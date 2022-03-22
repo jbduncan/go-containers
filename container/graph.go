@@ -1,8 +1,6 @@
 package container
 
-import (
-	"fmt"
-)
+import "fmt"
 
 type Graph[N comparable] interface {
 	Nodes() Set[N]
