@@ -1,5 +1,10 @@
 package container
 
+import (
+	"fmt"
+	"strings"
+)
+
 type Set[T comparable] interface {
 	Contains(value T) bool
 	Len() int
@@ -22,64 +27,53 @@ type MutableSet[T comparable] interface {
 }
 
 func NewSet[T comparable]() MutableSet[T] {
-	return new(set[T])
+	return &set[T]{
+		delegate: map[T]struct{}{},
+	}
 }
 
 type set[T comparable] struct {
-	elems []T
-} // map[T]struct{}
+	delegate map[T]struct{}
+}
 
 var _ MutableSet[int] = (*set[int])(nil)
 
 func (s *set[T]) Add(value T) {
-	// s[v] = struct{}{}
-	if !s.Contains(value) {
-		s.elems = append(s.elems, value)
-	}
+	s.delegate[value] = struct{}{}
 }
 
-func (s set[T]) Remove(value T) {
-	// delete(s, v)
+func (s *set[T]) Remove(value T) {
+	delete(s.delegate, value)
 }
 
 func (s set[T]) Contains(value T) bool {
-	// _, ok := s[v]
-	// return ok
-
-	//return (s.elem != nil && *s.elem == value) || (s.elem2 != nil && *s.elem2 == value)
-	for _, elem := range s.elems {
-		if elem == value {
-			return true
-		}
-	}
-	return false
+	_, ok := s.delegate[value]
+	return ok
 }
 
 func (s set[T]) Len() int {
-	// return len(s)
-	return len(s.elems)
+	return len(s.delegate)
 }
 
 func (s set[T]) ForEach(fn func(elem T)) {
-	// for v := range s {
-	// 	f(v)
-	// }
+	for elem := range s.delegate {
+		fn(elem)
+	}
 }
 
 func (s set[T]) String() string {
-	// var b strings.Builder
-	// b.WriteRune('[')
-	// i := 0
-	// s.ForEach(func(v T) {
-	// 	if i > 0 {
-	// 		b.WriteString(", ")
-	// 	}
-	// 	b.WriteString(fmt.Sprintf("%v", v))
-	// 	i++
-	// })
-	// b.WriteRune(']')
-	// return b.String()
-	return ""
+	var b strings.Builder
+	b.WriteRune('[')
+	i := 0
+	for elem := range s.delegate {
+		if i > 0 {
+			b.WriteString(", ")
+		}
+		b.WriteString(fmt.Sprintf("%v", elem))
+		i++
+	}
+	b.WriteRune(']')
+	return b.String()
 }
 
 type unmodifiableSet[T comparable] struct {

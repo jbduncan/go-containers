@@ -64,7 +64,7 @@ func (e EndpointPair[N]) AdjacentNode(n N) (N, error) {
 	if n == e.v {
 		return e.u, nil
 	}
-	return *new(N), fmt.Errorf("EndpointPair %v does not contain node %#v", e.String(), n)
+	return zeroValue[N](), fmt.Errorf("EndpointPair %v does not contain node %#v", e.String(), n)
 }
 
 func (e EndpointPair[N]) IsOrdered() bool {
@@ -110,7 +110,7 @@ func (o OrderedEndpointPair[N]) AdjacentNode(n N) (N, error) {
 	if n == o.v {
 		return o.u, nil
 	}
-	return *new(N), fmt.Errorf("OrderedEndpointPair %v does not contain node %#v", o.String(), n)
+	return zeroValue[N](), fmt.Errorf("OrderedEndpointPair %v does not contain node %#v", o.String(), n)
 }
 
 func (o OrderedEndpointPair[N]) IsOrdered() bool {
