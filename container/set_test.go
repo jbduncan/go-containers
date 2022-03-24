@@ -3,8 +3,6 @@ package container_test
 import (
 	"github.com/onsi/gomega/types"
 	"go-containers/container"
-	"reflect"
-	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -160,48 +158,21 @@ var _ = Describe("Set", func() {
 })
 
 func HaveLenOf(len int) types.GomegaMatcher {
-	return And(
-		WithTransform(
-			func(value any) bool {
-				return isSet(value)
-			},
-			BeTrue()),
-		WithTransform(
-			func(set any) int {
-				return lenOf(set)
-			},
-			Equal(len)))
+	return WithTransform(
+		func(set container.Set[string]) int {
+			return set.Len()
+		},
+		Equal(len))
 }
 
 func HaveLenOfZero() types.GomegaMatcher {
 	return HaveLenOf(0)
 }
 
-func Contain(elem any) types.GomegaMatcher {
+func Contain(elem string) types.GomegaMatcher {
 	return WithTransform(
-		func(set any) bool {
-			return contain(set, elem)
+		func(set container.Set[string]) bool {
+			return set.Contains(elem)
 		},
 		BeTrue())
-}
-
-func isSet(value any) bool {
-	return strings.Contains(
-		strings.ToLower(reflect.TypeOf(value).String()),
-		"container.set")
-}
-
-func lenOf(set any) int {
-	return int(
-		reflect.ValueOf(set).
-			MethodByName("Len").
-			Call(nil)[0].
-			Int())
-}
-
-func contain(set any, elem any) bool {
-	return reflect.ValueOf(set).
-		MethodByName("Contains").
-		Call([]reflect.Value{reflect.ValueOf(elem)})[0].
-		Bool()
 }
