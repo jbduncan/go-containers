@@ -97,7 +97,8 @@ func (e EndpointPair[N]) IsOrdered() bool {
 	return e.isOrdered
 }
 
-// TODO: EndpointPair: make Equals method and discourage == from being used. See this link:
+// TODO: EndpointPair: make Equals method and discourage == from being used (documenting that its use is undefined).
+//       See this link:
 //       https://github.com/google/guava/blob/4d323b2b117a5906ab16074c8c88b4ff162b1b82/guava/src/com/google/common/graph/EndpointPair.java#L131-L145
 
 func (e EndpointPair[N]) String() string {

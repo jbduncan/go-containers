@@ -11,6 +11,7 @@ type Set[T comparable] interface {
 	ForEach(fn func(elem T))
 	// Iter() Iterator
 	String() string
+	// TODO: Set: make Equals method and discourage == from being used (documenting that its use is undefined).
 }
 
 type MutableSet[T comparable] interface {
