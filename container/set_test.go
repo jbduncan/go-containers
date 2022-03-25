@@ -28,12 +28,7 @@ var _ = Describe("Set", func() {
 		})
 
 		It("returns nothing upon iteration", func() {
-			count := 0
-			set.ForEach(func(elem string) {
-				count++
-			})
-
-			Expect(count).To(BeZero())
+			Expect(set).To(ForEachProducesNothing())
 		})
 
 		It("has an empty list string representation", func() {
@@ -60,12 +55,7 @@ var _ = Describe("Set", func() {
 			})
 
 			It("returns element upon iteration", func() {
-				var elems []string
-				set.ForEach(func(elem string) {
-					elems = append(elems, elem)
-				})
-
-				Expect(elems).To(ConsistOf("link"))
+				Expect(set).To(ForEachProduces("link"))
 			})
 
 			It("has a single element list string representation", func() {
@@ -98,12 +88,7 @@ var _ = Describe("Set", func() {
 			})
 
 			It("returns both elements upon iteration", func() {
-				var elems []string
-				set.ForEach(func(elem string) {
-					elems = append(elems, elem)
-				})
-
-				Expect(elems).To(ConsistOf("link", "zelda"))
+				Expect(set).To(ForEachProduces("link", "zelda"))
 			})
 
 			It("has a two element list string representation", func() {
@@ -175,4 +160,23 @@ func Contain(elem string) types.GomegaMatcher {
 			return set.Contains(elem)
 		},
 		BeTrue())
+}
+
+func ForEachProduces(first string, others ...string) types.GomegaMatcher {
+	all := []string{first}
+	all = append(all, others...)
+
+	return WithTransform(forEachResults, ConsistOf(all))
+}
+
+func ForEachProducesNothing() types.GomegaMatcher {
+	return WithTransform(forEachResults, BeEmpty())
+}
+
+func forEachResults(set container.Set[string]) []string {
+	var result []string
+	set.ForEach(func(elem string) {
+		result = append(result, elem)
+	})
+	return result
 }
