@@ -13,12 +13,6 @@ type Set[T comparable] interface {
 	String() string
 }
 
-// TODO: Implement in another file
-// type Iterator[T any] interface {
-// 	Value() T
-// 	Next() bool
-// }
-
 type MutableSet[T comparable] interface {
 	Set[T]
 
