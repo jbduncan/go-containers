@@ -16,7 +16,7 @@ var _ = Describe("Set", func() {
 		set = container.NewSet[string]()
 	})
 
-	Describe("when creating a new set", func() {
+	Describe("given a new set", func() {
 		It("has a length of 0", func() {
 			Expect(set).To(HaveLenOfZero())
 		})
@@ -34,9 +34,7 @@ var _ = Describe("Set", func() {
 		It("has an empty list string representation", func() {
 			Expect(set.String()).To(Equal("[]"))
 		})
-	})
 
-	Describe("given a new MutableSet", func() {
 		Context("when adding one element", func() {
 			BeforeEach(func() {
 				set.Add("link")
@@ -94,15 +92,15 @@ var _ = Describe("Set", func() {
 			It("has a two element list string representation", func() {
 				Expect(set.String()).To(BeElementOf("[link, zelda]", "[zelda, link]"))
 			})
-		})
 
-		Context("when adding two elements and removing one", func() {
-			It("has a length of 1", func() {
-				set.Add("link")
-				set.Add("zelda")
-				set.Remove("link")
+			Context("and removing one", func() {
+				It("has a length of 1", func() {
+					set.Add("link")
+					set.Add("zelda")
+					set.Remove("link")
 
-				Expect(set).To(HaveLenOf(1))
+					Expect(set).To(HaveLenOf(1))
+				})
 			})
 		})
 
@@ -137,6 +135,57 @@ var _ = Describe("Set", func() {
 				set.Add("link")
 
 				Expect(set).To(HaveLenOf(1))
+			})
+		})
+
+		Context("when wrapping it in an unmodifiable set", func() {
+			var unmodSet container.Set[string]
+
+			BeforeEach(func() {
+				unmodSet = container.UnmodifiableSet(set)
+			})
+
+			It("has a length of 0", func() {
+				Expect(unmodSet).To(HaveLenOfZero())
+			})
+
+			It("returns nothing upon iteration", func() {
+				Expect(unmodSet).To(ForEachProducesNothing())
+			})
+
+			It("has an empty list string representation", func() {
+				Expect(unmodSet.String()).To(Equal("[]"))
+			})
+
+			Context("and adding one element afterwards", func() {
+				BeforeEach(func() {
+					set.Add("link")
+				})
+
+				It("has a length of 1", func() {
+					Expect(unmodSet).To(HaveLenOf(1))
+				})
+
+				It("contains the element", func() {
+					Expect(unmodSet).To(Contain("link"))
+				})
+
+				It("returns element upon iteration", func() {
+					Expect(unmodSet).To(ForEachProduces("link"))
+				})
+
+				It("has a single element list string representation", func() {
+					Expect(unmodSet.String()).To(Equal("[link]"))
+				})
+			})
+
+			Context("and adding two elements afterwards", func() {
+				It("has a two element list string representation", func() {
+					set.Add("link")
+					set.Add("zelda")
+
+					Expect(unmodSet.String()).To(BeElementOf("[link, zelda]", "[zelda, link]"))
+				})
 			})
 		})
 	})

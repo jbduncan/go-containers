@@ -31,6 +31,7 @@ type set[T comparable] struct {
 	delegate map[T]struct{}
 }
 
+var _ Set[int] = (*set[int])(nil)
 var _ MutableSet[int] = (*set[int])(nil)
 
 func (s *set[T]) Add(value T) {
@@ -77,25 +78,24 @@ type unmodifiableSet[T comparable] struct {
 
 var _ Set[int] = (*unmodifiableSet[int])(nil)
 
-func (r unmodifiableSet[T]) Contains(value T) bool {
-	// return r.set.Contains(v)
-	return false
+func UnmodifiableSet[T comparable](set MutableSet[T]) Set[T] {
+	return unmodifiableSet[T]{
+		set: set,
+	}
 }
 
-func (r unmodifiableSet[T]) Len() int {
-	// return r.set.Len()
-	return 0
+func (u unmodifiableSet[T]) Contains(value T) bool {
+	return u.set.Contains(value)
 }
 
-func (r unmodifiableSet[T]) ForEach(fn func(elem T)) {
-	// r.set.ForEach(f)
+func (u unmodifiableSet[T]) Len() int {
+	return u.set.Len()
 }
 
-func (r unmodifiableSet[T]) String() string {
-	// return r.set.String()
-	return ""
+func (u unmodifiableSet[T]) ForEach(fn func(elem T)) {
+	u.set.ForEach(fn)
 }
 
-func UnmodifiableSet[T comparable](set Set[T]) Set[T] {
-	return nil
+func (u unmodifiableSet[T]) String() string {
+	return u.set.String()
 }
