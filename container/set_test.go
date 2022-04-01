@@ -6,6 +6,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "go-containers/internal/matchers"
 )
 
 var _ = Describe("Set", func() {
@@ -28,11 +29,11 @@ var _ = Describe("Set", func() {
 		})
 
 		It("returns nothing upon iteration", func() {
-			Expect(set).To(ForEachProducesNothing())
+			Expect(set).To(HaveForEachThatProducesNothing())
 		})
 
 		It("has an empty list string representation", func() {
-			Expect(set.String()).To(Equal("[]"))
+			Expect(set).To(HaveStringRepr("[]"))
 		})
 
 		Context("when adding one element", func() {
@@ -53,11 +54,11 @@ var _ = Describe("Set", func() {
 			})
 
 			It("returns element upon iteration", func() {
-				Expect(set).To(ForEachProduces("link"))
+				Expect(set).To(HaveForEachThatProduces("link"))
 			})
 
 			It("has a single element list string representation", func() {
-				Expect(set.String()).To(Equal("[link]"))
+				Expect(set).To(HaveStringRepr("[link]"))
 			})
 		})
 
@@ -86,11 +87,11 @@ var _ = Describe("Set", func() {
 			})
 
 			It("returns both elements upon iteration", func() {
-				Expect(set).To(ForEachProduces("link", "zelda"))
+				Expect(set).To(HaveForEachThatProduces("link", "zelda"))
 			})
 
 			It("has a two element list string representation", func() {
-				Expect(set.String()).To(BeElementOf("[link, zelda]", "[zelda, link]"))
+				Expect(set).To(HaveStringRepr(BeElementOf("[link, zelda]", "[zelda, link]")))
 			})
 
 			Context("and removing one", func() {
@@ -118,14 +119,15 @@ var _ = Describe("Set", func() {
 			})
 
 			It("has a three element list string representation", func() {
-				Expect(set.String()).To(
-					BeElementOf(
-						"[link, zelda, ganondorf]",
-						"[link, ganondorf, zelda]",
-						"[zelda, link, ganondorf]",
-						"[zelda, ganondorf, link]",
-						"[ganondorf, link, zelda]",
-						"[ganondorf, zelda, link]"))
+				Expect(set).To(
+					HaveStringRepr(
+						BeElementOf(
+							"[link, zelda, ganondorf]",
+							"[link, ganondorf, zelda]",
+							"[zelda, link, ganondorf]",
+							"[zelda, ganondorf, link]",
+							"[ganondorf, link, zelda]",
+							"[ganondorf, zelda, link]")))
 			})
 		})
 
@@ -150,11 +152,11 @@ var _ = Describe("Set", func() {
 			})
 
 			It("returns nothing upon iteration", func() {
-				Expect(unmodSet).To(ForEachProducesNothing())
+				Expect(unmodSet).To(HaveForEachThatProducesNothing())
 			})
 
 			It("has an empty list string representation", func() {
-				Expect(unmodSet.String()).To(Equal("[]"))
+				Expect(unmodSet).To(HaveStringRepr("[]"))
 			})
 
 			Context("and adding one element afterwards", func() {
@@ -171,11 +173,11 @@ var _ = Describe("Set", func() {
 				})
 
 				It("returns element upon iteration", func() {
-					Expect(unmodSet).To(ForEachProduces("link"))
+					Expect(unmodSet).To(HaveForEachThatProduces("link"))
 				})
 
 				It("has a single element list string representation", func() {
-					Expect(unmodSet.String()).To(Equal("[link]"))
+					Expect(unmodSet).To(HaveStringRepr("[link]"))
 				})
 			})
 
@@ -184,7 +186,8 @@ var _ = Describe("Set", func() {
 					set.Add("link")
 					set.Add("zelda")
 
-					Expect(unmodSet.String()).To(BeElementOf("[link, zelda]", "[zelda, link]"))
+					Expect(unmodSet).
+						To(HaveStringRepr(BeElementOf("[link, zelda]", "[zelda, link]")))
 				})
 			})
 		})
@@ -211,14 +214,14 @@ func Contain(elem string) types.GomegaMatcher {
 		BeTrue())
 }
 
-func ForEachProduces(first string, others ...string) types.GomegaMatcher {
+func HaveForEachThatProduces(first string, others ...string) types.GomegaMatcher {
 	all := []string{first}
 	all = append(all, others...)
 
 	return WithTransform(forEachResults, ConsistOf(all))
 }
 
-func ForEachProducesNothing() types.GomegaMatcher {
+func HaveForEachThatProducesNothing() types.GomegaMatcher {
 	return WithTransform(forEachResults, BeEmpty())
 }
 
