@@ -9,7 +9,7 @@ import (
 	. "go-containers/internal/matchers"
 )
 
-var _ = Describe("Graph", func() {
+var _ = Describe("EndpointPair", func() {
 	Describe("given a new unordered endpoint pair", func() {
 		var endpointPair container.EndpointPair[string]
 
