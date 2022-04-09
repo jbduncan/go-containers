@@ -19,31 +19,31 @@ var _ = Describe("EndpointPair", func() {
 
 		Context("when calling .IsOrdered()", func() {
 			It("returns false", func() {
-				Expect(endpointPair).ToNot(BeOrdered())
+				Expect(endpointPair).ToNot(beOrdered())
 			})
 		})
 
 		Context("when calling .Source()", func() {
 			It("panics", func() {
-				Expect(endpointPair).To(HaveUnavailableSource())
+				Expect(endpointPair).To(haveUnavailableSource())
 			})
 		})
 
 		Context("when calling .Target()", func() {
 			It("panics", func() {
-				Expect(endpointPair).To(HaveUnavailableTarget())
+				Expect(endpointPair).To(haveUnavailableTarget())
 			})
 		})
 
 		Context("when calling .NodeU()", func() {
 			It("returns the first node", func() {
-				Expect(endpointPair).To(HaveNodeU("link"))
+				Expect(endpointPair).To(haveNodeU("link"))
 			})
 		})
 
 		Context("when calling .NodeV()", func() {
 			It("returns the second node", func() {
-				Expect(endpointPair).To(HaveNodeV("zelda"))
+				Expect(endpointPair).To(haveNodeV("zelda"))
 			})
 		})
 
@@ -87,31 +87,31 @@ var _ = Describe("EndpointPair", func() {
 
 		Context("when calling .IsOrdered()", func() {
 			It("returns true", func() {
-				Expect(endpointPair).To(BeOrdered())
+				Expect(endpointPair).To(beOrdered())
 			})
 		})
 
 		Context("when calling .Source()", func() {
 			It("returns the first node", func() {
-				Expect(endpointPair).To(HaveSource("link"))
+				Expect(endpointPair).To(haveSource("link"))
 			})
 		})
 
 		Context("when calling .Target()", func() {
 			It("panics", func() {
-				Expect(endpointPair).To(HaveTarget("zelda"))
+				Expect(endpointPair).To(haveTarget("zelda"))
 			})
 		})
 
 		Context("when calling .NodeU()", func() {
 			It("returns the first node", func() {
-				Expect(endpointPair).To(HaveNodeU("link"))
+				Expect(endpointPair).To(haveNodeU("link"))
 			})
 		})
 
 		Context("when calling .NodeV()", func() {
 			It("returns the second node", func() {
-				Expect(endpointPair).To(HaveNodeV("zelda"))
+				Expect(endpointPair).To(haveNodeV("zelda"))
 			})
 		})
 
@@ -144,7 +144,7 @@ var _ = Describe("EndpointPair", func() {
 	})
 })
 
-func BeOrdered() types.GomegaMatcher {
+func beOrdered() types.GomegaMatcher {
 	return WithTransform(
 		func(endpointPair graph.EndpointPair[string]) bool {
 			return endpointPair.IsOrdered()
@@ -152,7 +152,7 @@ func BeOrdered() types.GomegaMatcher {
 		BeTrue())
 }
 
-func HaveSource(source string) types.GomegaMatcher {
+func haveSource(source string) types.GomegaMatcher {
 	return WithTransform(
 		func(endpointPair graph.EndpointPair[string]) string {
 			return endpointPair.Source()
@@ -160,7 +160,7 @@ func HaveSource(source string) types.GomegaMatcher {
 		Equal(source))
 }
 
-func HaveTarget(target string) types.GomegaMatcher {
+func haveTarget(target string) types.GomegaMatcher {
 	return WithTransform(
 		func(endpointPair graph.EndpointPair[string]) string {
 			return endpointPair.Target()
@@ -168,7 +168,7 @@ func HaveTarget(target string) types.GomegaMatcher {
 		Equal(target))
 }
 
-func HaveUnavailableSource() types.GomegaMatcher {
+func haveUnavailableSource() types.GomegaMatcher {
 	return WithTransform(
 		func(endpointPair graph.EndpointPair[string]) func() {
 			return func() { endpointPair.Source() }
@@ -176,7 +176,7 @@ func HaveUnavailableSource() types.GomegaMatcher {
 		PanicWith(notAvailableOnUndirected))
 }
 
-func HaveUnavailableTarget() types.GomegaMatcher {
+func haveUnavailableTarget() types.GomegaMatcher {
 	return WithTransform(
 		func(endpointPair graph.EndpointPair[string]) func() {
 			return func() { endpointPair.Target() }
@@ -188,7 +188,7 @@ const notAvailableOnUndirected = "cannot call Source()/Target() on an EndpointPa
 	"undirected graph; consider calling AdjacentNode(node) if you already have a node, or " +
 	"NodeU()/NodeV() if you don't"
 
-func HaveNodeU(node string) types.GomegaMatcher {
+func haveNodeU(node string) types.GomegaMatcher {
 	return WithTransform(
 		func(endpointPair graph.EndpointPair[string]) string {
 			return endpointPair.NodeU()
@@ -196,7 +196,7 @@ func HaveNodeU(node string) types.GomegaMatcher {
 		Equal(node))
 }
 
-func HaveNodeV(node string) types.GomegaMatcher {
+func haveNodeV(node string) types.GomegaMatcher {
 	return WithTransform(
 		func(endpointPair graph.EndpointPair[string]) string {
 			return endpointPair.NodeV()
