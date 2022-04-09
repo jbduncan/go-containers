@@ -203,3 +203,6 @@ func haveNodeV(node string) types.GomegaMatcher {
 		},
 		Equal(node))
 }
+
+// TODO: Guava's EndpointPairTest.java has some tests that use EndpointPair but check Graph.edges()
+//       and Network.asGraph().edges(). Adapt these tests for our own Graph and Network types.
