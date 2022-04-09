@@ -1,4 +1,4 @@
-package container
+package set
 
 import (
 	"fmt"
@@ -9,8 +9,8 @@ type Set[T comparable] interface {
 	Contains(value T) bool
 	Len() int
 	ForEach(fn func(elem T))
-	// Iter() Iterator
 	String() string
+	// TODO: Set: make Iter method that returns an Iterator
 	// TODO: Set: make Equals method and discourage == from being used (documenting that its use is undefined).
 }
 
@@ -21,7 +21,7 @@ type MutableSet[T comparable] interface {
 	Remove(value T)
 }
 
-func NewSet[T comparable]() MutableSet[T] {
+func New[T comparable]() MutableSet[T] {
 	return &set[T]{
 		delegate: map[T]struct{}{},
 	}
@@ -78,7 +78,7 @@ type unmodifiableSet[T comparable] struct {
 
 var _ Set[int] = (*unmodifiableSet[int])(nil)
 
-func UnmodifiableSet[T comparable](set MutableSet[T]) Set[T] {
+func Unmodifiable[T comparable](set MutableSet[T]) Set[T] {
 	return unmodifiableSet[T]{
 		set: set,
 	}

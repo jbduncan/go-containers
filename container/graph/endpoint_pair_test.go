@@ -1,8 +1,8 @@
-package container_test
+package graph_test
 
 import (
 	"github.com/onsi/gomega/types"
-	"go-containers/container"
+	"go-containers/container/graph"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -11,10 +11,10 @@ import (
 
 var _ = Describe("EndpointPair", func() {
 	Describe("given a new unordered endpoint pair", func() {
-		var endpointPair container.EndpointPair[string]
+		var endpointPair graph.EndpointPair[string]
 
 		BeforeEach(func() {
-			endpointPair = container.NewUnorderedEndpointPair("link", "zelda")
+			endpointPair = graph.NewUnorderedEndpointPair("link", "zelda")
 		})
 
 		Context("when calling .IsOrdered()", func() {
@@ -79,10 +79,10 @@ var _ = Describe("EndpointPair", func() {
 	})
 
 	Describe("given a new ordered endpoint pair", func() {
-		var endpointPair container.EndpointPair[string]
+		var endpointPair graph.EndpointPair[string]
 
 		BeforeEach(func() {
-			endpointPair = container.NewOrderedEndpointPair("link", "zelda")
+			endpointPair = graph.NewOrderedEndpointPair("link", "zelda")
 		})
 
 		Context("when calling .IsOrdered()", func() {
@@ -146,7 +146,7 @@ var _ = Describe("EndpointPair", func() {
 
 func BeOrdered() types.GomegaMatcher {
 	return WithTransform(
-		func(endpointPair container.EndpointPair[string]) bool {
+		func(endpointPair graph.EndpointPair[string]) bool {
 			return endpointPair.IsOrdered()
 		},
 		BeTrue())
@@ -154,7 +154,7 @@ func BeOrdered() types.GomegaMatcher {
 
 func HaveSource(source string) types.GomegaMatcher {
 	return WithTransform(
-		func(endpointPair container.EndpointPair[string]) string {
+		func(endpointPair graph.EndpointPair[string]) string {
 			return endpointPair.Source()
 		},
 		Equal(source))
@@ -162,7 +162,7 @@ func HaveSource(source string) types.GomegaMatcher {
 
 func HaveTarget(target string) types.GomegaMatcher {
 	return WithTransform(
-		func(endpointPair container.EndpointPair[string]) string {
+		func(endpointPair graph.EndpointPair[string]) string {
 			return endpointPair.Target()
 		},
 		Equal(target))
@@ -170,7 +170,7 @@ func HaveTarget(target string) types.GomegaMatcher {
 
 func HaveUnavailableSource() types.GomegaMatcher {
 	return WithTransform(
-		func(endpointPair container.EndpointPair[string]) func() {
+		func(endpointPair graph.EndpointPair[string]) func() {
 			return func() { endpointPair.Source() }
 		},
 		PanicWith(notAvailableOnUndirected))
@@ -178,7 +178,7 @@ func HaveUnavailableSource() types.GomegaMatcher {
 
 func HaveUnavailableTarget() types.GomegaMatcher {
 	return WithTransform(
-		func(endpointPair container.EndpointPair[string]) func() {
+		func(endpointPair graph.EndpointPair[string]) func() {
 			return func() { endpointPair.Target() }
 		},
 		PanicWith(notAvailableOnUndirected))
@@ -190,7 +190,7 @@ const notAvailableOnUndirected = "cannot call Source()/Target() on an EndpointPa
 
 func HaveNodeU(node string) types.GomegaMatcher {
 	return WithTransform(
-		func(endpointPair container.EndpointPair[string]) string {
+		func(endpointPair graph.EndpointPair[string]) string {
 			return endpointPair.NodeU()
 		},
 		Equal(node))
@@ -198,7 +198,7 @@ func HaveNodeU(node string) types.GomegaMatcher {
 
 func HaveNodeV(node string) types.GomegaMatcher {
 	return WithTransform(
-		func(endpointPair container.EndpointPair[string]) string {
+		func(endpointPair graph.EndpointPair[string]) string {
 			return endpointPair.NodeV()
 		},
 		Equal(node))

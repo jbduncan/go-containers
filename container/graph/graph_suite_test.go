@@ -1,4 +1,4 @@
-package container_test
+package graph_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestContainer(t *testing.T) {
+func TestGraph(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Container Suite")
+	RunSpecs(t, "Graph Suite")
 }

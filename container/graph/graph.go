@@ -1,17 +1,19 @@
-package container
+package graph
+
+import "go-containers/container/set"
 
 type Graph[N comparable] interface {
-	Nodes() Set[N]
-	Edges() Set[EndpointPair[N]]
+	Nodes() set.Set[N]
+	Edges() set.Set[EndpointPair[N]]
 	IsDirected() bool
 	AllowsSelfLoops() bool
 	// TODO: Implement
 	// NodeOrder() ElementOrder
 	// IncidentEdgeOrder() ElementOrder
-	AdjacentNodes() Set[N]
-	Predecessors() Set[N]
-	Successors() Set[N]
-	IncidentEdges(node N) Set[EndpointPair[N]]
+	AdjacentNodes() set.Set[N]
+	Predecessors() set.Set[N]
+	Successors() set.Set[N]
+	IncidentEdges(node N) set.Set[EndpointPair[N]]
 	Degree(node N) int
 	InDegree(node N) int
 	OutDegree(node N) int

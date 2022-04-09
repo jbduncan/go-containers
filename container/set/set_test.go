@@ -1,8 +1,8 @@
-package container_test
+package set_test
 
 import (
 	"github.com/onsi/gomega/types"
-	"go-containers/container"
+	"go-containers/container/set"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -11,115 +11,115 @@ import (
 
 var _ = Describe("Set", func() {
 
-	var set container.MutableSet[string]
+	var mutSet set.MutableSet[string]
 
 	BeforeEach(func() {
-		set = container.NewSet[string]()
+		mutSet = set.New[string]()
 	})
 
 	Describe("given a new set", func() {
 		It("has a length of 0", func() {
-			Expect(set).To(HaveLenOfZero())
+			Expect(mutSet).To(haveLenOfZero())
 		})
 
 		It("does nothing on remove", func() {
-			set.Remove("link")
+			mutSet.Remove("link")
 
-			Expect(set).To(HaveLenOfZero())
+			Expect(mutSet).To(haveLenOfZero())
 		})
 
 		It("returns nothing upon iteration", func() {
-			Expect(set).To(HaveForEachThatProducesNothing())
+			Expect(mutSet).To(haveForEachThatProducesNothing())
 		})
 
 		It("has an empty list string representation", func() {
-			Expect(set).To(HaveStringRepr("[]"))
+			Expect(mutSet).To(HaveStringRepr("[]"))
 		})
 
 		Context("when adding one element", func() {
 			BeforeEach(func() {
-				set.Add("link")
+				mutSet.Add("link")
 			})
 
 			It("has a length of 1", func() {
-				Expect(set).To(HaveLenOf(1))
+				Expect(mutSet).To(haveLenOf(1))
 			})
 
 			It("contains the element", func() {
-				Expect(set).To(Contain("link"))
+				Expect(mutSet).To(contain("link"))
 			})
 
 			It("does not contain any other element", func() {
-				Expect(set).ToNot(Contain("zelda"))
+				Expect(mutSet).ToNot(contain("zelda"))
 			})
 
 			It("returns element upon iteration", func() {
-				Expect(set).To(HaveForEachThatProduces("link"))
+				Expect(mutSet).To(haveForEachThatProduces("link"))
 			})
 
 			It("has a single element list string representation", func() {
-				Expect(set).To(HaveStringRepr("[link]"))
+				Expect(mutSet).To(HaveStringRepr("[link]"))
 			})
 		})
 
 		Context("when adding and removing one element", func() {
 			It("has a length of 0", func() {
-				set.Add("link")
-				set.Remove("link")
+				mutSet.Add("link")
+				mutSet.Remove("link")
 
-				Expect(set).ToNot(Contain("link"))
+				Expect(mutSet).ToNot(contain("link"))
 			})
 		})
 
 		Context("when adding two elements", func() {
 			BeforeEach(func() {
-				set.Add("link")
-				set.Add("zelda")
+				mutSet.Add("link")
+				mutSet.Add("zelda")
 			})
 
 			It("has a length of 2", func() {
-				Expect(set).To(HaveLenOf(2))
+				Expect(mutSet).To(haveLenOf(2))
 			})
 
 			It("contains both elements", func() {
-				Expect(set).To(Contain("link"))
-				Expect(set).To(Contain("zelda"))
+				Expect(mutSet).To(contain("link"))
+				Expect(mutSet).To(contain("zelda"))
 			})
 
 			It("returns both elements upon iteration", func() {
-				Expect(set).To(HaveForEachThatProduces("link", "zelda"))
+				Expect(mutSet).To(haveForEachThatProduces("link", "zelda"))
 			})
 
 			It("has a two element list string representation", func() {
-				Expect(set).To(HaveStringRepr(BeElementOf("[link, zelda]", "[zelda, link]")))
+				Expect(mutSet).To(HaveStringRepr(BeElementOf("[link, zelda]", "[zelda, link]")))
 			})
 
 			Context("and removing one", func() {
 				It("has a length of 1", func() {
-					set.Add("link")
-					set.Add("zelda")
-					set.Remove("link")
+					mutSet.Add("link")
+					mutSet.Add("zelda")
+					mutSet.Remove("link")
 
-					Expect(set).To(HaveLenOf(1))
+					Expect(mutSet).To(haveLenOf(1))
 				})
 			})
 		})
 
 		Context("when adding three elements", func() {
 			BeforeEach(func() {
-				set.Add("link")
-				set.Add("zelda")
-				set.Add("ganondorf")
+				mutSet.Add("link")
+				mutSet.Add("zelda")
+				mutSet.Add("ganondorf")
 			})
 
 			It("contains all elements", func() {
-				Expect(set).To(Contain("link"))
-				Expect(set).To(Contain("zelda"))
-				Expect(set).To(Contain("ganondorf"))
+				Expect(mutSet).To(contain("link"))
+				Expect(mutSet).To(contain("zelda"))
+				Expect(mutSet).To(contain("ganondorf"))
 			})
 
 			It("has a three element list string representation", func() {
-				Expect(set).To(
+				Expect(mutSet).To(
 					HaveStringRepr(
 						BeElementOf(
 							"[link, zelda, ganondorf]",
@@ -133,26 +133,26 @@ var _ = Describe("Set", func() {
 
 		Context("when adding the same element twice", func() {
 			It("has a length of 1", func() {
-				set.Add("link")
-				set.Add("link")
+				mutSet.Add("link")
+				mutSet.Add("link")
 
-				Expect(set).To(HaveLenOf(1))
+				Expect(mutSet).To(haveLenOf(1))
 			})
 		})
 
 		Context("when wrapping it in an unmodifiable set", func() {
-			var unmodSet container.Set[string]
+			var unmodSet set.Set[string]
 
 			BeforeEach(func() {
-				unmodSet = container.UnmodifiableSet(set)
+				unmodSet = set.Unmodifiable(mutSet)
 			})
 
 			It("has a length of 0", func() {
-				Expect(unmodSet).To(HaveLenOfZero())
+				Expect(unmodSet).To(haveLenOfZero())
 			})
 
 			It("returns nothing upon iteration", func() {
-				Expect(unmodSet).To(HaveForEachThatProducesNothing())
+				Expect(unmodSet).To(haveForEachThatProducesNothing())
 			})
 
 			It("has an empty list string representation", func() {
@@ -161,19 +161,19 @@ var _ = Describe("Set", func() {
 
 			Context("and adding one element afterwards", func() {
 				BeforeEach(func() {
-					set.Add("link")
+					mutSet.Add("link")
 				})
 
 				It("has a length of 1", func() {
-					Expect(unmodSet).To(HaveLenOf(1))
+					Expect(unmodSet).To(haveLenOf(1))
 				})
 
 				It("contains the element", func() {
-					Expect(unmodSet).To(Contain("link"))
+					Expect(unmodSet).To(contain("link"))
 				})
 
 				It("returns element upon iteration", func() {
-					Expect(unmodSet).To(HaveForEachThatProduces("link"))
+					Expect(unmodSet).To(haveForEachThatProduces("link"))
 				})
 
 				It("has a single element list string representation", func() {
@@ -183,8 +183,8 @@ var _ = Describe("Set", func() {
 
 			Context("and adding two elements afterwards", func() {
 				It("has a two element list string representation", func() {
-					set.Add("link")
-					set.Add("zelda")
+					mutSet.Add("link")
+					mutSet.Add("zelda")
 
 					Expect(unmodSet).
 						To(HaveStringRepr(BeElementOf("[link, zelda]", "[zelda, link]")))
@@ -194,38 +194,38 @@ var _ = Describe("Set", func() {
 	})
 })
 
-func HaveLenOf(len int) types.GomegaMatcher {
+func haveLenOf(len int) types.GomegaMatcher {
 	return WithTransform(
-		func(set container.Set[string]) int {
+		func(set set.Set[string]) int {
 			return set.Len()
 		},
 		Equal(len))
 }
 
-func HaveLenOfZero() types.GomegaMatcher {
-	return HaveLenOf(0)
+func haveLenOfZero() types.GomegaMatcher {
+	return haveLenOf(0)
 }
 
-func Contain(elem string) types.GomegaMatcher {
+func contain(elem string) types.GomegaMatcher {
 	return WithTransform(
-		func(set container.Set[string]) bool {
+		func(set set.Set[string]) bool {
 			return set.Contains(elem)
 		},
 		BeTrue())
 }
 
-func HaveForEachThatProduces(first string, others ...string) types.GomegaMatcher {
+func haveForEachThatProduces(first string, others ...string) types.GomegaMatcher {
 	all := []string{first}
 	all = append(all, others...)
 
 	return WithTransform(forEachResults, ConsistOf(all))
 }
 
-func HaveForEachThatProducesNothing() types.GomegaMatcher {
+func haveForEachThatProducesNothing() types.GomegaMatcher {
 	return WithTransform(forEachResults, BeEmpty())
 }
 
-func forEachResults(set container.Set[string]) []string {
+func forEachResults(set set.Set[string]) []string {
 	var result []string
 	set.ForEach(func(elem string) {
 		result = append(result, elem)
