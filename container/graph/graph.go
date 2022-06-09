@@ -39,23 +39,29 @@ func Undirected[N comparable](opts ...Option[N]) Builder[N] {
 
 type Option[N comparable] func(graphBuilder Builder[N]) (Builder[N], error)
 
-type Builder struct{}
+type Builder[N comparable] struct{}
 
 func (b Builder[N]) Build() MutableGraph[N] {
-	return mutableGraph[N]{}
+	return &mutableGraph[N]{
+		nodes: set.New[N](),
+	}
 }
 
-type mutableGraph struct {
+type mutableGraph[N comparable] struct {
+	nodes set.MutableSet[N]
 }
 
-func (m mutableGraph[N]) Nodes() set.Set[N] {
-	//TODO implement me
-	panic("implement me")
+func (m *mutableGraph[N]) Nodes() set.Set[N] {
+	// TODO: Make sure is unmodifiable
+	return m.nodes
 }
 
-func (m mutableGraph[N]) AddNode(n N) bool {
-	//TODO implement me
-	panic("implement me")
+func (m *mutableGraph[N]) AddNode(n N) bool {
+	if m.nodes.Contains(n) {
+		return false
+	}
+	m.nodes.Add(n)
+	return true
 }
 
 // type ElementOrder struct {}
