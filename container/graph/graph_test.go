@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Graph", func() {
+var _ = Describe("Undirected mutable graph", func() {
 	graphTests(
 		func() graph.Graph[int] {
 			return graph.Undirected[int]().Build()
@@ -29,7 +29,7 @@ var _ = Describe("Graph", func() {
 // tested:
 //   - Test cases related to whether the graph is directed or undirected.
 //   - Test cases related to the specific implementation of the Graph interface.
-func graphTests(createGraphFunc func() graph.Graph[int], addNodeFunc func(g graph.Graph[int], n int) graph.Graph[int]) {
+func graphTests(createGraph func() graph.Graph[int], addNode func(g graph.Graph[int], n int) graph.Graph[int]) {
 	Context("given a graph", func() {
 		const (
 			n1 = 1
@@ -43,7 +43,7 @@ func graphTests(createGraphFunc func() graph.Graph[int], addNodeFunc func(g grap
 		)
 
 		BeforeEach(func() {
-			g = createGraphFunc()
+			g = createGraph()
 			gAsMutable, gIsMutable = g.(graph.MutableGraph[int])
 
 			Expect(g.Nodes()).To(beSetThatIsEmpty())
@@ -53,7 +53,7 @@ func graphTests(createGraphFunc func() graph.Graph[int], addNodeFunc func(g grap
 
 		Context("when adding one node", func() {
 			It("contains just the node", func() {
-				g = addNodeFunc(g, n1)
+				g = addNode(g, n1)
 				Expect(g.Nodes()).To(beSetThatConsistsOf(n1))
 			})
 		})
@@ -66,8 +66,8 @@ func graphTests(createGraphFunc func() graph.Graph[int], addNodeFunc func(g grap
 
 		Context("when adding two nodes", func() {
 			It("the graph contains both nodes", func() {
-				g = addNodeFunc(g, n1)
-				g = addNodeFunc(g, n2)
+				g = addNode(g, n1)
+				g = addNode(g, n2)
 				Expect(g.Nodes()).To(beSetThatConsistsOf(n1, n2))
 			})
 		})
@@ -89,9 +89,15 @@ func graphTests(createGraphFunc func() graph.Graph[int], addNodeFunc func(g grap
 					Skip("Graph is not mutable.")
 				}
 
-				g = addNodeFunc(g, n1)
+				g = addNode(g, n1)
 				Expect(gAsMutable.AddNode(n1)).To(BeFalse())
 				Expect(g.Nodes()).To(beSetThatConsistsOf(n1))
+			})
+		})
+
+		Context("when checking the mutability of the nodes set", func() {
+			It("is not mutable", func() {
+				Expect(g.Nodes()).To(beSetThatIsNotMutable())
 			})
 		})
 	})
@@ -106,6 +112,15 @@ func beSetThatConsistsOf(first int, others ...int) types.GomegaMatcher {
 
 func beSetThatIsEmpty() types.GomegaMatcher {
 	return WithTransform(toSlice, BeEmpty())
+}
+
+func beSetThatIsNotMutable() types.GomegaMatcher {
+	return WithTransform(
+		func(s set.Set[int]) bool {
+			_, mutable := s.(set.MutableSet[int])
+			return mutable
+		},
+		BeFalse())
 }
 
 func toSlice(s set.Set[int]) []int {
