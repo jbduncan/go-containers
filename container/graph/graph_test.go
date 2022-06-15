@@ -1,6 +1,7 @@
 package graph_test
 
 import (
+	"fmt"
 	"github.com/onsi/gomega/types"
 	"go-containers/container/graph"
 	"go-containers/container/set"
@@ -18,6 +19,10 @@ var _ = Describe("Undirected mutable graph", func() {
 			g.(graph.MutableGraph[int]).AddNode(n)
 			return g
 		},
+		func(g graph.Graph[int], n1 int, n2 int) graph.Graph[int] {
+			g.(graph.MutableGraph[int]).PutEdge(n1, n2)
+			return g
+		},
 	)
 })
 
@@ -29,11 +34,16 @@ var _ = Describe("Undirected mutable graph", func() {
 // tested:
 //   - Test cases related to whether the graph is directed or undirected.
 //   - Test cases related to the specific implementation of the Graph interface.
-func graphTests(createGraph func() graph.Graph[int], addNode func(g graph.Graph[int], n int) graph.Graph[int]) {
+func graphTests(
+	createGraph func() graph.Graph[int],
+	addNode func(g graph.Graph[int], n int) graph.Graph[int],
+	putEdge func(g graph.Graph[int], n1 int, n2 int) graph.Graph[int]) {
+
 	Context("given a graph", func() {
 		const (
-			n1 = 1
-			n2 = 2
+			n1             = 1
+			n2             = 2
+			nodeNotInGraph = 1_000
 		)
 
 		var (
@@ -46,9 +56,15 @@ func graphTests(createGraph func() graph.Graph[int], addNode func(g graph.Graph[
 			g = createGraph()
 			gAsMutable, gIsMutable = g.(graph.MutableGraph[int])
 
-			Expect(g.Nodes()).To(beSetThatIsEmpty())
+			Expect(g.Nodes()).To(beSetThatIsEmpty[int]())
 			// TODO: Uncomment when working on Graph.Edges() method
 			// Expect(g.Edges()).To(beSetThatIsEmpty())
+		})
+
+		Context("when instantiated", func() {
+			It("contains no nodes", func() {
+				Expect(g.Nodes()).To(beSetThatIsEmpty[int]())
+			})
 		})
 
 		Context("when adding one node", func() {
@@ -56,11 +72,25 @@ func graphTests(createGraph func() graph.Graph[int], addNode func(g graph.Graph[
 				g = addNode(g, n1)
 				Expect(g.Nodes()).To(beSetThatConsistsOf(n1))
 			})
-		})
 
-		Context("when not adding any nodes", func() {
-			It("contains no nodes", func() {
-				Expect(g.Nodes()).To(beSetThatIsEmpty())
+			It("reports that the node has no adjacent nodes", func() {
+				g = addNode(g, n1)
+				Expect(g.AdjacentNodes(n1)).To(beSetThatIsEmpty[int]())
+			})
+
+			It("reports that the node has no predecessors", func() {
+				g = addNode(g, n1)
+				Expect(g.Predecessors(n1)).To(beSetThatIsEmpty[int]())
+			})
+
+			It("reports that the node has no successors", func() {
+				g = addNode(g, n1)
+				Expect(g.Successors(n1)).To(beSetThatIsEmpty[int]())
+			})
+
+			It("reports that the node has no incident edges", func() {
+				g = addNode(g, n1)
+				Expect(g.IncidentEdges(n1)).To(beSetThatIsEmpty[graph.EndpointPair[int]]())
 			})
 		})
 
@@ -73,7 +103,7 @@ func graphTests(createGraph func() graph.Graph[int], addNode func(g graph.Graph[
 		})
 
 		Context("when adding a new node", func() {
-			It("contains just the node", func() {
+			It("contains just the single node", func() {
 				if !gIsMutable {
 					Skip("Graph is not mutable.")
 				}
@@ -95,9 +125,77 @@ func graphTests(createGraph func() graph.Graph[int], addNode func(g graph.Graph[
 			})
 		})
 
-		Context("when checking the mutability of the nodes set", func() {
+		Context("when adding one edge", func() {
+			It("reports both nodes as being adjacent", func() {
+				g = putEdge(g, n1, n2)
+				Expect(g.AdjacentNodes(n1)).To(beSetThatConsistsOf(n2))
+				Expect(g.AdjacentNodes(n2)).To(beSetThatConsistsOf(n1))
+			})
+		})
+
+		Context("when finding predecessors of non-existent node", func() {
+			It("fails", func() {
+				Expect(g.Predecessors(nodeNotInGraph)).
+					Error().
+					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
+			})
+		})
+
+		Context("when finding successors of non-existent node", func() {
+			It("fails", func() {
+				Expect(g.Successors(nodeNotInGraph)).
+					Error().
+					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
+			})
+		})
+
+		Context("when finding adjacent nodes of non-existent node", func() {
+			It("fails", func() {
+				Expect(g.AdjacentNodes(nodeNotInGraph)).
+					Error().
+					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
+			})
+		})
+
+		Context("when finding incident edges of non-existent node", func() {
+			It("fails", func() {
+				Expect(g.IncidentEdges(nodeNotInGraph)).
+					Error().
+					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
+			})
+		})
+
+		Context("when checking the mutability of the Nodes set", func() {
 			It("is not mutable", func() {
-				Expect(g.Nodes()).To(beSetThatIsNotMutable())
+				Expect(g.Nodes()).To(beSetThatIsNotMutable[int]())
+			})
+		})
+
+		Context("when checking the mutability of the AdjacentNodes set", func() {
+			It("is not mutable", func() {
+				g = addNode(g, n1)
+				Expect(g.AdjacentNodes(n1)).To(beSetThatIsNotMutable[int]())
+			})
+		})
+
+		Context("when checking the mutability of the Predecessors set", func() {
+			It("is not mutable", func() {
+				g = addNode(g, n1)
+				Expect(g.Predecessors(n1)).To(beSetThatIsNotMutable[int]())
+			})
+		})
+
+		Context("when checking the mutability of the Successors set", func() {
+			It("is not mutable", func() {
+				g = addNode(g, n1)
+				Expect(g.Successors(n1)).To(beSetThatIsNotMutable[int]())
+			})
+		})
+
+		Context("when checking the mutability of the IncidentEdges set", func() {
+			It("is not mutable", func() {
+				g = addNode(g, n1)
+				Expect(g.IncidentEdges(n1)).To(beSetThatIsNotMutable[graph.EndpointPair[int]]())
 			})
 		})
 	})
@@ -107,25 +205,25 @@ func beSetThatConsistsOf(first int, others ...int) types.GomegaMatcher {
 	all := []int{first}
 	all = append(all, others...)
 
-	return WithTransform(toSlice, ConsistOf(all))
+	return WithTransform(toSlice[int], ConsistOf(all))
 }
 
-func beSetThatIsEmpty() types.GomegaMatcher {
-	return WithTransform(toSlice, BeEmpty())
+func beSetThatIsEmpty[T comparable]() types.GomegaMatcher {
+	return WithTransform(toSlice[T], BeEmpty())
 }
 
-func beSetThatIsNotMutable() types.GomegaMatcher {
+func beSetThatIsNotMutable[T comparable]() types.GomegaMatcher {
 	return WithTransform(
-		func(s set.Set[int]) bool {
-			_, mutable := s.(set.MutableSet[int])
+		func(s set.Set[T]) bool {
+			_, mutable := s.(set.MutableSet[T])
 			return mutable
 		},
 		BeFalse())
 }
 
-func toSlice(s set.Set[int]) []int {
-	var result []int
-	s.ForEach(func(elem int) {
+func toSlice[T comparable](s set.Set[T]) []T {
+	var result []T
+	s.ForEach(func(elem T) {
 		result = append(result, elem)
 	})
 	return result
