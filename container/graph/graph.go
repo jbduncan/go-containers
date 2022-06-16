@@ -15,9 +15,13 @@ type Graph[N comparable] interface {
 	// NodeOrder() ElementOrder
 	// IncidentEdgeOrder() ElementOrder
 	AdjacentNodes(n N) (set.Set[N], error)
+	// MustAdjacentNodes(n N) set.Set[N]
 	Predecessors(n N) (set.Set[N], error)
+	// MustPredecessors(n N) set.Set[N]
 	Successors(n N) (set.Set[N], error)
+	// MustSuccessors(n N) set.Set[N]
 	IncidentEdges(n N) (set.Set[EndpointPair[N]], error)
+	// MustIncidentEdges(n N) set.Set[EndpointPair[N]]
 	// TODO: Implement Degree next.
 	// Degree(n N) (int, error)
 	// InDegree(n N) (int, error)
