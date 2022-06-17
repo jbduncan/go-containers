@@ -23,7 +23,7 @@ type Graph[N comparable] interface {
 	IncidentEdges(node N) (set.Set[EndpointPair[N]], error)
 	// MustIncidentEdges(node N) set.Set[EndpointPair[N]]
 	Degree(node N) (int, error)
-	// InDegree(node N) (int, error)
+	InDegree(node N) (int, error)
 	// OutDegree(node N) (int, error)
 	// HasEdgeConnecting(nodeU N, nodeV N) bool
 	// HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
@@ -132,6 +132,13 @@ func (m *mutableGraph[N]) Degree(node N) (int, error) {
 		return 0, fmt.Errorf(fmtNodeNotElementOfGraph, node)
 	}
 	return m.adjacencyList[node].Len(), nil
+}
+
+func (m *mutableGraph[N]) InDegree(node N) (int, error) {
+	if _, ok := m.adjacencyList[node]; !ok {
+		return 0, fmt.Errorf(fmtNodeNotElementOfGraph, node)
+	}
+	return 0, nil
 }
 
 func (m *mutableGraph[N]) AddNode(node N) bool {

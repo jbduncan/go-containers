@@ -62,10 +62,8 @@ func graphTests(
 			// Expect(g.Edges()).To(beSetThatIsEmpty())
 		})
 
-		Context("when instantiated", func() {
-			It("contains no nodes", func() {
-				Expect(g.Nodes()).To(beSetThatIsEmpty[int]())
-			})
+		It("contains no nodes", func() {
+			Expect(g.Nodes()).To(beSetThatIsEmpty[int]())
 		})
 
 		Context("when adding one node", func() {
@@ -97,6 +95,11 @@ func graphTests(
 			It("reports that the node has a degree of 0", func() {
 				g = addNode(g, n1)
 				Expect(g.Degree(n1)).To(BeZero())
+			})
+
+			It("reports that the node has an in degree of 0", func() {
+				g = addNode(g, n1)
+				Expect(g.InDegree(n1)).To(BeZero())
 			})
 		})
 
@@ -153,41 +156,49 @@ func graphTests(
 			})
 		})
 
-		Context("when finding predecessors of non-existent node", func() {
-			It("fails", func() {
+		Context("when finding the predecessors of non-existent node", func() {
+			It("returns an error", func() {
 				Expect(g.Predecessors(nodeNotInGraph)).
 					Error().
 					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
 			})
 		})
 
-		Context("when finding successors of non-existent node", func() {
-			It("fails", func() {
+		Context("when finding the successors of non-existent node", func() {
+			It("returns an error", func() {
 				Expect(g.Successors(nodeNotInGraph)).
 					Error().
 					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
 			})
 		})
 
-		Context("when finding adjacent nodes of non-existent node", func() {
-			It("fails", func() {
+		Context("when finding the adjacent nodes of non-existent node", func() {
+			It("returns an error", func() {
 				Expect(g.AdjacentNodes(nodeNotInGraph)).
 					Error().
 					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
 			})
 		})
 
-		Context("when finding incident edges of non-existent node", func() {
-			It("fails", func() {
+		Context("when finding the incident edges of non-existent node", func() {
+			It("returns an error", func() {
 				Expect(g.IncidentEdges(nodeNotInGraph)).
 					Error().
 					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
 			})
 		})
 
-		Context("when finding degree of non-existent node", func() {
-			It("fails", func() {
+		Context("when finding the degree of non-existent node", func() {
+			It("returns an error", func() {
 				Expect(g.Degree(nodeNotInGraph)).
+					Error().
+					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
+			})
+		})
+
+		Context("when finding the in degree of a non-existent node", func() {
+			It("returns an error", func() {
+				Expect(g.InDegree(nodeNotInGraph)).
 					Error().
 					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
 			})
