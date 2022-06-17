@@ -28,6 +28,7 @@ func (e EndpointPair[N]) Source() N {
 	if !e.isOrdered {
 		panic(notAvailableOnUndirected)
 	}
+
 	return e.nodeU
 }
 
@@ -35,6 +36,7 @@ func (e EndpointPair[N]) Target() N {
 	if !e.isOrdered {
 		panic(notAvailableOnUndirected)
 	}
+
 	return e.nodeV
 }
 
@@ -57,6 +59,7 @@ func (e EndpointPair[N]) AdjacentNode(node N) N {
 	if node == e.NodeV() {
 		return e.NodeU()
 	}
+
 	panic(fmt.Sprintf("EndpointPair %s does not contain node %v", e.String(), node))
 }
 

@@ -3,6 +3,7 @@ package graph
 import (
 	"errors"
 	"fmt"
+
 	"go-containers/container/set"
 )
 
@@ -146,6 +147,7 @@ func (m *mutableGraph[N]) AddNode(node N) bool {
 	if _, ok := m.adjacencyList[node]; ok {
 		return false
 	}
+
 	m.adjacencyList[node] = set.New[N]()
 	return true
 }

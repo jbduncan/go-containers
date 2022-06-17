@@ -2,6 +2,7 @@ package graph_test
 
 import (
 	"fmt"
+
 	"github.com/onsi/gomega/types"
 	"go-containers/container/graph"
 	"go-containers/container/set"
@@ -15,13 +16,17 @@ var _ = Describe("Undirected mutable graph", func() {
 		func() graph.Graph[int] {
 			return graph.Undirected[int]().Build()
 		},
-		func(g graph.Graph[int], n int) graph.Graph[int] {
-			g.(graph.MutableGraph[int]).AddNode(n)
-			return g
+		func(graphFixture graph.Graph[int], n int) graph.Graph[int] {
+			graphAsMutable, _ := graphFixture.(graph.MutableGraph[int])
+			graphAsMutable.AddNode(n)
+
+			return graphFixture
 		},
-		func(g graph.Graph[int], n1 int, n2 int) graph.Graph[int] {
-			g.(graph.MutableGraph[int]).PutEdge(n1, n2)
-			return g
+		func(graphFixture graph.Graph[int], node1 int, node2 int) graph.Graph[int] {
+			graphAsMutable, _ := graphFixture.(graph.MutableGraph[int])
+			graphAsMutable.PutEdge(node1, node2)
+
+			return graphFixture
 		},
 	)
 })
@@ -41,124 +46,133 @@ func graphTests(
 
 	Context("given a graph", func() {
 		const (
-			n1             = 1
-			n2             = 2
-			n3             = 3
+			node1          = 1
+			node2          = 2
+			node3          = 3
 			nodeNotInGraph = 1_000
 		)
 
 		var (
-			g          graph.Graph[int]
-			gAsMutable graph.MutableGraph[int]
-			gIsMutable bool
+			graphFixture graph.Graph[int]
 		)
 
-		BeforeEach(func() {
-			g = createGraph()
-			gAsMutable, gIsMutable = g.(graph.MutableGraph[int])
+		graphIsMutable := func() bool {
+			_, result := graphFixture.(graph.MutableGraph[int])
 
-			Expect(g.Nodes()).To(beSetThatIsEmpty[int]())
+			return result
+		}
+
+		graphAsMutable := func() graph.MutableGraph[int] {
+			result, _ := graphFixture.(graph.MutableGraph[int])
+
+			return result
+		}
+
+		BeforeEach(func() {
+			graphFixture = createGraph()
+
+			Expect(graphFixture.Nodes()).To(beSetThatIsEmpty[int]())
 			// TODO: Uncomment when working on Graph.Edges() method
-			// Expect(g.Edges()).To(beSetThatIsEmpty())
+			// Expect(graphFixture.Edges()).To(beSetThatIsEmpty())
 		})
 
 		It("contains no nodes", func() {
-			Expect(g.Nodes()).To(beSetThatIsEmpty[int]())
+			Expect(graphFixture.Nodes()).To(beSetThatIsEmpty[int]())
 		})
 
 		Context("when adding one node", func() {
 			It("contains just the node", func() {
-				g = addNode(g, n1)
-				Expect(g.Nodes()).To(beSetThatConsistsOf(n1))
+				graphFixture = addNode(graphFixture, node1)
+				Expect(graphFixture.Nodes()).To(beSetThatConsistsOf(node1))
 			})
 
 			It("reports that the node has no adjacent nodes", func() {
-				g = addNode(g, n1)
-				Expect(g.AdjacentNodes(n1)).To(beSetThatIsEmpty[int]())
+				graphFixture = addNode(graphFixture, node1)
+				Expect(graphFixture.AdjacentNodes(node1)).To(beSetThatIsEmpty[int]())
 			})
 
 			It("reports that the node has no predecessors", func() {
-				g = addNode(g, n1)
-				Expect(g.Predecessors(n1)).To(beSetThatIsEmpty[int]())
+				graphFixture = addNode(graphFixture, node1)
+				Expect(graphFixture.Predecessors(node1)).To(beSetThatIsEmpty[int]())
 			})
 
 			It("reports that the node has no successors", func() {
-				g = addNode(g, n1)
-				Expect(g.Successors(n1)).To(beSetThatIsEmpty[int]())
+				graphFixture = addNode(graphFixture, node1)
+				Expect(graphFixture.Successors(node1)).To(beSetThatIsEmpty[int]())
 			})
 
 			It("reports that the node has no incident edges", func() {
-				g = addNode(g, n1)
-				Expect(g.IncidentEdges(n1)).To(beSetThatIsEmpty[graph.EndpointPair[int]]())
+				graphFixture = addNode(graphFixture, node1)
+				Expect(graphFixture.IncidentEdges(node1)).To(beSetThatIsEmpty[graph.EndpointPair[int]]())
 			})
 
 			It("reports that the node has a degree of 0", func() {
-				g = addNode(g, n1)
-				Expect(g.Degree(n1)).To(BeZero())
+				graphFixture = addNode(graphFixture, node1)
+				Expect(graphFixture.Degree(node1)).To(BeZero())
 			})
 
 			It("reports that the node has an in degree of 0", func() {
-				g = addNode(g, n1)
-				Expect(g.InDegree(n1)).To(BeZero())
+				graphFixture = addNode(graphFixture, node1)
+				Expect(graphFixture.InDegree(node1)).To(BeZero())
 			})
 		})
 
 		Context("when adding two nodes", func() {
 			It("contains both nodes", func() {
-				g = addNode(g, n1)
-				g = addNode(g, n2)
-				Expect(g.Nodes()).To(beSetThatConsistsOf(n1, n2))
+				graphFixture = addNode(graphFixture, node1)
+				graphFixture = addNode(graphFixture, node2)
+				Expect(graphFixture.Nodes()).To(beSetThatConsistsOf(node1, node2))
 			})
 		})
 
 		Context("when adding a new node", func() {
 			It("returns true", func() {
-				if !gIsMutable {
+				if !graphIsMutable() {
 					Skip("Graph is not mutable.")
 				}
 
-				Expect(gAsMutable.AddNode(n1)).To(BeTrue())
-				Expect(g.Nodes()).To(beSetThatConsistsOf(n1))
+				Expect(graphAsMutable().AddNode(node1)).To(BeTrue())
+				Expect(graphFixture.Nodes()).To(beSetThatConsistsOf(node1))
 			})
 		})
 
 		Context("when adding an existing node", func() {
 			It("returns false", func() {
-				if !gIsMutable {
+				if !graphIsMutable() {
 					Skip("Graph is not mutable.")
 				}
 
-				g = addNode(g, n1)
-				Expect(gAsMutable.AddNode(n1)).To(BeFalse())
-				Expect(g.Nodes()).To(beSetThatConsistsOf(n1))
+				graphFixture = addNode(graphFixture, node1)
+				Expect(graphAsMutable().AddNode(node1)).To(BeFalse())
+				Expect(graphFixture.Nodes()).To(beSetThatConsistsOf(node1))
 			})
 		})
 
 		Context("when adding one edge", func() {
 			It("reports both nodes as being adjacent", func() {
-				g = putEdge(g, n1, n2)
-				Expect(g.AdjacentNodes(n1)).To(beSetThatConsistsOf(n2))
-				Expect(g.AdjacentNodes(n2)).To(beSetThatConsistsOf(n1))
+				graphFixture = putEdge(graphFixture, node1, node2)
+				Expect(graphFixture.AdjacentNodes(node1)).To(beSetThatConsistsOf(node2))
+				Expect(graphFixture.AdjacentNodes(node2)).To(beSetThatConsistsOf(node1))
 			})
 
 			It("reports both nodes as having a degree of 1", func() {
-				g = putEdge(g, n1, n2)
-				Expect(g.Degree(n1)).To(Equal(1))
-				Expect(g.Degree(n2)).To(Equal(1))
+				graphFixture = putEdge(graphFixture, node1, node2)
+				Expect(graphFixture.Degree(node1)).To(Equal(1))
+				Expect(graphFixture.Degree(node2)).To(Equal(1))
 			})
 		})
 
 		Context("when adding two connected edges", func() {
 			It("reports that the common node has a degree of 2", func() {
-				g = putEdge(g, n1, n2)
-				g = putEdge(g, n1, n3)
-				Expect(g.Degree(n1)).To(Equal(2))
+				graphFixture = putEdge(graphFixture, node1, node2)
+				graphFixture = putEdge(graphFixture, node1, node3)
+				Expect(graphFixture.Degree(node1)).To(Equal(2))
 			})
 		})
 
 		Context("when finding the predecessors of non-existent node", func() {
 			It("returns an error", func() {
-				Expect(g.Predecessors(nodeNotInGraph)).
+				Expect(graphFixture.Predecessors(nodeNotInGraph)).
 					Error().
 					To(MatchError(fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)))
 			})
@@ -166,7 +180,7 @@ func graphTests(
 
 		Context("when finding the successors of non-existent node", func() {
 			It("returns an error", func() {
-				Expect(g.Successors(nodeNotInGraph)).
+				Expect(graphFixture.Successors(nodeNotInGraph)).
 					Error().
 					To(MatchError(fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)))
 			})
@@ -174,7 +188,7 @@ func graphTests(
 
 		Context("when finding the adjacent nodes of non-existent node", func() {
 			It("returns an error", func() {
-				Expect(g.AdjacentNodes(nodeNotInGraph)).
+				Expect(graphFixture.AdjacentNodes(nodeNotInGraph)).
 					Error().
 					To(MatchError(fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)))
 			})
@@ -182,7 +196,7 @@ func graphTests(
 
 		Context("when finding the incident edges of non-existent node", func() {
 			It("returns an error", func() {
-				Expect(g.IncidentEdges(nodeNotInGraph)).
+				Expect(graphFixture.IncidentEdges(nodeNotInGraph)).
 					Error().
 					To(MatchError(fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)))
 			})
@@ -190,7 +204,7 @@ func graphTests(
 
 		Context("when finding the degree of non-existent node", func() {
 			It("returns an error", func() {
-				Expect(g.Degree(nodeNotInGraph)).
+				Expect(graphFixture.Degree(nodeNotInGraph)).
 					Error().
 					To(MatchError(fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)))
 			})
@@ -198,7 +212,7 @@ func graphTests(
 
 		Context("when finding the in degree of a non-existent node", func() {
 			It("returns an error", func() {
-				Expect(g.InDegree(nodeNotInGraph)).
+				Expect(graphFixture.InDegree(nodeNotInGraph)).
 					Error().
 					To(MatchError(fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)))
 			})
@@ -206,35 +220,35 @@ func graphTests(
 
 		Context("when checking the mutability of the Nodes set", func() {
 			It("is not mutable", func() {
-				Expect(g.Nodes()).To(beSetThatIsNotMutable[int]())
+				Expect(graphFixture.Nodes()).To(beSetThatIsNotMutable[int]())
 			})
 		})
 
 		Context("when checking the mutability of the AdjacentNodes set", func() {
 			It("is not mutable", func() {
-				g = addNode(g, n1)
-				Expect(g.AdjacentNodes(n1)).To(beSetThatIsNotMutable[int]())
+				graphFixture = addNode(graphFixture, node1)
+				Expect(graphFixture.AdjacentNodes(node1)).To(beSetThatIsNotMutable[int]())
 			})
 		})
 
 		Context("when checking the mutability of the Predecessors set", func() {
 			It("is not mutable", func() {
-				g = addNode(g, n1)
-				Expect(g.Predecessors(n1)).To(beSetThatIsNotMutable[int]())
+				graphFixture = addNode(graphFixture, node1)
+				Expect(graphFixture.Predecessors(node1)).To(beSetThatIsNotMutable[int]())
 			})
 		})
 
 		Context("when checking the mutability of the Successors set", func() {
 			It("is not mutable", func() {
-				g = addNode(g, n1)
-				Expect(g.Successors(n1)).To(beSetThatIsNotMutable[int]())
+				graphFixture = addNode(graphFixture, node1)
+				Expect(graphFixture.Successors(node1)).To(beSetThatIsNotMutable[int]())
 			})
 		})
 
 		Context("when checking the mutability of the IncidentEdges set", func() {
 			It("is not mutable", func() {
-				g = addNode(g, n1)
-				Expect(g.IncidentEdges(n1)).To(beSetThatIsNotMutable[graph.EndpointPair[int]]())
+				graphFixture = addNode(graphFixture, node1)
+				Expect(graphFixture.IncidentEdges(node1)).To(beSetThatIsNotMutable[graph.EndpointPair[int]]())
 			})
 		})
 	})
@@ -262,8 +276,10 @@ func beSetThatIsNotMutable[T comparable]() types.GomegaMatcher {
 
 func toSlice[T comparable](s set.Set[T]) []T {
 	var result []T
+
 	s.ForEach(func(elem T) {
 		result = append(result, elem)
 	})
+
 	return result
 }

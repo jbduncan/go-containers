@@ -227,8 +227,10 @@ func haveForEachThatProducesNothing() types.GomegaMatcher {
 
 func forEachResults(set set.Set[string]) []string {
 	var result []string
+
 	set.ForEach(func(elem string) {
 		result = append(result, elem)
 	})
+
 	return result
 }

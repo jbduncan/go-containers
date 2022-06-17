@@ -93,18 +93,21 @@ func (s set[T]) ForEach(fn func(elem T)) {
 }
 
 func (s set[T]) String() string {
-	var b strings.Builder
-	b.WriteRune('[')
-	i := 0
+	var builder strings.Builder
+
+	builder.WriteRune('[')
+	index := 0
 	for elem := range s.delegate {
-		if i > 0 {
-			b.WriteString(", ")
+		if index > 0 {
+			builder.WriteString(", ")
 		}
-		b.WriteString(fmt.Sprintf("%v", elem))
-		i++
+
+		builder.WriteString(fmt.Sprintf("%v", elem))
+		index++
 	}
-	b.WriteRune(']')
-	return b.String()
+
+	builder.WriteRune(']')
+	return builder.String()
 }
 
 type unmodifiableSet[T comparable] struct {
