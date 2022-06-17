@@ -160,7 +160,7 @@ func graphTests(
 			It("returns an error", func() {
 				Expect(g.Predecessors(nodeNotInGraph)).
 					Error().
-					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
+					To(MatchError(fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)))
 			})
 		})
 
@@ -168,7 +168,7 @@ func graphTests(
 			It("returns an error", func() {
 				Expect(g.Successors(nodeNotInGraph)).
 					Error().
-					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
+					To(MatchError(fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)))
 			})
 		})
 
@@ -176,7 +176,7 @@ func graphTests(
 			It("returns an error", func() {
 				Expect(g.AdjacentNodes(nodeNotInGraph)).
 					Error().
-					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
+					To(MatchError(fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)))
 			})
 		})
 
@@ -184,7 +184,7 @@ func graphTests(
 			It("returns an error", func() {
 				Expect(g.IncidentEdges(nodeNotInGraph)).
 					Error().
-					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
+					To(MatchError(fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)))
 			})
 		})
 
@@ -192,7 +192,7 @@ func graphTests(
 			It("returns an error", func() {
 				Expect(g.Degree(nodeNotInGraph)).
 					Error().
-					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
+					To(MatchError(fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)))
 			})
 		})
 
@@ -200,7 +200,7 @@ func graphTests(
 			It("returns an error", func() {
 				Expect(g.InDegree(nodeNotInGraph)).
 					Error().
-					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
+					To(MatchError(fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)))
 			})
 		})
 

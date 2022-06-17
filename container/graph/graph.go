@@ -1,11 +1,12 @@
 package graph
 
 import (
+	"errors"
 	"fmt"
 	"go-containers/container/set"
 )
 
-const fmtNodeNotElementOfGraph = "node %v not an element of this graph"
+var errNodeNotElementOfGraph = errors.New("node not an element of this graph")
 
 type Graph[N comparable] interface {
 	Nodes() set.Set[N]
@@ -98,14 +99,14 @@ func (k keySet[N]) String() string {
 func (m *mutableGraph[N]) AdjacentNodes(node N) (set.Set[N], error) {
 	adjacentNodes, ok := m.adjacencyList[node]
 	if !ok {
-		return nil, fmt.Errorf(fmtNodeNotElementOfGraph, node)
+		return nil, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
 	}
 	return set.Unmodifiable(adjacentNodes), nil
 }
 
 func (m *mutableGraph[N]) Predecessors(node N) (set.Set[N], error) {
 	if _, ok := m.adjacencyList[node]; !ok {
-		return nil, fmt.Errorf(fmtNodeNotElementOfGraph, node)
+		return nil, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
 	}
 	// TODO: Non-empty case(s)
 	return set.Unmodifiable(set.New[N]()), nil
@@ -113,7 +114,7 @@ func (m *mutableGraph[N]) Predecessors(node N) (set.Set[N], error) {
 
 func (m *mutableGraph[N]) Successors(node N) (set.Set[N], error) {
 	if _, ok := m.adjacencyList[node]; !ok {
-		return nil, fmt.Errorf(fmtNodeNotElementOfGraph, node)
+		return nil, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
 	}
 	// TODO: Non-empty case(s)
 	return set.Unmodifiable(set.New[N]()), nil
@@ -121,7 +122,7 @@ func (m *mutableGraph[N]) Successors(node N) (set.Set[N], error) {
 
 func (m *mutableGraph[N]) IncidentEdges(node N) (set.Set[EndpointPair[N]], error) {
 	if _, ok := m.adjacencyList[node]; !ok {
-		return nil, fmt.Errorf(fmtNodeNotElementOfGraph, node)
+		return nil, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
 	}
 	// TODO: Non-empty case(s)
 	return set.Unmodifiable(set.New[EndpointPair[N]]()), nil
@@ -129,14 +130,14 @@ func (m *mutableGraph[N]) IncidentEdges(node N) (set.Set[EndpointPair[N]], error
 
 func (m *mutableGraph[N]) Degree(node N) (int, error) {
 	if _, ok := m.adjacencyList[node]; !ok {
-		return 0, fmt.Errorf(fmtNodeNotElementOfGraph, node)
+		return 0, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
 	}
 	return m.adjacencyList[node].Len(), nil
 }
 
 func (m *mutableGraph[N]) InDegree(node N) (int, error) {
 	if _, ok := m.adjacencyList[node]; !ok {
-		return 0, fmt.Errorf(fmtNodeNotElementOfGraph, node)
+		return 0, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
 	}
 	return 0, nil
 }

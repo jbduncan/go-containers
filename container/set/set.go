@@ -8,7 +8,6 @@
 //
 // An existing set can be made "unmodifiable", which turns it into a read-only Set view. Read the docs for the function
 // Unmodifiable for more information.
-
 package set
 
 import (
