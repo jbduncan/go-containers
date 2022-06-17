@@ -43,6 +43,7 @@ func graphTests(
 		const (
 			n1             = 1
 			n2             = 2
+			n3             = 3
 			nodeNotInGraph = 1_000
 		)
 
@@ -92,10 +93,15 @@ func graphTests(
 				g = addNode(g, n1)
 				Expect(g.IncidentEdges(n1)).To(beSetThatIsEmpty[graph.EndpointPair[int]]())
 			})
+
+			It("reports that the node has a degree of 0", func() {
+				g = addNode(g, n1)
+				Expect(g.Degree(n1)).To(BeZero())
+			})
 		})
 
 		Context("when adding two nodes", func() {
-			It("the graph contains both nodes", func() {
+			It("contains both nodes", func() {
 				g = addNode(g, n1)
 				g = addNode(g, n2)
 				Expect(g.Nodes()).To(beSetThatConsistsOf(n1, n2))
@@ -103,7 +109,7 @@ func graphTests(
 		})
 
 		Context("when adding a new node", func() {
-			It("contains just the single node", func() {
+			It("returns true", func() {
 				if !gIsMutable {
 					Skip("Graph is not mutable.")
 				}
@@ -114,7 +120,7 @@ func graphTests(
 		})
 
 		Context("when adding an existing node", func() {
-			It("contains no additional nodes", func() {
+			It("returns false", func() {
 				if !gIsMutable {
 					Skip("Graph is not mutable.")
 				}
@@ -130,6 +136,20 @@ func graphTests(
 				g = putEdge(g, n1, n2)
 				Expect(g.AdjacentNodes(n1)).To(beSetThatConsistsOf(n2))
 				Expect(g.AdjacentNodes(n2)).To(beSetThatConsistsOf(n1))
+			})
+
+			It("reports both nodes as having a degree of 1", func() {
+				g = putEdge(g, n1, n2)
+				Expect(g.Degree(n1)).To(Equal(1))
+				Expect(g.Degree(n2)).To(Equal(1))
+			})
+		})
+
+		Context("when adding two connected edges", func() {
+			It("reports that the common node has a degree of 2", func() {
+				g = putEdge(g, n1, n2)
+				g = putEdge(g, n1, n3)
+				Expect(g.Degree(n1)).To(Equal(2))
 			})
 		})
 
@@ -160,6 +180,14 @@ func graphTests(
 		Context("when finding incident edges of non-existent node", func() {
 			It("fails", func() {
 				Expect(g.IncidentEdges(nodeNotInGraph)).
+					Error().
+					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
+			})
+		})
+
+		Context("when finding degree of non-existent node", func() {
+			It("fails", func() {
+				Expect(g.Degree(nodeNotInGraph)).
 					Error().
 					To(MatchError(fmt.Sprintf("node %d not an element of this graph", nodeNotInGraph)))
 			})

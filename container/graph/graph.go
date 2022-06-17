@@ -14,19 +14,18 @@ type Graph[N comparable] interface {
 	// AllowsSelfLoops() bool
 	// NodeOrder() ElementOrder
 	// IncidentEdgeOrder() ElementOrder
-	AdjacentNodes(n N) (set.Set[N], error)
-	// MustAdjacentNodes(n N) set.Set[N]
-	Predecessors(n N) (set.Set[N], error)
-	// MustPredecessors(n N) set.Set[N]
-	Successors(n N) (set.Set[N], error)
-	// MustSuccessors(n N) set.Set[N]
-	IncidentEdges(n N) (set.Set[EndpointPair[N]], error)
-	// MustIncidentEdges(n N) set.Set[EndpointPair[N]]
-	// TODO: Implement Degree next.
-	// Degree(n N) (int, error)
-	// InDegree(n N) (int, error)
-	// OutDegree(n N) (int, error)
-	// HasEdgeConnecting(u N, v N) bool
+	AdjacentNodes(node N) (set.Set[N], error)
+	// MustAdjacentNodes(node N) set.Set[N]
+	Predecessors(node N) (set.Set[N], error)
+	// MustPredecessors(node N) set.Set[N]
+	Successors(node N) (set.Set[N], error)
+	// MustSuccessors(node N) set.Set[N]
+	IncidentEdges(node N) (set.Set[EndpointPair[N]], error)
+	// MustIncidentEdges(node N) set.Set[EndpointPair[N]]
+	Degree(node N) (int, error)
+	// InDegree(node N) (int, error)
+	// OutDegree(node N) (int, error)
+	// HasEdgeConnecting(nodeU N, nodeV N) bool
 	// HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
 	// String() string
 	// TODO: Is an Equals function needed to meet Guava's Graph::equals rules?
@@ -35,11 +34,11 @@ type Graph[N comparable] interface {
 type MutableGraph[N comparable] interface {
 	Graph[N]
 
-	AddNode(n N) bool
-	PutEdge(u N, v N) bool
+	AddNode(node N) bool
+	PutEdge(nodeU N, nodeV N) bool
 	// PutEdgeWithEndpoints(e EndpointPair[N]) bool
-	// RemoveNode(n N) bool
-	// RemoveEdge(u N, v N) bool
+	// RemoveNode(node N) bool
+	// RemoveEdge(nodeU N, nodeV N) bool
 	// RemoveEdgeWithEndpoints(e EndpointPair[N]) bool
 }
 
@@ -96,60 +95,67 @@ func (k keySet[N]) String() string {
 	panic("implement me")
 }
 
-func (m *mutableGraph[N]) AdjacentNodes(n N) (set.Set[N], error) {
-	adjacentNodes, ok := m.adjacencyList[n]
+func (m *mutableGraph[N]) AdjacentNodes(node N) (set.Set[N], error) {
+	adjacentNodes, ok := m.adjacencyList[node]
 	if !ok {
-		return nil, fmt.Errorf(fmtNodeNotElementOfGraph, n)
+		return nil, fmt.Errorf(fmtNodeNotElementOfGraph, node)
 	}
 	return set.Unmodifiable(adjacentNodes), nil
 }
 
-func (m *mutableGraph[N]) Predecessors(n N) (set.Set[N], error) {
-	if _, ok := m.adjacencyList[n]; !ok {
-		return nil, fmt.Errorf(fmtNodeNotElementOfGraph, n)
+func (m *mutableGraph[N]) Predecessors(node N) (set.Set[N], error) {
+	if _, ok := m.adjacencyList[node]; !ok {
+		return nil, fmt.Errorf(fmtNodeNotElementOfGraph, node)
 	}
 	// TODO: Non-empty case(s)
 	return set.Unmodifiable(set.New[N]()), nil
 }
 
-func (m *mutableGraph[N]) Successors(n N) (set.Set[N], error) {
-	if _, ok := m.adjacencyList[n]; !ok {
-		return nil, fmt.Errorf(fmtNodeNotElementOfGraph, n)
+func (m *mutableGraph[N]) Successors(node N) (set.Set[N], error) {
+	if _, ok := m.adjacencyList[node]; !ok {
+		return nil, fmt.Errorf(fmtNodeNotElementOfGraph, node)
 	}
 	// TODO: Non-empty case(s)
 	return set.Unmodifiable(set.New[N]()), nil
 }
 
-func (m *mutableGraph[N]) IncidentEdges(n N) (set.Set[EndpointPair[N]], error) {
-	if _, ok := m.adjacencyList[n]; !ok {
-		return nil, fmt.Errorf(fmtNodeNotElementOfGraph, n)
+func (m *mutableGraph[N]) IncidentEdges(node N) (set.Set[EndpointPair[N]], error) {
+	if _, ok := m.adjacencyList[node]; !ok {
+		return nil, fmt.Errorf(fmtNodeNotElementOfGraph, node)
 	}
 	// TODO: Non-empty case(s)
 	return set.Unmodifiable(set.New[EndpointPair[N]]()), nil
 }
 
-func (m *mutableGraph[N]) AddNode(n N) bool {
-	if _, ok := m.adjacencyList[n]; ok {
+func (m *mutableGraph[N]) Degree(node N) (int, error) {
+	if _, ok := m.adjacencyList[node]; !ok {
+		return 0, fmt.Errorf(fmtNodeNotElementOfGraph, node)
+	}
+	return m.adjacencyList[node].Len(), nil
+}
+
+func (m *mutableGraph[N]) AddNode(node N) bool {
+	if _, ok := m.adjacencyList[node]; ok {
 		return false
 	}
-	m.adjacencyList[n] = set.New[N]()
+	m.adjacencyList[node] = set.New[N]()
 	return true
 }
 
-func (m *mutableGraph[N]) PutEdge(u N, v N) bool {
-	adjacentNodes, ok := m.adjacencyList[u]
+func (m *mutableGraph[N]) PutEdge(nodeU N, nodeV N) bool {
+	adjacentNodes, ok := m.adjacencyList[nodeU]
 	if !ok {
 		adjacentNodes = set.New[N]()
-		m.adjacencyList[u] = adjacentNodes
+		m.adjacencyList[nodeU] = adjacentNodes
 	}
-	adjacentNodes.Add(v)
+	adjacentNodes.Add(nodeV)
 
-	adjacentNodes, ok = m.adjacencyList[v]
+	adjacentNodes, ok = m.adjacencyList[nodeV]
 	if !ok {
 		adjacentNodes = set.New[N]()
-		m.adjacencyList[v] = adjacentNodes
+		m.adjacencyList[nodeV] = adjacentNodes
 	}
-	adjacentNodes.Add(u)
+	adjacentNodes.Add(nodeU)
 
 	//TODO
 	return false
