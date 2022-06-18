@@ -9,6 +9,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "go-containers/internal/matchers"
 )
 
 var _ = Describe("Undirected mutable graph", func() {
@@ -31,6 +32,13 @@ var _ = Describe("Undirected mutable graph", func() {
 	)
 })
 
+const (
+	node1          = 1
+	node2          = 2
+	node3          = 3
+	nodeNotInGraph = 1_000
+)
+
 // graphTests produces a suite of Ginkgo test cases for testing implementations of Graph interface. Graph instances
 // created for testing should have int nodes.
 //
@@ -45,13 +53,6 @@ func graphTests(
 	putEdge func(g graph.Graph[int], n1 int, n2 int) graph.Graph[int]) {
 
 	Context("given a graph", func() {
-		const (
-			node1          = 1
-			node2          = 2
-			node3          = 3
-			nodeNotInGraph = 1_000
-		)
-
 		var (
 			graphFixture graph.Graph[int]
 		)
@@ -66,6 +67,12 @@ func graphTests(
 			result, _ := graphFixture.(graph.MutableGraph[int])
 
 			return result
+		}
+
+		skipIfGraphIsNotMutable := func() {
+			if !graphIsMutable() {
+				Skip("Graph is not mutable.")
+			}
 		}
 
 		BeforeEach(func() {
@@ -115,6 +122,11 @@ func graphTests(
 				graphFixture = addNode(graphFixture, node1)
 				Expect(graphFixture.InDegree(node1)).To(BeZero())
 			})
+
+			It("reports that the node has an out degree of 0", func() {
+				graphFixture = addNode(graphFixture, node1)
+				Expect(graphFixture.OutDegree(node1)).To(BeZero())
+			})
 		})
 
 		Context("when adding two nodes", func() {
@@ -127,9 +139,7 @@ func graphTests(
 
 		Context("when adding a new node", func() {
 			It("returns true", func() {
-				if !graphIsMutable() {
-					Skip("Graph is not mutable.")
-				}
+				skipIfGraphIsNotMutable()
 
 				Expect(graphAsMutable().AddNode(node1)).To(BeTrue())
 				Expect(graphFixture.Nodes()).To(beSetThatConsistsOf(node1))
@@ -138,12 +148,112 @@ func graphTests(
 
 		Context("when adding an existing node", func() {
 			It("returns false", func() {
-				if !graphIsMutable() {
-					Skip("Graph is not mutable.")
-				}
+				skipIfGraphIsNotMutable()
 
 				graphFixture = addNode(graphFixture, node1)
 				Expect(graphAsMutable().AddNode(node1)).To(BeFalse())
+			})
+
+			It("does not add the node again", func() {
+				graphFixture = addNode(graphFixture, node1)
+				graphFixture = addNode(graphFixture, node1)
+				Expect(graphFixture.Nodes()).To(beSetThatConsistsOf(node1))
+			})
+		})
+
+		Context("when removing an existing node", func() {
+			It("returns true", func() {
+				skipIfGraphIsNotMutable()
+
+				graphFixture = addNode(graphFixture, node1)
+				Expect(graphAsMutable().RemoveNode(node1)).To(BeTrue())
+			})
+
+			It("removes the node", func() {
+				skipIfGraphIsNotMutable()
+
+				graphFixture = addNode(graphFixture, node1)
+				graphAsMutable().RemoveNode(node1)
+				Expect(graphFixture.Nodes()).To(beSetThatIsEmpty[int]())
+			})
+
+			It("removes the connections to its adjacent nodes", func() {
+				skipIfGraphIsNotMutable()
+
+				graphFixture = putEdge(graphFixture, node1, node2)
+				graphFixture = putEdge(graphFixture, node3, node1)
+
+				graphAsMutable().RemoveNode(node1)
+
+				Expect(graphFixture.AdjacentNodes(node2)).To(beSetThatIsEmpty[int]())
+				Expect(graphFixture.AdjacentNodes(node3)).To(beSetThatIsEmpty[int]())
+			})
+
+			// TODO: Pending implementation of Graph.Edges()
+			//It("removes the connected edges", func() {
+			//	skipIfGraphIsNotMutable()
+			//
+			//	graphFixture = putEdge(graphFixture, node1, node2)
+			//	graphFixture = putEdge(graphFixture, node3, node1)
+			//
+			//	graphAsMutable().RemoveNode(node1)
+			//
+			//	Expect(graphFixture.Edges()).To(beSetThatIsEmpty[int]())
+			//})
+
+			Context("and querying the node after removal", func() {
+				It("returns an error", func() {
+					skipIfGraphIsNotMutable()
+
+					graphFixture = addNode(graphFixture, node1)
+
+					graphAsMutable().RemoveNode(node1)
+
+					Expect(graphFixture.AdjacentNodes(node1)).
+						Error().
+						To(MatchError(fmt.Sprintf("%d: node not an element of this graph", node1)))
+				})
+			})
+		})
+
+		Context("when removing one node from two anti-parallel edges", func() {
+			It("leaves the other node alone", func() {
+				skipIfGraphIsNotMutable()
+
+				graphFixture = putEdge(graphFixture, node1, node2)
+				graphFixture = putEdge(graphFixture, node2, node1)
+
+				graphAsMutable().RemoveNode(node1)
+
+				Expect(graphFixture.Nodes()).To(beSetThatConsistsOf(node2))
+			})
+
+			// TODO: Pending implementation of Graph.Edges()
+			//It("removes both edges", func() {
+			//	skipIfGraphIsNotMutable()
+			//
+			//	graphFixture = putEdge(graphFixture, node1, node2)
+			//	graphFixture = putEdge(graphFixture, node2, node1)
+			//
+			//	graphAsMutable().RemoveNode(node1)
+			//
+			//	Expect(graphFixture.Edges()).To(beSetThatIsEmpty[int]())
+			//})
+		})
+
+		Context("when removing an absent node", func() {
+			It("returns false", func() {
+				skipIfGraphIsNotMutable()
+
+				Expect(graphAsMutable().RemoveNode(nodeNotInGraph)).To(BeFalse())
+			})
+
+			It("leaves the existing nodes alone", func() {
+				skipIfGraphIsNotMutable()
+
+				graphFixture = addNode(graphFixture, node1)
+
+				graphAsMutable().RemoveNode(nodeNotInGraph)
 				Expect(graphFixture.Nodes()).To(beSetThatConsistsOf(node1))
 			})
 		})
@@ -170,7 +280,7 @@ func graphTests(
 			})
 		})
 
-		Context("when finding the predecessors of non-existent node", func() {
+		Context("when finding the predecessors of an absent node", func() {
 			It("returns an error", func() {
 				Expect(graphFixture.Predecessors(nodeNotInGraph)).
 					Error().
@@ -178,7 +288,7 @@ func graphTests(
 			})
 		})
 
-		Context("when finding the successors of non-existent node", func() {
+		Context("when finding the successors of an absent node", func() {
 			It("returns an error", func() {
 				Expect(graphFixture.Successors(nodeNotInGraph)).
 					Error().
@@ -186,7 +296,7 @@ func graphTests(
 			})
 		})
 
-		Context("when finding the adjacent nodes of non-existent node", func() {
+		Context("when finding the adjacent nodes of an absent node", func() {
 			It("returns an error", func() {
 				Expect(graphFixture.AdjacentNodes(nodeNotInGraph)).
 					Error().
@@ -194,7 +304,7 @@ func graphTests(
 			})
 		})
 
-		Context("when finding the incident edges of non-existent node", func() {
+		Context("when finding the incident edges of an absent node", func() {
 			It("returns an error", func() {
 				Expect(graphFixture.IncidentEdges(nodeNotInGraph)).
 					Error().
@@ -202,7 +312,7 @@ func graphTests(
 			})
 		})
 
-		Context("when finding the degree of non-existent node", func() {
+		Context("when finding the degree of an absent node", func() {
 			It("returns an error", func() {
 				Expect(graphFixture.Degree(nodeNotInGraph)).
 					Error().
@@ -210,9 +320,17 @@ func graphTests(
 			})
 		})
 
-		Context("when finding the in degree of a non-existent node", func() {
+		Context("when finding the in degree of an absent node", func() {
 			It("returns an error", func() {
 				Expect(graphFixture.InDegree(nodeNotInGraph)).
+					Error().
+					To(MatchError(fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)))
+			})
+		})
+
+		Context("when finding the out degree of of an absent node", func() {
+			It("returns an error", func() {
+				Expect(graphFixture.OutDegree(nodeNotInGraph)).
 					Error().
 					To(MatchError(fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)))
 			})
@@ -258,11 +376,11 @@ func beSetThatConsistsOf(first int, others ...int) types.GomegaMatcher {
 	all := []int{first}
 	all = append(all, others...)
 
-	return WithTransform(toSlice[int], ConsistOf(all))
+	return WithTransform(ForEachToSlice[int], ConsistOf(all))
 }
 
 func beSetThatIsEmpty[T comparable]() types.GomegaMatcher {
-	return WithTransform(toSlice[T], BeEmpty())
+	return WithTransform(ForEachToSlice[T], BeEmpty())
 }
 
 func beSetThatIsNotMutable[T comparable]() types.GomegaMatcher {
@@ -274,11 +392,11 @@ func beSetThatIsNotMutable[T comparable]() types.GomegaMatcher {
 		BeFalse())
 }
 
-func toSlice[T comparable](s set.Set[T]) []T {
-	var result []T
+func forEachCount(set set.Set[int]) int {
+	var result int
 
-	s.ForEach(func(elem T) {
-		result = append(result, elem)
+	set.ForEach(func(elem int) {
+		result++
 	})
 
 	return result

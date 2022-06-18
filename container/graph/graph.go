@@ -26,11 +26,12 @@ type Graph[N comparable] interface {
 	// MustIncidentEdges(node N) set.Set[EndpointPair[N]]
 	Degree(node N) (int, error)
 	InDegree(node N) (int, error)
-	// OutDegree(node N) (int, error)
+	OutDegree(node N) (int, error)
 	// HasEdgeConnecting(nodeU N, nodeV N) bool
 	// HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
 	// String() string
 	// TODO: Is an Equals function needed to meet Guava's Graph::equals rules?
+	// Equal(other Graph[N]) bool
 }
 
 type MutableGraph[N comparable] interface {
@@ -39,7 +40,7 @@ type MutableGraph[N comparable] interface {
 	AddNode(node N) bool
 	PutEdge(nodeU N, nodeV N) bool
 	// PutEdgeWithEndpoints(e EndpointPair[N]) bool
-	// RemoveNode(node N) bool
+	RemoveNode(node N) bool
 	// RemoveEdge(nodeU N, nodeV N) bool
 	// RemoveEdgeWithEndpoints(e EndpointPair[N]) bool
 }
@@ -63,12 +64,8 @@ type mutableGraph[N comparable] struct {
 }
 
 func (m *mutableGraph[N]) Nodes() set.Set[N] {
-	return wrapKeys(m.adjacencyList)
-}
-
-func wrapKeys[N comparable](delegate map[N]set.MutableSet[N]) set.Set[N] {
 	return keySet[N]{
-		delegate: delegate,
+		delegate: m.adjacencyList,
 	}
 }
 
@@ -77,12 +74,12 @@ type keySet[N comparable] struct {
 }
 
 func (k keySet[N]) Contains(elem N) bool {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (k keySet[N]) Len() int {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
@@ -93,7 +90,7 @@ func (k keySet[N]) ForEach(fn func(elem N)) {
 }
 
 func (k keySet[N]) String() string {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
@@ -102,6 +99,7 @@ func (m *mutableGraph[N]) AdjacentNodes(node N) (set.Set[N], error) {
 	if !ok {
 		return nil, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
 	}
+
 	return set.Unmodifiable(adjacentNodes), nil
 }
 
@@ -109,7 +107,7 @@ func (m *mutableGraph[N]) Predecessors(node N) (set.Set[N], error) {
 	if _, ok := m.adjacencyList[node]; !ok {
 		return nil, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
 	}
-	// TODO: Non-empty case(s)
+
 	return set.Unmodifiable(set.New[N]()), nil
 }
 
@@ -117,7 +115,7 @@ func (m *mutableGraph[N]) Successors(node N) (set.Set[N], error) {
 	if _, ok := m.adjacencyList[node]; !ok {
 		return nil, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
 	}
-	// TODO: Non-empty case(s)
+
 	return set.Unmodifiable(set.New[N]()), nil
 }
 
@@ -125,7 +123,7 @@ func (m *mutableGraph[N]) IncidentEdges(node N) (set.Set[EndpointPair[N]], error
 	if _, ok := m.adjacencyList[node]; !ok {
 		return nil, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
 	}
-	// TODO: Non-empty case(s)
+
 	return set.Unmodifiable(set.New[EndpointPair[N]]()), nil
 }
 
@@ -133,6 +131,7 @@ func (m *mutableGraph[N]) Degree(node N) (int, error) {
 	if _, ok := m.adjacencyList[node]; !ok {
 		return 0, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
 	}
+
 	return m.adjacencyList[node].Len(), nil
 }
 
@@ -140,6 +139,15 @@ func (m *mutableGraph[N]) InDegree(node N) (int, error) {
 	if _, ok := m.adjacencyList[node]; !ok {
 		return 0, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
 	}
+
+	return 0, nil
+}
+
+func (m *mutableGraph[N]) OutDegree(node N) (int, error) {
+	if _, ok := m.adjacencyList[node]; !ok {
+		return 0, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
+	}
+
 	return 0, nil
 }
 
@@ -169,6 +177,21 @@ func (m *mutableGraph[N]) PutEdge(nodeU N, nodeV N) bool {
 
 	//TODO
 	return false
+}
+
+func (m *mutableGraph[N]) RemoveNode(node N) bool {
+	_, ok := m.adjacencyList[node]
+	if !ok {
+		return false
+	}
+
+	delete(m.adjacencyList, node)
+
+	for _, adjacentNodes := range m.adjacencyList {
+		adjacentNodes.Remove(node)
+	}
+
+	return true
 }
 
 // type ElementOrder struct {}
