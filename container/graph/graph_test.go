@@ -83,6 +83,10 @@ func graphTests(
 			// Expect(graphFixture.Edges()).To(beSetThatIsEmpty())
 		})
 
+		AfterEach(func() {
+			validateGraphState(graphFixture)
+		})
+
 		It("contains no nodes", func() {
 			Expect(graphFixture.Nodes()).To(beSetThatIsEmpty[int]())
 		})
@@ -370,6 +374,79 @@ func graphTests(
 			})
 		})
 	})
+}
+
+func validateGraphState(graphFixture graph.Graph[int]) {
+	// TODO: Pending implementation of graph.CopyOf
+	//expectStronglyEquivalent(graphFixture, graph.CopyOf(graphFixture))
+	// TODO: Pending implementation of graph.ImmutableCopyOf
+	//expectStronglyEquivalent(graphFixture, graph.ImmutableCopyOf(graphFixture))
+
+	// TODO: Pending implementation of Graph.String()
+	//graphString := graphFixture.String()
+	// TODO: Pending implementation of Graph.IsDirected()
+	//Expect(graphString).To(ContainSubstring("isDirected: %v", graphFixture.IsDirected()))
+	// TODO: Pending implementation of Graph.AllowsSelfLoops()
+	//Expect(graphString).To(ContainSubstring("allowsSelfLoops: %v", graphFixture.AllowsSelfLoops()))
+
+	// TODO: Pending implementation of Graph.String()
+	//nodeStart := strings.Index(graphString, "nodes:")
+	//edgeStart := strings.Index(graphString, "edges:")
+	//nodeString := graphString[nodeStart:edgeStart] // safe because contents are ASCII
+
+	allEndpointPairs := set.New[graph.EndpointPair[int]]()
+	_ = allEndpointPairs
+
+	sanityCheckSet(graphFixture.Nodes()).ForEach(func(node int) {
+		// TODO: Pending implementation of Graph.String()
+		//Expect(nodeString).To(ContainSubstring(strconv.Itoa(node)))
+
+		// TODO: Pending implementation of many Graph methods
+		//if graphFixture.IsDirected() {
+		//	Expect(graphFixture.Degree(node)).To(Equal(graphFixture.MustInDegree(node) + graphFixture.MustOutDegree(node)))
+		//	Expect(graphFixture.Predecessors(node)).To(HaveLenOf[int](graphFixture.MustInDegree(node)))
+		//	Expect(graphFixture.Successors(node)).To(HaveLenOf[int](graphFixture.MustOutDegree(node)))
+		//} else {
+		//	nodeConnectedToNode := graphFixture.MustAdjacentNodes(node).Contains(node)
+		//	selfLoopCount := 0
+		//	if nodeConnectedToNode {
+		//		selfLoopCount = 1
+		//	}
+		//	Expect(graphFixture.Degree(node)).To(Equal(graphFixture.MustAdjacentNodes(nodes).Len() + selfLoopCount))
+		//	Expect(graphFixture.Predecessors(node)).To(BeSetEqualTo(graphFixture.MustAdjacentNodes(nodes)))
+		//	Expect(graphFixture.Successors(node)).To(BeSetEqualTo(graphFixture.MustAdjacentNodes(nodes)))
+		//	Expect(graphFixture.InDegree(node)).To(Equal(graphFixture.Degree(node)))
+		//	Expect(graphFixture.OutDegree(node)).To(Equal(graphFixture.Degree(node)))
+		//}
+
+		// TODO: Check the validity of other aspects of the state
+	})
+}
+
+func expectStronglyEquivalent(first graph.Graph[int], second graph.Graph[int]) {
+	// Properties not covered by Graph.Equal()
+	// TODO: Pending implementation of Graph.AllowsSelfLoops()
+	//Expect(first.AllowsSelfLoops()).To(Equal(second.AllowsSelfLoops()))
+	// TODO: Pending implementation of Graph.NodeOrder()
+	//Expect(first).To(haveNodeOrder(second.NodeOrder()))
+
+	// TODO: Pending implementation of Graph.Equal()
+	//Expect(first).To(beGraphEqualTo(second))
+}
+
+// In some cases, our graph implementations return custom sets that define their own method implementations. Verify that
+// these sets are consistent with the elements produced by their ForEach.
+func sanityCheckSet(set set.Set[int]) set.Set[int] {
+	Expect(set).To(HaveLenOf[int](forEachCount(set)))
+	set.ForEach(func(elem int) {
+		Expect(set).To(Contain(elem))
+	})
+	Expect(set).ToNot(Contain(nodeNotInGraph))
+	// TODO: Pending implementation of Set.String()
+	//Expect(theSet).To(HaveStringConsistingOfElementsIn(ForEachToSlice(theSet)))
+	// TODO: Pending implementation of Set.Equal()
+	//Expect(theSet).To(BeSetEqualTo(set.CopyOf(theSet)))
+	return set
 }
 
 func beSetThatConsistsOf(first int, others ...int) types.GomegaMatcher {
