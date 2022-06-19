@@ -419,6 +419,17 @@ func validateGraphState(graphFixture graph.Graph[int]) {
 		//	Expect(graphFixture.OutDegree(node)).To(Equal(graphFixture.Degree(node)))
 		//}
 
+		// TODO: Pending implementation of many Graph methods
+		//sanityCheckSet(graphFixture.MustAdjacentNodes(node)).ForEach(func(adjacentNode int) {
+		//	if !graphFixture.AllowsSelfLoops() {
+		//		Expect(node).ToNot(Equal(adjacentNode))
+		//	}
+		//	Expect(
+		//		graphFixture.MustPredecessors(node).Contains(adjacentNode) ||
+		//			graphFixture.MustSuccessors(node).Contains(adjacentNode)).
+		//		To(BeTrue())
+		//})
+
 		// TODO: Check the validity of other aspects of the state
 	})
 }
