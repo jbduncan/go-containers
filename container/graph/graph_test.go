@@ -79,7 +79,8 @@ func graphTests(
 		})
 
 		AfterEach(func() {
-			validateGraphState(graph)
+			// TODO: Comment out when first Graph implementation is finished
+			// validateGraphState(graph)
 		})
 
 		It("contains no nodes", func() {
@@ -87,12 +88,15 @@ func graphTests(
 		})
 
 		It("contains no edges", func() {
-			// TODO: Uncomment when working on Graph.Edges() method
-			// Expect(graph.Edges()).To(beSetThatIsEmpty())
+			Expect(graph.Edges()).To(beSetThatIsEmpty[EndpointPair[int]]())
 		})
 
 		It("has unmodifiable nodes", func() {
 			Expect(graph.Nodes()).To(beSetThatIsNotMutable[int]())
+		})
+
+		It("has unmodifiable edges", func() {
+			Expect(graph.Edges()).To(beSetThatIsNotMutable[EndpointPair[int]]())
 		})
 
 		Context("when adding one node", func() {
@@ -199,10 +203,9 @@ func graphTests(
 				Expect(graph.AdjacentNodes(node3)).To(beSetThatIsEmpty[int]())
 			})
 
-			// TODO: Pending implementation of Graph.Edges()
-			//It("removes the connected edges", func() {
-			//	Expect(graph.Edges()).To(beSetThatIsEmpty[int]())
-			//})
+			It("removes the connected edges", func() {
+				Expect(graph.Edges()).To(beSetThatIsEmpty[EndpointPair[int]]())
+			})
 		})
 
 		Context("when removing an absent node", func() {
@@ -260,10 +263,9 @@ func graphTests(
 					Expect(graph.Nodes()).To(beSetThatConsistsOf(node2))
 				})
 
-				// TODO: Pending implementation of Graph.Edges()
-				//It("removes both edges", func() {
-				//	Expect(graph.Edges()).To(beSetThatIsEmpty[int]())
-				//})
+				It("removes both edges", func() {
+					Expect(graph.Edges()).To(beSetThatIsEmpty[EndpointPair[int]]())
+				})
 			})
 		})
 

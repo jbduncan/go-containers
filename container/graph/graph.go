@@ -11,7 +11,7 @@ var errNodeNotElementOfGraph = errors.New("node not an element of this graph")
 
 type Graph[N comparable] interface {
 	Nodes() set.Set[N]
-	// Edges() set.Set[EndpointPair[N]]
+	Edges() set.Set[EndpointPair[N]]
 	// IsDirected() bool
 	// AllowsSelfLoops() bool
 	// NodeOrder() ElementOrder
@@ -67,6 +67,10 @@ func (m *mutableGraph[N]) Nodes() set.Set[N] {
 	return keySet[N]{
 		delegate: m.adjacencyList,
 	}
+}
+
+func (m *mutableGraph[N]) Edges() set.Set[EndpointPair[N]] {
+	return set.Unmodifiable(set.New[EndpointPair[N]]())
 }
 
 type keySet[N comparable] struct {
