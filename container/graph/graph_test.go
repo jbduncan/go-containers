@@ -38,14 +38,14 @@ const (
 	nodeNotInGraph = 1_000
 )
 
-// graphTests produces a suite of Ginkgo test cases for testing implementations of Graph interface. Graph instances
-// created for testing should have int nodes.
+// graphTests produces a suite of Ginkgo test cases for testing implementations of the Graph
+// interface. Graph instances created for testing should have int nodes.
 //
-// Test cases that should be handled similarly in any graph implementation are included in this function. For example,
-// testing that `Nodes()` method returns the set of the nodes in the graph. The following test cases are explicitly not
-// tested:
+// Test cases that should be handled similarly in any graph implementation are included in this
+// function; for example, testing that the `Nodes()` method returns the set of the nodes in the
+// graph. The following test cases are explicitly not tested:
 //   - Test cases related to whether the graph is directed or undirected.
-//   - Test cases related to the specific implementation of the Graph interface.
+//   - Test cases related to specific implementations of the Graph interface.
 func graphTests(
 	createGraph func() Graph[int],
 	addNode func(g Graph[int], n int) Graph[int],
