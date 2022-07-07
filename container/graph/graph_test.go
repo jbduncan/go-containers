@@ -249,6 +249,13 @@ func graphTests(
 
 				Expect(graph.Degree(node1)).To(Equal(2))
 			})
+
+			It("reports the two unique nodes as adjacent to the common one", func() {
+				graph = putEdge(graph, node1, node2)
+				graph = putEdge(graph, node1, node3)
+
+				Expect(graph.AdjacentNodes(node1)).To(beSetThatConsistsOf(node2, node3))
+			})
 		})
 
 		Context("when adding two anti-parallel edges", func() {
@@ -268,6 +275,73 @@ func graphTests(
 			})
 		})
 
+		Context("when removing an existing edge", func() {
+			var removed bool
+
+			BeforeEach(func() {
+				skipIfGraphIsNotMutable()
+				graph = putEdge(graph, node1, node2)
+
+				removed = graphAsMutable().RemoveEdge(node1, node2)
+			})
+
+			It("returns true", func() {
+				Expect(removed).To(BeTrue())
+			})
+
+			It("removes the connection between its nodes", func() {
+				// TODO: Pending full implementation of Graph.Successors and Graph.Predecessors
+				Skip("Pending full implementation of Graph.Successors and Graph.Predecessors")
+
+				Expect(graph.Successors(node1)).To(beSetThatIsEmpty[int]())
+				Expect(graph.Predecessors(node2)).To(beSetThatIsEmpty[int]())
+			})
+		})
+
+		Context("when removing an absent edge with an existing nodeU", func() {
+			var removed bool
+
+			BeforeEach(func() {
+				skipIfGraphIsNotMutable()
+				graph = putEdge(graph, node1, node2)
+
+				removed = graphAsMutable().RemoveEdge(node1, nodeNotInGraph)
+			})
+
+			It("returns false", func() {
+				Expect(removed).To(BeFalse())
+			})
+
+			It("leaves the existing nodes alone", func() {
+				// TODO: Pending full implementation of Graph.Successors
+				Skip("Pending full implementation of Graph.Successors")
+
+				Expect(graph.Successors(node1)).To(Contain(node2))
+			})
+		})
+
+		Context("when removing an absent edge with an existing nodeV", func() {
+			var removed bool
+
+			BeforeEach(func() {
+				skipIfGraphIsNotMutable()
+				graph = putEdge(graph, node1, node2)
+
+				removed = graphAsMutable().RemoveEdge(nodeNotInGraph, node2)
+			})
+
+			It("returns false", func() {
+				Expect(removed).To(BeFalse())
+			})
+
+			It("leaves the existing nodes alone", func() {
+				// TODO: Pending full implementation of Graph.Successors
+				Skip("Pending full implementation of Graph.Successors")
+
+				Expect(graph.Successors(node1)).To(Contain(node2))
+			})
+		})
+
 		notElementOfGraphMsg := fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)
 
 		Context("when finding the predecessors of an absent node", func() {
@@ -277,12 +351,6 @@ func graphTests(
 					To(MatchError(notElementOfGraphMsg))
 			})
 		})
-
-		//Context("when it must find the predecessors of an absent node", func() {
-		//	It("panics", func() {
-		//		// TODO: Write when implementing Graph.MustPredecessors()
-		//	})
-		//})
 
 		Context("when finding the successors of an absent node", func() {
 			It("returns an error", func() {

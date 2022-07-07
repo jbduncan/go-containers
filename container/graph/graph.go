@@ -41,7 +41,7 @@ type MutableGraph[N comparable] interface {
 	PutEdge(nodeU N, nodeV N) bool
 	// PutEdgeWithEndpoints(e EndpointPair[N]) bool
 	RemoveNode(node N) bool
-	// RemoveEdge(nodeU N, nodeV N) bool
+	RemoveEdge(nodeU N, nodeV N) bool
 	// RemoveEdgeWithEndpoints(e EndpointPair[N]) bool
 }
 
@@ -193,6 +193,17 @@ func (m *mutableGraph[N]) RemoveNode(node N) bool {
 
 	for _, adjacentNodes := range m.adjacencyList {
 		adjacentNodes.Remove(node)
+	}
+
+	return true
+}
+
+func (m *mutableGraph[N]) RemoveEdge(nodeU N, nodeV N) bool {
+	if _, ok := m.adjacencyList[nodeU]; !ok {
+		return false
+	}
+	if _, ok := m.adjacencyList[nodeV]; !ok {
+		return false
 	}
 
 	return true
