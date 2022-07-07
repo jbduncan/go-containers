@@ -42,7 +42,7 @@ var _ = Describe("Set", func() {
 			})
 
 			It("has a length of 1", func() {
-				Expect(mutSet).To(HaveLenOf[string](1))
+				Expect(mutSet).To(HaveLenOf(1))
 			})
 
 			It("contains the element", func() {
@@ -78,7 +78,7 @@ var _ = Describe("Set", func() {
 			})
 
 			It("has a length of 2", func() {
-				Expect(mutSet).To(HaveLenOf[string](2))
+				Expect(mutSet).To(HaveLenOf(2))
 			})
 
 			It("contains both elements", func() {
@@ -100,7 +100,7 @@ var _ = Describe("Set", func() {
 					mutSet.Add("zelda")
 					mutSet.Remove("link")
 
-					Expect(mutSet).To(HaveLenOf[string](1))
+					Expect(mutSet).To(HaveLenOf(1))
 				})
 			})
 		})
@@ -136,7 +136,7 @@ var _ = Describe("Set", func() {
 				mutSet.Add("link")
 				mutSet.Add("link")
 
-				Expect(mutSet).To(HaveLenOf[string](1))
+				Expect(mutSet).To(HaveLenOf(1))
 			})
 		})
 
@@ -165,7 +165,7 @@ var _ = Describe("Set", func() {
 				})
 
 				It("has a length of 1", func() {
-					Expect(unmodSet).To(HaveLenOf[string](1))
+					Expect(unmodSet).To(HaveLenOf(1))
 				})
 
 				It("contains the element", func() {
@@ -195,7 +195,7 @@ var _ = Describe("Set", func() {
 })
 
 func haveLenOfZero() types.GomegaMatcher {
-	return HaveLenOf[string](0)
+	return HaveLenOf(0)
 }
 
 func haveForEachThatProduces(first string, others ...string) types.GomegaMatcher {
