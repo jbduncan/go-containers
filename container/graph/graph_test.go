@@ -28,7 +28,7 @@ var _ = Describe("Undirected mutable graph", func() {
 
 			return graph
 		},
-	)
+		ContainersAreViews)
 })
 
 const (
@@ -36,6 +36,15 @@ const (
 	node2          = 2
 	node3          = 3
 	nodeNotInGraph = 1_000
+)
+
+type ContainersMode int
+
+const (
+	ContainersAreViews ContainersMode = iota
+	// TODO: Add additional test cases for graphs whose accessor containers (Nodes(), Edges(), etc.)
+	//       are immutable copies.
+	ContainersAreCopies
 )
 
 // graphTests produces a suite of Ginkgo test cases for testing implementations of the Graph
@@ -49,7 +58,8 @@ const (
 func graphTests(
 	createGraph func() Graph[int],
 	addNode func(g Graph[int], n int) Graph[int],
-	putEdge func(g Graph[int], n1 int, n2 int) Graph[int]) {
+	putEdge func(g Graph[int], n1 int, n2 int) Graph[int],
+	containersMode ContainersMode) {
 
 	Context("given a graph", func() {
 		var (
@@ -75,6 +85,15 @@ func graphTests(
 		}
 
 		BeforeEach(func() {
+			if containersMode != ContainersAreViews &&
+				containersMode != ContainersAreCopies {
+				Fail(
+					fmt.Sprintf(
+						"containersMode returned neither ContainersAreViews nor "+
+							"ContainersAreCopies, but %d instead",
+						containersMode))
+			}
+
 			graph = createGraph()
 		})
 
@@ -90,12 +109,31 @@ func graphTests(
 			Expect(graph.Edges()).To(beSetThatIsEmpty[EndpointPair[int]]())
 		})
 
-		It("has unmodifiable nodes", func() {
-			Expect(graph.Nodes()).To(beSetThatIsNotMutable[int]())
+		It("has an unmodifiable nodes set view", func() {
+			if containersMode != ContainersAreViews {
+				Skip("Graph.Nodes() is not expected to return an unmodifiable view")
+			}
+
+			nodes := graph.Nodes()
+			Expect(nodes).To(beSetThatIsNotMutable[int]())
+
+			graph = addNode(graph, node1)
+			// TODO: Pending implementation of keySet.Contains()
+			//Expect(nodes).To(Contain(node1))
 		})
 
-		It("has unmodifiable edges", func() {
-			Expect(graph.Edges()).To(beSetThatIsNotMutable[EndpointPair[int]]())
+		It("has an unmodifiable edges set view", func() {
+			if containersMode != ContainersAreViews {
+				Skip("Graph.Edges() is not expected to return an unmodifiable view")
+			}
+
+			edges := graph.Edges()
+			Expect(edges).To(beSetThatIsNotMutable[EndpointPair[int]]())
+
+			graph = putEdge(graph, node1, node2)
+			// TODO: Pending uncommenting of newEndpointPair function and implementation of
+			//		 Graph.Edges()
+			//Expect(edges).To(Contain(newEndpointPair(graph, node1, node2)))
 		})
 
 		Context("when adding one node", func() {
@@ -135,20 +173,58 @@ func graphTests(
 				Expect(graph.OutDegree(node1)).To(BeZero())
 			})
 
-			It("has unmodifiable adjacent nodes", func() {
-				Expect(graph.AdjacentNodes(node1)).To(beSetThatIsNotMutable[int]())
+			It("has an unmodifiable adjacent nodes set view", func() {
+				if containersMode != ContainersAreViews {
+					Skip("Graph.AdjacentNodes() is not expected to return an unmodifiable view")
+				}
+
+				adjacentNodes, err := graph.AdjacentNodes(node1)
+				Expect(adjacentNodes, err).To(beSetThatIsNotMutable[int]())
+
+				graph = putEdge(graph, node1, node2)
+				// TODO: Pending uncommenting of newEndpointPair function and implementation of
+				//       Graph.AdjacentNodes()
+				//Expect(adjacentNodes).To(Contain(newEndpointPair(graph, node1, node2)))
 			})
 
-			It("had unmodifiable predecessors", func() {
-				Expect(graph.Predecessors(node1)).To(beSetThatIsNotMutable[int]())
+			It("had an unmodifiable predecessors set view", func() {
+				if containersMode != ContainersAreViews {
+					Skip("Graph.Predecessors() is not expected to return an unmodifiable view")
+				}
+
+				predecessors, err := graph.Predecessors(node1)
+				Expect(predecessors, err).To(beSetThatIsNotMutable[int]())
+
+				graph = putEdge(graph, node2, node1)
+				// TODO: Pending implementation of Graph.Predecessors()
+				//Expect(predecessors).To(Contain(node2))
 			})
 
-			It("has unmodifiable successors", func() {
-				Expect(graph.Successors(node1)).To(beSetThatIsNotMutable[int]())
+			It("has an unmodifiable successors set view", func() {
+				if containersMode != ContainersAreViews {
+					Skip("Graph.Successors() is not expected to return an unmodifiable view")
+				}
+
+				successors, err := graph.Successors(node1)
+				Expect(successors, err).To(beSetThatIsNotMutable[int]())
+
+				graph = putEdge(graph, node1, node2)
+				// TODO: Pending implementation of Graph.Successors()
+				//Expect(successors).To(Contain(node2))
 			})
 
-			It("has unmodifiable incident edges", func() {
-				Expect(graph.IncidentEdges(node1)).To(beSetThatIsNotMutable[EndpointPair[int]]())
+			It("has an unmodifiable incident edges set view", func() {
+				if containersMode != ContainersAreViews {
+					Skip("Graph.IncidentEdges() is not expected to return an unmodifiable view")
+				}
+
+				incidentEdges, err := graph.IncidentEdges(node1)
+				Expect(incidentEdges, err).To(beSetThatIsNotMutable[EndpointPair[int]]())
+
+				graph = putEdge(graph, node1, node2)
+				// TODO: Pending uncommenting of newEndpointPair function and implementation of
+				//       Graph.IncidentEdges()
+				//Expect(incidentEdges).To(Contain(newEndpointPair(graph, node1, node2)))
 			})
 		})
 
