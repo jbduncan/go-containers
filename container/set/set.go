@@ -77,22 +77,22 @@ func (s *set[T]) Remove(elem T) {
 	delete(s.delegate, elem)
 }
 
-func (s set[T]) Contains(elem T) bool {
+func (s *set[T]) Contains(elem T) bool {
 	_, ok := s.delegate[elem]
 	return ok
 }
 
-func (s set[T]) Len() int {
+func (s *set[T]) Len() int {
 	return len(s.delegate)
 }
 
-func (s set[T]) ForEach(fn func(elem T)) {
+func (s *set[T]) ForEach(fn func(elem T)) {
 	for elem := range s.delegate {
 		fn(elem)
 	}
 }
 
-func (s set[T]) String() string {
+func (s *set[T]) String() string {
 	var builder strings.Builder
 
 	builder.WriteRune('[')
