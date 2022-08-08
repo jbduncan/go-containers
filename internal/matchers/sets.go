@@ -11,33 +11,32 @@ import (
 )
 
 func HaveLenOf(len int) types.GomegaMatcher {
-	return And(
-		WithTransform(
-			func(value any) (int, error) {
-				errNotLenMethod := fmt.Errorf(format.Message(value, "to have a Len method with a single return value of type <int>"))
+	return WithTransform(
+		func(value any) (int, error) {
+			errNoLenMethod := fmt.Errorf(format.Message(value, "to have a Len method with a single return value of type <int>"))
 
-				typ := reflect.TypeOf(value)
-				lenMethod, ok := typ.MethodByName("Len")
-				if !ok {
-					return 0, errNotLenMethod
-				}
+			typ := reflect.TypeOf(value)
+			lenMethod, ok := typ.MethodByName("Len")
+			if !ok {
+				return 0, errNoLenMethod
+			}
 
-				if hasReceiverAndNoParams(lenMethod) {
-					return 0, errNotLenMethod
-				}
+			if hasReceiverAndNoParams(lenMethod) {
+				return 0, errNoLenMethod
+			}
 
-				if lenMethod.Type.NumOut() != 1 {
-					return 0, errNotLenMethod
-				}
+			if lenMethod.Type.NumOut() != 1 {
+				return 0, errNoLenMethod
+			}
 
-				if !lenMethod.Type.Out(0).AssignableTo(reflect.TypeOf(0)) {
-					return 0, errNotLenMethod
-				}
+			if !lenMethod.Type.Out(0).AssignableTo(reflect.TypeOf(0)) {
+				return 0, errNoLenMethod
+			}
 
-				result := lenMethod.Func.Call([]reflect.Value{reflect.ValueOf(value)})[0].Int()
-				return int(result), nil
-			},
-			Equal(len)))
+			result := lenMethod.Func.Call([]reflect.Value{reflect.ValueOf(value)})[0].Int()
+			return int(result), nil
+		},
+		Equal(len))
 }
 
 func hasReceiverAndNoParams(method reflect.Method) bool {
