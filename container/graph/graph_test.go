@@ -495,11 +495,18 @@ func undirectedGraphTests(
 		})
 
 		Context("when adding one edge", func() {
-			It("reports both nodes as predecessors of each other", func() {
-				putEdge(graph, node1, node2)
+			BeforeEach(func() {
+				graph = putEdge(graph, node1, node2)
+			})
 
+			It("sees both nodes as predecessors of each other", func() {
 				Expect(graph.Predecessors(node2)).To(beSetThatConsistsOf(node1))
 				Expect(graph.Predecessors(node1)).To(beSetThatConsistsOf(node2))
+			})
+
+			It("sees both nodes as successors of each other", func() {
+				Expect(graph.Successors(node1)).To(beSetThatConsistsOf(node2))
+				Expect(graph.Successors(node2)).To(beSetThatConsistsOf(node1))
 			})
 		})
 	})

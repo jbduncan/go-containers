@@ -116,13 +116,7 @@ func (m *mutableGraph[N]) Predecessors(node N) (set.Set[N], error) {
 }
 
 func (m *mutableGraph[N]) Successors(node N) (set.Set[N], error) {
-	_, ok := m.adjacencyList[node]
-	if !ok {
-		return nil, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
-	}
-
-	return set.Unmodifiable(set.New[N]()), nil
-
+	return m.AdjacentNodes(node)
 }
 
 func (m *mutableGraph[N]) IncidentEdges(node N) (set.Set[EndpointPair[N]], error) {
