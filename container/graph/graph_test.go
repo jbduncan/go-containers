@@ -499,7 +499,7 @@ func undirectedGraphTests(
 				putEdge(graph, node1, node2)
 
 				Expect(graph.Predecessors(node2)).To(beSetThatConsistsOf(node1))
-				Expect(graph.Successors(node1)).To(beSetThatConsistsOf(node2))
+				Expect(graph.Predecessors(node1)).To(beSetThatConsistsOf(node2))
 			})
 		})
 	})
