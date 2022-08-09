@@ -85,14 +85,7 @@ func graphTests(
 		}
 
 		BeforeEach(func() {
-			if containersMode != ContainersAreViews &&
-				containersMode != ContainersAreCopies {
-				Fail(
-					fmt.Sprintf(
-						"containersMode returned neither ContainersAreViews nor "+
-							"ContainersAreCopies, but %d instead",
-						containersMode))
-			}
+			assertContainersMode(containersMode)
 
 			graph = createGraph()
 		})
@@ -476,6 +469,51 @@ func graphTests(
 			})
 		})
 	})
+
+	undirectedGraphTests(createGraph, addNode, putEdge, containersMode)
+}
+
+func undirectedGraphTests(
+	createGraph func() Graph[int],
+	addNode func(g Graph[int], n int) Graph[int],
+	putEdge func(g Graph[int], n1 int, n2 int) Graph[int],
+	containersMode ContainersMode) {
+
+	Context("given an undirected graph", func() {
+
+		var (
+			graph Graph[int]
+		)
+
+		BeforeEach(func() {
+			assertContainersMode(containersMode)
+
+			graph = createGraph()
+			if graph.IsDirected() {
+				Skip("graph is not undirected")
+			}
+		})
+
+		Context("when adding one edge", func() {
+			It("reports both nodes as predecessors of each other", func() {
+				putEdge(graph, node1, node2)
+
+				Expect(graph.Predecessors(node2)).To(beSetThatConsistsOf(node1))
+				Expect(graph.Successors(node1)).To(beSetThatConsistsOf(node2))
+			})
+		})
+	})
+}
+
+func assertContainersMode(containersMode ContainersMode) {
+	if containersMode != ContainersAreViews &&
+		containersMode != ContainersAreCopies {
+		Fail(
+			fmt.Sprintf(
+				"containersMode returned neither ContainersAreViews nor "+
+					"ContainersAreCopies, but %d instead",
+				containersMode))
+	}
 }
 
 func validateGraphState(graph Graph[int]) {

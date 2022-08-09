@@ -12,7 +12,7 @@ var errNodeNotElementOfGraph = errors.New("node not an element of this graph")
 type Graph[N comparable] interface {
 	Nodes() set.Set[N]
 	Edges() set.Set[EndpointPair[N]]
-	// IsDirected() bool
+	IsDirected() bool
 	// AllowsSelfLoops() bool
 	// NodeOrder() ElementOrder
 	// IncidentEdgeOrder() ElementOrder
@@ -63,6 +63,10 @@ type mutableGraph[N comparable] struct {
 	adjacencyList map[N]set.MutableSet[N]
 }
 
+func (m *mutableGraph[N]) IsDirected() bool {
+	return false
+}
+
 func (m *mutableGraph[N]) Nodes() set.Set[N] {
 	return keySet[N]{
 		delegate: m.adjacencyList,
@@ -108,19 +112,11 @@ func (m *mutableGraph[N]) AdjacentNodes(node N) (set.Set[N], error) {
 }
 
 func (m *mutableGraph[N]) Predecessors(node N) (set.Set[N], error) {
-	if _, ok := m.adjacencyList[node]; !ok {
-		return nil, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
-	}
-
-	return set.Unmodifiable(set.New[N]()), nil
+	return m.AdjacentNodes(node)
 }
 
 func (m *mutableGraph[N]) Successors(node N) (set.Set[N], error) {
-	if _, ok := m.adjacencyList[node]; !ok {
-		return nil, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
-	}
-
-	return set.Unmodifiable(set.New[N]()), nil
+	return m.AdjacentNodes(node)
 }
 
 func (m *mutableGraph[N]) IncidentEdges(node N) (set.Set[EndpointPair[N]], error) {
