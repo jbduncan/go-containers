@@ -508,6 +508,28 @@ func undirectedGraphTests(
 				Expect(graph.Successors(node1)).To(beSetThatConsistsOf(node2))
 				Expect(graph.Successors(node2)).To(beSetThatConsistsOf(node1))
 			})
+
+			It("has an incident edge connecting the first node to the second", func() {
+				incidentEdges, err := graph.IncidentEdges(node1)
+
+				Expect(incidentEdges, err).To(
+					// TODO: When EndpointPair has an Equal method, replace this assertion with a custom one
+					//       that checks that the set contains only one element, where the element is "equal"
+					//       according to EndpointPair.Equal. (The name "BeEquivalentTo" is already taken by
+					//       Gomega. Maybe "EqualAccordingToEqualMethod"?)
+					beSetThatConsistsOf(NewUnorderedEndpointPair(node1, node2)))
+			})
+
+			It("has an incident edge connecting the second node to the first", func() {
+				incidentEdges, err := graph.IncidentEdges(node2)
+
+				Expect(incidentEdges, err).To(
+					// TODO: When EndpointPair has an Equal method, replace this assertion with a custom one
+					//       that checks that the set contains only one element, where the element is "equal"
+					//       according to EndpointPair.Equal. (The name "BeEquivalentTo" is already taken by
+					//       Gomega. Maybe "EqualAccordingToEqualMethod"?)
+					beSetThatConsistsOf(NewUnorderedEndpointPair(node2, node1)))
+			})
 		})
 	})
 }
@@ -642,11 +664,11 @@ func sanityCheckSet[N comparable](set set.Set[N]) set.Set[N] {
 	return set
 }
 
-func beSetThatConsistsOf(first int, others ...int) types.GomegaMatcher {
-	all := []int{first}
+func beSetThatConsistsOf[N comparable](first N, others ...N) types.GomegaMatcher {
+	all := []N{first}
 	all = append(all, others...)
 
-	return WithTransform(ForEachToSlice[int], ConsistOf(all))
+	return WithTransform(ForEachToSlice[N], ConsistOf(all))
 }
 
 func beSetThatConsistsOfElementsIn[T comparable](set set.Set[T]) types.GomegaMatcher {

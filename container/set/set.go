@@ -41,7 +41,7 @@ type Set[T comparable] interface {
 
 	// TODO: Set: make ToSlice method that returns the elements in a slice
 	// TODO: Set: make Iter method that returns an Iterator
-	// TODO: Set: make Equals method and discourage == from being used (documenting that its use is undefined).
+	// TODO: Set: make Equal method and discourage == from being used (documenting that its use is undefined).
 }
 
 // MutableSet is a Set with additional methods for adding and removing elements to and from the set.

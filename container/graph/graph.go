@@ -30,7 +30,7 @@ type Graph[N comparable] interface {
 	// HasEdgeConnecting(nodeU N, nodeV N) bool
 	// HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
 	// String() string
-	// TODO: Is an Equals function needed to meet Guava's Graph::equals rules?
+	// TODO: Is an Equal function needed to meet Guava's Graph::equals rules?
 	// Equal(other Graph[N]) bool
 }
 
@@ -120,11 +120,40 @@ func (m *mutableGraph[N]) Successors(node N) (set.Set[N], error) {
 }
 
 func (m *mutableGraph[N]) IncidentEdges(node N) (set.Set[EndpointPair[N]], error) {
-	if _, ok := m.adjacencyList[node]; !ok {
+	adjacentNodes, ok := m.adjacencyList[node]
+	if !ok {
 		return nil, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
 	}
 
-	return set.Unmodifiable(set.New[EndpointPair[N]]()), nil
+	return incidentEdgeSet[N]{
+		node, adjacentNodes,
+	}, nil
+}
+
+type incidentEdgeSet[N comparable] struct {
+	node          N
+	adjacentNodes set.MutableSet[N]
+}
+
+func (i incidentEdgeSet[N]) Contains(elem EndpointPair[N]) bool {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (i incidentEdgeSet[N]) Len() int {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (i incidentEdgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
+	i.adjacentNodes.ForEach(func(adjNode N) {
+		fn(NewUnorderedEndpointPair(i.node, adjNode))
+	})
+}
+
+func (i incidentEdgeSet[N]) String() string {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (m *mutableGraph[N]) Degree(node N) (int, error) {
