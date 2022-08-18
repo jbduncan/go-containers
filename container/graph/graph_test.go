@@ -523,6 +523,30 @@ func undirectedGraphTests(
 					//       Gomega. Maybe "EqualAccordingToEqualMethod"?)
 					beSetThatConsistsOf(NewUnorderedEndpointPair(node2, node1)))
 			})
+
+			It("has an in degree of 1 for the first node", func() {
+				inDegree := graph.InDegree(node1)
+
+				Expect(inDegree).To(Equal(1))
+			})
+
+			It("has an in degree of 1 for the second node", func() {
+				inDegree := graph.InDegree(node2)
+
+				Expect(inDegree).To(Equal(1))
+			})
+
+			It("has an out degree of 1 for the first node", func() {
+				inDegree := graph.OutDegree(node1)
+
+				Expect(inDegree).To(Equal(1))
+			})
+
+			It("has an out degree of 1 for the second node", func() {
+				inDegree := graph.OutDegree(node2)
+
+				Expect(inDegree).To(Equal(1))
+			})
 		})
 	})
 }

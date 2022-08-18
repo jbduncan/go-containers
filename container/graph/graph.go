@@ -172,19 +172,11 @@ func (m *mutableGraph[N]) Degree(node N) int {
 }
 
 func (m *mutableGraph[N]) InDegree(node N) int {
-	if _, ok := m.adjacencyList[node]; !ok {
-		return 0
-	}
-
-	return 0
+	return m.Degree(node)
 }
 
 func (m *mutableGraph[N]) OutDegree(node N) int {
-	if _, ok := m.adjacencyList[node]; !ok {
-		return 0
-	}
-
-	return 0
+	return m.Degree(node)
 }
 
 func (m *mutableGraph[N]) AddNode(node N) bool {
