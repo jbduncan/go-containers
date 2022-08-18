@@ -55,6 +55,8 @@ const (
 // graph. The following test cases are explicitly not tested:
 //   - Test cases related to whether the graph is directed or undirected.
 //   - Test cases related to specific implementations of the Graph interface.
+//
+// TODO: Move to a public package for graph testing utilities
 func graphTests(
 	createGraph func() Graph[int],
 	addNode func(g Graph[int], n int) Graph[int],
@@ -171,8 +173,8 @@ func graphTests(
 					Skip("Graph.AdjacentNodes() is not expected to return an unmodifiable view")
 				}
 
-				adjacentNodes, err := graph.AdjacentNodes(node1)
-				Expect(adjacentNodes, err).To(beSetThatIsNotMutable[int]())
+				adjacentNodes := graph.AdjacentNodes(node1)
+				Expect(adjacentNodes).To(beSetThatIsNotMutable[int]())
 
 				graph = putEdge(graph, node1, node2)
 				// TODO: Pending uncommenting of newEndpointPair function and implementation of
@@ -185,8 +187,8 @@ func graphTests(
 					Skip("Graph.Predecessors() is not expected to return an unmodifiable view")
 				}
 
-				predecessors, err := graph.Predecessors(node1)
-				Expect(predecessors, err).To(beSetThatIsNotMutable[int]())
+				predecessors := graph.Predecessors(node1)
+				Expect(predecessors).To(beSetThatIsNotMutable[int]())
 
 				graph = putEdge(graph, node2, node1)
 				// TODO: Pending implementation of Graph.Predecessors()
@@ -198,8 +200,8 @@ func graphTests(
 					Skip("Graph.Successors() is not expected to return an unmodifiable view")
 				}
 
-				successors, err := graph.Successors(node1)
-				Expect(successors, err).To(beSetThatIsNotMutable[int]())
+				successors := graph.Successors(node1)
+				Expect(successors).To(beSetThatIsNotMutable[int]())
 
 				graph = putEdge(graph, node1, node2)
 				// TODO: Pending implementation of Graph.Successors()
@@ -211,8 +213,8 @@ func graphTests(
 					Skip("Graph.IncidentEdges() is not expected to return an unmodifiable view")
 				}
 
-				incidentEdges, err := graph.IncidentEdges(node1)
-				Expect(incidentEdges, err).To(beSetThatIsNotMutable[EndpointPair[int]]())
+				incidentEdges := graph.IncidentEdges(node1)
+				Expect(incidentEdges).To(beSetThatIsNotMutable[EndpointPair[int]]())
 
 				graph = putEdge(graph, node1, node2)
 				// TODO: Pending uncommenting of newEndpointPair function and implementation of
@@ -411,61 +413,52 @@ func graphTests(
 			})
 		})
 
-		notElementOfGraphMsg := fmt.Sprintf("%d: node not an element of this graph", nodeNotInGraph)
-
 		Context("when finding the predecessors of an absent node", func() {
-			It("returns an error", func() {
+			It("returns an empty set", func() {
 				Expect(graph.Predecessors(nodeNotInGraph)).
-					Error().
-					To(MatchError(notElementOfGraphMsg))
+					To(beSetThatIsEmpty[int]())
 			})
 		})
 
 		Context("when finding the successors of an absent node", func() {
-			It("returns an error", func() {
+			It("returns an empty set", func() {
 				Expect(graph.Successors(nodeNotInGraph)).
-					Error().
-					To(MatchError(notElementOfGraphMsg))
+					To(beSetThatIsEmpty[int]())
 			})
 		})
 
 		Context("when finding the adjacent nodes of an absent node", func() {
-			It("returns an error", func() {
+			It("returns an empty set", func() {
 				Expect(graph.AdjacentNodes(nodeNotInGraph)).
-					Error().
-					To(MatchError(notElementOfGraphMsg))
+					To(beSetThatIsEmpty[int]())
 			})
 		})
 
 		Context("when finding the incident edges of an absent node", func() {
-			It("returns an error", func() {
+			It("returns an empty set", func() {
 				Expect(graph.IncidentEdges(nodeNotInGraph)).
-					Error().
-					To(MatchError(notElementOfGraphMsg))
+					To(beSetThatIsEmpty[EndpointPair[int]]())
 			})
 		})
 
 		Context("when finding the degree of an absent node", func() {
-			It("returns an error", func() {
+			It("returns zero", func() {
 				Expect(graph.Degree(nodeNotInGraph)).
-					Error().
-					To(MatchError(notElementOfGraphMsg))
+					To(BeZero())
 			})
 		})
 
 		Context("when finding the in degree of an absent node", func() {
-			It("returns an error", func() {
+			It("returns zero", func() {
 				Expect(graph.InDegree(nodeNotInGraph)).
-					Error().
-					To(MatchError(notElementOfGraphMsg))
+					To(BeZero())
 			})
 		})
 
 		Context("when finding the out degree of of an absent node", func() {
-			It("returns an error", func() {
+			It("returns zero", func() {
 				Expect(graph.OutDegree(nodeNotInGraph)).
-					Error().
-					To(MatchError(notElementOfGraphMsg))
+					To(BeZero())
 			})
 		})
 	})
@@ -510,9 +503,9 @@ func undirectedGraphTests(
 			})
 
 			It("has an incident edge connecting the first node to the second", func() {
-				incidentEdges, err := graph.IncidentEdges(node1)
+				incidentEdges := graph.IncidentEdges(node1)
 
-				Expect(incidentEdges, err).To(
+				Expect(incidentEdges).To(
 					// TODO: When EndpointPair has an Equal method, replace this assertion with a custom one
 					//       that checks that the set contains only one element, where the element is "equal"
 					//       according to EndpointPair.Equal. (The name "BeEquivalentTo" is already taken by
@@ -521,9 +514,9 @@ func undirectedGraphTests(
 			})
 
 			It("has an incident edge connecting the second node to the first", func() {
-				incidentEdges, err := graph.IncidentEdges(node2)
+				incidentEdges := graph.IncidentEdges(node2)
 
-				Expect(incidentEdges, err).To(
+				Expect(incidentEdges).To(
 					// TODO: When EndpointPair has an Equal method, replace this assertion with a custom one
 					//       that checks that the set contains only one element, where the element is "equal"
 					//       according to EndpointPair.Equal. (The name "BeEquivalentTo" is already taken by

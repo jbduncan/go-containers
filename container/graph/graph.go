@@ -1,13 +1,8 @@
 package graph
 
 import (
-	"errors"
-	"fmt"
-
 	"go-containers/container/set"
 )
-
-var errNodeNotElementOfGraph = errors.New("node not an element of this graph")
 
 type Graph[N comparable] interface {
 	Nodes() set.Set[N]
@@ -16,17 +11,27 @@ type Graph[N comparable] interface {
 	// AllowsSelfLoops() bool
 	// NodeOrder() ElementOrder
 	// IncidentEdgeOrder() ElementOrder
-	AdjacentNodes(node N) (set.Set[N], error)
-	// MustAdjacentNodes(node N) set.Set[N]
-	Predecessors(node N) (set.Set[N], error)
-	// MustPredecessors(node N) set.Set[N]
-	Successors(node N) (set.Set[N], error)
-	// MustSuccessors(node N) set.Set[N]
-	IncidentEdges(node N) (set.Set[EndpointPair[N]], error)
-	// MustIncidentEdges(node N) set.Set[EndpointPair[N]]
-	Degree(node N) (int, error)
-	InDegree(node N) (int, error)
-	OutDegree(node N) (int, error)
+	// TODO: Document that passing in an absent node returns an empty set, and to use Nodes().Contains() to tell when a
+	//       given node is in the graph or not.
+	AdjacentNodes(node N) set.Set[N]
+	// TODO: Document that passing in an absent node returns an empty set, and to use Nodes().Contains() to tell when a
+	//       given node is in the graph or not.
+	Predecessors(node N) set.Set[N]
+	// TODO: Document that passing in an absent node returns an empty set, and to use Nodes().Contains() to tell when a
+	//       given node is in the graph or not.
+	Successors(node N) set.Set[N]
+	// TODO: Document that passing in an absent node returns an empty set, and to use Nodes().Contains() to tell when a
+	//       given node is in the graph or not.
+	IncidentEdges(node N) set.Set[EndpointPair[N]]
+	// TODO: Document that passing in an absent node returns zero, and to use Nodes().Contains() to tell when a
+	//       given node is in the graph or not.
+	Degree(node N) int
+	// TODO: Document that passing in an absent node returns zero, and to use Nodes().Contains() to tell when a
+	//       given node is in the graph or not.
+	InDegree(node N) int
+	// TODO: Document that passing in an absent node returns zero, and to use Nodes().Contains() to tell when a
+	//       given node is in the graph or not.
+	OutDegree(node N) int
 	// HasEdgeConnecting(nodeU N, nodeV N) bool
 	// HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
 	// String() string
@@ -102,32 +107,33 @@ func (k keySet[N]) String() string {
 	panic("implement me")
 }
 
-func (m *mutableGraph[N]) AdjacentNodes(node N) (set.Set[N], error) {
+func (m *mutableGraph[N]) AdjacentNodes(node N) set.Set[N] {
 	adjacentNodes, ok := m.adjacencyList[node]
 	if !ok {
-		return nil, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
+		return set.Unmodifiable(set.New[N]())
 	}
 
-	return set.Unmodifiable(adjacentNodes), nil
+	return set.Unmodifiable(adjacentNodes)
 }
 
-func (m *mutableGraph[N]) Predecessors(node N) (set.Set[N], error) {
+func (m *mutableGraph[N]) Predecessors(node N) set.Set[N] {
 	return m.AdjacentNodes(node)
 }
 
-func (m *mutableGraph[N]) Successors(node N) (set.Set[N], error) {
+func (m *mutableGraph[N]) Successors(node N) set.Set[N] {
 	return m.AdjacentNodes(node)
 }
 
-func (m *mutableGraph[N]) IncidentEdges(node N) (set.Set[EndpointPair[N]], error) {
+func (m *mutableGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 	adjacentNodes, ok := m.adjacencyList[node]
 	if !ok {
-		return nil, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
+		return set.Unmodifiable(set.New[EndpointPair[N]]())
 	}
 
 	return incidentEdgeSet[N]{
-		node, adjacentNodes,
-	}, nil
+		node,
+		adjacentNodes,
+	}
 }
 
 type incidentEdgeSet[N comparable] struct {
@@ -156,28 +162,29 @@ func (i incidentEdgeSet[N]) String() string {
 	panic("implement me")
 }
 
-func (m *mutableGraph[N]) Degree(node N) (int, error) {
-	if _, ok := m.adjacencyList[node]; !ok {
-		return 0, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
+func (m *mutableGraph[N]) Degree(node N) int {
+	adjacentNodes, ok := m.adjacencyList[node]
+	if !ok {
+		return 0
 	}
 
-	return m.adjacencyList[node].Len(), nil
+	return adjacentNodes.Len()
 }
 
-func (m *mutableGraph[N]) InDegree(node N) (int, error) {
+func (m *mutableGraph[N]) InDegree(node N) int {
 	if _, ok := m.adjacencyList[node]; !ok {
-		return 0, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
+		return 0
 	}
 
-	return 0, nil
+	return 0
 }
 
-func (m *mutableGraph[N]) OutDegree(node N) (int, error) {
+func (m *mutableGraph[N]) OutDegree(node N) int {
 	if _, ok := m.adjacencyList[node]; !ok {
-		return 0, fmt.Errorf("%v: %w", node, errNodeNotElementOfGraph)
+		return 0
 	}
 
-	return 0, nil
+	return 0
 }
 
 func (m *mutableGraph[N]) AddNode(node N) bool {
