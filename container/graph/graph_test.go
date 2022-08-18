@@ -113,7 +113,7 @@ func graphTests(
 			Expect(nodes).To(beSetThatIsNotMutable[int]())
 
 			graph = addNode(graph, node1)
-			// TODO: Pending implementation of keySet.Contains()
+			// TODO: Pending implementation of Graph.Nodes().Contains()
 			//Expect(nodes).To(Contain(node1))
 		})
 
@@ -128,8 +128,7 @@ func graphTests(
 			Expect(edges).To(beSetThatIsNotMutable[EndpointPair[int]]())
 
 			graph = putEdge(graph, node1, node2)
-			// TODO: Pending uncommenting of newEndpointPair function and implementation of
-			//		 Graph.Edges()
+			// TODO: Pending implementation of Graph.Edges()
 			//Expect(edges).To(Contain(newEndpointPair(graph, node1, node2)))
 		})
 
@@ -181,9 +180,7 @@ func graphTests(
 				Expect(adjacentNodes).To(beSetThatIsNotMutable[int]())
 
 				graph = putEdge(graph, node1, node2)
-				// TODO: Pending uncommenting of newEndpointPair function and implementation of
-				//       Graph.AdjacentNodes()
-				//Expect(adjacentNodes).To(Contain(newEndpointPair(graph, node1, node2)))
+				Expect(adjacentNodes).To(Contain(node2))
 			})
 
 			// TODO: Write an equivalent test to above for ContainersAreCopies
@@ -197,8 +194,7 @@ func graphTests(
 				Expect(predecessors).To(beSetThatIsNotMutable[int]())
 
 				graph = putEdge(graph, node2, node1)
-				// TODO: Pending implementation of Graph.Predecessors()
-				//Expect(predecessors).To(Contain(node2))
+				Expect(predecessors).To(Contain(node2))
 			})
 
 			// TODO: Write an equivalent test to above for ContainersAreCopies
@@ -212,8 +208,7 @@ func graphTests(
 				Expect(successors).To(beSetThatIsNotMutable[int]())
 
 				graph = putEdge(graph, node1, node2)
-				// TODO: Pending implementation of Graph.Successors()
-				//Expect(successors).To(Contain(node2))
+				Expect(successors).To(Contain(node2))
 			})
 
 			// TODO: Write an equivalent test to above for ContainersAreCopies
@@ -394,9 +389,6 @@ func graphTests(
 			})
 
 			It("leaves the existing nodes alone", func() {
-				// TODO: Pending full implementation of Graph.Successors
-				Skip("Pending full implementation of Graph.Successors")
-
 				Expect(graph.Successors(node1)).To(Contain(node2))
 			})
 		})
@@ -416,9 +408,6 @@ func graphTests(
 			})
 
 			It("leaves the existing nodes alone", func() {
-				// TODO: Pending full implementation of Graph.Successors
-				Skip("Pending full implementation of Graph.Successors")
-
 				Expect(graph.Successors(node1)).To(Contain(node2))
 			})
 		})
@@ -624,16 +613,16 @@ func validateGraphState(graph Graph[int]) {
 			Expect(graph.OutDegree(node)).To(Equal(graph.Degree(node)))
 		}
 
-		// TODO: Pending implementation of Graph.AllowSelfLoops()
-		//sanityCheckSet(graph.AdjacentNodes(node)).ForEach(func(adjacentNode int) {
-		//	if !graph.AllowsSelfLoops() {
-		//		Expect(node).ToNot(Equal(adjacentNode))
-		//	}
-		//	Expect(
-		//		graph.Predecessors(node).Contains(adjacentNode) ||
-		//			graph.Successors(node).Contains(adjacentNode)).
-		//		To(BeTrue())
-		//})
+		sanityCheckSet(graph.AdjacentNodes(node)).ForEach(func(adjacentNode int) {
+			// TODO: Pending implementation of Graph.AllowSelfLoops()
+			//if !graph.AllowsSelfLoops() {
+			//	Expect(node).ToNot(Equal(adjacentNode))
+			//}
+			Expect(
+				graph.Predecessors(node).Contains(adjacentNode) ||
+					graph.Successors(node).Contains(adjacentNode)).
+				To(BeTrue())
+		})
 
 		sanityCheckSet(graph.Successors(node)).ForEach(func(successor int) {
 			allEndpointPairs.Add(newEndpointPair(graph, node, successor))
