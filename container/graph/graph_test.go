@@ -535,13 +535,19 @@ func undirectedGraphTests(
 				Expect(graph.OutDegree(node2)).To(Equal(1))
 			})
 
-			It("sees the first node as being connected to the second", func() {
+			It("sees the first node as being connected to the second in an unordered fashion", func() {
 				Expect(graph.HasEdgeConnecting(node1, node2)).
+					To(BeTrue())
+
+				Expect(graph.HasEdgeConnectingEndpoints(NewUnorderedEndpointPair(node1, node2))).
 					To(BeTrue())
 			})
 
-			It("sees the second node as being connected to the first", func() {
+			It("sees the second node as being connected to the first in an unordered fashion", func() {
 				Expect(graph.HasEdgeConnecting(node2, node1)).
+					To(BeTrue())
+
+				Expect(graph.HasEdgeConnectingEndpoints(NewUnorderedEndpointPair(node2, node1))).
 					To(BeTrue())
 			})
 
@@ -550,11 +556,26 @@ func undirectedGraphTests(
 					To(BeFalse())
 				Expect(graph.HasEdgeConnecting(nodeNotInGraph, node1)).
 					To(BeFalse())
+
+				Expect(graph.HasEdgeConnectingEndpoints(NewUnorderedEndpointPair(node1, nodeNotInGraph))).
+					To(BeFalse())
+				Expect(graph.HasEdgeConnectingEndpoints(NewUnorderedEndpointPair(nodeNotInGraph, node1))).
+					To(BeFalse())
 			})
 
 			It("does not see the second node as being connected to any other node", func() {
 				Expect(graph.HasEdgeConnecting(node2, nodeNotInGraph)).
 					To(BeFalse())
+
+				Expect(graph.HasEdgeConnectingEndpoints(NewUnorderedEndpointPair(node2, nodeNotInGraph))).
+					To(BeFalse())
+			})
+
+			Context("and trying to find that edge with ordered endpoints", func() {
+				It("returns false", func() {
+					Expect(graph.HasEdgeConnectingEndpoints(NewOrderedEndpointPair(node1, node2))).
+						To(BeFalse())
+				})
 			})
 		})
 	})
@@ -658,7 +679,6 @@ func expectStronglyEquivalent(first Graph[int], second Graph[int]) {
 	//Expect(first).To(beGraphEqualTo(second))
 }
 
-// TODO: Pending implementation of Graph.IsDirected()
 func newEndpointPair[N comparable](graph Graph[N], nodeU N, nodeV N) EndpointPair[N] {
 	if graph.IsDirected() {
 		return NewOrderedEndpointPair(nodeU, nodeV)

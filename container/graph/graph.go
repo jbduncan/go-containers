@@ -33,7 +33,7 @@ type Graph[N comparable] interface {
 	//       given node is in the graph or not.
 	OutDegree(node N) int
 	HasEdgeConnecting(nodeU N, nodeV N) bool
-	// HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
+	HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
 	// String() string
 	// TODO: Is an Equal function needed to meet Guava's Graph::equals rules?
 	// Equal(other Graph[N]) bool
@@ -197,6 +197,14 @@ func (m *mutableGraph[N]) HasEdgeConnecting(nodeU N, nodeV N) bool {
 	}
 
 	return true
+}
+
+func (m *mutableGraph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
+	if endpointPair.IsOrdered() {
+		return false
+	}
+
+	return m.HasEdgeConnecting(endpointPair.NodeU(), endpointPair.NodeV())
 }
 
 func (m *mutableGraph[N]) AddNode(node N) bool {
