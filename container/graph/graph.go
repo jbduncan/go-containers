@@ -32,7 +32,7 @@ type Graph[N comparable] interface {
 	// TODO: Document that passing in an absent node returns zero, and to use Nodes().Contains() to tell when a
 	//       given node is in the graph or not.
 	OutDegree(node N) int
-	// HasEdgeConnecting(nodeU N, nodeV N) bool
+	HasEdgeConnecting(nodeU N, nodeV N) bool
 	// HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
 	// String() string
 	// TODO: Is an Equal function needed to meet Guava's Graph::equals rules?
@@ -152,9 +152,10 @@ func (i incidentEdgeSet[N]) Len() int {
 }
 
 func (i incidentEdgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
-	i.adjacentNodes.ForEach(func(adjNode N) {
-		fn(NewUnorderedEndpointPair(i.node, adjNode))
-	})
+	i.adjacentNodes.ForEach(
+		func(adjNode N) {
+			fn(NewUnorderedEndpointPair(i.node, adjNode))
+		})
 }
 
 func (i incidentEdgeSet[N]) String() string {
@@ -177,6 +178,25 @@ func (m *mutableGraph[N]) InDegree(node N) int {
 
 func (m *mutableGraph[N]) OutDegree(node N) int {
 	return m.Degree(node)
+}
+
+func (m *mutableGraph[N]) HasEdgeConnecting(nodeU N, nodeV N) bool {
+	adjacentNodes, ok := m.adjacencyList[nodeU]
+	if !ok {
+		return false
+	}
+
+	if !adjacentNodes.Contains(nodeV) {
+		return false
+	}
+
+	adjacentNodes = m.adjacencyList[nodeV]
+
+	if !adjacentNodes.Contains(nodeU) {
+		return false
+	}
+
+	return true
 }
 
 func (m *mutableGraph[N]) AddNode(node N) bool {

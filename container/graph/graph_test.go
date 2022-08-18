@@ -503,9 +503,7 @@ func undirectedGraphTests(
 			})
 
 			It("has an incident edge connecting the first node to the second", func() {
-				incidentEdges := graph.IncidentEdges(node1)
-
-				Expect(incidentEdges).To(
+				Expect(graph.IncidentEdges(node1)).To(
 					// TODO: When EndpointPair has an Equal method, replace this assertion with a custom one
 					//       that checks that the set contains only one element, where the element is "equal"
 					//       according to EndpointPair.Equal. (The name "BeEquivalentTo" is already taken by
@@ -514,9 +512,7 @@ func undirectedGraphTests(
 			})
 
 			It("has an incident edge connecting the second node to the first", func() {
-				incidentEdges := graph.IncidentEdges(node2)
-
-				Expect(incidentEdges).To(
+				Expect(graph.IncidentEdges(node2)).To(
 					// TODO: When EndpointPair has an Equal method, replace this assertion with a custom one
 					//       that checks that the set contains only one element, where the element is "equal"
 					//       according to EndpointPair.Equal. (The name "BeEquivalentTo" is already taken by
@@ -525,27 +521,41 @@ func undirectedGraphTests(
 			})
 
 			It("has an in degree of 1 for the first node", func() {
-				inDegree := graph.InDegree(node1)
-
-				Expect(inDegree).To(Equal(1))
+				Expect(graph.InDegree(node1)).To(Equal(1))
 			})
 
 			It("has an in degree of 1 for the second node", func() {
-				inDegree := graph.InDegree(node2)
-
-				Expect(inDegree).To(Equal(1))
+				Expect(graph.InDegree(node2)).To(Equal(1))
 			})
 
 			It("has an out degree of 1 for the first node", func() {
-				inDegree := graph.OutDegree(node1)
-
-				Expect(inDegree).To(Equal(1))
+				Expect(graph.OutDegree(node1)).To(Equal(1))
 			})
 
 			It("has an out degree of 1 for the second node", func() {
-				inDegree := graph.OutDegree(node2)
+				Expect(graph.OutDegree(node2)).To(Equal(1))
+			})
 
-				Expect(inDegree).To(Equal(1))
+			It("sees the first node as being connected to the second", func() {
+				Expect(graph.HasEdgeConnecting(node1, node2)).
+					To(BeTrue())
+			})
+
+			It("sees the second node as being connected to the first", func() {
+				Expect(graph.HasEdgeConnecting(node2, node1)).
+					To(BeTrue())
+			})
+
+			It("does not see the first node as being connected to any other node", func() {
+				Expect(graph.HasEdgeConnecting(node1, nodeNotInGraph)).
+					To(BeFalse())
+				Expect(graph.HasEdgeConnecting(nodeNotInGraph, node1)).
+					To(BeFalse())
+			})
+
+			It("does not see the second node as being connected to any other node", func() {
+				Expect(graph.HasEdgeConnecting(node2, nodeNotInGraph)).
+					To(BeFalse())
 			})
 		})
 	})
@@ -570,9 +580,9 @@ func validateGraphState(graph Graph[int]) {
 
 	// TODO: Pending implementation of Graph.String()
 	//graphString := graph.String()
-	// TODO: Pending implementation of Graph.IsDirected()
+	// TODO: Pending implementation of Graph.String() and Graph.IsDirected()
 	//Expect(graphString).To(ContainSubstring("isDirected: %v", graph.IsDirected()))
-	// TODO: Pending implementation of Graph.AllowsSelfLoops()
+	// TODO: Pending implementation of Graph.String() and Graph.AllowsSelfLoops()
 	//Expect(graphString).To(ContainSubstring("allowsSelfLoops: %v", graph.AllowsSelfLoops()))
 
 	// TODO: Pending implementation of Graph.String()
@@ -581,62 +591,60 @@ func validateGraphState(graph Graph[int]) {
 	//nodeString := graphString[nodeStart:edgeStart] // safe because contents are ASCII
 
 	allEndpointPairs := set.New[EndpointPair[int]]()
-	_ = allEndpointPairs
 
 	sanityCheckSet(graph.Nodes()).ForEach(func(node int) {
 		// TODO: Pending implementation of Graph.String()
 		//Expect(nodeString).To(ContainSubstring(strconv.Itoa(node)))
 
 		// TODO: Pending implementation of many Graph methods
-		//if graph.IsDirected() {
-		//	Expect(graph.Degree(node)).To(Equal(graph.MustInDegree(node) + graph.MustOutDegree(node)))
-		//	Expect(graph.Predecessors(node)).To(HaveLenOf(graph.MustInDegree(node)))
-		//	Expect(graph.Successors(node)).To(HaveLenOf(graph.MustOutDegree(node)))
-		//} else {
-		//	nodeConnectedToSelf := must(graph.AdjacentNodes(node)).Contains(node)
-		//	selfLoopCount := 0
-		//	if nodeConnectedToSelf {
-		//		selfLoopCount = 1
-		//	}
-		//	Expect(graph.Degree(node)).To(Equal(must(graph.MustAdjacentNodes(nodes)).Len() + selfLoopCount))
-		//	Expect(graph.Predecessors(node)).To(BeSetEqualTo(must(graph.AdjacentNodes(nodes))))
-		//	Expect(graph.Successors(node)).To(BeSetEqualTo(must(graph.AdjacentNodes(nodes))))
-		//	Expect(graph.InDegree(node)).To(Equal(graph.Degree(node)))
-		//	Expect(graph.OutDegree(node)).To(Equal(graph.Degree(node)))
-		//}
+		if graph.IsDirected() {
+			Expect(graph.Degree(node)).To(Equal(graph.InDegree(node) + graph.OutDegree(node)))
+			Expect(graph.Predecessors(node)).To(HaveLenOf(graph.InDegree(node)))
+			Expect(graph.Successors(node)).To(HaveLenOf(graph.OutDegree(node)))
+		} else {
+			nodeConnectedToSelf := graph.AdjacentNodes(node).Contains(node)
+			selfLoopCount := 0
+			if nodeConnectedToSelf {
+				selfLoopCount = 1
+			}
+			Expect(graph.Degree(node)).To(Equal(graph.AdjacentNodes(node).Len() + selfLoopCount))
+			Expect(graph.Predecessors(node)).To(beSetThatConsistsOfElementsIn(graph.AdjacentNodes(node)))
+			Expect(graph.Successors(node)).To(beSetThatConsistsOfElementsIn(graph.AdjacentNodes(node)))
+			Expect(graph.InDegree(node)).To(Equal(graph.Degree(node)))
+			Expect(graph.OutDegree(node)).To(Equal(graph.Degree(node)))
+		}
 
-		// TODO: Pending implementation of many Graph methods
-		//sanityCheckSet(must(graph.AdjacentNodes(node))).ForEach(func(adjacentNode int) {
+		// TODO: Pending implementation of Graph.AllowSelfLoops()
+		//sanityCheckSet(graph.AdjacentNodes(node)).ForEach(func(adjacentNode int) {
 		//	if !graph.AllowsSelfLoops() {
 		//		Expect(node).ToNot(Equal(adjacentNode))
 		//	}
 		//	Expect(
-		//		must(graph.Predecessors(node)).Contains(adjacentNode) ||
-		//			must(graph.Successors(node)).Contains(adjacentNode)).
+		//		graph.Predecessors(node).Contains(adjacentNode) ||
+		//			graph.Successors(node).Contains(adjacentNode)).
 		//		To(BeTrue())
 		//})
 
-		// TODO: Pending implementation of Graph.IsDirected() and Graph.HasEdgeConnecting()
-		//sanityCheckSet(must(graph.Successors(node))).ForEach(func(successor int) {
-		//	allEndpointPairs.Add(newEndpointPair(graph, node, successor))
-		//	Expect(graph.Predecessors(successor)).To(Contain(node))
-		//	Expect(graph.HasEdgeConnecting(node, successor)).To(BeTrue())
-		//	Expect(graph.IncidentEdges(node)).To(Contain(graph, node, successor))
-		//})
+		sanityCheckSet(graph.Successors(node)).ForEach(func(successor int) {
+			allEndpointPairs.Add(newEndpointPair(graph, node, successor))
+			Expect(graph.Predecessors(successor)).To(Contain(node))
+			Expect(graph.HasEdgeConnecting(node, successor)).To(BeTrue())
+			// TODO: Pending implementation of Graph.IncidentEdges().Contains()
+			//Expect(graph.IncidentEdges(node)).To(Contain(newEndpointPair(graph, node, successor)))
+		})
 
-		// TODO: Pending implementation of Graph.IsDirected() and Graph.HasEdgeConnecting()
-		//sanityCheckSet(must(graph.IncidentEdges(node))).ForEach(func(endpoints EndpointPair[int]) {
-		//	if graph.IsDirected() {
-		//		Expect(graph.HasEdgeConnecting(endpoints.Source(), endpoints.Target())).To(BeTrue())
-		//	} else {
-		//		Expect(graph.HasEdgeConnecting(endpoints.NodeU(), endpoints.NodeV())).To(BeTrue())
-		//	}
-		//})
+		sanityCheckSet(graph.IncidentEdges(node)).ForEach(func(endpoints EndpointPair[int]) {
+			if graph.IsDirected() {
+				Expect(graph.HasEdgeConnecting(endpoints.Source(), endpoints.Target())).To(BeTrue())
+			} else {
+				Expect(graph.HasEdgeConnecting(endpoints.NodeU(), endpoints.NodeV())).To(BeTrue())
+			}
+		})
 
+		sanityCheckSet(graph.Edges())
+		Expect(graph.Edges()).ToNot(Contain(newEndpointPair(graph, nodeNotInGraph, nodeNotInGraph)))
 		// TODO: Pending implementation of Graph.Edges()
-		//sanityCheckSet(graph.Edges())
-		//Expect(graph.Edges()).ToNot(Contain(newEndpointPair(graph, nodeNotInGraph, nodeNotInGraph)))
-		//Expect(graph.Edges()).To(beSetThatConsistsOfElementsIn(allEndpointPairs))
+		//Expect(graph.Edges()).To(beSetThatConsistsOfElementsIn[EndpointPair[int]](allEndpointPairs))
 	})
 }
 
@@ -651,18 +659,13 @@ func expectStronglyEquivalent(first Graph[int], second Graph[int]) {
 	//Expect(first).To(beGraphEqualTo(second))
 }
 
-func must[N any](value N, err error) N {
-	Expect(err).ToNot(HaveOccurred())
-	return value
-}
-
 // TODO: Pending implementation of Graph.IsDirected()
-//func newEndpointPair[N comparable](graph Graph[N], nodeU N, nodeV N) EndpointPair[N] {
-//	if graph.IsDirected() {
-//		return NewOrderedEndpointPair(nodeU, nodeV)
-//	}
-//	return NewUnorderedEndpointPair(nodeU, nodeV)
-//}
+func newEndpointPair[N comparable](graph Graph[N], nodeU N, nodeV N) EndpointPair[N] {
+	if graph.IsDirected() {
+		return NewOrderedEndpointPair(nodeU, nodeV)
+	}
+	return NewUnorderedEndpointPair(nodeU, nodeV)
+}
 
 // In some cases, our graph implementations return custom sets that define their own method implementations. Verify that
 // these sets are consistent with the elements produced by their ForEach.
@@ -675,9 +678,9 @@ func sanityCheckSet[N comparable](set set.Set[N]) set.Set[N] {
 	//})
 	//Expect(set).ToNot(Contain(nodeNotInGraph))
 	// TODO: Pending introduction of Set.String()
-	//Expect(theSet).To(HaveStringConsistingOfElementsIn(ForEachToSlice(theSet)))
+	//Expect(set).To(HaveStringConsistingOfElementsIn(ForEachToSlice(set)))
 	// TODO: Pending introduction of Set.Equal()
-	//Expect(theSet).To(BeSetEqualTo(set.CopyOf(theSet)))
+	//Expect(set).To(beSetThatConsistsOfElementsIn(set.CopyOf(set)))
 	return set
 }
 
@@ -689,7 +692,7 @@ func beSetThatConsistsOf[N comparable](first N, others ...N) types.GomegaMatcher
 }
 
 func beSetThatConsistsOfElementsIn[T comparable](set set.Set[T]) types.GomegaMatcher {
-	return WithTransform(ForEachToSlice[int], ConsistOf(ForEachToSlice(set)))
+	return WithTransform(ForEachToSlice[T], ConsistOf(ForEachToSlice(set)))
 }
 
 func beSetThatIsEmpty[T comparable]() types.GomegaMatcher {
