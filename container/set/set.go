@@ -1,5 +1,5 @@
-// Package set provides a set data structure, which is a generic, unordered collection of elements where each element is
-// unique.
+// Package set provides a set data structure, which is a generic, unordered container of elements where no two elements
+// can be equal according to Go's '==' operator.
 //
 // A set can be created with the New function.
 //
