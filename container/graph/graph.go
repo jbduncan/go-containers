@@ -243,12 +243,17 @@ func (m *mutableGraph[N]) RemoveNode(node N) bool {
 }
 
 func (m *mutableGraph[N]) RemoveEdge(nodeU N, nodeV N) bool {
-	if _, ok := m.adjacencyList[nodeU]; !ok {
+	adjacentNodes, ok := m.adjacencyList[nodeU]
+	if !ok {
 		return false
 	}
-	if _, ok := m.adjacencyList[nodeV]; !ok {
+	adjacentNodes.Remove(nodeV)
+
+	adjacentNodes, ok = m.adjacencyList[nodeV]
+	if !ok {
 		return false
 	}
+	adjacentNodes.Remove(nodeU)
 
 	return true
 }

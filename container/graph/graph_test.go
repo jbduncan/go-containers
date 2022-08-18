@@ -352,6 +352,7 @@ func graphTests(
 			BeforeEach(func() {
 				skipIfGraphIsNotMutable()
 				graph = putEdge(graph, node1, node2)
+				graph = putEdge(graph, node1, node3)
 
 				removed = graphAsMutable().RemoveEdge(node1, node2)
 			})
@@ -361,10 +362,8 @@ func graphTests(
 			})
 
 			It("removes the connection between its nodes", func() {
-				// TODO: Pending full implementation of Graph.Successors and Graph.Predecessors
-				Skip("Pending full implementation of Graph.Successors and Graph.Predecessors")
-
-				Expect(graph.Successors(node1)).To(beSetThatIsEmpty[int]())
+				Expect(graph.Successors(node1)).To(beSetThatConsistsOf(node3))
+				Expect(graph.Predecessors(node3)).To(beSetThatConsistsOf(node1))
 				Expect(graph.Predecessors(node2)).To(beSetThatIsEmpty[int]())
 			})
 		})
