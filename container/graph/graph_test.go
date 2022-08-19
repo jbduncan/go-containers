@@ -1,9 +1,10 @@
-package graph
+package graph_test
 
 import (
 	"fmt"
 
 	"github.com/onsi/gomega/types"
+	"go-containers/container/graph"
 	"go-containers/container/set"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -13,13 +14,13 @@ import (
 
 var _ = Describe("Undirected mutable graph", func() {
 	mutableGraphTests(
-		func() MutableGraph[int] {
-			return Undirected[int]().Build()
+		func() graph.MutableGraph[int] {
+			return graph.Undirected[int]().Build()
 		},
 		ContainersAreViews)
 	mutableGraphTests(
-		func() MutableGraph[int] {
-			return Undirected[int]().AllowsSelfLoops(true).Build()
+		func() graph.MutableGraph[int] {
+			return graph.Undirected[int]().AllowsSelfLoops(true).Build()
 		},
 		ContainersAreViews)
 })
@@ -50,44 +51,44 @@ const (
 //
 // TODO: Move to a public package for graph testing utilities
 func mutableGraphTests(
-	createGraph func() MutableGraph[int],
+	createGraph func() graph.MutableGraph[int],
 	containersMode ContainersMode) {
 
-	addNode := func(graph Graph[int], n int) Graph[int] {
-		graphAsMutable := graph.(MutableGraph[int])
-		graphAsMutable.AddNode(n)
+	addNode := func(grph graph.Graph[int], node int) graph.Graph[int] {
+		graphAsMutable := grph.(graph.MutableGraph[int])
+		graphAsMutable.AddNode(node)
 
-		return graph
+		return grph
 	}
-	putEdge := func(graph Graph[int], node1 int, node2 int) Graph[int] {
-		graphAsMutable := graph.(MutableGraph[int])
+	putEdge := func(grph graph.Graph[int], node1 int, node2 int) graph.Graph[int] {
+		graphAsMutable := grph.(graph.MutableGraph[int])
 		graphAsMutable.PutEdge(node1, node2)
 
-		return graph
+		return grph
 	}
 
-	graphTests(func() Graph[int] { return createGraph() }, addNode, putEdge, containersMode)
+	graphTests(func() graph.Graph[int] { return createGraph() }, addNode, putEdge, containersMode)
 }
 
 func graphTests(
-	createGraph func() Graph[int],
-	addNode func(g Graph[int], n int) Graph[int],
-	putEdge func(g Graph[int], n1 int, n2 int) Graph[int],
+	createGraph func() graph.Graph[int],
+	addNode func(g graph.Graph[int], n int) graph.Graph[int],
+	putEdge func(g graph.Graph[int], n1 int, n2 int) graph.Graph[int],
 	containersMode ContainersMode) {
 
 	Context("given a graph", func() {
 		var (
-			graph Graph[int]
+			grph graph.Graph[int]
 		)
 
 		graphIsMutable := func() bool {
-			_, result := graph.(MutableGraph[int])
+			_, result := grph.(graph.MutableGraph[int])
 
 			return result
 		}
 
-		graphAsMutable := func() MutableGraph[int] {
-			result, _ := graph.(MutableGraph[int])
+		graphAsMutable := func() graph.MutableGraph[int] {
+			result, _ := grph.(graph.MutableGraph[int])
 
 			return result
 		}
@@ -101,19 +102,19 @@ func graphTests(
 		BeforeEach(func() {
 			assertContainersMode(containersMode)
 
-			graph = createGraph()
+			grph = createGraph()
 		})
 
 		AfterEach(func() {
-			validateGraphState(graph)
+			validateGraphState(grph)
 		})
 
 		It("contains no nodes", func() {
-			Expect(graph.Nodes()).To(beSetThatIsEmpty[int]())
+			Expect(grph.Nodes()).To(beSetThatIsEmpty[int]())
 		})
 
 		It("contains no edges", func() {
-			Expect(graph.Edges()).To(beSetThatIsEmpty[EndpointPair[int]]())
+			Expect(grph.Edges()).To(beSetThatIsEmpty[graph.EndpointPair[int]]())
 		})
 
 		It("has an unmodifiable nodes set view", func() {
@@ -121,10 +122,10 @@ func graphTests(
 				Skip("Graph.Nodes() is not expected to return an unmodifiable view")
 			}
 
-			nodes := graph.Nodes()
+			nodes := grph.Nodes()
 			Expect(nodes).To(beSetThatIsNotMutable[int]())
 
-			graph = addNode(graph, node1)
+			grph = addNode(grph, node1)
 			// TODO: Pending implementation of Graph.Nodes().Contains()
 			//Expect(nodes).To(Contain(node1))
 		})
@@ -136,51 +137,51 @@ func graphTests(
 				Skip("Graph.Edges() is not expected to return an unmodifiable view")
 			}
 
-			edges := graph.Edges()
-			Expect(edges).To(beSetThatIsNotMutable[EndpointPair[int]]())
+			edges := grph.Edges()
+			Expect(edges).To(beSetThatIsNotMutable[graph.EndpointPair[int]]())
 
-			graph = putEdge(graph, node1, node2)
+			grph = putEdge(grph, node1, node2)
 			// TODO: Pending implementation of Graph.Edges()
-			//Expect(edges).To(Contain(newEndpointPair(graph, node1, node2)))
+			//Expect(edges).To(Contain(newEndpointPair(grph, node1, node2)))
 		})
 
 		// TODO: Write an equivalent test to above for ContainersAreCopies
 
 		Context("when adding one node", func() {
 			BeforeEach(func() {
-				graph = addNode(graph, node1)
+				grph = addNode(grph, node1)
 			})
 
 			It("contains just the node", func() {
-				Expect(graph.Nodes()).To(beSetThatConsistsOf(node1))
+				Expect(grph.Nodes()).To(beSetThatConsistsOf(node1))
 			})
 
 			It("reports that the node has no adjacent nodes", func() {
-				Expect(graph.AdjacentNodes(node1)).To(beSetThatIsEmpty[int]())
+				Expect(grph.AdjacentNodes(node1)).To(beSetThatIsEmpty[int]())
 			})
 
 			It("reports that the node has no predecessors", func() {
-				Expect(graph.Predecessors(node1)).To(beSetThatIsEmpty[int]())
+				Expect(grph.Predecessors(node1)).To(beSetThatIsEmpty[int]())
 			})
 
 			It("reports that the node has no successors", func() {
-				Expect(graph.Successors(node1)).To(beSetThatIsEmpty[int]())
+				Expect(grph.Successors(node1)).To(beSetThatIsEmpty[int]())
 			})
 
 			It("reports that the node has no incident edges", func() {
-				Expect(graph.IncidentEdges(node1)).To(beSetThatIsEmpty[EndpointPair[int]]())
+				Expect(grph.IncidentEdges(node1)).To(beSetThatIsEmpty[graph.EndpointPair[int]]())
 			})
 
 			It("reports that the node has a degree of 0", func() {
-				Expect(graph.Degree(node1)).To(BeZero())
+				Expect(grph.Degree(node1)).To(BeZero())
 			})
 
 			It("reports that the node has an in degree of 0", func() {
-				Expect(graph.InDegree(node1)).To(BeZero())
+				Expect(grph.InDegree(node1)).To(BeZero())
 			})
 
 			It("reports that the node has an out degree of 0", func() {
-				Expect(graph.OutDegree(node1)).To(BeZero())
+				Expect(grph.OutDegree(node1)).To(BeZero())
 			})
 
 			It("has an unmodifiable adjacent nodes set view", func() {
@@ -188,10 +189,10 @@ func graphTests(
 					Skip("Graph.AdjacentNodes() is not expected to return an unmodifiable view")
 				}
 
-				adjacentNodes := graph.AdjacentNodes(node1)
+				adjacentNodes := grph.AdjacentNodes(node1)
 				Expect(adjacentNodes).To(beSetThatIsNotMutable[int]())
 
-				graph = putEdge(graph, node1, node2)
+				grph = putEdge(grph, node1, node2)
 				Expect(adjacentNodes).To(Contain(node2))
 			})
 
@@ -202,10 +203,10 @@ func graphTests(
 					Skip("Graph.Predecessors() is not expected to return an unmodifiable view")
 				}
 
-				predecessors := graph.Predecessors(node1)
+				predecessors := grph.Predecessors(node1)
 				Expect(predecessors).To(beSetThatIsNotMutable[int]())
 
-				graph = putEdge(graph, node2, node1)
+				grph = putEdge(grph, node2, node1)
 				Expect(predecessors).To(Contain(node2))
 			})
 
@@ -216,10 +217,10 @@ func graphTests(
 					Skip("Graph.Successors() is not expected to return an unmodifiable view")
 				}
 
-				successors := graph.Successors(node1)
+				successors := grph.Successors(node1)
 				Expect(successors).To(beSetThatIsNotMutable[int]())
 
-				graph = putEdge(graph, node1, node2)
+				grph = putEdge(grph, node1, node2)
 				Expect(successors).To(Contain(node2))
 			})
 
@@ -230,12 +231,12 @@ func graphTests(
 					Skip("Graph.IncidentEdges() is not expected to return an unmodifiable view")
 				}
 
-				incidentEdges := graph.IncidentEdges(node1)
-				Expect(incidentEdges).To(beSetThatIsNotMutable[EndpointPair[int]]())
+				incidentEdges := grph.IncidentEdges(node1)
+				Expect(incidentEdges).To(beSetThatIsNotMutable[graph.EndpointPair[int]]())
 
-				graph = putEdge(graph, node1, node2)
+				grph = putEdge(grph, node1, node2)
 				// TODO: Pending implementation of Graph.IncidentEdges().Contains()
-				//Expect(incidentEdges).To(Contain(newEndpointPair(graph, node1, node2)))
+				//Expect(incidentEdges).To(Contain(newEndpointPair(grph, node1, node2)))
 			})
 
 			// TODO: Write an equivalent test to above for ContainersAreCopies
@@ -243,10 +244,10 @@ func graphTests(
 
 		Context("when adding two nodes", func() {
 			It("contains both nodes", func() {
-				graph = addNode(graph, node1)
-				graph = addNode(graph, node2)
+				grph = addNode(grph, node1)
+				grph = addNode(grph, node2)
 
-				Expect(graph.Nodes()).To(beSetThatConsistsOf(node1, node2))
+				Expect(grph.Nodes()).To(beSetThatConsistsOf(node1, node2))
 			})
 		})
 
@@ -261,7 +262,7 @@ func graphTests(
 		Context("when adding an existing node", Ordered, func() {
 			It("returns false", func() {
 				skipIfGraphIsNotMutable()
-				graph = addNode(graph, node1)
+				grph = addNode(grph, node1)
 
 				Expect(graphAsMutable().AddNode(node1)).To(BeFalse())
 			})
@@ -272,8 +273,8 @@ func graphTests(
 
 			BeforeEach(func() {
 				skipIfGraphIsNotMutable()
-				graph = putEdge(graph, node1, node2)
-				graph = putEdge(graph, node3, node1)
+				grph = putEdge(grph, node1, node2)
+				grph = putEdge(grph, node3, node1)
 
 				removed = graphAsMutable().RemoveNode(node1)
 			})
@@ -283,16 +284,16 @@ func graphTests(
 			})
 
 			It("it leaves the other nodes alone", func() {
-				Expect(graph.Nodes()).To(beSetThatConsistsOf(node2, node3))
+				Expect(grph.Nodes()).To(beSetThatConsistsOf(node2, node3))
 			})
 
 			It("removes its connections to its adjacent nodes", func() {
-				Expect(graph.AdjacentNodes(node2)).To(beSetThatIsEmpty[int]())
-				Expect(graph.AdjacentNodes(node3)).To(beSetThatIsEmpty[int]())
+				Expect(grph.AdjacentNodes(node2)).To(beSetThatIsEmpty[int]())
+				Expect(grph.AdjacentNodes(node3)).To(beSetThatIsEmpty[int]())
 			})
 
 			It("removes the connected edges", func() {
-				Expect(graph.Edges()).To(beSetThatIsEmpty[EndpointPair[int]]())
+				Expect(grph.Edges()).To(beSetThatIsEmpty[graph.EndpointPair[int]]())
 			})
 		})
 
@@ -301,7 +302,7 @@ func graphTests(
 
 			BeforeEach(func() {
 				skipIfGraphIsNotMutable()
-				graph = addNode(graph, node1)
+				grph = addNode(grph, node1)
 
 				removed = graphAsMutable().RemoveNode(nodeNotInGraph)
 			})
@@ -311,39 +312,39 @@ func graphTests(
 			})
 
 			It("leaves all the nodes alone", func() {
-				Expect(graph.Nodes()).To(beSetThatConsistsOf(node1))
+				Expect(grph.Nodes()).To(beSetThatConsistsOf(node1))
 			})
 		})
 
 		Context("when adding one edge", func() {
 			BeforeEach(func() {
-				graph = putEdge(graph, node1, node2)
+				grph = putEdge(grph, node1, node2)
 			})
 
 			It("reports that both nodes are adjacent to each other", func() {
-				Expect(graph.AdjacentNodes(node1)).To(beSetThatConsistsOf(node2))
-				Expect(graph.AdjacentNodes(node2)).To(beSetThatConsistsOf(node1))
+				Expect(grph.AdjacentNodes(node1)).To(beSetThatConsistsOf(node2))
+				Expect(grph.AdjacentNodes(node2)).To(beSetThatConsistsOf(node1))
 			})
 
 			It("reports that both nodes have a degree of 1", func() {
-				Expect(graph.Degree(node1)).To(Equal(1))
-				Expect(graph.Degree(node2)).To(Equal(1))
+				Expect(grph.Degree(node1)).To(Equal(1))
+				Expect(grph.Degree(node2)).To(Equal(1))
 			})
 		})
 
 		Context("when adding two connected edges", func() {
 			It("reports that the common node has a degree of 2", func() {
-				graph = putEdge(graph, node1, node2)
-				graph = putEdge(graph, node1, node3)
+				grph = putEdge(grph, node1, node2)
+				grph = putEdge(grph, node1, node3)
 
-				Expect(graph.Degree(node1)).To(Equal(2))
+				Expect(grph.Degree(node1)).To(Equal(2))
 			})
 
 			It("reports the two unique nodes as adjacent to the common one", func() {
-				graph = putEdge(graph, node1, node2)
-				graph = putEdge(graph, node1, node3)
+				grph = putEdge(grph, node1, node2)
+				grph = putEdge(grph, node1, node3)
 
-				Expect(graph.AdjacentNodes(node1)).To(beSetThatConsistsOf(node2, node3))
+				Expect(grph.AdjacentNodes(node1)).To(beSetThatConsistsOf(node2, node3))
 			})
 		})
 
@@ -351,15 +352,15 @@ func graphTests(
 			Context("and removing one of the nodes", func() {
 				It("leaves the other node alone", func() {
 					skipIfGraphIsNotMutable()
-					graph = putEdge(graph, node1, node2)
-					graph = putEdge(graph, node2, node1)
+					grph = putEdge(grph, node1, node2)
+					grph = putEdge(grph, node2, node1)
 					graphAsMutable().RemoveNode(node1)
 
-					Expect(graph.Nodes()).To(beSetThatConsistsOf(node2))
+					Expect(grph.Nodes()).To(beSetThatConsistsOf(node2))
 				})
 
 				It("removes both edges", func() {
-					Expect(graph.Edges()).To(beSetThatIsEmpty[EndpointPair[int]]())
+					Expect(grph.Edges()).To(beSetThatIsEmpty[graph.EndpointPair[int]]())
 				})
 			})
 		})
@@ -369,8 +370,8 @@ func graphTests(
 
 			BeforeEach(func() {
 				skipIfGraphIsNotMutable()
-				graph = putEdge(graph, node1, node2)
-				graph = putEdge(graph, node1, node3)
+				grph = putEdge(grph, node1, node2)
+				grph = putEdge(grph, node1, node3)
 
 				removed = graphAsMutable().RemoveEdge(node1, node2)
 			})
@@ -380,9 +381,9 @@ func graphTests(
 			})
 
 			It("removes the connection between its nodes", func() {
-				Expect(graph.Successors(node1)).To(beSetThatConsistsOf(node3))
-				Expect(graph.Predecessors(node3)).To(beSetThatConsistsOf(node1))
-				Expect(graph.Predecessors(node2)).To(beSetThatIsEmpty[int]())
+				Expect(grph.Successors(node1)).To(beSetThatConsistsOf(node3))
+				Expect(grph.Predecessors(node3)).To(beSetThatConsistsOf(node1))
+				Expect(grph.Predecessors(node2)).To(beSetThatIsEmpty[int]())
 			})
 		})
 
@@ -391,7 +392,7 @@ func graphTests(
 
 			BeforeEach(func() {
 				skipIfGraphIsNotMutable()
-				graph = putEdge(graph, node1, node2)
+				grph = putEdge(grph, node1, node2)
 
 				removed = graphAsMutable().RemoveEdge(node1, nodeNotInGraph)
 			})
@@ -401,7 +402,7 @@ func graphTests(
 			})
 
 			It("leaves the existing nodes alone", func() {
-				Expect(graph.Successors(node1)).To(Contain(node2))
+				Expect(grph.Successors(node1)).To(Contain(node2))
 			})
 		})
 
@@ -410,7 +411,7 @@ func graphTests(
 
 			BeforeEach(func() {
 				skipIfGraphIsNotMutable()
-				graph = putEdge(graph, node1, node2)
+				grph = putEdge(grph, node1, node2)
 
 				removed = graphAsMutable().RemoveEdge(nodeNotInGraph, node2)
 			})
@@ -420,55 +421,55 @@ func graphTests(
 			})
 
 			It("leaves the existing nodes alone", func() {
-				Expect(graph.Successors(node1)).To(Contain(node2))
+				Expect(grph.Successors(node1)).To(Contain(node2))
 			})
 		})
 
 		Context("when finding the predecessors of an absent node", func() {
 			It("returns an empty set", func() {
-				Expect(graph.Predecessors(nodeNotInGraph)).
+				Expect(grph.Predecessors(nodeNotInGraph)).
 					To(beSetThatIsEmpty[int]())
 			})
 		})
 
 		Context("when finding the successors of an absent node", func() {
 			It("returns an empty set", func() {
-				Expect(graph.Successors(nodeNotInGraph)).
+				Expect(grph.Successors(nodeNotInGraph)).
 					To(beSetThatIsEmpty[int]())
 			})
 		})
 
 		Context("when finding the adjacent nodes of an absent node", func() {
 			It("returns an empty set", func() {
-				Expect(graph.AdjacentNodes(nodeNotInGraph)).
+				Expect(grph.AdjacentNodes(nodeNotInGraph)).
 					To(beSetThatIsEmpty[int]())
 			})
 		})
 
 		Context("when finding the incident edges of an absent node", func() {
 			It("returns an empty set", func() {
-				Expect(graph.IncidentEdges(nodeNotInGraph)).
-					To(beSetThatIsEmpty[EndpointPair[int]]())
+				Expect(grph.IncidentEdges(nodeNotInGraph)).
+					To(beSetThatIsEmpty[graph.EndpointPair[int]]())
 			})
 		})
 
 		Context("when finding the degree of an absent node", func() {
 			It("returns zero", func() {
-				Expect(graph.Degree(nodeNotInGraph)).
+				Expect(grph.Degree(nodeNotInGraph)).
 					To(BeZero())
 			})
 		})
 
 		Context("when finding the in degree of an absent node", func() {
 			It("returns zero", func() {
-				Expect(graph.InDegree(nodeNotInGraph)).
+				Expect(grph.InDegree(nodeNotInGraph)).
 					To(BeZero())
 			})
 		})
 
 		Context("when finding the out degree of of an absent node", func() {
 			It("returns zero", func() {
-				Expect(graph.OutDegree(nodeNotInGraph)).
+				Expect(grph.OutDegree(nodeNotInGraph)).
 					To(BeZero())
 			})
 		})
@@ -478,114 +479,114 @@ func graphTests(
 }
 
 func undirectedGraphTests(
-	createGraph func() Graph[int],
-	addNode func(g Graph[int], n int) Graph[int],
-	putEdge func(g Graph[int], n1 int, n2 int) Graph[int],
+	createGraph func() graph.Graph[int],
+	addNode func(g graph.Graph[int], n int) graph.Graph[int],
+	putEdge func(g graph.Graph[int], n1 int, n2 int) graph.Graph[int],
 	containersMode ContainersMode) {
 
 	Context("given an undirected graph", func() {
 
 		var (
-			graph Graph[int]
+			grph graph.Graph[int]
 		)
 
 		BeforeEach(func() {
 			assertContainersMode(containersMode)
 
-			graph = createGraph()
-			if graph.IsDirected() {
+			grph = createGraph()
+			if grph.IsDirected() {
 				Skip("graph is not undirected")
 			}
 		})
 
 		Context("when adding one edge", func() {
 			BeforeEach(func() {
-				graph = putEdge(graph, node1, node2)
+				grph = putEdge(grph, node1, node2)
 			})
 
 			It("sees both nodes as predecessors of each other", func() {
-				Expect(graph.Predecessors(node2)).To(beSetThatConsistsOf(node1))
-				Expect(graph.Predecessors(node1)).To(beSetThatConsistsOf(node2))
+				Expect(grph.Predecessors(node2)).To(beSetThatConsistsOf(node1))
+				Expect(grph.Predecessors(node1)).To(beSetThatConsistsOf(node2))
 			})
 
 			It("sees both nodes as successors of each other", func() {
-				Expect(graph.Successors(node1)).To(beSetThatConsistsOf(node2))
-				Expect(graph.Successors(node2)).To(beSetThatConsistsOf(node1))
+				Expect(grph.Successors(node1)).To(beSetThatConsistsOf(node2))
+				Expect(grph.Successors(node2)).To(beSetThatConsistsOf(node1))
 			})
 
 			It("has an incident edge connecting the first node to the second", func() {
-				Expect(graph.IncidentEdges(node1)).To(
+				Expect(grph.IncidentEdges(node1)).To(
 					// TODO: When EndpointPair has an Equal method, replace this assertion with a custom one
 					//       that checks that the set contains only one element, where the element is "equal"
 					//       according to EndpointPair.Equal. (The name "BeEquivalentTo" is already taken by
 					//       Gomega. Maybe "EqualAccordingToEqualMethod"?)
-					beSetThatConsistsOf(NewUnorderedEndpointPair(node1, node2)))
+					beSetThatConsistsOf(graph.NewUnorderedEndpointPair(node1, node2)))
 			})
 
 			It("has an incident edge connecting the second node to the first", func() {
-				Expect(graph.IncidentEdges(node2)).To(
+				Expect(grph.IncidentEdges(node2)).To(
 					// TODO: When EndpointPair has an Equal method, replace this assertion with a custom one
 					//       that checks that the set contains only one element, where the element is "equal"
 					//       according to EndpointPair.Equal. (The name "BeEquivalentTo" is already taken by
 					//       Gomega. Maybe "EqualAccordingToEqualMethod"?)
-					beSetThatConsistsOf(NewUnorderedEndpointPair(node2, node1)))
+					beSetThatConsistsOf(graph.NewUnorderedEndpointPair(node2, node1)))
 			})
 
 			It("has an in degree of 1 for the first node", func() {
-				Expect(graph.InDegree(node1)).To(Equal(1))
+				Expect(grph.InDegree(node1)).To(Equal(1))
 			})
 
 			It("has an in degree of 1 for the second node", func() {
-				Expect(graph.InDegree(node2)).To(Equal(1))
+				Expect(grph.InDegree(node2)).To(Equal(1))
 			})
 
 			It("has an out degree of 1 for the first node", func() {
-				Expect(graph.OutDegree(node1)).To(Equal(1))
+				Expect(grph.OutDegree(node1)).To(Equal(1))
 			})
 
 			It("has an out degree of 1 for the second node", func() {
-				Expect(graph.OutDegree(node2)).To(Equal(1))
+				Expect(grph.OutDegree(node2)).To(Equal(1))
 			})
 
 			It("sees the first node as being connected to the second in an unordered fashion", func() {
-				Expect(graph.HasEdgeConnecting(node1, node2)).
+				Expect(grph.HasEdgeConnecting(node1, node2)).
 					To(BeTrue())
 
-				Expect(graph.HasEdgeConnectingEndpoints(NewUnorderedEndpointPair(node1, node2))).
+				Expect(grph.HasEdgeConnectingEndpoints(graph.NewUnorderedEndpointPair(node1, node2))).
 					To(BeTrue())
 			})
 
 			It("sees the second node as being connected to the first in an unordered fashion", func() {
-				Expect(graph.HasEdgeConnecting(node2, node1)).
+				Expect(grph.HasEdgeConnecting(node2, node1)).
 					To(BeTrue())
 
-				Expect(graph.HasEdgeConnectingEndpoints(NewUnorderedEndpointPair(node2, node1))).
+				Expect(grph.HasEdgeConnectingEndpoints(graph.NewUnorderedEndpointPair(node2, node1))).
 					To(BeTrue())
 			})
 
 			It("does not see the first node as being connected to any other node", func() {
-				Expect(graph.HasEdgeConnecting(node1, nodeNotInGraph)).
+				Expect(grph.HasEdgeConnecting(node1, nodeNotInGraph)).
 					To(BeFalse())
-				Expect(graph.HasEdgeConnecting(nodeNotInGraph, node1)).
+				Expect(grph.HasEdgeConnecting(nodeNotInGraph, node1)).
 					To(BeFalse())
 
-				Expect(graph.HasEdgeConnectingEndpoints(NewUnorderedEndpointPair(node1, nodeNotInGraph))).
+				Expect(grph.HasEdgeConnectingEndpoints(graph.NewUnorderedEndpointPair(node1, nodeNotInGraph))).
 					To(BeFalse())
-				Expect(graph.HasEdgeConnectingEndpoints(NewUnorderedEndpointPair(nodeNotInGraph, node1))).
+				Expect(grph.HasEdgeConnectingEndpoints(graph.NewUnorderedEndpointPair(nodeNotInGraph, node1))).
 					To(BeFalse())
 			})
 
 			It("does not see the second node as being connected to any other node", func() {
-				Expect(graph.HasEdgeConnecting(node2, nodeNotInGraph)).
+				Expect(grph.HasEdgeConnecting(node2, nodeNotInGraph)).
 					To(BeFalse())
 
-				Expect(graph.HasEdgeConnectingEndpoints(NewUnorderedEndpointPair(node2, nodeNotInGraph))).
+				Expect(grph.HasEdgeConnectingEndpoints(graph.NewUnorderedEndpointPair(node2, nodeNotInGraph))).
 					To(BeFalse())
 			})
 
 			Context("and trying to find that edge with ordered endpoints", func() {
 				It("returns false", func() {
-					Expect(graph.HasEdgeConnectingEndpoints(NewOrderedEndpointPair(node1, node2))).
+					Expect(grph.HasEdgeConnectingEndpoints(graph.NewOrderedEndpointPair(node1, node2))).
 						To(BeFalse())
 				})
 			})
@@ -604,12 +605,27 @@ func assertContainersMode(containersMode ContainersMode) {
 	}
 }
 
-func validateGraphState(graph Graph[int]) {
+func validateGraphState(grph graph.Graph[int]) {
 	// TODO: Pending implementation of graph.CopyOf
 	//expectStronglyEquivalent(graph, graph.CopyOf(graph))
 	// TODO: Pending implementation of graph.ImmutableCopyOf
 	//expectStronglyEquivalent(graph, graph.ImmutableCopyOf(graph))
 
+	sanityCheckString(grph)
+
+	allEndpointPairs := set.New[graph.EndpointPair[int]]()
+
+	sanityCheckSet(grph.Nodes()).ForEach(func(node int) {
+		// TODO: Pending implementation of Graph.String()
+		//Expect(nodeString).To(ContainSubstring(strconv.Itoa(node)))
+
+		sanityCheckConnections(grph, node, allEndpointPairs)
+		sanityCheckEdges(grph)
+	})
+}
+
+func sanityCheckString(grph graph.Graph[int]) {
+	_ = grph
 	// TODO: Pending implementation of Graph.String()
 	//graphString := graph.String()
 	// TODO: Pending implementation of Graph.String() and Graph.IsDirected()
@@ -621,66 +637,63 @@ func validateGraphState(graph Graph[int]) {
 	//nodeStart := strings.Index(graphString, "nodes:")
 	//edgeStart := strings.Index(graphString, "edges:")
 	//nodeString := graphString[nodeStart:edgeStart] // safe because contents are ASCII
+}
 
-	allEndpointPairs := set.New[EndpointPair[int]]()
-
-	sanityCheckSet(graph.Nodes()).ForEach(func(node int) {
-		// TODO: Pending implementation of Graph.String()
-		//Expect(nodeString).To(ContainSubstring(strconv.Itoa(node)))
-
-		// TODO: Pending implementation of many Graph methods
-		if graph.IsDirected() {
-			Expect(graph.Degree(node)).To(Equal(graph.InDegree(node) + graph.OutDegree(node)))
-			Expect(graph.Predecessors(node)).To(HaveLenOf(graph.InDegree(node)))
-			Expect(graph.Successors(node)).To(HaveLenOf(graph.OutDegree(node)))
-		} else {
-			nodeConnectedToSelf := graph.AdjacentNodes(node).Contains(node)
-			selfLoopCount := 0
-			if nodeConnectedToSelf {
-				selfLoopCount = 1
-			}
-			Expect(graph.Degree(node)).To(Equal(graph.AdjacentNodes(node).Len() + selfLoopCount))
-			Expect(graph.Predecessors(node)).To(beSetThatConsistsOfElementsIn(graph.AdjacentNodes(node)))
-			Expect(graph.Successors(node)).To(beSetThatConsistsOfElementsIn(graph.AdjacentNodes(node)))
-			Expect(graph.InDegree(node)).To(Equal(graph.Degree(node)))
-			Expect(graph.OutDegree(node)).To(Equal(graph.Degree(node)))
+func sanityCheckConnections(grph graph.Graph[int], node int, allEndpointPairs set.MutableSet[graph.EndpointPair[int]]) {
+	// TODO: Pending implementation of many Graph methods
+	if grph.IsDirected() {
+		Expect(grph.Degree(node)).To(Equal(grph.InDegree(node) + grph.OutDegree(node)))
+		Expect(grph.Predecessors(node)).To(HaveLenOf(grph.InDegree(node)))
+		Expect(grph.Successors(node)).To(HaveLenOf(grph.OutDegree(node)))
+	} else {
+		nodeConnectedToSelf := grph.AdjacentNodes(node).Contains(node)
+		selfLoopCount := 0
+		if nodeConnectedToSelf {
+			selfLoopCount = 1
 		}
+		Expect(grph.Degree(node)).To(Equal(grph.AdjacentNodes(node).Len() + selfLoopCount))
+		Expect(grph.Predecessors(node)).To(beSetThatConsistsOfElementsIn(grph.AdjacentNodes(node)))
+		Expect(grph.Successors(node)).To(beSetThatConsistsOfElementsIn(grph.AdjacentNodes(node)))
+		Expect(grph.InDegree(node)).To(Equal(grph.Degree(node)))
+		Expect(grph.OutDegree(node)).To(Equal(grph.Degree(node)))
+	}
 
-		sanityCheckSet(graph.AdjacentNodes(node)).ForEach(func(adjacentNode int) {
-			// TODO: Pending implementation of Graph.AllowSelfLoops()
-			//if !graph.AllowsSelfLoops() {
-			//	Expect(node).ToNot(Equal(adjacentNode))
-			//}
-			Expect(
-				graph.Predecessors(node).Contains(adjacentNode) ||
-					graph.Successors(node).Contains(adjacentNode)).
-				To(BeTrue())
-		})
+	sanityCheckSet(grph.AdjacentNodes(node)).ForEach(func(adjacentNode int) {
+		// TODO: Pending implementation of Graph.AllowSelfLoops()
+		//if !graph.AllowsSelfLoops() {
+		//	Expect(node).ToNot(Equal(adjacentNode))
+		//}
+		Expect(
+			grph.Predecessors(node).Contains(adjacentNode) ||
+				grph.Successors(node).Contains(adjacentNode)).
+			To(BeTrue())
+	})
 
-		sanityCheckSet(graph.Successors(node)).ForEach(func(successor int) {
-			allEndpointPairs.Add(newEndpointPair(graph, node, successor))
-			Expect(graph.Predecessors(successor)).To(Contain(node))
-			Expect(graph.HasEdgeConnecting(node, successor)).To(BeTrue())
-			// TODO: Pending implementation of Graph.IncidentEdges().Contains()
-			//Expect(graph.IncidentEdges(node)).To(Contain(newEndpointPair(graph, node, successor)))
-		})
+	sanityCheckSet(grph.Successors(node)).ForEach(func(successor int) {
+		allEndpointPairs.Add(newEndpointPair(grph, node, successor))
+		Expect(grph.Predecessors(successor)).To(Contain(node))
+		Expect(grph.HasEdgeConnecting(node, successor)).To(BeTrue())
+		// TODO: Pending implementation of Graph.IncidentEdges().Contains()
+		//Expect(graph.IncidentEdges(node)).To(Contain(newEndpointPair(graph, node, successor)))
+	})
 
-		sanityCheckSet(graph.IncidentEdges(node)).ForEach(func(endpoints EndpointPair[int]) {
-			if graph.IsDirected() {
-				Expect(graph.HasEdgeConnecting(endpoints.Source(), endpoints.Target())).To(BeTrue())
-			} else {
-				Expect(graph.HasEdgeConnecting(endpoints.NodeU(), endpoints.NodeV())).To(BeTrue())
-			}
-		})
-
-		sanityCheckSet(graph.Edges())
-		Expect(graph.Edges()).ToNot(Contain(newEndpointPair(graph, nodeNotInGraph, nodeNotInGraph)))
-		// TODO: Pending implementation of Graph.Edges()
-		//Expect(graph.Edges()).To(beSetThatConsistsOfElementsIn[EndpointPair[int]](allEndpointPairs))
+	sanityCheckSet(grph.IncidentEdges(node)).ForEach(func(endpoints graph.EndpointPair[int]) {
+		if grph.IsDirected() {
+			Expect(grph.HasEdgeConnecting(endpoints.Source(), endpoints.Target())).To(BeTrue())
+		} else {
+			Expect(grph.HasEdgeConnecting(endpoints.NodeU(), endpoints.NodeV())).To(BeTrue())
+		}
 	})
 }
 
-func expectStronglyEquivalent(first Graph[int], second Graph[int]) {
+func sanityCheckEdges(grph graph.Graph[int]) {
+	sanityCheckSet(grph.Edges())
+	Expect(grph.Edges()).ToNot(Contain(newEndpointPair(grph, nodeNotInGraph, nodeNotInGraph)))
+	// TODO: Pending implementation of Graph.Edges()
+	//Expect(grph.Edges()).To(beSetThatConsistsOfElementsIn[EndpointPair[int]](allEndpointPairs))
+}
+
+func expectStronglyEquivalent(first graph.Graph[int], second graph.Graph[int]) {
 	// Properties not covered by Graph.Equal()
 	// TODO: Pending implementation of Graph.AllowsSelfLoops()
 	//Expect(first.AllowsSelfLoops()).To(Equal(second.AllowsSelfLoops()))
@@ -691,14 +704,14 @@ func expectStronglyEquivalent(first Graph[int], second Graph[int]) {
 	//Expect(first).To(beGraphEqualTo(second))
 }
 
-func newEndpointPair[N comparable](graph Graph[N], nodeU N, nodeV N) EndpointPair[N] {
-	if graph.IsDirected() {
-		return NewOrderedEndpointPair(nodeU, nodeV)
+func newEndpointPair[N comparable](grph graph.Graph[N], nodeU N, nodeV N) graph.EndpointPair[N] {
+	if grph.IsDirected() {
+		return graph.NewOrderedEndpointPair(nodeU, nodeV)
 	}
-	return NewUnorderedEndpointPair(nodeU, nodeV)
+	return graph.NewUnorderedEndpointPair(nodeU, nodeV)
 }
 
-// In some cases, our graph implementations return custom sets that define their own method implementations. Verify that
+// In some cases, graphs may return custom sets that define their own method implementations. Verify that
 // these sets are consistent with the elements produced by their ForEach.
 func sanityCheckSet[N comparable](set set.Set[N]) set.Set[N] {
 	// TODO: Pending implementation of keySet.Len()
@@ -709,7 +722,7 @@ func sanityCheckSet[N comparable](set set.Set[N]) set.Set[N] {
 	//})
 	//Expect(set).ToNot(Contain(nodeNotInGraph))
 	// TODO: Pending introduction of Set.String()
-	//Expect(set).To(HaveStringConsistingOfElementsIn(ForEachToSlice(set)))
+	//Expect(set).To(HaveStringConsistingOfElementsIn(set))
 	// TODO: Pending introduction of Set.Equal()
 	//Expect(set).To(beSetThatConsistsOfElementsIn(set.CopyOf(set)))
 	return set

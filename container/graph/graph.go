@@ -201,11 +201,7 @@ func (m *mutableGraph[N]) HasEdgeConnecting(nodeU N, nodeV N) bool {
 
 	adjacentNodes = m.adjacencyList[nodeV]
 
-	if !adjacentNodes.Contains(nodeU) {
-		return false
-	}
-
-	return true
+	return adjacentNodes.Contains(nodeU)
 }
 
 func (m *mutableGraph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
