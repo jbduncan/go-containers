@@ -12,21 +12,14 @@ import (
 )
 
 var _ = Describe("Undirected mutable graph", func() {
-	graphTests(
-		func() Graph[int] {
+	mutableGraphTests(
+		func() MutableGraph[int] {
 			return Undirected[int]().Build()
 		},
-		func(graph Graph[int], n int) Graph[int] {
-			graphAsMutable, _ := graph.(MutableGraph[int])
-			graphAsMutable.AddNode(n)
-
-			return graph
-		},
-		func(graph Graph[int], node1 int, node2 int) Graph[int] {
-			graphAsMutable, _ := graph.(MutableGraph[int])
-			graphAsMutable.PutEdge(node1, node2)
-
-			return graph
+		ContainersAreViews)
+	mutableGraphTests(
+		func() MutableGraph[int] {
+			return Undirected[int]().AllowsSelfLoops(true).Build()
 		},
 		ContainersAreViews)
 })
@@ -47,16 +40,35 @@ const (
 	ContainersAreCopies
 )
 
-// graphTests produces a suite of Ginkgo test cases for testing implementations of the Graph
-// interface. Graph instances created for testing should have int nodes.
+// mutableGraphTests produces a suite of Ginkgo test cases for testing implementations of the
+// MutableGraph interface. MutableGraph instances created for testing are to have int nodes.
 //
 // Test cases that should be handled similarly in any graph implementation are included in this
 // function; for example, testing that the `Nodes()` method returns the set of the nodes in the
-// graph. The following test cases are explicitly not tested:
-//   - Test cases related to whether the graph is directed or undirected.
-//   - Test cases related to specific implementations of the Graph interface.
+// graph. Test cases related to specific implementations of the MutableGraph interface are
+// explicitly not tested.
 //
 // TODO: Move to a public package for graph testing utilities
+func mutableGraphTests(
+	createGraph func() MutableGraph[int],
+	containersMode ContainersMode) {
+
+	addNode := func(graph Graph[int], n int) Graph[int] {
+		graphAsMutable := graph.(MutableGraph[int])
+		graphAsMutable.AddNode(n)
+
+		return graph
+	}
+	putEdge := func(graph Graph[int], node1 int, node2 int) Graph[int] {
+		graphAsMutable := graph.(MutableGraph[int])
+		graphAsMutable.PutEdge(node1, node2)
+
+		return graph
+	}
+
+	graphTests(func() Graph[int] { return createGraph() }, addNode, putEdge, containersMode)
+}
+
 func graphTests(
 	createGraph func() Graph[int],
 	addNode func(g Graph[int], n int) Graph[int],

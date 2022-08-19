@@ -8,7 +8,7 @@ type Graph[N comparable] interface {
 	Nodes() set.Set[N]
 	Edges() set.Set[EndpointPair[N]]
 	IsDirected() bool
-	// AllowsSelfLoops() bool
+	AllowsSelfLoops() bool
 	// NodeOrder() ElementOrder
 	// IncidentEdgeOrder() ElementOrder
 	// TODO: Document that passing in an absent node returns an empty set, and to use Nodes().Contains() to tell when a
@@ -43,6 +43,8 @@ type MutableGraph[N comparable] interface {
 	Graph[N]
 
 	AddNode(node N) bool
+	// TODO: Document that PutEdge will panic if Graph.AllowsSelfLoops() is true and nodeU and nodeV are equal
+	//       according to ==, and to check that nodeU != nodeV beforehand.
 	PutEdge(nodeU N, nodeV N) bool
 	// PutEdgeWithEndpoints(e EndpointPair[N]) bool
 	RemoveNode(node N) bool
@@ -50,13 +52,16 @@ type MutableGraph[N comparable] interface {
 	// RemoveEdgeWithEndpoints(e EndpointPair[N]) bool
 }
 
-func Undirected[N comparable](opts ...Option[N]) Builder[N] {
+func Undirected[N comparable]() Builder[N] {
 	return Builder[N]{}
 }
 
-type Option[N comparable] func(b Builder[N]) (Builder[N], error)
+type Builder[N comparable] struct {
+}
 
-type Builder[N comparable] struct{}
+func (b Builder[N]) AllowsSelfLoops(allowsSelfLoops bool) Builder[N] {
+	panic("TODO") // TODO
+}
 
 func (b Builder[N]) Build() MutableGraph[N] {
 	return &mutableGraph[N]{
@@ -70,6 +75,10 @@ type mutableGraph[N comparable] struct {
 
 func (m *mutableGraph[N]) IsDirected() bool {
 	return false
+}
+
+func (m *mutableGraph[N]) AllowsSelfLoops() bool {
+	panic("TODO") // TODO
 }
 
 func (m *mutableGraph[N]) Nodes() set.Set[N] {
