@@ -91,25 +91,6 @@ func (m *mutableGraph[N]) Edges() set.Set[EndpointPair[N]] {
 	return set.Unmodifiable(set.New[EndpointPair[N]]())
 }
 
-type keySet[N comparable] struct {
-	delegate map[N]set.MutableSet[N]
-}
-
-func (k keySet[N]) Contains(elem N) bool {
-	_, ok := k.delegate[elem]
-	return ok
-}
-
-func (k keySet[N]) Len() int {
-	return len(k.delegate)
-}
-
-func (k keySet[N]) ForEach(fn func(elem N)) {
-	for key := range k.delegate {
-		fn(key)
-	}
-}
-
 func (k keySet[N]) String() string {
 	// TODO implement me
 	panic("implement me")
@@ -142,37 +123,6 @@ func (m *mutableGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 		node,
 		adjacentNodes,
 	}
-}
-
-type incidentEdgeSet[N comparable] struct {
-	node          N
-	adjacentNodes set.MutableSet[N]
-}
-
-func (i incidentEdgeSet[N]) Contains(elem EndpointPair[N]) bool {
-	if !elem.IsOrdered() {
-		// TODO: Once EndpointPair.Equal() is introduced, replace this code with an
-		//       EndpointPair.Equal() check
-		return (i.node == elem.NodeU() && i.adjacentNodes.Contains(elem.NodeV())) ||
-			(i.node == elem.NodeV() && i.adjacentNodes.Contains(elem.NodeU()))
-	}
-	return false
-}
-
-func (i incidentEdgeSet[N]) Len() int {
-	return i.adjacentNodes.Len()
-}
-
-func (i incidentEdgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
-	i.adjacentNodes.ForEach(
-		func(adjNode N) {
-			fn(NewUnorderedEndpointPair(i.node, adjNode))
-		})
-}
-
-func (i incidentEdgeSet[N]) String() string {
-	//TODO implement me
-	panic("implement me")
 }
 
 func (m *mutableGraph[N]) Degree(node N) int {
