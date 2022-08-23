@@ -126,8 +126,7 @@ func graphTests(
 			Expect(nodes).To(beSetThatIsNotMutable[int]())
 
 			grph = addNode(grph, node1)
-			// TODO: Pending implementation of Graph.Nodes().Contains()
-			//Expect(nodes).To(Contain(node1))
+			Expect(nodes).To(Contain(node1))
 		})
 
 		// TODO: Write an equivalent test to above for ContainersAreCopies
@@ -235,8 +234,7 @@ func graphTests(
 				Expect(incidentEdges).To(beSetThatIsNotMutable[graph.EndpointPair[int]]())
 
 				grph = putEdge(grph, node1, node2)
-				// TODO: Pending implementation of Graph.IncidentEdges().Contains()
-				//Expect(incidentEdges).To(Contain(newEndpointPair(grph, node1, node2)))
+				Expect(incidentEdges).To(Contain(newEndpointPair(grph, node1, node2)))
 			})
 
 			// TODO: Write an equivalent test to above for ContainersAreCopies
@@ -519,7 +517,7 @@ func undirectedGraphTests(
 					// TODO: When EndpointPair has an Equal method, replace this assertion with a custom one
 					//       that checks that the set contains only one element, where the element is "equal"
 					//       according to EndpointPair.Equal. (The name "BeEquivalentTo" is already taken by
-					//       Gomega. Maybe "EqualAccordingToEqualMethod"?)
+					//       Gomega. Maybe "BeEquivalentUsingEqualMethodTo"?)
 					beSetThatConsistsOf(graph.NewUnorderedEndpointPair(node1, node2)))
 			})
 
@@ -528,7 +526,7 @@ func undirectedGraphTests(
 					// TODO: When EndpointPair has an Equal method, replace this assertion with a custom one
 					//       that checks that the set contains only one element, where the element is "equal"
 					//       according to EndpointPair.Equal. (The name "BeEquivalentTo" is already taken by
-					//       Gomega. Maybe "EqualAccordingToEqualMethod"?)
+					//       Gomega. Maybe "BeEquivalentUsingEqualMethodTo"?)
 					beSetThatConsistsOf(graph.NewUnorderedEndpointPair(node2, node1)))
 			})
 
@@ -615,17 +613,16 @@ func validateGraphState(grph graph.Graph[int]) {
 
 	allEndpointPairs := set.New[graph.EndpointPair[int]]()
 
-	sanityCheckSet(grph.Nodes()).ForEach(func(node int) {
+	sanityCheckIntSet(grph.Nodes()).ForEach(func(node int) {
 		// TODO: Pending implementation of Graph.String()
 		//Expect(nodeString).To(ContainSubstring(strconv.Itoa(node)))
 
 		sanityCheckConnections(grph, node, allEndpointPairs)
-		sanityCheckEdges(grph)
+		sanityCheckEdges(grph, allEndpointPairs)
 	})
 }
 
 func sanityCheckString(grph graph.Graph[int]) {
-	_ = grph
 	// TODO: Pending implementation of Graph.String()
 	//graphString := graph.String()
 	// TODO: Pending implementation of Graph.String() and Graph.IsDirected()
@@ -640,7 +637,6 @@ func sanityCheckString(grph graph.Graph[int]) {
 }
 
 func sanityCheckConnections(grph graph.Graph[int], node int, allEndpointPairs set.MutableSet[graph.EndpointPair[int]]) {
-	// TODO: Pending implementation of many Graph methods
 	if grph.IsDirected() {
 		Expect(grph.Degree(node)).To(Equal(grph.InDegree(node) + grph.OutDegree(node)))
 		Expect(grph.Predecessors(node)).To(HaveLenOf(grph.InDegree(node)))
@@ -658,7 +654,7 @@ func sanityCheckConnections(grph graph.Graph[int], node int, allEndpointPairs se
 		Expect(grph.OutDegree(node)).To(Equal(grph.Degree(node)))
 	}
 
-	sanityCheckSet(grph.AdjacentNodes(node)).ForEach(func(adjacentNode int) {
+	sanityCheckIntSet(grph.AdjacentNodes(node)).ForEach(func(adjacentNode int) {
 		// TODO: Pending implementation of Graph.AllowSelfLoops()
 		//if !graph.AllowsSelfLoops() {
 		//	Expect(node).ToNot(Equal(adjacentNode))
@@ -669,15 +665,19 @@ func sanityCheckConnections(grph graph.Graph[int], node int, allEndpointPairs se
 			To(BeTrue())
 	})
 
-	sanityCheckSet(grph.Successors(node)).ForEach(func(successor int) {
-		allEndpointPairs.Add(newEndpointPair(grph, node, successor))
+	sanityCheckIntSet(grph.Successors(node)).ForEach(func(successor int) {
+		endpointPair := newEndpointPair(grph, node, successor)
+		allEndpointPairs.Add(endpointPair)
 		Expect(grph.Predecessors(successor)).To(Contain(node))
 		Expect(grph.HasEdgeConnecting(node, successor)).To(BeTrue())
-		// TODO: Pending implementation of Graph.IncidentEdges().Contains()
-		//Expect(graph.IncidentEdges(node)).To(Contain(newEndpointPair(graph, node, successor)))
+		Expect(grph.IncidentEdges(node)).To(Contain(endpointPair))
+		if !grph.IsDirected() {
+			reversedEndpointPair := newEndpointPair(grph, endpointPair.NodeV(), endpointPair.NodeU())
+			Expect(grph.IncidentEdges(node)).To(Contain(reversedEndpointPair))
+		}
 	})
 
-	sanityCheckSet(grph.IncidentEdges(node)).ForEach(func(endpoints graph.EndpointPair[int]) {
+	sanityCheckEndpointPairSet(grph.IncidentEdges(node)).ForEach(func(endpoints graph.EndpointPair[int]) {
 		if grph.IsDirected() {
 			Expect(grph.HasEdgeConnecting(endpoints.Source(), endpoints.Target())).To(BeTrue())
 		} else {
@@ -686,8 +686,8 @@ func sanityCheckConnections(grph graph.Graph[int], node int, allEndpointPairs se
 	})
 }
 
-func sanityCheckEdges(grph graph.Graph[int]) {
-	sanityCheckSet(grph.Edges())
+func sanityCheckEdges(grph graph.Graph[int], allEndpointPairs set.MutableSet[graph.EndpointPair[int]]) {
+	sanityCheckEndpointPairSet(grph.Edges())
 	Expect(grph.Edges()).ToNot(Contain(newEndpointPair(grph, nodeNotInGraph, nodeNotInGraph)))
 	// TODO: Pending implementation of Graph.Edges()
 	//Expect(grph.Edges()).To(beSetThatConsistsOfElementsIn[EndpointPair[int]](allEndpointPairs))
@@ -713,14 +713,29 @@ func newEndpointPair[N comparable](grph graph.Graph[N], nodeU N, nodeV N) graph.
 
 // In some cases, graphs may return custom sets that define their own method implementations. Verify that
 // these sets are consistent with the elements produced by their ForEach.
-func sanityCheckSet[N comparable](set set.Set[N]) set.Set[N] {
+func sanityCheckIntSet(set set.Set[int]) set.Set[int] {
 	Expect(set).To(HaveLenOf(forEachCount(set)))
-	// TODO: Pending implementation of keySet.Contains()
-	//set.ForEach(func(elem N) {
-	//	Expect(set).To(Contain(elem))
-	//})
-	//Expect(set).ToNot(Contain(nodeNotInGraph))
-	// TODO: Pending introduction of Set.String()
+	set.ForEach(func(elem int) {
+		Expect(set).To(Contain(elem))
+	})
+	Expect(set).ToNot(Contain(nodeNotInGraph))
+	// TODO: Pending tested implementation of Set.String()
+	//Expect(set).To(HaveStringConsistingOfElementsIn(set))
+	// TODO: Pending introduction of Set.Equal()
+	//Expect(set).To(beSetThatConsistsOfElementsIn(set.CopyOf(set)))
+	return set
+}
+
+// In some cases, graphs may return custom sets that define their own method implementations. Verify that
+// these sets are consistent with the elements produced by their ForEach.
+func sanityCheckEndpointPairSet(set set.Set[graph.EndpointPair[int]]) set.Set[graph.EndpointPair[int]] {
+	Expect(set).To(HaveLenOf(forEachCount(set)))
+	set.ForEach(func(elem graph.EndpointPair[int]) {
+		Expect(set).To(Contain(elem))
+	})
+	Expect(set).ToNot(Contain(graph.NewOrderedEndpointPair(nodeNotInGraph, nodeNotInGraph)))
+	Expect(set).ToNot(Contain(graph.NewUnorderedEndpointPair(nodeNotInGraph, nodeNotInGraph)))
+	// TODO: Pending tested implementation of Set.String()
 	//Expect(set).To(HaveStringConsistingOfElementsIn(set))
 	// TODO: Pending introduction of Set.Equal()
 	//Expect(set).To(beSetThatConsistsOfElementsIn(set.CopyOf(set)))

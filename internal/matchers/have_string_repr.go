@@ -9,8 +9,6 @@ import (
 )
 
 func HaveStringRepr(valueOrMatcher any) types.GomegaMatcher {
-	matcher := types.GomegaMatcher(nil)
-
 	value, ok := valueOrMatcher.(string)
 	if ok {
 		return WithTransform(
@@ -20,7 +18,7 @@ func HaveStringRepr(valueOrMatcher any) types.GomegaMatcher {
 			Equal(value))
 	}
 
-	matcher, ok = valueOrMatcher.(types.GomegaMatcher)
+	matcher, ok := valueOrMatcher.(types.GomegaMatcher)
 	if ok {
 		return WithTransform(
 			func(stringer fmt.Stringer) string {

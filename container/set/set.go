@@ -92,6 +92,7 @@ func (s *set[T]) ForEach(fn func(elem T)) {
 	}
 }
 
+// TODO: Test this method
 func (s *set[T]) String() string {
 	var builder strings.Builder
 
@@ -143,6 +144,7 @@ func (u unmodifiableSet[T]) ForEach(fn func(elem T)) {
 	u.set.ForEach(fn)
 }
 
+// TODO: Test this method
 func (u unmodifiableSet[T]) String() string {
 	return u.set.String()
 }

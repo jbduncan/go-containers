@@ -96,8 +96,8 @@ type keySet[N comparable] struct {
 }
 
 func (k keySet[N]) Contains(elem N) bool {
-	// TODO implement me
-	panic("implement me")
+	_, ok := k.delegate[elem]
+	return ok
 }
 
 func (k keySet[N]) Len() int {
@@ -150,8 +150,13 @@ type incidentEdgeSet[N comparable] struct {
 }
 
 func (i incidentEdgeSet[N]) Contains(elem EndpointPair[N]) bool {
-	//TODO implement me
-	panic("implement me")
+	if !elem.IsOrdered() {
+		// TODO: Once EndpointPair.Equal() is introduced, replace this code with an
+		//       EndpointPair.Equal() check
+		return (i.node == elem.NodeU() && i.adjacentNodes.Contains(elem.NodeV())) ||
+			(i.node == elem.NodeV() && i.adjacentNodes.Contains(elem.NodeU()))
+	}
+	return false
 }
 
 func (i incidentEdgeSet[N]) Len() int {
