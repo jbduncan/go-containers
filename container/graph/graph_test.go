@@ -714,8 +714,7 @@ func newEndpointPair[N comparable](grph graph.Graph[N], nodeU N, nodeV N) graph.
 // In some cases, graphs may return custom sets that define their own method implementations. Verify that
 // these sets are consistent with the elements produced by their ForEach.
 func sanityCheckSet[N comparable](set set.Set[N]) set.Set[N] {
-	// TODO: Pending implementation of keySet.Len()
-	// Expect(set).To(HaveLenOf(forEachCount(set)))
+	Expect(set).To(HaveLenOf(forEachCount(set)))
 	// TODO: Pending implementation of keySet.Contains()
 	//set.ForEach(func(elem N) {
 	//	Expect(set).To(Contain(elem))

@@ -60,7 +60,7 @@ type Builder[N comparable] struct {
 }
 
 func (b Builder[N]) AllowsSelfLoops(allowsSelfLoops bool) Builder[N] {
-	panic("TODO") // TODO
+	return b // TODO
 }
 
 func (b Builder[N]) Build() MutableGraph[N] {
@@ -101,8 +101,7 @@ func (k keySet[N]) Contains(elem N) bool {
 }
 
 func (k keySet[N]) Len() int {
-	// TODO implement me
-	panic("implement me")
+	return len(k.delegate)
 }
 
 func (k keySet[N]) ForEach(fn func(elem N)) {
@@ -156,8 +155,7 @@ func (i incidentEdgeSet[N]) Contains(elem EndpointPair[N]) bool {
 }
 
 func (i incidentEdgeSet[N]) Len() int {
-	//TODO implement me
-	panic("implement me")
+	return i.adjacentNodes.Len()
 }
 
 func (i incidentEdgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
