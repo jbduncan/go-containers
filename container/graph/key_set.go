@@ -20,3 +20,8 @@ func (k keySet[N]) ForEach(fn func(elem N)) {
 		fn(key)
 	}
 }
+
+func (k keySet[N]) String() string {
+	// TODO implement me
+	panic("implement me")
+}

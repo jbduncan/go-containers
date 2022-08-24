@@ -91,11 +91,6 @@ func (m *mutableGraph[N]) Edges() set.Set[EndpointPair[N]] {
 	return set.Unmodifiable(set.New[EndpointPair[N]]())
 }
 
-func (k keySet[N]) String() string {
-	// TODO implement me
-	panic("implement me")
-}
-
 func (m *mutableGraph[N]) AdjacentNodes(node N) set.Set[N] {
 	adjacentNodes, ok := m.adjacencyList[node]
 	if !ok {
