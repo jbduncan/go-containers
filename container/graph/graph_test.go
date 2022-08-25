@@ -95,7 +95,7 @@ func graphTests(
 
 		skipIfGraphIsNotMutable := func() {
 			if !graphIsMutable() {
-				Skip("Graph is not mutable.")
+				Skip("Graph is not mutable")
 			}
 		}
 
@@ -488,13 +488,29 @@ func undirectedGraphTests(
 			grph graph.Graph[int]
 		)
 
+		skipIfGraphAllowsSelfLoops := func() {
+			if grph.AllowsSelfLoops() {
+				Skip("Graph allows self-loops")
+			}
+		}
+
+		skipIfGraphDisallowsSelfLoops := func() {
+			if !grph.AllowsSelfLoops() {
+				Skip("Graph disallows self-loops")
+			}
+		}
+
 		BeforeEach(func() {
 			assertContainersMode(containersMode)
 
 			grph = createGraph()
 			if grph.IsDirected() {
-				Skip("graph is not undirected")
+				Skip("Graph is directed")
 			}
+		})
+
+		AfterEach(func() {
+			validateUndirectedEdges(grph)
 		})
 
 		Context("when adding one edge", func() {
@@ -517,7 +533,7 @@ func undirectedGraphTests(
 					// TODO: When EndpointPair has an Equal method, replace this assertion with a custom one
 					//       that checks that the set contains only one element, where the element is "equal"
 					//       according to EndpointPair.Equal. (The name "BeEquivalentTo" is already taken by
-					//       Gomega. Maybe "BeEquivalentUsingEqualMethodTo"?)
+					//       Gomega. Maybe "BeEquivalentToUsingEqualMethod"?)
 					beSetThatConsistsOf(graph.NewUnorderedEndpointPair(node1, node2)))
 			})
 
@@ -526,7 +542,7 @@ func undirectedGraphTests(
 					// TODO: When EndpointPair has an Equal method, replace this assertion with a custom one
 					//       that checks that the set contains only one element, where the element is "equal"
 					//       according to EndpointPair.Equal. (The name "BeEquivalentTo" is already taken by
-					//       Gomega. Maybe "BeEquivalentUsingEqualMethodTo"?)
+					//       Gomega. Maybe "BeEquivalentToUsingEqualMethod"?)
 					beSetThatConsistsOf(graph.NewUnorderedEndpointPair(node2, node1)))
 			})
 
@@ -589,6 +605,29 @@ func undirectedGraphTests(
 				})
 			})
 		})
+
+		Context("when the graph disallows self-loops", func() {
+			Context("and adding one self-loop edge", func() {
+				It("panics", func() {
+					skipIfGraphAllowsSelfLoops()
+
+					Expect(func() { grph = putEdge(grph, node1, node1) }).
+						To(PanicWith("self-loops are disallowed"))
+				})
+			})
+		})
+
+		Context("when the graph allows self-loops", func() {
+			Context("and adding one self-loop edge", func() {
+				It("sees the shared node as its own adjacent node", func() {
+					skipIfGraphDisallowsSelfLoops()
+
+					grph = putEdge(grph, node1, node1)
+
+					Expect(grph.AdjacentNodes(node1)).To(beSetThatConsistsOf(node1))
+				})
+			})
+		})
 	})
 }
 
@@ -597,7 +636,7 @@ func assertContainersMode(containersMode ContainersMode) {
 		containersMode != ContainersAreCopies {
 		Fail(
 			fmt.Sprintf(
-				"containersMode returned neither ContainersAreViews nor "+
+				"containersMode is neither ContainersAreViews nor "+
 					"ContainersAreCopies, but %d instead",
 				containersMode))
 	}
@@ -704,13 +743,6 @@ func expectStronglyEquivalent(first graph.Graph[int], second graph.Graph[int]) {
 	//Expect(first).To(beGraphEqualTo(second))
 }
 
-func newEndpointPair[N comparable](grph graph.Graph[N], nodeU N, nodeV N) graph.EndpointPair[N] {
-	if grph.IsDirected() {
-		return graph.NewOrderedEndpointPair(nodeU, nodeV)
-	}
-	return graph.NewUnorderedEndpointPair(nodeU, nodeV)
-}
-
 // In some cases, graphs may return custom sets that define their own method implementations. Verify that
 // these sets are consistent with the elements produced by their ForEach.
 func sanityCheckIntSet(set set.Set[int]) set.Set[int] {
@@ -742,11 +774,23 @@ func sanityCheckEndpointPairSet(set set.Set[graph.EndpointPair[int]]) set.Set[gr
 	return set
 }
 
-func beSetThatConsistsOf[N comparable](first N, others ...N) types.GomegaMatcher {
-	all := []N{first}
+func validateUndirectedEdges(grph graph.Graph[int]) {
+	// TODO: Check that the predecessors, successors and adjacent nodes of
+	//       every node in grph are the same.
+}
+
+func newEndpointPair[N comparable](grph graph.Graph[N], nodeU N, nodeV N) graph.EndpointPair[N] {
+	if grph.IsDirected() {
+		return graph.NewOrderedEndpointPair(nodeU, nodeV)
+	}
+	return graph.NewUnorderedEndpointPair(nodeU, nodeV)
+}
+
+func beSetThatConsistsOf[T comparable](first T, others ...T) types.GomegaMatcher {
+	all := []T{first}
 	all = append(all, others...)
 
-	return WithTransform(ForEachToSlice[N], ConsistOf(all))
+	return WithTransform(ForEachToSlice[T], ConsistOf(all))
 }
 
 func beSetThatConsistsOfElementsIn[T comparable](set set.Set[T]) types.GomegaMatcher {
@@ -766,10 +810,10 @@ func beSetThatIsNotMutable[T comparable]() types.GomegaMatcher {
 		BeFalse())
 }
 
-func forEachCount[N comparable](set set.Set[N]) int {
+func forEachCount[T comparable](set set.Set[T]) int {
 	var result int
 
-	set.ForEach(func(elem N) {
+	set.ForEach(func(elem T) {
 		result++
 	})
 

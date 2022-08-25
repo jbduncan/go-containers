@@ -57,20 +57,24 @@ func Undirected[N comparable]() Builder[N] {
 }
 
 type Builder[N comparable] struct {
+	allowsSelfLoops bool
 }
 
 func (b Builder[N]) AllowsSelfLoops(allowsSelfLoops bool) Builder[N] {
-	return b // TODO
+	b.allowsSelfLoops = allowsSelfLoops
+	return b
 }
 
 func (b Builder[N]) Build() MutableGraph[N] {
 	return &mutableGraph[N]{
-		adjacencyList: map[N]set.MutableSet[N]{},
+		adjacencyList:   map[N]set.MutableSet[N]{},
+		allowsSelfLoops: b.allowsSelfLoops,
 	}
 }
 
 type mutableGraph[N comparable] struct {
-	adjacencyList map[N]set.MutableSet[N]
+	adjacencyList   map[N]set.MutableSet[N]
+	allowsSelfLoops bool
 }
 
 func (m *mutableGraph[N]) IsDirected() bool {
@@ -78,7 +82,7 @@ func (m *mutableGraph[N]) IsDirected() bool {
 }
 
 func (m *mutableGraph[N]) AllowsSelfLoops() bool {
-	panic("TODO") // TODO
+	return m.allowsSelfLoops
 }
 
 func (m *mutableGraph[N]) Nodes() set.Set[N] {
@@ -170,6 +174,10 @@ func (m *mutableGraph[N]) AddNode(node N) bool {
 }
 
 func (m *mutableGraph[N]) PutEdge(nodeU N, nodeV N) bool {
+	if !m.AllowsSelfLoops() && nodeU == nodeV {
+		panic("self-loops are disallowed")
+	}
+
 	adjacentNodes, ok := m.adjacencyList[nodeU]
 	if !ok {
 		adjacentNodes = set.New[N]()
