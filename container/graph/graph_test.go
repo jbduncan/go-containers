@@ -12,7 +12,7 @@ import (
 	. "go-containers/internal/matchers"
 )
 
-var _ = Describe("Undirected mutable graph", func() {
+var _ = Describe("Graphs", func() {
 	mutableGraphTests(
 		func() graph.MutableGraph[int] {
 			return graph.Undirected[int]().Build()
@@ -628,6 +628,9 @@ func undirectedGraphTests(
 				})
 			})
 		})
+
+		// TODO: Implement tests for stable ordering when NodeOrder()/IncidentEdgeOrder()
+		//       is introduced.
 	})
 }
 
@@ -694,10 +697,9 @@ func sanityCheckConnections(grph graph.Graph[int], node int, allEndpointPairs se
 	}
 
 	sanityCheckIntSet(grph.AdjacentNodes(node)).ForEach(func(adjacentNode int) {
-		// TODO: Pending implementation of Graph.AllowSelfLoops()
-		//if !graph.AllowsSelfLoops() {
-		//	Expect(node).ToNot(Equal(adjacentNode))
-		//}
+		if !grph.AllowsSelfLoops() {
+			Expect(node).ToNot(Equal(adjacentNode))
+		}
 		Expect(
 			grph.Predecessors(node).Contains(adjacentNode) ||
 				grph.Successors(node).Contains(adjacentNode)).
@@ -734,8 +736,7 @@ func sanityCheckEdges(grph graph.Graph[int], allEndpointPairs set.MutableSet[gra
 
 func expectStronglyEquivalent(first graph.Graph[int], second graph.Graph[int]) {
 	// Properties not covered by Graph.Equal()
-	// TODO: Pending implementation of Graph.AllowsSelfLoops()
-	//Expect(first.AllowsSelfLoops()).To(Equal(second.AllowsSelfLoops()))
+	Expect(first.AllowsSelfLoops()).To(Equal(second.AllowsSelfLoops()))
 	// TODO: Pending implementation of Graph.NodeOrder()
 	//Expect(first).To(haveNodeOrder(second.NodeOrder()))
 

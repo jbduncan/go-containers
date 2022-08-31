@@ -9,7 +9,7 @@ import (
 	. "go-containers/internal/matchers"
 )
 
-var _ = Describe("Set", func() {
+var _ = Describe("Sets", func() {
 
 	var mutSet set.MutableSet[string]
 
