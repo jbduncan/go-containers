@@ -69,12 +69,6 @@ func (b Builder[N]) AllowsSelfLoops(allowsSelfLoops bool) Builder[N] {
 //       than the MutableGraph interface, to allow new methods to be
 //       added without breaking backwards compatibility:
 //       - https://github.com/golang/go/wiki/CodeReviewComments#interfaces
-//       For that matter, consider removing the Graph and MutableGraph
-//       interfaces entirely or moving them to graph_test.go (the only
-//       user so far), as users can easily define interfaces with the
-//       graph methods that they need. But see how gonum do things first:
-//       - https://pkg.go.dev/gonum.org/v1/gonum/graph
-//       - https://pkg.go.dev/gonum.org/v1/gonum/graph/testgraph
 
 func (b Builder[N]) Build() MutableGraph[N] {
 	return &mutableGraph[N]{
