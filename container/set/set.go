@@ -28,8 +28,8 @@ type Set[T comparable] interface {
 
 	// ForEach runs the given function on each element in this set.
 	//
-	// The order in which the elements are returned is undefined; it may change
-	// even from one call to the next.
+	// The order in which the elements are returned is undefined; it may even
+	// change from one call to the next.
 	ForEach(fn func(elem T))
 
 	// String returns a string representation of all the elements in this set.
@@ -92,7 +92,6 @@ func (s *set[T]) ForEach(fn func(elem T)) {
 	}
 }
 
-// TODO: Test this method
 func (s *set[T]) String() string {
 	var builder strings.Builder
 
@@ -144,7 +143,6 @@ func (u unmodifiableSet[T]) ForEach(fn func(elem T)) {
 	u.set.ForEach(fn)
 }
 
-// TODO: Test this method
 func (u unmodifiableSet[T]) String() string {
 	return u.set.String()
 }
