@@ -14,11 +14,13 @@ import (
 
 var _ = Describe("Graphs", func() {
 	mutableGraphTests(
+		"Undirected graph",
 		func() graph.MutableGraph[int] {
 			return graph.Undirected[int]().Build()
 		},
 		ContainersAreViews)
 	mutableGraphTests(
+		"Undirected graph allowing self-loops",
 		func() graph.MutableGraph[int] {
 			return graph.Undirected[int]().AllowsSelfLoops(true).Build()
 		},
@@ -51,6 +53,7 @@ const (
 //
 // TODO: Move to a public package for graph testing utilities
 func mutableGraphTests(
+	graphName string,
 	createGraph func() graph.MutableGraph[int],
 	containersMode ContainersMode) {
 
@@ -67,25 +70,20 @@ func mutableGraphTests(
 		return grph
 	}
 
-	graphTests(func() graph.Graph[int] { return createGraph() }, addNode, putEdge, containersMode)
+	graphTests(graphName, func() graph.Graph[int] { return createGraph() }, addNode, putEdge, containersMode)
 }
 
 func graphTests(
+	graphName string,
 	createGraph func() graph.Graph[int],
 	addNode func(g graph.Graph[int], n int) graph.Graph[int],
 	putEdge func(g graph.Graph[int], n1 int, n2 int) graph.Graph[int],
 	containersMode ContainersMode) {
 
-	Context("given a graph", func() {
+	Context(fmt.Sprintf("%s: given a graph", graphName), func() {
 		var (
 			grph graph.Graph[int]
 		)
-
-		graphIsMutable := func() bool {
-			_, result := grph.(graph.MutableGraph[int])
-
-			return result
-		}
 
 		graphAsMutable := func() graph.MutableGraph[int] {
 			result, _ := grph.(graph.MutableGraph[int])
@@ -94,7 +92,9 @@ func graphTests(
 		}
 
 		skipIfGraphIsNotMutable := func() {
-			if !graphIsMutable() {
+			_, mutable := grph.(graph.MutableGraph[int])
+
+			if !mutable {
 				Skip("Graph is not mutable")
 			}
 		}
@@ -314,7 +314,7 @@ func graphTests(
 			})
 		})
 
-		Context("when adding one edge", func() {
+		Context("when putting one edge", func() {
 			BeforeEach(func() {
 				grph = putEdge(grph, node1, node2)
 			})
@@ -330,7 +330,7 @@ func graphTests(
 			})
 		})
 
-		Context("when adding two connected edges", func() {
+		Context("when putting two connected edges", func() {
 			It("reports that the common node has a degree of 2", func() {
 				grph = putEdge(grph, node1, node2)
 				grph = putEdge(grph, node1, node3)
@@ -346,7 +346,7 @@ func graphTests(
 			})
 		})
 
-		Context("when adding two anti-parallel edges", func() {
+		Context("when putting two anti-parallel edges", func() {
 			Context("and removing one of the nodes", func() {
 				It("leaves the other node alone", func() {
 					skipIfGraphIsNotMutable()
@@ -473,16 +473,17 @@ func graphTests(
 		})
 	})
 
-	undirectedGraphTests(createGraph, addNode, putEdge, containersMode)
+	undirectedGraphTests(graphName, createGraph, addNode, putEdge, containersMode)
 }
 
 func undirectedGraphTests(
+	graphName string,
 	createGraph func() graph.Graph[int],
 	addNode func(g graph.Graph[int], n int) graph.Graph[int],
 	putEdge func(g graph.Graph[int], n1 int, n2 int) graph.Graph[int],
 	containersMode ContainersMode) {
 
-	Context("given an undirected graph", func() {
+	Context(fmt.Sprintf("%s: given an undirected graph", graphName), func() {
 
 		var (
 			grph graph.Graph[int]
@@ -513,7 +514,7 @@ func undirectedGraphTests(
 			validateUndirectedEdges(grph)
 		})
 
-		Context("when adding one edge", func() {
+		Context("when putting one edge", func() {
 			BeforeEach(func() {
 				grph = putEdge(grph, node1, node2)
 			})
@@ -607,7 +608,7 @@ func undirectedGraphTests(
 		})
 
 		Context("when the graph disallows self-loops", func() {
-			Context("and adding one self-loop edge", func() {
+			Context("and putting one self-loop edge", func() {
 				It("panics", func() {
 					skipIfGraphAllowsSelfLoops()
 
@@ -618,7 +619,7 @@ func undirectedGraphTests(
 		})
 
 		Context("when the graph allows self-loops", func() {
-			Context("and adding one self-loop edge", func() {
+			Context("and putting one self-loop edge", func() {
 				It("sees the shared node as its own adjacent node", func() {
 					skipIfGraphDisallowsSelfLoops()
 
@@ -630,7 +631,8 @@ func undirectedGraphTests(
 		})
 
 		// TODO: Implement tests for stable ordering when NodeOrder()/IncidentEdgeOrder()
-		//       is introduced.
+		//       is introduced. See Guava's AbstractStandardUndirectedGraphTest.java for inspiration.
+
 	})
 }
 
@@ -744,6 +746,9 @@ func expectStronglyEquivalent(first graph.Graph[int], second graph.Graph[int]) {
 	//Expect(first).To(beGraphEqualTo(second))
 }
 
+// TODO: Consider replacing these set sanity checks with proper tests fashioned after the
+//       ones in set_test.go
+
 // In some cases, graphs may return custom sets that define their own method implementations. Verify that
 // these sets are consistent with the elements produced by their ForEach.
 func sanityCheckIntSet(set set.Set[int]) set.Set[int] {
@@ -754,7 +759,7 @@ func sanityCheckIntSet(set set.Set[int]) set.Set[int] {
 	Expect(set).ToNot(Contain(nodeNotInGraph))
 	// TODO: Pending tested implementation of Set.String()
 	//Expect(set).To(HaveStringConsistingOfElementsIn(set))
-	// TODO: Pending introduction of Set.Equal()
+	// TODO: Pending introduction of Set.Equal() and set.CopyOf()
 	//Expect(set).To(beSetThatConsistsOfElementsIn(set.CopyOf(set)))
 	return set
 }
@@ -770,14 +775,16 @@ func sanityCheckEndpointPairSet(set set.Set[graph.EndpointPair[int]]) set.Set[gr
 	Expect(set).ToNot(Contain(graph.NewUnorderedEndpointPair(nodeNotInGraph, nodeNotInGraph)))
 	// TODO: Pending tested implementation of Set.String()
 	//Expect(set).To(HaveStringConsistingOfElementsIn(set))
-	// TODO: Pending introduction of Set.Equal()
+	// TODO: Pending introduction of Set.Equal() and set.CopyOf()
 	//Expect(set).To(beSetThatConsistsOfElementsIn(set.CopyOf(set)))
 	return set
 }
 
+// TODO: Consider moving this sanity check into its own test.
+
 func validateUndirectedEdges(grph graph.Graph[int]) {
 	// TODO: Check that the predecessors, successors and adjacent nodes of
-	//       every node in grph are the same.
+	//       every node in grph are the same. Pending introduction of Set.Equal().
 }
 
 func newEndpointPair[N comparable](grph graph.Graph[N], nodeU N, nodeV N) graph.EndpointPair[N] {
