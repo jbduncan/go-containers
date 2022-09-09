@@ -124,7 +124,7 @@ var _ Set[int] = (*unmodifiableSet[int])(nil)
 //
 // This function allows for two use cases:
 //   - Immutable sets.
-//   - Set views that can be mutated by your code but not your clients' code.
+//   - Sets that can be mutated by your own code but not your clients' code.
 func Unmodifiable[T comparable](set MutableSet[T]) Set[T] {
 	return unmodifiableSet[T]{
 		set: set,
