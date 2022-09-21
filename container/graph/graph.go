@@ -120,8 +120,6 @@ func (m *mutableGraph[N]) Successors(node N) set.Set[N] {
 func (m *mutableGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 	adjacentNodes, ok := m.adjacencyList[node]
 	if !ok {
-		// TODO: Consider extracting out into a constant or function
-		//       in set.go
 		return set.Unmodifiable(set.New[EndpointPair[N]]())
 	}
 
@@ -233,5 +231,3 @@ func (m *mutableGraph[N]) RemoveEdge(nodeU N, nodeV N) bool {
 
 	return true
 }
-
-// type ElementOrder struct {}
