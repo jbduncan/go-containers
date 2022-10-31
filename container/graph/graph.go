@@ -97,6 +97,7 @@ func (m *mutableGraph[N]) Nodes() set.Set[N] {
 }
 
 func (m *mutableGraph[N]) Edges() set.Set[EndpointPair[N]] {
+	// TODO: flesh out
 	return set.Unmodifiable(set.New[EndpointPair[N]]())
 }
 
@@ -197,7 +198,7 @@ func (m *mutableGraph[N]) PutEdge(nodeU N, nodeV N) bool {
 	}
 	adjacentNodes.Add(nodeU)
 
-	//TODO
+	//TODO: return booleans at all the right times
 	return false
 }
 
