@@ -732,7 +732,7 @@ func sanityCheckConnections(grph graph.Graph[int], node int, allEndpointPairs se
 func sanityCheckEdges(grph graph.Graph[int], allEndpointPairs set.MutableSet[graph.EndpointPair[int]]) {
 	sanityCheckEndpointPairSet(grph.Edges())
 	Expect(grph.Edges()).ToNot(Contain(newEndpointPair(grph, nodeNotInGraph, nodeNotInGraph)))
-	// TODO: Pending implementation of Graph.Edges()
+	// TODO: Pending implementation of Graph.Edges(), which depends on Set.Iter()
 	//Expect(grph.Edges()).To(beSetThatConsistsOfElementsIn[EndpointPair[int]](allEndpointPairs))
 }
 

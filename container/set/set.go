@@ -39,8 +39,11 @@ type Set[T comparable] interface {
 	// next.
 	String() string
 
-	// TODO: Set: make ToSlice method that returns the elements in a slice
 	// TODO: Set: make Iter method that returns an Iterator
+	// Iter returns an iterator for the elements in this set.
+	//Iter() iter.Iterator[T]
+
+	// TODO: Set: make ToSlice method that returns the elements in a slice
 	// TODO: Set: make Equal method and discourage == from being used (documenting that its use is undefined).
 }
 
@@ -49,10 +52,10 @@ type MutableSet[T comparable] interface {
 	Set[T]
 
 	// Add adds the given element into this set, if it is not already present.
-	Add(elem T) // TODO: Return true if set was changed, false otherwise
+	Add(elem T) // TODO: Return true if set did not already have the element, otherwise false
 
 	// Remove removes the given element from this set.
-	Remove(elem T)
+	Remove(elem T) // TODO: Return true if set had the element, otherwise false
 }
 
 // New returns a new empty MutableSet.
