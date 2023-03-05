@@ -12,6 +12,17 @@ import (
 	. "go-containers/internal/matchers"
 )
 
+// TODO: Move mutableGraphTests to a graphtester package
+// TODO: Migrate mutableGraphTests to a struct with a constructor function like:
+//       graphtester.ForMutableGraph(
+//           name string,
+//           newGraph func() graph.MutableGraph[int],
+//           ...graphtester.Option options)
+//       ...where options is any of:
+//         - WhereContainersAreViews
+//         - WhereContainersAreCopies
+//       ...and the default is `WhereContainersAreViews`
+
 var _ = Describe("Graphs", func() {
 	mutableGraphTests(
 		"Undirected graph",
@@ -631,7 +642,7 @@ func undirectedGraphTests(
 		})
 
 		// TODO: Implement tests for stable ordering when NodeOrder()/IncidentEdgeOrder()
-		//       is introduced. See Guava's AbstractStandardUndirectedGraphTest.java for inspiration.
+		//       is introduced.
 
 	})
 }
