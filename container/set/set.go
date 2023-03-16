@@ -39,9 +39,9 @@ type Set[T comparable] interface {
 	// next.
 	String() string
 
-	// TODO: Set: make Iter method that returns an Iterator
-	// Iter returns an iterator for the elements in this set.
-	//Iter() iter.Iterator[T]
+	// TODO: Set: make Iterator method that returns an Iterator
+	// Iterator returns an iterator for the elements in this set.
+	//Iterator() iterator.Iterator[T]
 
 	// TODO: Set: make ToSlice method that returns the elements in a slice
 	// TODO: Set: make Equal method and discourage == from being used (documenting that its use is undefined).

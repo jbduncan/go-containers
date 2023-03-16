@@ -1,4 +1,4 @@
-package iter
+package iterator
 
 // Iterator generates a series of elements, one by one. Usually it gets its elements from an underlying collection.
 // TODO: Document with an example use.
