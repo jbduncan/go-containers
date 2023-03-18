@@ -39,11 +39,14 @@ type Set[T comparable] interface {
 	// next.
 	String() string
 
-	// TODO: Set: make Iterator method that returns an Iterator
+	// TODO: Set: make Iterator method that returns an Iterator.
+	//       Note: this depends on making a custom map type that we can easily make an
+	//       iterator for.
 	// Iterator returns an iterator for the elements in this set.
 	//Iterator() iterator.Iterator[T]
 
 	// TODO: Set: make ToSlice method that returns the elements in a slice
+
 	// TODO: Set: make Equal method and discourage == from being used (documenting that its use is undefined).
 }
 
@@ -58,6 +61,11 @@ type MutableSet[T comparable] interface {
 	Remove(elem T) // TODO: Return true if set had the element, otherwise false
 }
 
+// TODO: Consider returning a public version of the concrete type, rather
+//       than the MutableSet interface, to allow new methods to be added
+//       without breaking backwards compatibility:
+//       - https://github.com/golang/go/wiki/CodeReviewComments#interfaces
+
 // New returns a new empty MutableSet.
 func New[T comparable]() MutableSet[T] {
 	return &set[T]{
@@ -68,6 +76,9 @@ func New[T comparable]() MutableSet[T] {
 type set[T comparable] struct {
 	delegate map[T]struct{}
 }
+
+// TODO: If the Set and MutableSet interfaces are ever eliminated, move them and these
+//       compile-time type assertions to a test package.
 
 var _ Set[int] = (*set[int])(nil)
 var _ MutableSet[int] = (*set[int])(nil)

@@ -77,6 +77,13 @@ func (b Builder[N]) Build() MutableGraph[N] {
 	}
 }
 
+// TODO: If the Graph and MutableGraph interfaces are ever eliminated, move them and these
+//       compile-time type assertions to a test package.
+
+var _ Graph[int] = (*mutableGraph[int])(nil)
+var _ MutableGraph[int] = (*mutableGraph[int])(nil)
+
+// TODO: Rename to `graph` for consistency with `set.set`.
 type mutableGraph[N comparable] struct {
 	adjacencyList   map[N]set.MutableSet[N]
 	allowsSelfLoops bool
@@ -91,7 +98,7 @@ func (m *mutableGraph[N]) AllowsSelfLoops() bool {
 }
 
 func (m *mutableGraph[N]) Nodes() set.Set[N] {
-	return keySet[N]{
+	return &keySet[N]{
 		delegate: m.adjacencyList,
 	}
 }
