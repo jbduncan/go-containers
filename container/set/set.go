@@ -32,6 +32,13 @@ type Set[T comparable] interface {
 	// change from one call to the next.
 	ForEach(fn func(elem T))
 
+	// ToSlice returns a new slice with the contents of this set copied into
+	// it.
+	//
+	// The order of the elements in this slice is undefined; it may even
+	// change from one call of ToSlice to the next.
+	ToSlice() []T
+
 	// String returns a string representation of all the elements in this set.
 	//
 	// The format of this string is undefined. The order of the elements in
@@ -45,12 +52,11 @@ type Set[T comparable] interface {
 	// Iterator returns an iterator for the elements in this set.
 	//Iterator() iterator.Iterator[T]
 
-	// TODO: Set: make ToSlice method that returns the elements in a slice
-
 	// TODO: Set: make Equal method and discourage == from being used (documenting that its use is undefined).
 }
 
-// MutableSet is a Set with additional methods for adding and removing elements to and from the set.
+// MutableSet is a Set with additional methods for adding and removing
+// elements to and from the set.
 type MutableSet[T comparable] interface {
 	Set[T]
 
@@ -104,6 +110,16 @@ func (s *set[T]) ForEach(fn func(elem T)) {
 	for elem := range s.delegate {
 		fn(elem)
 	}
+}
+
+func (s *set[T]) ToSlice() []T {
+	result := make([]T, 0, s.Len())
+
+	for elem := range s.delegate {
+		result = append(result, elem)
+	}
+
+	return result
 }
 
 func (s *set[T]) String() string {

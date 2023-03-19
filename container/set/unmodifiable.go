@@ -33,6 +33,10 @@ func (u unmodifiableSet[T]) ForEach(fn func(elem T)) {
 	u.set.ForEach(fn)
 }
 
+func (u unmodifiableSet[T]) ToSlice() []T {
+	return u.set.ToSlice()
+}
+
 func (u unmodifiableSet[T]) String() string {
 	return u.set.String()
 }

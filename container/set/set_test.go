@@ -28,12 +28,16 @@ var _ = Describe("Sets", func() {
 			Expect(mutSet).To(haveLenOfZero())
 		})
 
-		It("returns nothing upon iteration", func() {
+		It("returns nothing on iteration", func() {
 			Expect(mutSet).To(haveForEachThatProducesNothing())
 		})
 
 		It("has an empty list string representation", func() {
 			Expect(mutSet).To(HaveStringRepr("[]"))
+		})
+
+		It("returns an empty slice on calling .ToSlice()", func() {
+			Expect(mutSet).To(HaveEmptyToSlice())
 		})
 
 		Context("when adding one element", func() {
@@ -53,8 +57,12 @@ var _ = Describe("Sets", func() {
 				Expect(mutSet).ToNot(Contain("zelda"))
 			})
 
-			It("returns element upon iteration", func() {
+			It("returns element on iteration", func() {
 				Expect(mutSet).To(haveForEachThatProduces("link"))
+			})
+
+			It("returns a single element slice on calling .ToSlice()", func() {
+				Expect(mutSet).To(HaveToSliceThatConsistsOf("link"))
 			})
 
 			It("has a single element list string representation", func() {
@@ -88,6 +96,10 @@ var _ = Describe("Sets", func() {
 
 			It("returns both elements upon iteration", func() {
 				Expect(mutSet).To(haveForEachThatProduces("link", "zelda"))
+			})
+
+			It("returns a two element slice on calling .ToSlice()", func() {
+				Expect(mutSet).To(HaveToSliceThatConsistsOf("link", "zelda"))
 			})
 
 			It("has a two element list string representation", func() {
@@ -151,8 +163,12 @@ var _ = Describe("Sets", func() {
 				Expect(unmodSet).To(haveLenOfZero())
 			})
 
-			It("returns nothing upon iteration", func() {
+			It("returns nothing on iteration", func() {
 				Expect(unmodSet).To(haveForEachThatProducesNothing())
+			})
+
+			It("returns an empty slice on calling .ToSlice()", func() {
+				Expect(mutSet).To(HaveEmptyToSlice())
 			})
 
 			It("has an empty list string representation", func() {
@@ -172,8 +188,12 @@ var _ = Describe("Sets", func() {
 					Expect(unmodSet).To(Contain("link"))
 				})
 
-				It("returns element upon iteration", func() {
+				It("returns element on iteration", func() {
 					Expect(unmodSet).To(haveForEachThatProduces("link"))
+				})
+
+				It("returns a single element slice on calling .ToSlice()", func() {
+					Expect(mutSet).To(HaveToSliceThatConsistsOf("link"))
 				})
 
 				It("has a single element list string representation", func() {
@@ -182,10 +202,16 @@ var _ = Describe("Sets", func() {
 			})
 
 			Context("and adding two elements afterwards", func() {
-				It("has a two element list string representation", func() {
+				BeforeEach(func() {
 					mutSet.Add("link")
 					mutSet.Add("zelda")
+				})
 
+				It("returns a two element slice on calling .ToSlice()", func() {
+					Expect(mutSet).To(HaveToSliceThatConsistsOf("link", "zelda"))
+				})
+
+				It("has a two element list string representation", func() {
 					Expect(unmodSet).
 						To(HaveStringRepr(BeElementOf("[link, zelda]", "[zelda, link]")))
 				})

@@ -28,6 +28,11 @@ func (i incidentEdgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
 		})
 }
 
+func (i incidentEdgeSet[N]) ToSlice() []EndpointPair[N] {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (i incidentEdgeSet[N]) String() string {
 	//TODO implement me
 	panic("implement me")

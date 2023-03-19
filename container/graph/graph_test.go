@@ -124,6 +124,10 @@ func graphTests(
 			Expect(grph.Nodes()).To(beEmptySet[int]())
 		})
 
+		It("returns an empty slice on calling the nodes' .ToSlice()", func() {
+			Expect(grph.Nodes()).To(HaveEmptyToSlice[int]())
+		})
+
 		It("contains nodes with an empty string representation", func() {
 			Expect(grph.Nodes()).To(HaveStringRepr("[]"))
 		})
@@ -168,6 +172,10 @@ func graphTests(
 
 			It("contains just the node", func() {
 				Expect(grph.Nodes()).To(beSetThatConsistsOf(node1))
+			})
+
+			It("returns a single element slice on calling nodes' .ToSlice()", func() {
+				Expect(grph.Nodes()).To(HaveToSliceThatConsistsOf(node1))
 			})
 
 			It("contains nodes with a single element string representation", func() {
@@ -267,6 +275,10 @@ func graphTests(
 
 			It("contains both nodes", func() {
 				Expect(grph.Nodes()).To(beSetThatConsistsOf(node1, node2))
+			})
+
+			It("returns a two element slice on calling nodes' .ToSlice()", func() {
+				Expect(grph.Nodes()).To(HaveToSliceThatConsistsOf(node1, node2))
 			})
 
 			It("contains nodes with a two element string representation", func() {

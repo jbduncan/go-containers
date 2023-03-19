@@ -51,6 +51,8 @@ func Contain[T comparable](elem T) types.GomegaMatcher {
 		BeTrue())
 }
 
+// TODO: Replace a few of ForEachToSlice's uses with set.ToSlice()
+
 func ForEachToSlice[T comparable](s set.Set[T]) []T {
 	var result []T
 
@@ -59,4 +61,23 @@ func ForEachToSlice[T comparable](s set.Set[T]) []T {
 	})
 
 	return result
+}
+
+func HaveEmptyToSlice[T comparable]() types.GomegaMatcher {
+	return WithTransform(
+		func(s set.Set[T]) []T {
+			return s.ToSlice()
+		},
+		BeEmpty())
+}
+
+func HaveToSliceThatConsistsOf[T comparable](first T, others ...T) types.GomegaMatcher {
+	all := []T{first}
+	all = append(all, others...)
+
+	return WithTransform(
+		func(s set.Set[T]) []T {
+			return s.ToSlice()
+		},
+		ConsistOf(all))
 }
