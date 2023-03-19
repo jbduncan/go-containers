@@ -9,3 +9,5 @@ type Iterator[T any] interface {
 	// Next returns true if the iteration has more elements, otherwise false.
 	Next() bool
 }
+
+// TODO: Introduce implementation that iterates over slices.
