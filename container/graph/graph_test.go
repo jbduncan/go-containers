@@ -124,8 +124,10 @@ func graphTests(
 			Expect(grph.Nodes()).To(beEmptySet[int]())
 		})
 
-		It("returns an empty slice on calling the nodes' .ToSlice()", func() {
-			Expect(grph.Nodes()).To(HaveEmptyToSlice[int]())
+		Context("when returning a slice representation of the nodes", func() {
+			It("returns an empty slice", func() {
+				Expect(grph.Nodes()).To(HaveEmptyToSlice[int]())
+			})
 		})
 
 		It("contains nodes with an empty string representation", func() {
@@ -174,8 +176,10 @@ func graphTests(
 				Expect(grph.Nodes()).To(beSetThatConsistsOf(node1))
 			})
 
-			It("returns a single element slice on calling nodes' .ToSlice()", func() {
-				Expect(grph.Nodes()).To(HaveToSliceThatConsistsOf(node1))
+			Context("when returning a slice representation of the nodes", func() {
+				It("returns a single element slice", func() {
+					Expect(grph.Nodes()).To(HaveToSliceThatConsistsOf(node1))
+				})
 			})
 
 			It("contains nodes with a single element string representation", func() {
@@ -277,8 +281,10 @@ func graphTests(
 				Expect(grph.Nodes()).To(beSetThatConsistsOf(node1, node2))
 			})
 
-			It("returns a two element slice on calling nodes' .ToSlice()", func() {
-				Expect(grph.Nodes()).To(HaveToSliceThatConsistsOf(node1, node2))
+			Context("when returning a slice representation of the nodes", func() {
+				It("returns a two element slice", func() {
+					Expect(grph.Nodes()).To(HaveToSliceThatConsistsOf(node1, node2))
+				})
 			})
 
 			It("contains nodes with a two element string representation", func() {
@@ -733,6 +739,7 @@ func sanityCheckString(grph graph.Graph[int]) {
 	//nodeString := graphString[nodeStart:edgeStart] // safe because contents are ASCII
 }
 
+// TODO: Move to own tests
 func sanityCheckConnections(grph graph.Graph[int], node int, allEndpointPairs set.MutableSet[graph.EndpointPair[int]]) {
 	if grph.IsDirected() {
 		Expect(grph.Degree(node)).To(Equal(grph.InDegree(node) + grph.OutDegree(node)))
@@ -803,29 +810,31 @@ func expectStronglyEquivalent(first graph.Graph[int], second graph.Graph[int]) {
 
 // In some cases, graphs may return custom sets that define their own method implementations. Verify that
 // these sets are consistent with the elements produced by their ForEach.
-func sanityCheckIntSet(set set.Set[int]) set.Set[int] {
-	Expect(set).To(HaveLenOf(forEachCount(set)))
-	set.ForEach(func(elem int) {
-		Expect(set).To(Contain(elem))
+func sanityCheckIntSet(values set.Set[int]) set.Set[int] {
+	Expect(values).To(HaveLenOf(forEachCount(values)))
+	values.ForEach(func(elem int) {
+		Expect(values).To(Contain(elem))
 	})
-	Expect(set).ToNot(Contain(nodeNotInGraph))
+	Expect(values).ToNot(Contain(nodeNotInGraph))
 	// TODO: Pending introduction of set.CopyOf()
-	//Expect(set).To(beSetThatConsistsOfElementsIn(set.CopyOf(set)))
-	return set
+	//Expect(values).To(beSetThatConsistsOfElementsIn(values.CopyOf(values)))
+	return values
 }
+
+// TODO: Move below function to its own tests
 
 // In some cases, graphs may return custom sets that define their own method implementations. Verify that
 // these sets are consistent with the elements produced by their ForEach.
-func sanityCheckEndpointPairSet(set set.Set[graph.EndpointPair[int]]) set.Set[graph.EndpointPair[int]] {
-	Expect(set).To(HaveLenOf(forEachCount(set)))
-	set.ForEach(func(elem graph.EndpointPair[int]) {
-		Expect(set).To(Contain(elem))
+func sanityCheckEndpointPairSet(values set.Set[graph.EndpointPair[int]]) set.Set[graph.EndpointPair[int]] {
+	Expect(values).To(HaveLenOf(forEachCount(values)))
+	values.ForEach(func(elem graph.EndpointPair[int]) {
+		Expect(values).To(Contain(elem))
 	})
-	Expect(set).ToNot(Contain(graph.NewOrderedEndpointPair(nodeNotInGraph, nodeNotInGraph)))
-	Expect(set).ToNot(Contain(graph.NewUnorderedEndpointPair(nodeNotInGraph, nodeNotInGraph)))
+	Expect(values).ToNot(Contain(graph.NewOrderedEndpointPair(nodeNotInGraph, nodeNotInGraph)))
+	Expect(values).ToNot(Contain(graph.NewUnorderedEndpointPair(nodeNotInGraph, nodeNotInGraph)))
 	// TODO: Pending introduction of set.CopyOf()
-	//Expect(set).To(beSetThatConsistsOfElementsIn(set.CopyOf(set)))
-	return set
+	//Expect(values).To(beSetThatConsistsOfElementsIn(values.CopyOf(values)))
+	return values
 }
 
 func newEndpointPair[N comparable](grph graph.Graph[N], nodeU N, nodeV N) graph.EndpointPair[N] {

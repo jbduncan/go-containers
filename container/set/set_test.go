@@ -36,8 +36,10 @@ var _ = Describe("Sets", func() {
 			Expect(mutSet).To(HaveStringRepr("[]"))
 		})
 
-		It("returns an empty slice on calling .ToSlice()", func() {
-			Expect(mutSet).To(HaveEmptyToSlice())
+		Context("when returning a slice representation", func() {
+			It("returns an empty slice", func() {
+				Expect(mutSet).To(HaveEmptyToSlice())
+			})
 		})
 
 		Context("when adding one element", func() {
@@ -61,8 +63,10 @@ var _ = Describe("Sets", func() {
 				Expect(mutSet).To(haveForEachThatProduces("link"))
 			})
 
-			It("returns a single element slice on calling .ToSlice()", func() {
-				Expect(mutSet).To(HaveToSliceThatConsistsOf("link"))
+			Context("when returning a slice representation", func() {
+				It("returns a single element slice", func() {
+					Expect(mutSet).To(HaveToSliceThatConsistsOf("link"))
+				})
 			})
 
 			It("has a single element list string representation", func() {
@@ -98,8 +102,10 @@ var _ = Describe("Sets", func() {
 				Expect(mutSet).To(haveForEachThatProduces("link", "zelda"))
 			})
 
-			It("returns a two element slice on calling .ToSlice()", func() {
-				Expect(mutSet).To(HaveToSliceThatConsistsOf("link", "zelda"))
+			Context("when returning a slice representation", func() {
+				It("returns a two element slice", func() {
+					Expect(mutSet).To(HaveToSliceThatConsistsOf("link", "zelda"))
+				})
 			})
 
 			It("has a two element list string representation", func() {
@@ -167,8 +173,10 @@ var _ = Describe("Sets", func() {
 				Expect(unmodSet).To(haveForEachThatProducesNothing())
 			})
 
-			It("returns an empty slice on calling .ToSlice()", func() {
-				Expect(mutSet).To(HaveEmptyToSlice())
+			Context("when returning a slice representation", func() {
+				It("returns an empty slice", func() {
+					Expect(mutSet).To(HaveEmptyToSlice())
+				})
 			})
 
 			It("has an empty list string representation", func() {
@@ -192,8 +200,10 @@ var _ = Describe("Sets", func() {
 					Expect(unmodSet).To(haveForEachThatProduces("link"))
 				})
 
-				It("returns a single element slice on calling .ToSlice()", func() {
-					Expect(mutSet).To(HaveToSliceThatConsistsOf("link"))
+				Context("when returning a slice representation", func() {
+					It("returns a single element slice", func() {
+						Expect(mutSet).To(HaveToSliceThatConsistsOf("link"))
+					})
 				})
 
 				It("has a single element list string representation", func() {
@@ -207,8 +217,10 @@ var _ = Describe("Sets", func() {
 					mutSet.Add("zelda")
 				})
 
-				It("returns a two element slice on calling .ToSlice()", func() {
-					Expect(mutSet).To(HaveToSliceThatConsistsOf("link", "zelda"))
+				Context("when returning a slice representation", func() {
+					It("returns a two element slice", func() {
+						Expect(mutSet).To(HaveToSliceThatConsistsOf("link", "zelda"))
+					})
 				})
 
 				It("has a two element list string representation", func() {
