@@ -97,16 +97,23 @@ func (m *mutableGraph[N]) AllowsSelfLoops() bool {
 	return m.allowsSelfLoops
 }
 
+// TODO: Add tests for all set.Set methods of mutableGraph.Nodes()
+
 func (m *mutableGraph[N]) Nodes() set.Set[N] {
 	return &keySet[N]{
 		delegate: m.adjacencyList,
 	}
 }
 
+// TODO: Add tests for all set.Set methods of mutableGraph.Edges()
+
 func (m *mutableGraph[N]) Edges() set.Set[EndpointPair[N]] {
 	// TODO: flesh out
 	return set.Unmodifiable(set.New[EndpointPair[N]]())
 }
+
+// TODO: Add tests for all set.Set methods of mutableGraph.AdjacentNodes()
+//       for both a present node and an absent node
 
 func (m *mutableGraph[N]) AdjacentNodes(node N) set.Set[N] {
 	adjacentNodes, ok := m.adjacencyList[node]
@@ -117,13 +124,22 @@ func (m *mutableGraph[N]) AdjacentNodes(node N) set.Set[N] {
 	return set.Unmodifiable(adjacentNodes)
 }
 
+// TODO: Add tests for all set.Set methods of mutableGraph.Predecessors()
+//       for both a present node and an absent node
+
 func (m *mutableGraph[N]) Predecessors(node N) set.Set[N] {
 	return m.AdjacentNodes(node)
 }
 
+// TODO: Add tests for all set.Set methods of mutableGraph.Successors()
+//       for both a present node and an absent node
+
 func (m *mutableGraph[N]) Successors(node N) set.Set[N] {
 	return m.AdjacentNodes(node)
 }
+
+// TODO: Add tests for all set.Set methods of mutableGraph.IncidentEdges()
+//       for both a present node and an absent node
 
 func (m *mutableGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 	adjacentNodes, ok := m.adjacencyList[node]
