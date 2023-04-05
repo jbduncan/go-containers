@@ -19,13 +19,13 @@ var _ = Describe("Sets", func() {
 
 	Describe("given a new set", func() {
 		It("has a length of 0", func() {
-			Expect(mutSet).To(haveLenOfZero())
+			Expect(mutSet).To(HaveLenOfZero())
 		})
 
 		It("does nothing on remove", func() {
 			mutSet.Remove("link")
 
-			Expect(mutSet).To(haveLenOfZero())
+			Expect(mutSet).To(HaveLenOfZero())
 		})
 
 		It("returns nothing on iteration", func() {
@@ -38,7 +38,7 @@ var _ = Describe("Sets", func() {
 
 		Context("when returning a slice representation", func() {
 			It("returns an empty slice", func() {
-				Expect(mutSet).To(HaveEmptyToSlice())
+				Expect(mutSet).To(HaveEmptyToSlice[string]())
 			})
 		})
 
@@ -166,7 +166,7 @@ var _ = Describe("Sets", func() {
 			})
 
 			It("has a length of 0", func() {
-				Expect(unmodSet).To(haveLenOfZero())
+				Expect(unmodSet).To(HaveLenOfZero())
 			})
 
 			It("returns nothing on iteration", func() {
@@ -175,7 +175,7 @@ var _ = Describe("Sets", func() {
 
 			Context("when returning a slice representation", func() {
 				It("returns an empty slice", func() {
-					Expect(mutSet).To(HaveEmptyToSlice())
+					Expect(mutSet).To(HaveEmptyToSlice[string]())
 				})
 			})
 
@@ -231,10 +231,6 @@ var _ = Describe("Sets", func() {
 		})
 	})
 })
-
-func haveLenOfZero() types.GomegaMatcher {
-	return HaveLenOf(0)
-}
 
 func haveForEachThatProduces(first string, others ...string) types.GomegaMatcher {
 	all := []string{first}

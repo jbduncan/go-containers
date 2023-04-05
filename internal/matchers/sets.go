@@ -39,9 +39,15 @@ func HaveLenOf(len int) types.GomegaMatcher {
 		Equal(len))
 }
 
+func HaveLenOfZero() types.GomegaMatcher {
+	return HaveLenOf(0)
+}
+
 func hasReceiverAndNoParams(method reflect.Method) bool {
 	return method.Type.NumIn() != 1
 }
+
+// TODO: Rename to BeSetThatContains
 
 func Contain[T comparable](elem T) types.GomegaMatcher {
 	return WithTransform(
@@ -50,8 +56,6 @@ func Contain[T comparable](elem T) types.GomegaMatcher {
 		},
 		BeTrue())
 }
-
-// TODO: Replace a few of ForEachToSlice's uses with set.ToSlice()
 
 func ForEachToSlice[T comparable](s set.Set[T]) []T {
 	var result []T
@@ -63,6 +67,8 @@ func ForEachToSlice[T comparable](s set.Set[T]) []T {
 	return result
 }
 
+// TODO: Rename to BeSetWithEmptyToSlice
+
 func HaveEmptyToSlice[T comparable]() types.GomegaMatcher {
 	return WithTransform(
 		func(s set.Set[T]) []T {
@@ -70,6 +76,8 @@ func HaveEmptyToSlice[T comparable]() types.GomegaMatcher {
 		},
 		BeEmpty())
 }
+
+// TODO: Rename to BeSetWithToSliceThatConsistsOf
 
 func HaveToSliceThatConsistsOf[T comparable](first T, others ...T) types.GomegaMatcher {
 	all := []T{first}
