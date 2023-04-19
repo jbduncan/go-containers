@@ -67,9 +67,29 @@ func (e EndpointPair[N]) IsOrdered() bool {
 	return e.isOrdered
 }
 
-// TODO: EndpointPair: make Equal method and discourage == from being used (documenting that its use is undefined).
-//       See this link:
-//       https://github.com/google/guava/blob/4d323b2b117a5906ab16074c8c88b4ff162b1b82/guava/src/com/google/common/graph/EndpointPair.java#L131-L145
+// TODO: Document that == is discouraged.
+
+func (e EndpointPair[N]) Equal(other EndpointPair[N]) bool {
+	if e.IsOrdered() && other.IsOrdered() {
+		return e.Source() == other.Source() &&
+			e.Target() == other.Target()
+	}
+
+	if !e.IsOrdered() && !other.IsOrdered() {
+		return e.equalNodes(other) ||
+			e.equalNodesInReverse(other)
+	}
+
+	return false
+}
+
+func (e EndpointPair[N]) equalNodes(other EndpointPair[N]) bool {
+	return e.NodeU() == other.NodeU() && e.NodeV() == other.NodeV()
+}
+
+func (e EndpointPair[N]) equalNodesInReverse(other EndpointPair[N]) bool {
+	return e.NodeU() == other.NodeV() && e.NodeV() == other.NodeU()
+}
 
 func (e EndpointPair[N]) String() string {
 	if e.isOrdered {
