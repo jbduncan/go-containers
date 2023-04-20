@@ -73,35 +73,35 @@ var _ = Describe("EndpointPair", func() {
 		Context("when calling .Equal() with an equivalent unordered endpoint pair", func() {
 			It("returns true", func() {
 				other := graph.NewUnorderedEndpointPair("link", "zelda")
-				Expect(endpointPair.Equal(other)).To(BeTrue())
+				Expect(endpointPair).To(BeEquivalentToUsingEqualMethod(other))
 			})
 		})
 
 		Context("when calling .Equal() with an ordered endpoint pair", func() {
 			It("returns false", func() {
 				other := graph.NewOrderedEndpointPair("link", "zelda")
-				Expect(endpointPair.Equal(other)).To(BeFalse())
+				Expect(endpointPair).ToNot(BeEquivalentToUsingEqualMethod(other))
 			})
 		})
 
 		Context("when calling .Equal() with an unordered endpoint pair with a different NodeU", func() {
 			It("returns false", func() {
 				other := graph.NewUnorderedEndpointPair("ganon", "zelda")
-				Expect(endpointPair.Equal(other)).To(BeFalse())
+				Expect(endpointPair).ToNot(BeEquivalentToUsingEqualMethod(other))
 			})
 		})
 
 		Context("when calling .Equal() with an unordered endpoint pair with a different NodeV", func() {
 			It("returns false", func() {
 				other := graph.NewUnorderedEndpointPair("link", "ganon")
-				Expect(endpointPair.Equal(other)).To(BeFalse())
+				Expect(endpointPair).ToNot(BeEquivalentToUsingEqualMethod(other))
 			})
 		})
 
 		Context("when calling .Equal() with a reversed unordered endpoint pair", func() {
 			It("returns true", func() {
 				other := graph.NewUnorderedEndpointPair("zelda", "link")
-				Expect(endpointPair.Equal(other)).To(BeTrue())
+				Expect(endpointPair).To(BeEquivalentToUsingEqualMethod(other))
 			})
 		})
 
@@ -174,28 +174,28 @@ var _ = Describe("EndpointPair", func() {
 		Context("when calling .Equal() with an equivalent ordered endpoint pair", func() {
 			It("returns true", func() {
 				other := graph.NewOrderedEndpointPair("link", "zelda")
-				Expect(endpointPair.Equal(other)).To(BeTrue())
+				Expect(endpointPair).To(BeEquivalentToUsingEqualMethod(other))
 			})
 		})
 
 		Context("when calling .Equal() with an unordered endpoint pair", func() {
 			It("returns false", func() {
 				other := graph.NewUnorderedEndpointPair("link", "zelda")
-				Expect(endpointPair.Equal(other)).To(BeFalse())
+				Expect(endpointPair).ToNot(BeEquivalentToUsingEqualMethod(other))
 			})
 		})
 
 		Context("when calling .Equal() with an ordered endpoint pair with a different source", func() {
 			It("returns false", func() {
 				other := graph.NewOrderedEndpointPair("ganon", "zelda")
-				Expect(endpointPair.Equal(other)).To(BeFalse())
+				Expect(endpointPair).ToNot(BeEquivalentToUsingEqualMethod(other))
 			})
 		})
 
 		Context("when calling .Equal() with an ordered endpoint pair with a different target", func() {
 			It("returns false", func() {
 				other := graph.NewOrderedEndpointPair("link", "ganon")
-				Expect(endpointPair.Equal(other)).To(BeFalse())
+				Expect(endpointPair).ToNot(BeEquivalentToUsingEqualMethod(other))
 			})
 		})
 

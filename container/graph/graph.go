@@ -108,8 +108,43 @@ func (m *mutableGraph[N]) Nodes() set.Set[N] {
 // TODO: Add tests for all set.Set methods of mutableGraph.Edges()
 
 func (m *mutableGraph[N]) Edges() set.Set[EndpointPair[N]] {
-	// TODO: flesh out
-	return set.Unmodifiable(set.New[EndpointPair[N]]())
+	// TODO: To get this code working, we used an O(E^2) algorithm. Let's
+	//       study the Rust petgraph library to see what it does and ask on
+	//       https://codereview.stackexchange.com/ to see if we can reduce the
+	//       runtime to O(E). Worst case scenario, we can come up with a set
+	//       that allows for custom equivalences, allowing the `contains`
+	//       function to be replaced with an O(1) Set.Contains check that
+	//       compares elements by EndpointPair.Equal. (Time to TDD a custom
+	//       hash table into existence!)
+	//       Note: If we go for a custom hash table, let's use FNV-1a (via
+	//       fnv.New64a()), which is the hashing algorithm of choice in
+	//       craftinginterpreters.com, Chapter 20. Note that the book chose it
+	//       for brevity, not necessarily performance, but it seems a good
+	//       start. If performance really matters to us in the future, we can
+	//       read "The Art of Computer Programming, Volume 3", according to
+	//       https://stackoverflow.com/a/34652.
+	result := set.New[EndpointPair[N]]()
+	m.Nodes().ForEach(func(u N) {
+		// TODO: Replace .AdjacentNodes with .Successors when building
+		//       a directed graph type.
+		m.AdjacentNodes(u).ForEach(func(v N) {
+			newEdge := NewUnorderedEndpointPair(u, v)
+			if !contains(result, newEdge) {
+				result.Add(newEdge)
+			}
+		})
+	})
+	return set.Unmodifiable(result)
+}
+
+func contains[T comparable](s set.MutableSet[EndpointPair[T]], value EndpointPair[T]) bool {
+	result := false
+	s.ForEach(func(existing EndpointPair[T]) {
+		if value.Equal(existing) {
+			result = true
+		}
+	})
+	return result
 }
 
 // TODO: Add tests for all set.Set methods of mutableGraph.AdjacentNodes()

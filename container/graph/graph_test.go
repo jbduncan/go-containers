@@ -391,19 +391,14 @@ func graphTests(
 				Expect(grph.AdjacentNodes(node1)).To(beSetThatConsistsOf(node2, node3))
 			})
 
-			XIt("returns both edges on iteration", func() {
-				Fail("Not yet implemented. Implement EndpointPair.Equals(), create matcher " +
-					"BeEquivalentToUsingEqualMethod() and allow beSetThatConsistsOf() to accept matchers first.")
-
-				// TODO: Depends on EndpointPair.Equal() to be implemented so that, if
-				//       grph.Edges() returns endpoint pairs like [node2, node1] or
-				//       [node3, node1], then they will still count.
-				Expect(grph.Edges()).To(
-					// TODO: Change beSetThatConsistsOf to accept matchers too. That way.
-					//       we can pass in BeEquivalentToUsingEqualMethod().
-					beSetThatConsistsOf(
-						graph.NewUnorderedEndpointPair(node1, node2),
-						graph.NewUnorderedEndpointPair(node1, node3)))
+			It("returns both edges on iteration", func() {
+				Expect(grph.Edges().ToSlice()).To(
+					ConsistOf(
+						BeEquivalentToUsingEqualMethod(
+							graph.NewUnorderedEndpointPair(node1, node2)),
+						BeEquivalentToUsingEqualMethod(
+							graph.NewUnorderedEndpointPair(node1, node3))),
+					"to consist of [node1, node2] and [node1, node3] (unordered endpoint pairs)")
 			})
 		})
 
