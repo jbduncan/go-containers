@@ -4,10 +4,11 @@ import (
 	"fmt"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
+	"github.com/onsi/gomega/types"
 	"reflect"
 )
 
-func BeEquivalentToUsingEqualMethod(value any) OmegaMatcher {
+func BeEquivalentToUsingEqualMethod(value any) types.GomegaMatcher {
 	return WithTransform(
 		func(this any) (bool, error) {
 			typ := reflect.TypeOf(this)
