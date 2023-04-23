@@ -19,6 +19,14 @@ test:
 .PHONY: check
 check: format_check test
 
-# TODO: Add another target for static analysis with staticcheck:
-#       https://github.com/dominikh/go-tools
+# TODO: Add another target for static analysis with golangci-lint:
+#       https://golangci-lint.run/
+#       Note: golangci-lint has gofumpt support, which should make
+#       scripts/format_check.sh redundant.
+#       Furthermore, it has support for:
+#         - staticcheck (enabled by default)
+#         - go vet (enabled by default)
+#         - ginkgolinter
+#         - bidichk (for checking dangerous Unicode characters in source code)
+#         - gosec (for checking security problems)
 # TODO: Add static analysis target to prerequisites of "check"
