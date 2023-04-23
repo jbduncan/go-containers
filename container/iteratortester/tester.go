@@ -2,8 +2,9 @@ package iteratortester
 
 import (
 	"fmt"
-	"go-containers/container/iterator"
 	"reflect"
+
+	"go-containers/container/iterator"
 )
 
 type IteratorOrder int
@@ -23,8 +24,8 @@ type Tester[T any] struct {
 func ForIteratorWithKnownOrder[T any](
 	iteratorName string,
 	newIterator func() iterator.Iterator[T],
-	expectedElements []T) *Tester[T] {
-
+	expectedElements []T,
+) *Tester[T] {
 	return &Tester[T]{
 		iteratorName:     iteratorName,
 		expectedElements: copyToNonNilSlice(expectedElements),
@@ -36,8 +37,8 @@ func ForIteratorWithKnownOrder[T any](
 func ForIteratorWithUnknownOrder[T any](
 	iteratorName string,
 	newIterator func() iterator.Iterator[T],
-	expectedElements []T) *Tester[T] {
-
+	expectedElements []T,
+) *Tester[T] {
 	return &Tester[T]{
 		iteratorName:     iteratorName,
 		expectedElements: copyToNonNilSlice(expectedElements),

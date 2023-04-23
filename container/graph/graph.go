@@ -80,8 +80,10 @@ func (b Builder[N]) Build() MutableGraph[N] {
 // TODO: If the Graph and MutableGraph interfaces are ever eliminated, move them and these
 //       compile-time type assertions to a test package.
 
-var _ Graph[int] = (*mutableGraph[int])(nil)
-var _ MutableGraph[int] = (*mutableGraph[int])(nil)
+var (
+	_ Graph[int]        = (*mutableGraph[int])(nil)
+	_ MutableGraph[int] = (*mutableGraph[int])(nil)
+)
 
 // TODO: Rename to `graph` for consistency with `set.set`.
 type mutableGraph[N comparable] struct {
@@ -256,7 +258,7 @@ func (m *mutableGraph[N]) PutEdge(nodeU N, nodeV N) bool {
 	}
 	adjacentNodes.Add(nodeU)
 
-	//TODO: return booleans at all the right times
+	// TODO: return booleans at all the right times
 	return false
 }
 

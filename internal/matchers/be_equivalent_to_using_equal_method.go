@@ -2,20 +2,20 @@ package matchers
 
 import (
 	"fmt"
+	"reflect"
+
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
 	"github.com/onsi/gomega/types"
-	"reflect"
 )
 
 func BeEquivalentToUsingEqualMethod(value any) types.GomegaMatcher {
 	return WithTransform(
 		func(this any) (bool, error) {
 			typ := reflect.TypeOf(this)
-			noEqualMethodMessage :=
-				"to have an Equal method with a single parameter of type <" +
-					typ.Name() +
-					"> and a single return value of type <bool>"
+			noEqualMethodMessage := "to have an Equal method with a single parameter of type <" +
+				typ.Name() +
+				"> and a single return value of type <bool>"
 			errNoEqualMethod := fmt.Errorf(format.Message(this, noEqualMethodMessage))
 
 			equalMethod, ok := typ.MethodByName("Equal")

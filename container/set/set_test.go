@@ -1,16 +1,14 @@
 package set_test
 
 import (
-	"github.com/onsi/gomega/types"
-	"go-containers/container/set"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/types"
+	"go-containers/container/set"
 	. "go-containers/internal/matchers"
 )
 
 var _ = Describe("Sets", func() {
-
 	var mutSet set.MutableSet[string]
 
 	BeforeEach(func() {

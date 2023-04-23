@@ -3,12 +3,11 @@ package graph_test
 import (
 	"fmt"
 
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
 	"go-containers/container/graph"
 	"go-containers/container/set"
-
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 	. "go-containers/internal/matchers"
 )
 
@@ -66,8 +65,8 @@ const (
 func mutableGraphTests(
 	graphName string,
 	createGraph func() graph.MutableGraph[int],
-	containersMode ContainersMode) {
-
+	containersMode ContainersMode,
+) {
 	addNode := func(grph graph.Graph[int], node int) graph.Graph[int] {
 		graphAsMutable := grph.(graph.MutableGraph[int])
 		graphAsMutable.AddNode(node)
@@ -89,12 +88,10 @@ func graphTests(
 	createGraph func() graph.Graph[int],
 	addNode func(g graph.Graph[int], n int) graph.Graph[int],
 	putEdge func(g graph.Graph[int], n1 int, n2 int) graph.Graph[int],
-	containersMode ContainersMode) {
-
+	containersMode ContainersMode,
+) {
 	Context(fmt.Sprintf("%s: given a graph", graphName), func() {
-		var (
-			grph graph.Graph[int]
-		)
+		var grph graph.Graph[int]
 
 		graphAsMutable := func() graph.MutableGraph[int] {
 			result, _ := grph.(graph.MutableGraph[int])
@@ -162,7 +159,7 @@ func graphTests(
 
 			grph = putEdge(grph, node1, node2)
 			// TODO: Pending implementation of Graph.Edges()
-			//Expect(edges).To(Contain(newEndpointPair(grph, node1, node2)))
+			// Expect(edges).To(Contain(newEndpointPair(grph, node1, node2)))
 		})
 
 		// TODO: Write an equivalent test to above for ContainersAreCopies
@@ -537,13 +534,10 @@ func undirectedGraphTests(
 	createGraph func() graph.Graph[int],
 	addNode func(g graph.Graph[int], n int) graph.Graph[int],
 	putEdge func(g graph.Graph[int], n1 int, n2 int) graph.Graph[int],
-	containersMode ContainersMode) {
-
+	containersMode ContainersMode,
+) {
 	Context(fmt.Sprintf("%s: given an undirected graph", graphName), func() {
-
-		var (
-			grph graph.Graph[int]
-		)
+		var grph graph.Graph[int]
 
 		skipIfGraphAllowsSelfLoops := func() {
 			if grph.AllowsSelfLoops() {
@@ -684,7 +678,6 @@ func undirectedGraphTests(
 
 		// TODO: Implement tests for stable ordering when NodeOrder()/IncidentEdgeOrder()
 		//       is introduced.
-
 	})
 }
 
@@ -701,9 +694,9 @@ func assertContainersMode(containersMode ContainersMode) {
 
 func validateGraphState(grph graph.Graph[int]) {
 	// TODO: Pending implementation of graph.CopyOf
-	//expectStronglyEquivalent(graph, graph.CopyOf(graph))
+	// expectStronglyEquivalent(graph, graph.CopyOf(graph))
 	// TODO: Pending implementation of graph.ImmutableCopyOf
-	//expectStronglyEquivalent(graph, graph.ImmutableCopyOf(graph))
+	// expectStronglyEquivalent(graph, graph.ImmutableCopyOf(graph))
 
 	sanityCheckString(grph)
 
@@ -711,7 +704,7 @@ func validateGraphState(grph graph.Graph[int]) {
 
 	sanityCheckIntSet(grph.Nodes()).ForEach(func(node int) {
 		// TODO: Pending implementation of Graph.String()
-		//Expect(nodeString).To(ContainSubstring(strconv.Itoa(node)))
+		// Expect(nodeString).To(ContainSubstring(strconv.Itoa(node)))
 
 		sanityCheckConnections(grph, node, allEndpointPairs)
 	})
@@ -722,16 +715,16 @@ func validateGraphState(grph graph.Graph[int]) {
 // TODO: Move to its own test
 func sanityCheckString(grph graph.Graph[int]) {
 	// TODO: Pending implementation of Graph.String()
-	//graphString := graph.String()
+	// graphString := graph.String()
 	// TODO: Pending implementation of Graph.String() and Graph.IsDirected()
-	//Expect(graphString).To(ContainSubstring("isDirected: %v", graph.IsDirected()))
+	// Expect(graphString).To(ContainSubstring("isDirected: %v", graph.IsDirected()))
 	// TODO: Pending implementation of Graph.String() and Graph.AllowsSelfLoops()
-	//Expect(graphString).To(ContainSubstring("allowsSelfLoops: %v", graph.AllowsSelfLoops()))
+	// Expect(graphString).To(ContainSubstring("allowsSelfLoops: %v", graph.AllowsSelfLoops()))
 
 	// TODO: Pending implementation of Graph.String()
-	//nodeStart := strings.Index(graphString, "nodes:")
-	//edgeStart := strings.Index(graphString, "edges:")
-	//nodeString := graphString[nodeStart:edgeStart] // safe because contents are ASCII
+	// nodeStart := strings.Index(graphString, "nodes:")
+	// edgeStart := strings.Index(graphString, "edges:")
+	// nodeString := graphString[nodeStart:edgeStart] // safe because contents are ASCII
 }
 
 // TODO: Move to own tests
@@ -794,10 +787,10 @@ func expectStronglyEquivalent(first graph.Graph[int], second graph.Graph[int]) {
 	// Properties not covered by Graph.Equal()
 	Expect(first.AllowsSelfLoops()).To(Equal(second.AllowsSelfLoops()))
 	// TODO: Pending implementation of Graph.NodeOrder()
-	//Expect(first).To(haveNodeOrder(second.NodeOrder()))
+	// Expect(first).To(haveNodeOrder(second.NodeOrder()))
 
 	// TODO: Pending implementation of Graph.Equal()
-	//Expect(first).To(beGraphEqualTo(second))
+	// Expect(first).To(beGraphEqualTo(second))
 }
 
 // TODO: Consider replacing these set sanity checks with proper tests fashioned after the
@@ -812,7 +805,7 @@ func sanityCheckIntSet(values set.Set[int]) set.Set[int] {
 	})
 	Expect(values).ToNot(Contain(nodeNotInGraph))
 	// TODO: Pending introduction of set.CopyOf()
-	//Expect(values).To(beSetThatConsistsOfElementsIn(values.CopyOf(values)))
+	// Expect(values).To(beSetThatConsistsOfElementsIn(values.CopyOf(values)))
 	return values
 }
 
@@ -828,7 +821,7 @@ func sanityCheckEndpointPairSet(values set.Set[graph.EndpointPair[int]]) set.Set
 	Expect(values).ToNot(Contain(graph.NewOrderedEndpointPair(nodeNotInGraph, nodeNotInGraph)))
 	Expect(values).ToNot(Contain(graph.NewUnorderedEndpointPair(nodeNotInGraph, nodeNotInGraph)))
 	// TODO: Pending introduction of set.CopyOf()
-	//Expect(values).To(beSetThatConsistsOfElementsIn(values.CopyOf(values)))
+	// Expect(values).To(beSetThatConsistsOfElementsIn(values.CopyOf(values)))
 	return values
 }
 

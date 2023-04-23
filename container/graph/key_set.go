@@ -2,8 +2,9 @@ package graph
 
 import (
 	"fmt"
-	"go-containers/container/set"
 	"strings"
+
+	"go-containers/container/set"
 )
 
 var _ set.Set[int] = (*keySet[int])(nil)

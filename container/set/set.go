@@ -18,7 +18,6 @@ import (
 // Set is a generic, unordered collection of elements, where each element is unique. This interface has methods for
 // reading the set; for writing to the set, use the MutableSet interface.
 type Set[T comparable] interface {
-
 	// Contains returns true if this set contains the given element, otherwise
 	// it returns false.
 	Contains(elem T) bool
@@ -50,7 +49,7 @@ type Set[T comparable] interface {
 	//       Note: this depends on making a custom map type that we can easily make an
 	//       iterator for.
 	// Iterator returns an iterator for the elements in this set.
-	//Iterator() iterator.Iterator[T]
+	// Iterator() iterator.Iterator[T]
 
 	// TODO: Set: make Equal method and discourage == from being used (documenting that its use is undefined).
 }
@@ -86,8 +85,10 @@ type set[T comparable] struct {
 // TODO: If the Set and MutableSet interfaces are ever eliminated, move them and these
 //       compile-time type assertions to a test package.
 
-var _ Set[int] = (*set[int])(nil)
-var _ MutableSet[int] = (*set[int])(nil)
+var (
+	_ Set[int]        = (*set[int])(nil)
+	_ MutableSet[int] = (*set[int])(nil)
+)
 
 func (s *set[T]) Add(elem T) {
 	s.delegate[elem] = struct{}{}

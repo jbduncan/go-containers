@@ -1,10 +1,11 @@
 package iteratortester_test
 
 import (
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 	"go-containers/container/iterator"
 	"go-containers/container/iteratortester"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Iterator testers", func() {
