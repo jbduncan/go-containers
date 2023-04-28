@@ -454,6 +454,7 @@ func graphTests(
 
 			It("leaves the existing nodes alone", func() {
 				Expect(grph.Successors(node1)).To(Contain(node2))
+				Expect(grph.Predecessors(node2)).To(Contain(node1))
 			})
 		})
 
@@ -473,6 +474,27 @@ func graphTests(
 
 			It("leaves the existing nodes alone", func() {
 				Expect(grph.Successors(node1)).To(Contain(node2))
+				Expect(grph.Predecessors(node2)).To(Contain(node1))
+			})
+		})
+
+		Context("when removing an absent edge with two existing nodes", func() {
+			var removed bool
+
+			BeforeEach(func() {
+				skipIfGraphIsNotMutable()
+				grph = addNode(grph, node1)
+				grph = addNode(grph, node2)
+
+				removed = graphAsMutable().RemoveEdge(node1, node2)
+			})
+
+			It("returns false", func() {
+				Expect(removed).To(BeFalse())
+			})
+
+			It("leaves the existing nodes alone", func() {
+				Expect(grph.Nodes()).To(beSetThatConsistsOf(node1, node2))
 			})
 		})
 

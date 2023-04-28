@@ -1,6 +1,8 @@
 package graph
 
 import (
+	"fmt"
+
 	"go-containers/container/set"
 )
 
@@ -111,13 +113,12 @@ func (m *mutableGraph[N]) Nodes() set.Set[N] {
 
 func (m *mutableGraph[N]) Edges() set.Set[EndpointPair[N]] {
 	// TODO: To get this code working, we used an O(E^2) algorithm. Let's
-	//       study the Rust petgraph library to see what it does and ask on
-	//       https://codereview.stackexchange.com/ to see if we can reduce the
-	//       runtime to O(E). Worst case scenario, we can come up with a set
-	//       that allows for custom equivalences, allowing the `contains`
-	//       function to be replaced with an O(1) Set.Contains check that
-	//       compares elements by EndpointPair.Equal. (Time to TDD a custom
-	//       hash table into existence!)
+	//       ask on https://codereview.stackexchange.com/ to see if we can
+	//       reduce the runtime to O(E). Worst case scenario, we can come up
+	//       with a set that allows for custom equivalences, allowing the
+	//       `contains` function to be replaced with an O(1) Set.Contains check
+	//       that compares elements by EndpointPair.Equal. (Time to TDD a
+	//       custom hash table into existence!)
 	//       Note: If we go for a custom hash table, let's use FNV-1a (via
 	//       fnv.New64a()), which is the hashing algorithm of choice in
 	//       craftinginterpreters.com, Chapter 20. Note that the book chose it
@@ -209,17 +210,7 @@ func (m *mutableGraph[N]) OutDegree(node N) int {
 
 func (m *mutableGraph[N]) HasEdgeConnecting(nodeU N, nodeV N) bool {
 	adjacentNodes, ok := m.adjacencyList[nodeU]
-	if !ok {
-		return false
-	}
-
-	if !adjacentNodes.Contains(nodeV) {
-		return false
-	}
-
-	adjacentNodes = m.adjacencyList[nodeV]
-
-	return adjacentNodes.Contains(nodeU)
+	return ok && adjacentNodes.Contains(nodeV)
 }
 
 func (m *mutableGraph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
@@ -244,22 +235,20 @@ func (m *mutableGraph[N]) PutEdge(nodeU N, nodeV N) bool {
 		panic("self-loops are disallowed")
 	}
 
+	m.putEdge(nodeU, nodeV)
+	m.putEdge(nodeV, nodeU)
+
+	// TODO: return booleans at all the right times
+	return false
+}
+
+func (m *mutableGraph[N]) putEdge(nodeU N, nodeV N) {
 	adjacentNodes, ok := m.adjacencyList[nodeU]
 	if !ok {
 		adjacentNodes = set.New[N]()
 		m.adjacencyList[nodeU] = adjacentNodes
 	}
 	adjacentNodes.Add(nodeV)
-
-	adjacentNodes, ok = m.adjacencyList[nodeV]
-	if !ok {
-		adjacentNodes = set.New[N]()
-		m.adjacencyList[nodeV] = adjacentNodes
-	}
-	adjacentNodes.Add(nodeU)
-
-	// TODO: return booleans at all the right times
-	return false
 }
 
 func (m *mutableGraph[N]) RemoveNode(node N) bool {
@@ -278,17 +267,29 @@ func (m *mutableGraph[N]) RemoveNode(node N) bool {
 }
 
 func (m *mutableGraph[N]) RemoveEdge(nodeU N, nodeV N) bool {
-	adjacentNodes, ok := m.adjacencyList[nodeU]
+	removedUToV := m.removeEdge(nodeU, nodeV)
+	removedVToU := m.removeEdge(nodeV, nodeU)
+
+	if removedUToV != removedVToU {
+		panic(
+			fmt.Sprintf(
+				"Unexpected: removedUToV (%t) != removedVToU (%t)",
+				removedUToV, removedVToU))
+	}
+
+	return removedUToV
+}
+
+func (m *mutableGraph[N]) removeEdge(from N, to N) bool {
+	adjacentNodes, ok := m.adjacencyList[from]
 	if !ok {
 		return false
 	}
-	adjacentNodes.Remove(nodeV)
 
-	adjacentNodes, ok = m.adjacencyList[nodeV]
-	if !ok {
-		return false
+	// TODO: Simplify when MutableSet.Remove returns bools
+	if adjacentNodes.Contains(to) {
+		adjacentNodes.Remove(to)
+		return true
 	}
-	adjacentNodes.Remove(nodeU)
-
-	return true
+	return false
 }
