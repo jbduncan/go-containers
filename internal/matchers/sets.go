@@ -15,26 +15,16 @@ func HaveLenOf(len int) types.GomegaMatcher {
 		func(value any) (int, error) {
 			errNoLenMethod := fmt.Errorf(format.Message(value, "to have a Len method with a single return value of type <int>"))
 
-			typ := reflect.TypeOf(value)
-			lenMethod, ok := typ.MethodByName("Len")
+			type sized interface {
+				Len() int
+			}
+
+			s, ok := value.(sized)
 			if !ok {
 				return 0, errNoLenMethod
 			}
 
-			if hasReceiverAndNoParams(lenMethod) {
-				return 0, errNoLenMethod
-			}
-
-			if lenMethod.Type.NumOut() != 1 {
-				return 0, errNoLenMethod
-			}
-
-			if !lenMethod.Type.Out(0).AssignableTo(reflect.TypeOf(0)) {
-				return 0, errNoLenMethod
-			}
-
-			result := lenMethod.Func.Call([]reflect.Value{reflect.ValueOf(value)})[0].Int()
-			return int(result), nil
+			return s.Len(), nil
 		},
 		Equal(len))
 }
