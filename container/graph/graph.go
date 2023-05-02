@@ -112,52 +112,19 @@ func (m *mutableGraph[N]) Nodes() set.Set[N] {
 // TODO: Add tests for all set.Set methods of mutableGraph.Edges()
 
 func (m *mutableGraph[N]) Edges() set.Set[EndpointPair[N]] {
-	// TODO: To get this code working, we used an O(E^2) algorithm. Let's ask
-	//       on https://codereview.stackexchange.com/ to see if we can reduce
-	//       the runtime to O(E). Worst case scenario, we could:
-	//       1. Keep track of "node IDs" internally so that nodes can be
-	//          compared with <, allowing only one of [u, v] and [v, u] to be
-	//          kept in m.adjacencyList, thus eliminating the slice looping
-	//          below. Beware: if node IDs are of type int or some other
-	//          fixed-size int type, then if we started at nodeID = 0 and
-	//          repeatedly incremented it until we wrap back around to 0
-	//          (plausible if users somehow added and removed nodes many, many
-	//          times), then from that point on "free" node IDs would have to
-	//          be found, which would be O(N). We could use uint to reduce
-	//          the chance of this happening.
-	//       2. Come up with a set with a custom equivalence, allowing the
-	//          `contains` function to be replaced with an O(1)
-	//          Set.Contains check that compares elements by
-	//          EndpointPair.Equal.
-	//       Note: If we go for a custom hash table, let's use FNV-1a (via
-	//       fnv.New64a()), which is the hashing algorithm of choice in
-	//       craftinginterpreters.com, Chapter 20. Note that the book chose it
-	//       for brevity, not necessarily performance, but it seems a good
-	//       start. If performance really matters to us in the future, we can
-	//       read "The Art of Computer Programming, Volume 3", according to
-	//       https://stackoverflow.com/a/34652.
 	result := set.New[EndpointPair[N]]()
 	m.Nodes().ForEach(func(u N) {
 		// TODO: Replace .AdjacentNodes with .Successors when building
 		//       a directed graph type.
 		m.AdjacentNodes(u).ForEach(func(v N) {
-			newEdge := NewUnorderedEndpointPair(u, v)
-			if !contains(result, newEdge) {
-				result.Add(newEdge)
+			uv := NewUnorderedEndpointPair(u, v)
+			vu := NewUnorderedEndpointPair(v, u)
+			if !result.Contains(uv) && !result.Contains(vu) {
+				result.Add(uv)
 			}
 		})
 	})
 	return set.Unmodifiable(result)
-}
-
-func contains[T comparable](s set.MutableSet[EndpointPair[T]], value EndpointPair[T]) bool {
-	result := false
-	s.ForEach(func(existing EndpointPair[T]) {
-		if value.Equal(existing) {
-			result = true
-		}
-	})
-	return result
 }
 
 // TODO: Add tests for all set.Set methods of mutableGraph.AdjacentNodes()
