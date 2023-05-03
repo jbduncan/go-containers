@@ -6,6 +6,8 @@ import (
 	"go-containers/container/set"
 )
 
+// TODO: Docs
+// TODO: Document with an example use
 type Graph[N comparable] interface {
 	Nodes() set.Set[N]
 	Edges() set.Set[EndpointPair[N]]
@@ -41,6 +43,7 @@ type Graph[N comparable] interface {
 	// Equal(other Graph[N]) bool
 }
 
+// TODO: Docs
 type MutableGraph[N comparable] interface {
 	Graph[N]
 

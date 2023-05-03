@@ -12,9 +12,9 @@ func Example() {
 	exampleSet.Add("link")
 	exampleSet.Add("zelda")
 
-	fmt.Println(exampleSet.Contains("link"))  // true
-	fmt.Println(exampleSet.Contains("zelda")) // true
-	fmt.Println(exampleSet.Contains("epona")) // false
+	fmt.Println(exampleSet.Contains("link"))      // true
+	fmt.Println(exampleSet.Contains("zelda"))     // true
+	fmt.Println(exampleSet.Contains("ganondorf")) // false
 
 	// Remove a string from the set.
 	exampleSet.Remove("zelda")
@@ -25,7 +25,7 @@ func Example() {
 	fmt.Println(unmodifiableSet.Contains("link"))  // true
 	fmt.Println(unmodifiableSet.Contains("zelda")) // false
 
-	// Add an element back to set; this also adds it to unmodifiable set
+	// Add an element back to set; this also adds it to unmodifiable set.
 	exampleSet.Add("zelda")
 	fmt.Println(unmodifiableSet.Contains("link"))  // true
 	fmt.Println(unmodifiableSet.Contains("zelda")) // true
