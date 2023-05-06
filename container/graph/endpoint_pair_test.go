@@ -63,9 +63,7 @@ var _ = Describe("EndpointPair", func() {
 		Context("when calling .AdjacentNode() with a non-adjacent node", func() {
 			It("panics", func() {
 				Expect(func() { endpointPair.AdjacentNode("ganondorf") }).
-					To(Or(
-						PanicWith("EndpointPair [link, zelda] does not contain node ganondorf"),
-						PanicWith("EndpointPair [zelda, link] does not contain node ganondorf")))
+					To(PanicWith(MatchRegexp(`^EndpointPair (\[link, zelda\]|\[zelda, link\]) does not contain node ganondorf$`)))
 			})
 		})
 
