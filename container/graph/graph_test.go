@@ -170,7 +170,7 @@ func graphTests(
 			})
 
 			It("contains just the node", func() {
-				Expect(grph.Nodes()).To(beSetThatConsistsOf(node1))
+				Expect(grph.Nodes()).To(beSetThatConsistsOf[int](node1))
 			})
 
 			Context("when returning a slice representation of the nodes", func() {
@@ -275,7 +275,7 @@ func graphTests(
 			})
 
 			It("contains both nodes", func() {
-				Expect(grph.Nodes()).To(beSetThatConsistsOf(node1, node2))
+				Expect(grph.Nodes()).To(beSetThatConsistsOf[int](node1, node2))
 			})
 
 			Context("when returning a slice representation of the nodes", func() {
@@ -326,7 +326,7 @@ func graphTests(
 			})
 
 			It("it leaves the other nodes alone", func() {
-				Expect(grph.Nodes()).To(beSetThatConsistsOf(node2, node3))
+				Expect(grph.Nodes()).To(beSetThatConsistsOf[int](node2, node3))
 			})
 
 			It("removes its connections to its adjacent nodes", func() {
@@ -354,7 +354,7 @@ func graphTests(
 			})
 
 			It("leaves all the nodes alone", func() {
-				Expect(grph.Nodes()).To(beSetThatConsistsOf(node1))
+				Expect(grph.Nodes()).To(beSetThatConsistsOf[int](node1))
 			})
 		})
 
@@ -364,8 +364,8 @@ func graphTests(
 			})
 
 			It("reports that both nodes are adjacent to each other", func() {
-				Expect(grph.AdjacentNodes(node1)).To(beSetThatConsistsOf(node2))
-				Expect(grph.AdjacentNodes(node2)).To(beSetThatConsistsOf(node1))
+				Expect(grph.AdjacentNodes(node1)).To(beSetThatConsistsOf[int](node2))
+				Expect(grph.AdjacentNodes(node2)).To(beSetThatConsistsOf[int](node1))
 			})
 
 			It("reports that both nodes have a degree of 1", func() {
@@ -385,7 +385,7 @@ func graphTests(
 			})
 
 			It("reports the two unique nodes as adjacent to the common one", func() {
-				Expect(grph.AdjacentNodes(node1)).To(beSetThatConsistsOf(node2, node3))
+				Expect(grph.AdjacentNodes(node1)).To(beSetThatConsistsOf[int](node2, node3))
 			})
 
 			It("returns both edges on iteration", func() {
@@ -407,7 +407,7 @@ func graphTests(
 					grph = putEdge(grph, node2, node1)
 					graphAsMutable().RemoveNode(node1)
 
-					Expect(grph.Nodes()).To(beSetThatConsistsOf(node2))
+					Expect(grph.Nodes()).To(beSetThatConsistsOf[int](node2))
 				})
 
 				It("removes both edges", func() {
@@ -432,8 +432,8 @@ func graphTests(
 			})
 
 			It("removes the connection between its nodes", func() {
-				Expect(grph.Successors(node1)).To(beSetThatConsistsOf(node3))
-				Expect(grph.Predecessors(node3)).To(beSetThatConsistsOf(node1))
+				Expect(grph.Successors(node1)).To(beSetThatConsistsOf[int](node3))
+				Expect(grph.Predecessors(node3)).To(beSetThatConsistsOf[int](node1))
 				Expect(grph.Predecessors(node2)).To(beEmptySet[int]())
 			})
 		})
@@ -494,7 +494,7 @@ func graphTests(
 			})
 
 			It("leaves the existing nodes alone", func() {
-				Expect(grph.Nodes()).To(beSetThatConsistsOf(node1, node2))
+				Expect(grph.Nodes()).To(beSetThatConsistsOf[int](node1, node2))
 			})
 		})
 
@@ -588,31 +588,27 @@ func undirectedGraphTests(
 			})
 
 			It("sees both nodes as predecessors of each other", func() {
-				Expect(grph.Predecessors(node2)).To(beSetThatConsistsOf(node1))
-				Expect(grph.Predecessors(node1)).To(beSetThatConsistsOf(node2))
+				Expect(grph.Predecessors(node2)).To(beSetThatConsistsOf[int](node1))
+				Expect(grph.Predecessors(node1)).To(beSetThatConsistsOf[int](node2))
 			})
 
 			It("sees both nodes as successors of each other", func() {
-				Expect(grph.Successors(node1)).To(beSetThatConsistsOf(node2))
-				Expect(grph.Successors(node2)).To(beSetThatConsistsOf(node1))
+				Expect(grph.Successors(node1)).To(beSetThatConsistsOf[int](node2))
+				Expect(grph.Successors(node2)).To(beSetThatConsistsOf[int](node1))
 			})
 
 			It("has an incident edge connecting the first node to the second", func() {
 				Expect(grph.IncidentEdges(node1)).To(
-					// TODO: When EndpointPair has an Equal method, replace this assertion with a custom one
-					//       that checks that the set contains only one element, where the element is "equal"
-					//       according to EndpointPair.Equal. (The name "BeEquivalentTo" is already taken by
-					//       Gomega. Maybe "BeEquivalentToUsingEqualMethod"?)
-					beSetThatConsistsOf(graph.NewUnorderedEndpointPair(node1, node2)))
+					beSetThatConsistsOf[graph.EndpointPair[int]](
+						BeEquivalentToUsingEqualMethod(
+							graph.NewUnorderedEndpointPair(node1, node2))))
 			})
 
 			It("has an incident edge connecting the second node to the first", func() {
 				Expect(grph.IncidentEdges(node2)).To(
-					// TODO: When EndpointPair has an Equal method, replace this assertion with a custom one
-					//       that checks that the set contains only one element, where the element is "equal"
-					//       according to EndpointPair.Equal. (The name "BeEquivalentTo" is already taken by
-					//       Gomega. Maybe "BeEquivalentToUsingEqualMethod"?)
-					beSetThatConsistsOf(graph.NewUnorderedEndpointPair(node2, node1)))
+					beSetThatConsistsOf[graph.EndpointPair[int]](
+						BeEquivalentToUsingEqualMethod(
+							graph.NewUnorderedEndpointPair(node2, node1))))
 			})
 
 			It("has an in degree of 1 for the first node", func() {
@@ -693,7 +689,7 @@ func undirectedGraphTests(
 
 					grph = putEdge(grph, node1, node1)
 
-					Expect(grph.AdjacentNodes(node1)).To(beSetThatConsistsOf(node1))
+					Expect(grph.AdjacentNodes(node1)).To(beSetThatConsistsOf[int](node1))
 				})
 			})
 		})
@@ -854,8 +850,8 @@ func newEndpointPair[N comparable](grph graph.Graph[N], nodeU N, nodeV N) graph.
 	return graph.NewUnorderedEndpointPair(nodeU, nodeV)
 }
 
-func beSetThatConsistsOf[T comparable](first T, others ...T) types.GomegaMatcher {
-	all := []T{first}
+func beSetThatConsistsOf[T comparable](first any, others ...any) types.GomegaMatcher {
+	all := []any{first}
 	all = append(all, others...)
 
 	return WithTransform(ForEachToSlice[T], ConsistOf(all))
