@@ -11,6 +11,9 @@ import (
 )
 
 func HaveLenOf(len int) types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
+	//  when value.Len() (the actual value) isn't equal to len
+	//  (the expected value).
 	return WithTransform(
 		func(value any) (int, error) {
 			errNoLenMethod := fmt.Errorf(format.Message(value, "to have a Len method with a single return value of type <int>"))
@@ -40,6 +43,7 @@ func hasReceiverAndNoParams(method reflect.Method) bool {
 // TODO: Rename to BeSetThatContains
 
 func Contain[T comparable](elem T) types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(
 		func(set set.Set[T]) bool {
 			return set.Contains(elem)
@@ -60,6 +64,7 @@ func ForEachToSlice[T comparable](s set.Set[T]) []T {
 // TODO: Rename to BeSetWithEmptyToSlice
 
 func HaveEmptyToSlice[T comparable]() types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(
 		func(s set.Set[T]) []T {
 			return s.ToSlice()
@@ -73,6 +78,7 @@ func HaveToSliceThatConsistsOf[T comparable](first T, others ...T) types.GomegaM
 	all := []T{first}
 	all = append(all, others...)
 
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(
 		func(s set.Set[T]) []T {
 			return s.ToSlice()

@@ -850,22 +850,30 @@ func newEndpointPair[N comparable](grph graph.Graph[N], nodeU N, nodeV N) graph.
 	return graph.NewUnorderedEndpointPair(nodeU, nodeV)
 }
 
+// TODO: Move to internal/matchers
 func beSetThatConsistsOf[T comparable](first any, others ...any) types.GomegaMatcher {
 	all := []any{first}
 	all = append(all, others...)
 
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(ForEachToSlice[T], ConsistOf(all))
 }
 
+// TODO: Move to internal/matchers
 func beSetThatConsistsOfElementsIn[T comparable](set set.Set[T]) types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(ForEachToSlice[T], ConsistOf(ForEachToSlice(set)))
 }
 
+// TODO: Move to internal/matchers
 func beEmptySet[T comparable]() types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(ForEachToSlice[T], BeEmpty())
 }
 
+// TODO: Move to internal/matchers
 func beNonMutableSet[T comparable]() types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(
 		func(s set.Set[T]) bool {
 			_, mutable := s.(set.MutableSet[T])
