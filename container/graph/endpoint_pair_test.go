@@ -204,7 +204,9 @@ var _ = Describe("EndpointPair", func() {
 	})
 })
 
+// TODO: Move to internal/matchers
 func beOrdered() types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(
 		func(endpointPair graph.EndpointPair[string]) bool {
 			return endpointPair.IsOrdered()
@@ -212,7 +214,9 @@ func beOrdered() types.GomegaMatcher {
 		BeTrue())
 }
 
+// TODO: Move to internal/matchers
 func haveSource(source string) types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(
 		func(endpointPair graph.EndpointPair[string]) string {
 			return endpointPair.Source()
@@ -220,7 +224,9 @@ func haveSource(source string) types.GomegaMatcher {
 		Equal(source))
 }
 
+// TODO: Move to internal/matchers
 func haveTarget(target string) types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(
 		func(endpointPair graph.EndpointPair[string]) string {
 			return endpointPair.Target()
@@ -228,7 +234,9 @@ func haveTarget(target string) types.GomegaMatcher {
 		Equal(target))
 }
 
+// TODO: Move to internal/matchers
 func haveUnavailableSource() types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(
 		func(endpointPair graph.EndpointPair[string]) func() {
 			return func() { endpointPair.Source() }
@@ -236,7 +244,9 @@ func haveUnavailableSource() types.GomegaMatcher {
 		PanicWith(notAvailableOnUndirected))
 }
 
+// TODO: Move to internal/matchers
 func haveUnavailableTarget() types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(
 		func(endpointPair graph.EndpointPair[string]) func() {
 			return func() { endpointPair.Target() }
@@ -248,7 +258,9 @@ const notAvailableOnUndirected = "cannot call Source()/Target() on an EndpointPa
 	"undirected graph; consider calling AdjacentNode(node) if you already have a node, or " +
 	"NodeU()/NodeV() if you don't"
 
+// TODO: Move to internal/matchers
 func haveNodeU(node string) types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(
 		func(endpointPair graph.EndpointPair[string]) string {
 			return endpointPair.NodeU()
@@ -256,7 +268,9 @@ func haveNodeU(node string) types.GomegaMatcher {
 		Equal(node))
 }
 
+// TODO: Move to internal/matchers
 func haveNodeV(node string) types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(
 		func(endpointPair graph.EndpointPair[string]) string {
 			return endpointPair.NodeV()
@@ -265,4 +279,5 @@ func haveNodeV(node string) types.GomegaMatcher {
 }
 
 // TODO: Guava's EndpointPairTest.java has some tests that use EndpointPair but check Graph.edges()
-//       and Network.asGraph().edges(). Adapt these tests for our own Graph and Network types.
+//       and Network.asGraph().edges() for both directed and undirected graphs. Adapt these tests
+//       for our own graph types.
