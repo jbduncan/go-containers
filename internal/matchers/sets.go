@@ -2,7 +2,6 @@ package matchers
 
 import (
 	"fmt"
-	"reflect"
 
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
@@ -34,10 +33,6 @@ func HaveLenOf(len int) types.GomegaMatcher {
 
 func HaveLenOfZero() types.GomegaMatcher {
 	return HaveLenOf(0)
-}
-
-func hasReceiverAndNoParams(method reflect.Method) bool {
-	return method.Type.NumIn() != 1
 }
 
 // TODO: Rename to BeSetThatContains
