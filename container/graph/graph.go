@@ -15,25 +15,25 @@ type Graph[N comparable] interface {
 	AllowsSelfLoops() bool
 	// NodeOrder() ElementOrder
 	// IncidentEdgeOrder() ElementOrder
-	// TODO: Document that passing in an absent node returns an empty set, and to use Nodes().Contains() to tell when a
+	// TODO: Document that passing in an absent node panics, and to use Nodes().Contains() to tell when a
 	//       given node is in the graph or not.
 	AdjacentNodes(node N) set.Set[N]
-	// TODO: Document that passing in an absent node returns an empty set, and to use Nodes().Contains() to tell when a
+	// TODO: Document that passing in an absent node panics, and to use Nodes().Contains() to tell when a
 	//       given node is in the graph or not.
 	Predecessors(node N) set.Set[N]
-	// TODO: Document that passing in an absent node returns an empty set, and to use Nodes().Contains() to tell when a
+	// TODO: Document that passing in an absent node panics, and to use Nodes().Contains() to tell when a
 	//       given node is in the graph or not.
 	Successors(node N) set.Set[N]
-	// TODO: Document that passing in an absent node returns an empty set, and to use Nodes().Contains() to tell when a
+	// TODO: Document that passing in an absent node panics, and to use Nodes().Contains() to tell when a
 	//       given node is in the graph or not.
 	IncidentEdges(node N) set.Set[EndpointPair[N]]
-	// TODO: Document that passing in an absent node returns zero, and to use Nodes().Contains() to tell when a
+	// TODO: Document that passing in an absent node panics, and to use Nodes().Contains() to tell when a
 	//       given node is in the graph or not.
 	Degree(node N) int
-	// TODO: Document that passing in an absent node returns zero, and to use Nodes().Contains() to tell when a
+	// TODO: Document that passing in an absent node panics, and to use Nodes().Contains() to tell when a
 	//       given node is in the graph or not.
 	InDegree(node N) int
-	// TODO: Document that passing in an absent node returns zero, and to use Nodes().Contains() to tell when a
+	// TODO: Document that passing in an absent node panics, and to use Nodes().Contains() to tell when a
 	//       given node is in the graph or not.
 	OutDegree(node N) int
 	HasEdgeConnecting(nodeU N, nodeV N) bool
@@ -107,7 +107,7 @@ func (m *mutableGraph[N]) AllowsSelfLoops() bool {
 // TODO: Add tests for all set.Set methods of mutableGraph.Nodes()
 
 func (m *mutableGraph[N]) Nodes() set.Set[N] {
-	return &keySet[N]{
+	return keySet[N]{
 		delegate: m.adjacencyList,
 	}
 }
@@ -124,6 +124,10 @@ func (m *mutableGraph[N]) Edges() set.Set[EndpointPair[N]] {
 func (m *mutableGraph[N]) AdjacentNodes(node N) set.Set[N] {
 	adjacentNodes, ok := m.adjacencyList[node]
 	if !ok {
+		// TODO: Go back to panicking, as this set is not a view and
+		//       there is no sane way of testing that it's a view.
+		//       Furthermore, panicking will allow programmers to
+		//       flush out bugs faster.
 		return set.Unmodifiable(set.New[N]())
 	}
 

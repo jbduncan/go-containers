@@ -67,12 +67,14 @@ func mutableGraphTests(
 	createGraph func() graph.MutableGraph[int],
 	containersMode ContainersMode,
 ) {
+	// TODO: Consider replacing addNode with graphAsMutable().AddNode
 	addNode := func(grph graph.Graph[int], node int) graph.Graph[int] {
 		graphAsMutable := grph.(graph.MutableGraph[int])
 		graphAsMutable.AddNode(node)
 
 		return grph
 	}
+	// TODO: Consider replacing putEdge with graphAsMutable().PutEdge
 	putEdge := func(grph graph.Graph[int], node1 int, node2 int) graph.Graph[int] {
 		graphAsMutable := grph.(graph.MutableGraph[int])
 		graphAsMutable.PutEdge(node1, node2)
