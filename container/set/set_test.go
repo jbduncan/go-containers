@@ -237,9 +237,11 @@ func haveForEachThatProduces(first string, others ...string) types.GomegaMatcher
 	all := []string{first}
 	all = append(all, others...)
 
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(ForEachToSlice[string], ConsistOf(all))
 }
 
 func haveForEachThatProducesNothing() types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(ForEachToSlice[string], BeEmpty())
 }

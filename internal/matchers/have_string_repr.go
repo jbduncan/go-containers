@@ -11,6 +11,7 @@ import (
 func HaveStringRepr(valueOrMatcher any) types.GomegaMatcher {
 	value, ok := valueOrMatcher.(string)
 	if ok {
+		// TODO: Use gcustom.MakeMatcher to improve error message
 		return WithTransform(
 			func(stringer fmt.Stringer) string {
 				return stringer.String()
@@ -20,6 +21,7 @@ func HaveStringRepr(valueOrMatcher any) types.GomegaMatcher {
 
 	matcher, ok := valueOrMatcher.(types.GomegaMatcher)
 	if ok {
+		// TODO: Use gcustom.MakeMatcher to improve error message
 		return WithTransform(
 			func(stringer fmt.Stringer) string {
 				return stringer.String()
