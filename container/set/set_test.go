@@ -8,6 +8,9 @@ import (
 	. "go-containers/internal/matchers"
 )
 
+// TODO: turn into a TCK that can be applied to other set
+//  implementations, like those in package "graph".
+
 var _ = Describe("Sets", func() {
 	var mutSet set.MutableSet[string]
 

@@ -2,6 +2,8 @@ package graph
 
 import "go-containers/container/set"
 
+var _ set.Set[EndpointPair[int]] = (*incidentEdgeSet[int])(nil)
+
 type incidentEdgeSet[N comparable] struct {
 	node          N
 	adjacentNodes set.MutableSet[N]
@@ -9,8 +11,6 @@ type incidentEdgeSet[N comparable] struct {
 
 func (i incidentEdgeSet[N]) Contains(elem EndpointPair[N]) bool {
 	if !elem.IsOrdered() {
-		// TODO: Once EndpointPair.Equal() is introduced, replace this code with an
-		//       EndpointPair.Equal() check
 		return (i.node == elem.NodeU() && i.adjacentNodes.Contains(elem.NodeV())) ||
 			(i.node == elem.NodeV() && i.adjacentNodes.Contains(elem.NodeU()))
 	}

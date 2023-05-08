@@ -158,8 +158,7 @@ func graphTests(
 			Expect(edges).To(beNonMutableSet[graph.EndpointPair[int]]())
 
 			grph = putEdge(grph, node1, node2)
-			// TODO: Pending implementation of Graph.Edges()
-			// Expect(edges).To(Contain(newEndpointPair(grph, node1, node2)))
+			Expect(edges).To(Contain(newEndpointPair(grph, node1, node2)))
 		})
 
 		// TODO: Write an equivalent test to above for ContainersAreCopies
@@ -372,6 +371,43 @@ func graphTests(
 				Expect(grph.Degree(node1)).To(Equal(1))
 				Expect(grph.Degree(node2)).To(Equal(1))
 			})
+
+			It("returns just that edge on iteration", func() {
+				Expect(grph.Edges()).To(
+					beSetThatConsistsOf[graph.EndpointPair[int]](
+						BeEquivalentToUsingEqualMethod(
+							graph.NewUnorderedEndpointPair(node1, node2))))
+			})
+
+			It("contains just that edge", func() {
+				containsNode1ToNode2 := grph.Edges().Contains(graph.NewUnorderedEndpointPair(node1, node2))
+				Expect(containsNode1ToNode2).To(BeTrue(), "to contain [node1, node2] (unordered endpoint pair)")
+
+				containsNode2ToNode1 := grph.Edges().Contains(graph.NewUnorderedEndpointPair(node2, node1))
+				Expect(containsNode2ToNode1).To(BeTrue(), "to contain [node2, node1] (unordered endpoint pair)")
+
+				containsNode1ToNode3 := grph.Edges().Contains(graph.NewUnorderedEndpointPair(node1, node3))
+				Expect(containsNode1ToNode3).To(BeFalse(), "to not contain [node1, node3] (unordered endpoint pair)")
+
+				containsNode3ToNode1 := grph.Edges().Contains(graph.NewUnorderedEndpointPair(node3, node1))
+				Expect(containsNode3ToNode1).To(BeFalse(), "to not contain [node3, node1] (unordered endpoint pair)")
+			})
+
+			It("has an edges length of 1", func() {
+				Expect(grph.Edges()).To(HaveLenOf(1))
+			})
+
+			It("has an edges slice consisting of just that edge", func() {
+				Expect(grph.Edges().ToSlice()).To(
+					ConsistOf(
+						BeEquivalentToUsingEqualMethod(
+							graph.NewUnorderedEndpointPair(node1, node2))),
+					"to consist of [node1, node2] (unordered endpoint pair)")
+			})
+
+			It("has edges with a single element string representation", func() {
+				Expect(grph.Edges()).To(HaveStringRepr(BeElementOf("[[1, 2]]", "[[2, 1]]")))
+			})
 		})
 
 		Context("when putting two connected edges", func() {
@@ -389,13 +425,17 @@ func graphTests(
 			})
 
 			It("returns both edges on iteration", func() {
-				Expect(grph.Edges().ToSlice()).To(
-					ConsistOf(
+				Expect(grph.Edges()).To(
+					beSetThatConsistsOf[graph.EndpointPair[int]](
 						BeEquivalentToUsingEqualMethod(
 							graph.NewUnorderedEndpointPair(node1, node2)),
 						BeEquivalentToUsingEqualMethod(
 							graph.NewUnorderedEndpointPair(node1, node3))),
 					"to consist of [node1, node2] and [node1, node3] (unordered endpoint pairs)")
+			})
+
+			It("has an edges length of 2", func() {
+				Expect(grph.Edges()).To(HaveLenOf(2))
 			})
 		})
 

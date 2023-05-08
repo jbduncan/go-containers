@@ -112,22 +112,10 @@ func (m *mutableGraph[N]) Nodes() set.Set[N] {
 	}
 }
 
-// TODO: Add tests for all set.Set methods of mutableGraph.Edges()
-
 func (m *mutableGraph[N]) Edges() set.Set[EndpointPair[N]] {
-	result := set.New[EndpointPair[N]]()
-	m.Nodes().ForEach(func(u N) {
-		// TODO: Replace .AdjacentNodes with .Successors when building
-		//       a directed graph type.
-		m.AdjacentNodes(u).ForEach(func(v N) {
-			uv := NewUnorderedEndpointPair(u, v)
-			vu := NewUnorderedEndpointPair(v, u)
-			if !result.Contains(uv) && !result.Contains(vu) {
-				result.Add(uv)
-			}
-		})
-	})
-	return set.Unmodifiable(result)
+	return edgeSet[N]{
+		delegate: m,
+	}
 }
 
 // TODO: Add tests for all set.Set methods of mutableGraph.AdjacentNodes()

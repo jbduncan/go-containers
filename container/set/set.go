@@ -31,12 +31,18 @@ type Set[T comparable] interface {
 	// change from one call to the next.
 	ForEach(fn func(elem T))
 
+	// TODO: Move set.ToSlice to its own top-level, non-member function to
+	//       prevent the need to re-implement it for every set.
+
 	// ToSlice returns a new slice with the contents of this set copied into
 	// it.
 	//
 	// The order of the elements in this slice is undefined; it may even
 	// change from one call of ToSlice to the next.
 	ToSlice() []T
+
+	// TODO: Can we move all of our Set.String() implementations into a helper
+	//       function?
 
 	// String returns a string representation of all the elements in this set.
 	//
