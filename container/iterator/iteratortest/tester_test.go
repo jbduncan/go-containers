@@ -1,8 +1,8 @@
-package iteratortester_test
+package iteratortest_test
 
 import (
 	"go-containers/container/iterator"
-	"go-containers/container/iteratortester"
+	"go-containers/container/iterator/iteratortest"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -13,7 +13,7 @@ var _ = Describe("Iterator testers", func() {
 		Context("with a slice and a known-order iterator with the same elements and order", func() {
 			Context("when running the tester", func() {
 				It("passes", func() {
-					tester := iteratortester.ForIteratorWithKnownOrder(
+					tester := iteratortest.ForIteratorWithKnownOrder(
 						"Known-order slice iterator",
 						func() iterator.Iterator[int] {
 							return sliceIter([]int{1, 2, 3})
@@ -30,7 +30,7 @@ var _ = Describe("Iterator testers", func() {
 		Context("with a slice and a known-order iterator with different orders", func() {
 			Context("when running the tester", func() {
 				It("fails", func() {
-					tester := iteratortester.ForIteratorWithKnownOrder(
+					tester := iteratortest.ForIteratorWithKnownOrder(
 						"Slice iterator in different order",
 						func() iterator.Iterator[int] {
 							return sliceIter([]int{1, 3, 2})
@@ -51,7 +51,7 @@ var _ = Describe("Iterator testers", func() {
 		Context("with a slice and a known-order iterator with different lengths", func() {
 			Context("when running the tester", func() {
 				It("fails", func() {
-					tester := iteratortester.ForIteratorWithKnownOrder(
+					tester := iteratortest.ForIteratorWithKnownOrder(
 						"Slice iterator with too many elements",
 						func() iterator.Iterator[int] {
 							return sliceIter([]int{1, 2, 3, 4})
@@ -72,7 +72,7 @@ var _ = Describe("Iterator testers", func() {
 		Context("with a slice and an unknown-order iterator with different orders", func() {
 			Context("when running the tester", func() {
 				It("passes", func() {
-					tester := iteratortester.ForIteratorWithUnknownOrder(
+					tester := iteratortest.ForIteratorWithUnknownOrder(
 						"Unknown-order slice iterator",
 						func() iterator.Iterator[int] {
 							return sliceIter([]int{1, 3, 2})

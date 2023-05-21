@@ -1,4 +1,4 @@
-package iteratortester_test
+package iteratortest_test
 
 import (
 	"testing"
