@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2022 Jonathan Bluett-Duncan
+Copyright (c) 2022-present Jonathan Bluett-Duncan
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
