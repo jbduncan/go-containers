@@ -6,7 +6,7 @@ endif
 
 .PHONY: fmt
 fmt:
-	go generate gofumpt_apply.go
+	go run mvdan.cc/gofumpt -l -w .
 
 .PHONY: fmt_check
 fmt_check:
@@ -14,7 +14,10 @@ fmt_check:
 
 .PHONY: test
 test:
-	go generate test.go
+	go run github.com/onsi/ginkgo/v2/ginkgo -r
+# TODO: Improve above instruction to follow Ginkgo best practices for CI:
+#       https://onsi.github.io/ginkgo/#recommended-continuous-integration-configuration
+
 
 .PHONY: check
 check: fmt_check test
