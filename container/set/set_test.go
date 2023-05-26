@@ -1,15 +1,30 @@
 package set_test
 
 import (
+	"testing"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/types"
 	"go-containers/container/set"
+	"go-containers/container/set/settest"
 	. "go-containers/internal/matchers"
 )
 
 // TODO: turn into a TCK that can be applied to other set
 //  implementations, like those in package "graph".
+
+// TODO: Rename to TestSet when the Ginkgo tests for this
+//	package can go away.
+
+func TestSet2(t *testing.T) {
+	settest.Set(t, func(elements []string) set.Set[string] {
+		s := set.New[string]()
+		for _, element := range elements {
+			s.Add(element)
+		}
+		return s
+	})
+}
 
 var _ = Describe("Sets", func() {
 	var mutSet set.MutableSet[string]
@@ -23,6 +38,10 @@ var _ = Describe("Sets", func() {
 			Expect(mutSet).To(HaveLenOfZero())
 		})
 
+		It("contains nothing", func() {
+			Expect(mutSet).ToNot(Contain("link"))
+		})
+
 		It("does nothing on remove", func() {
 			mutSet.Remove("link")
 
@@ -30,7 +49,7 @@ var _ = Describe("Sets", func() {
 		})
 
 		It("returns nothing on iteration", func() {
-			Expect(mutSet).To(haveForEachThatProducesNothing())
+			Expect(mutSet).To(BeSetWithForEachThatProducesNothing())
 		})
 
 		It("has an empty list string representation", func() {
@@ -61,7 +80,7 @@ var _ = Describe("Sets", func() {
 			})
 
 			It("returns element on iteration", func() {
-				Expect(mutSet).To(haveForEachThatProduces("link"))
+				Expect(mutSet).To(BeSetWithForEachThatProduces("link"))
 			})
 
 			Context("when returning a slice representation", func() {
@@ -76,7 +95,7 @@ var _ = Describe("Sets", func() {
 		})
 
 		Context("when adding and removing one element", func() {
-			It("has a length of 0", func() {
+			It("no longer contains the element", func() {
 				mutSet.Add("link")
 				mutSet.Remove("link")
 
@@ -100,7 +119,7 @@ var _ = Describe("Sets", func() {
 			})
 
 			It("returns both elements upon iteration", func() {
-				Expect(mutSet).To(haveForEachThatProduces("link", "zelda"))
+				Expect(mutSet).To(BeSetWithForEachThatProduces("link", "zelda"))
 			})
 
 			Context("when returning a slice representation", func() {
@@ -171,7 +190,7 @@ var _ = Describe("Sets", func() {
 			})
 
 			It("returns nothing on iteration", func() {
-				Expect(unmodSet).To(haveForEachThatProducesNothing())
+				Expect(unmodSet).To(BeSetWithForEachThatProducesNothing())
 			})
 
 			Context("when returning a slice representation", func() {
@@ -198,7 +217,7 @@ var _ = Describe("Sets", func() {
 				})
 
 				It("returns element on iteration", func() {
-					Expect(unmodSet).To(haveForEachThatProduces("link"))
+					Expect(unmodSet).To(BeSetWithForEachThatProduces("link"))
 				})
 
 				Context("when returning a slice representation", func() {
@@ -232,16 +251,3 @@ var _ = Describe("Sets", func() {
 		})
 	})
 })
-
-func haveForEachThatProduces(first string, others ...string) types.GomegaMatcher {
-	all := []string{first}
-	all = append(all, others...)
-
-	// TODO: Use gcustom.MakeMatcher to improve error message
-	return WithTransform(ForEachToSlice[string], ConsistOf(all))
-}
-
-func haveForEachThatProducesNothing() types.GomegaMatcher {
-	// TODO: Use gcustom.MakeMatcher to improve error message
-	return WithTransform(ForEachToSlice[string], BeEmpty())
-}

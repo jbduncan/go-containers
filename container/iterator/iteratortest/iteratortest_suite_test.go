@@ -12,5 +12,5 @@ import (
 
 func TestIteratorTester(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "IteratorTester Suite")
+	RunSpecs(t, "IteratorTest Suite")
 }

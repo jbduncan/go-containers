@@ -80,3 +80,24 @@ func HaveToSliceThatConsistsOf[T comparable](first T, others ...T) types.GomegaM
 		},
 		ConsistOf(all))
 }
+
+func BeSetWithForEachThatProduces(first string, others ...string) types.GomegaMatcher {
+	all := []string{first}
+	all = append(all, others...)
+
+	// TODO: Use gcustom.MakeMatcher to improve error message
+	return WithTransform(ForEachToSlice[string], ConsistOf(all))
+}
+
+func BeSetWithForEachThatProducesNothing() types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
+	return WithTransform(ForEachToSlice[string], BeEmpty())
+}
+
+func BeSetThatConsistsOf[T comparable](first any, others ...any) types.GomegaMatcher {
+	all := []any{first}
+	all = append(all, others...)
+
+	// TODO: Use gcustom.MakeMatcher to improve error message
+	return WithTransform(ForEachToSlice[T], ConsistOf(all))
+}
