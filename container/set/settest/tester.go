@@ -214,7 +214,7 @@ func Set(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
 		g := NewWithT(t)
 		s := setBuilder(twoElements()).(set.MutableSet[string])
 
-		// TODO: Introduce "ContainAll"
+		// TODO: Introduce "ContainAtLeast"
 		g.Expect(s).To(And(Contain("link"), Contain("zelda")))
 	})
 
@@ -226,7 +226,7 @@ func Set(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
 			s.Add("link")
 			s.Add("zelda")
 
-			// TODO: Introduce "ContainAll"
+			// TODO: Introduce "ContainAtLeast"
 			g.Expect(s).To(And(Contain("link"), Contain("zelda")))
 		})
 	}
@@ -308,13 +308,30 @@ func Set(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
 				s.Add("zelda")
 				s.Remove("link")
 
-				g.Expect(s).To(BeSetThatConsistsOf[string]("zelda"))
+				g.Expect(s).To(HaveLenOf(1))
 			})
 	}
 
 	t.Run("three element set: contains all elements", func(t *testing.T) {
-		// TODO
+		g := NewWithT(t)
+		s := setBuilder(empty()).(set.MutableSet[string])
+
+		s.Add("link")
+		s.Add("zelda")
+		s.Add("ganondorf")
+
+		// TODO: Introduce "ContainAtLeast"
+		g.Expect(s).To(
+			And(
+				Contain("link"),
+				Contain("zelda"),
+				Contain("ganondorf")))
 	})
+
+	t.Run("three element set: has three-element string representation",
+		func(t *testing.T) {
+			// TODO
+		})
 }
 
 func empty() []string {

@@ -35,8 +35,6 @@ func HaveLenOfZero() types.GomegaMatcher {
 	return HaveLenOf(0)
 }
 
-// TODO: Rename to BeSetThatContains
-
 func Contain[T comparable](elem T) types.GomegaMatcher {
 	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(
@@ -56,8 +54,6 @@ func ForEachToSlice[T comparable](s set.Set[T]) []T {
 	return result
 }
 
-// TODO: Rename to BeSetWithEmptyToSlice
-
 func HaveEmptyToSlice[T comparable]() types.GomegaMatcher {
 	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(
@@ -66,8 +62,6 @@ func HaveEmptyToSlice[T comparable]() types.GomegaMatcher {
 		},
 		BeEmpty())
 }
-
-// TODO: Rename to BeSetWithToSliceThatConsistsOf
 
 func HaveToSliceThatConsistsOf[T comparable](first T, others ...T) types.GomegaMatcher {
 	all := []T{first}
@@ -81,6 +75,8 @@ func HaveToSliceThatConsistsOf[T comparable](first T, others ...T) types.GomegaM
 		ConsistOf(all))
 }
 
+// TODO: Rename to HaveForEachThatConsistsOf.
+
 func BeSetWithForEachThatProduces(first string, others ...string) types.GomegaMatcher {
 	all := []string{first}
 	all = append(all, others...)
@@ -89,10 +85,15 @@ func BeSetWithForEachThatProduces(first string, others ...string) types.GomegaMa
 	return WithTransform(ForEachToSlice[string], ConsistOf(all))
 }
 
+// TODO: Rename to HaveForEachThatProducesNothing
+
 func BeSetWithForEachThatProducesNothing() types.GomegaMatcher {
 	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(ForEachToSlice[string], BeEmpty())
 }
+
+// TODO: This matcher is a duplicate of BeSetWithForEachThatProduces.
+//       Eliminate one or the other.
 
 func BeSetThatConsistsOf[T comparable](first any, others ...any) types.GomegaMatcher {
 	all := []any{first}
