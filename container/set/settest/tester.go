@@ -312,13 +312,27 @@ func Set(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
 			})
 	}
 
+	if mutable {
+		t.Run("empty set: add x3: contains all elements", func(t *testing.T) {
+			g := NewWithT(t)
+			s := setBuilder(empty()).(set.MutableSet[string])
+
+			s.Add("link")
+			s.Add("zelda")
+			s.Add("ganondorf")
+
+			// TODO: Introduce "ContainAtLeast"
+			g.Expect(s).To(
+				And(
+					Contain("link"),
+					Contain("zelda"),
+					Contain("ganondorf")))
+		})
+	}
+
 	t.Run("three element set: contains all elements", func(t *testing.T) {
 		g := NewWithT(t)
-		s := setBuilder(empty()).(set.MutableSet[string])
-
-		s.Add("link")
-		s.Add("zelda")
-		s.Add("ganondorf")
+		s := setBuilder(threeElements())
 
 		// TODO: Introduce "ContainAtLeast"
 		g.Expect(s).To(
@@ -328,7 +342,52 @@ func Set(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
 				Contain("ganondorf")))
 	})
 
+	if mutable {
+		t.Run("empty set: add x3: has three-element string representation",
+			func(t *testing.T) {
+				g := NewWithT(t)
+				s := setBuilder(empty()).(set.MutableSet[string])
+
+				s.Add("link")
+				s.Add("zelda")
+				s.Add("ganondorf")
+
+				g.Expect(s).To(
+					HaveStringRepr(
+						BeElementOf(
+							"[link, zelda, ganondorf]",
+							"[link, ganondorf, zelda]",
+							"[zelda, link, ganondorf]",
+							"[zelda, ganondorf, link]",
+							"[ganondorf, link, zelda]",
+							"[ganondorf, zelda, link]")))
+			})
+	}
+
 	t.Run("three element set: has three-element string representation",
+		func(t *testing.T) {
+			g := NewWithT(t)
+			s := setBuilder(threeElements())
+
+			g.Expect(s).To(
+				HaveStringRepr(
+					BeElementOf(
+						"[link, zelda, ganondorf]",
+						"[link, ganondorf, zelda]",
+						"[zelda, link, ganondorf]",
+						"[zelda, ganondorf, link]",
+						"[ganondorf, link, zelda]",
+						"[ganondorf, zelda, link]")))
+		})
+
+	if mutable {
+		t.Run("empty set: same element added twice: has length of 1",
+			func(t *testing.T) {
+				// TODO
+			})
+	}
+
+	t.Run("set initialized from two same elements: has length of 1",
 		func(t *testing.T) {
 			// TODO
 		})
@@ -344,4 +403,8 @@ func oneElement() []string {
 
 func twoElements() []string {
 	return []string{"link", "zelda"}
+}
+
+func threeElements() []string {
+	return []string{"link", "zelda", "ganondorf"}
 }
