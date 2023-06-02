@@ -67,17 +67,8 @@ func Set(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
 	threeElementSetHasThreeElementStringRepr(t, setBuilder)
 	emptySetPlusThreeHasThreeElementStringRepr(t, setBuilder, mutable)
 
-	t.Run("set initialized from two same elements: has length of 1",
-		func(t *testing.T) {
-			// TODO
-		})
-
-	if mutable {
-		t.Run("empty set: same element added twice: has length of 1",
-			func(t *testing.T) {
-				// TODO
-			})
-	}
+	setInitializedFromTwoOfSameElementHasLengthOfOne(t, setBuilder)
+	emptySetPlusSameElementTwiceHasLengthOfOne(t, setBuilder, mutable)
 }
 
 func emptySetHasLengthOfZero(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
@@ -340,7 +331,7 @@ func twoElementSetHasLengthOfTwo(t *testing.T, setBuilder func(elements []string
 
 	t.Run("two element set: has length of 2", func(t *testing.T) {
 		g := NewWithT(t)
-		s := setBuilder(twoElements()).(set.MutableSet[string])
+		s := setBuilder(twoElements())
 
 		g.Expect(s).To(HaveLenOf(2))
 	})
@@ -367,7 +358,7 @@ func twoElementSetContainsBothElements(t *testing.T, setBuilder func(elements []
 
 	t.Run("two element set: contains both elements", func(t *testing.T) {
 		g := NewWithT(t)
-		s := setBuilder(twoElements()).(set.MutableSet[string])
+		s := setBuilder(twoElements())
 
 		// TODO: Introduce "ContainAtLeast"
 		g.Expect(s).To(And(Contain("link"), Contain("zelda")))
@@ -397,7 +388,7 @@ func twoElementSetReturnsBothElementsOnIteration(t *testing.T, setBuilder func(e
 	t.Run("two element set: returns both elements on iteration",
 		func(t *testing.T) {
 			g := NewWithT(t)
-			s := setBuilder(twoElements()).(set.MutableSet[string])
+			s := setBuilder(twoElements())
 
 			g.Expect(s).To(BeSetWithForEachThatProduces("link", "zelda"))
 		})
@@ -459,7 +450,7 @@ func twoElementSetReturnsTwoElementSlice(t *testing.T, setBuilder func(elements 
 
 	t.Run("two element set: returns two-element slice", func(t *testing.T) {
 		g := NewWithT(t)
-		s := setBuilder(twoElements()).(set.MutableSet[string])
+		s := setBuilder(twoElements())
 
 		g.Expect(s).To(HaveToSliceThatConsistsOf("link", "zelda"))
 	})
@@ -584,6 +575,35 @@ func threeElementSetHasThreeElementStringRepr(t *testing.T, setBuilder func(elem
 		})
 }
 
+func setInitializedFromTwoOfSameElementHasLengthOfOne(t *testing.T, setBuilder func(elements []string) set.Set[string]) bool {
+	t.Helper()
+
+	return t.Run("set initialized from two of same element: has length of 1",
+		func(t *testing.T) {
+			g := NewWithT(t)
+			s := setBuilder(twoSameElements())
+
+			g.Expect(s).To(HaveLenOf(1))
+		})
+}
+
+func emptySetPlusSameElementTwiceHasLengthOfOne(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+	t.Helper()
+
+	if mutable {
+		t.Run("empty set: add same element x2: has length of 1",
+			func(t *testing.T) {
+				g := NewWithT(t)
+				s := setBuilder(empty()).(set.MutableSet[string])
+
+				s.Add("link")
+				s.Add("link")
+
+				g.Expect(s).To(HaveLenOf(1))
+			})
+	}
+}
+
 func empty() []string {
 	return make([]string, 0)
 }
@@ -598,4 +618,8 @@ func twoElements() []string {
 
 func threeElements() []string {
 	return []string{"link", "zelda", "ganondorf"}
+}
+
+func twoSameElements() []string {
+	return []string{"link", "link"}
 }
