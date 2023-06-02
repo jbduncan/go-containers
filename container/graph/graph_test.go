@@ -3,12 +3,12 @@ package graph_test
 import (
 	"fmt"
 
+	"github.com/jbduncan/go-containers/container/graph"
+	"github.com/jbduncan/go-containers/container/set"
+	. "github.com/jbduncan/go-containers/internal/matchers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
-	"go-containers/container/graph"
-	"go-containers/container/set"
-	. "go-containers/internal/matchers"
 )
 
 // TODO: Move mutableGraphTests to a graphtester package

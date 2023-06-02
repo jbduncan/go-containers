@@ -3,7 +3,7 @@ package set_test
 import (
 	"fmt"
 
-	"go-containers/container/set"
+	"github.com/jbduncan/go-containers/container/set"
 )
 
 func Example() {

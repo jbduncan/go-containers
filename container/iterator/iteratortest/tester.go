@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"go-containers/container/iterator"
+	"github.com/jbduncan/go-containers/container/iterator"
 )
 
 type IteratorOrder int
@@ -21,7 +21,7 @@ type Tester[T any] struct {
 	knownOrder       IteratorOrder
 }
 
-// TODO: Refactor to a style similar to
+// TODO: Change to a style similar to
 // https://www.calhoun.io/more-effective-ddd-with-interface-test-suites/
 func ForIteratorWithKnownOrder[T any](
 	iteratorName string,

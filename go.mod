@@ -1,4 +1,4 @@
-module go-containers
+module github.com/jbduncan/go-containers
 
 go 1.18
 

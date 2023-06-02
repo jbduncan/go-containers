@@ -3,10 +3,10 @@ package set_test
 import (
 	"testing"
 
+	"github.com/jbduncan/go-containers/container/set"
+	"github.com/jbduncan/go-containers/container/set/settest"
+	. "github.com/jbduncan/go-containers/internal/matchers"
 	. "github.com/onsi/gomega"
-	"go-containers/container/set"
-	"go-containers/container/set/settest"
-	. "go-containers/internal/matchers"
 )
 
 func TestSetNew(t *testing.T) {

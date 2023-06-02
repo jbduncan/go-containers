@@ -1,8 +1,8 @@
 package iteratortest_test
 
 import (
-	"go-containers/container/iterator"
-	"go-containers/container/iterator/iteratortest"
+	"github.com/jbduncan/go-containers/container/iterator"
+	"github.com/jbduncan/go-containers/container/iterator/iteratortest"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

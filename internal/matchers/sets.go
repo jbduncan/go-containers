@@ -3,10 +3,10 @@ package matchers
 import (
 	"fmt"
 
+	"github.com/jbduncan/go-containers/container/set"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
 	"github.com/onsi/gomega/types"
-	"go-containers/container/set"
 )
 
 func HaveLenOf(len int) types.GomegaMatcher {
