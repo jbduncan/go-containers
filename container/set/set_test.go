@@ -3,20 +3,13 @@ package set_test
 import (
 	"testing"
 
-	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go-containers/container/set"
 	"go-containers/container/set/settest"
 	. "go-containers/internal/matchers"
 )
 
-// TODO: turn into a TCK that can be applied to other set
-//  implementations, like those in package "graph".
-
-// TODO: Rename to TestSet when the Ginkgo tests for this
-//	package can go away.
-
-func TestSet2(t *testing.T) {
+func TestSetNew(t *testing.T) {
 	settest.Set(t, func(elements []string) set.Set[string] {
 		s := set.New[string]()
 		for _, element := range elements {
@@ -26,228 +19,108 @@ func TestSet2(t *testing.T) {
 	})
 }
 
-var _ = Describe("Sets", func() {
-	var mutSet set.MutableSet[string]
-
-	BeforeEach(func() {
-		mutSet = set.New[string]()
+func TestSetUnmodifiable(t *testing.T) {
+	settest.Set(t, func(elements []string) set.Set[string] {
+		s := set.New[string]()
+		for _, element := range elements {
+			s.Add(element)
+		}
+		return set.Unmodifiable[string](s)
 	})
 
-	Describe("given a new set", func() {
-		It("has a length of 0", func() {
-			Expect(mutSet).To(HaveLenOfZero())
+	t.Run(
+		"empty unmodifiable set: add to underlying set: has length of 1",
+		func(t *testing.T) {
+			g := NewWithT(t)
+			s := set.New[string]()
+			unmodSet := set.Unmodifiable(s)
+
+			s.Add("link")
+
+			g.Expect(unmodSet).To(HaveLenOf(1))
 		})
 
-		It("contains nothing", func() {
-			Expect(mutSet).ToNot(Contain("link"))
+	t.Run(
+		"empty unmodifiable set: add to underlying set: contains element",
+		func(t *testing.T) {
+			g := NewWithT(t)
+			s := set.New[string]()
+			unmodSet := set.Unmodifiable(s)
+
+			s.Add("link")
+
+			g.Expect(unmodSet).To(Contain("link"))
 		})
 
-		It("does nothing on remove", func() {
-			mutSet.Remove("link")
+	t.Run(
+		"empty unmodifiable set: "+
+			"add to underlying set: "+
+			"returns element on iteration",
+		func(t *testing.T) {
+			g := NewWithT(t)
+			s := set.New[string]()
+			unmodSet := set.Unmodifiable(s)
 
-			Expect(mutSet).To(HaveLenOfZero())
+			s.Add("link")
+
+			g.Expect(unmodSet).To(BeSetWithForEachThatProduces("link"))
 		})
 
-		It("returns nothing on iteration", func() {
-			Expect(mutSet).To(BeSetWithForEachThatProducesNothing())
+	t.Run(
+		"empty unmodifiable set: "+
+			"add to underlying set: "+
+			"has one-element string representation",
+		func(t *testing.T) {
+			g := NewWithT(t)
+			s := set.New[string]()
+			unmodSet := set.Unmodifiable(s)
+
+			s.Add("link")
+
+			g.Expect(unmodSet).To(HaveStringRepr("[link]"))
 		})
 
-		It("has an empty list string representation", func() {
-			Expect(mutSet).To(HaveStringRepr("[]"))
+	t.Run(
+		"empty unmodifiable set: "+
+			"add to underlying set: "+
+			"returns one-element slice",
+		func(t *testing.T) {
+			g := NewWithT(t)
+			s := set.New[string]()
+			unmodSet := set.Unmodifiable(s)
+
+			s.Add("link")
+
+			g.Expect(unmodSet).To(HaveToSliceThatConsistsOf("link"))
 		})
 
-		Context("when returning a slice representation", func() {
-			It("returns an empty slice", func() {
-				Expect(mutSet).To(HaveEmptyToSlice[string]())
-			})
+	t.Run(
+		"empty unmodifiable set: "+
+			"add x2 to underlying set: "+
+			"has two-element string representation",
+		func(t *testing.T) {
+			g := NewWithT(t)
+			s := set.New[string]()
+			unmodSet := set.Unmodifiable(s)
+
+			s.Add("link")
+			s.Add("zelda")
+
+			g.Expect(unmodSet).To(HaveStringRepr(BeElementOf("[link, zelda]", "[zelda, link]")))
 		})
 
-		Context("when adding one element", func() {
-			BeforeEach(func() {
-				mutSet.Add("link")
-			})
+	t.Run(
+		"empty unmodifiable set: "+
+			"add x2 to underlying set: "+
+			"returns two-element slice",
+		func(t *testing.T) {
+			g := NewWithT(t)
+			s := set.New[string]()
+			unmodSet := set.Unmodifiable(s)
 
-			It("has a length of 1", func() {
-				Expect(mutSet).To(HaveLenOf(1))
-			})
+			s.Add("link")
+			s.Add("zelda")
 
-			It("contains the element", func() {
-				Expect(mutSet).To(Contain("link"))
-			})
-
-			It("does not contain any other element", func() {
-				Expect(mutSet).ToNot(Contain("zelda"))
-			})
-
-			It("returns element on iteration", func() {
-				Expect(mutSet).To(BeSetWithForEachThatProduces("link"))
-			})
-
-			Context("when returning a slice representation", func() {
-				It("returns a single element slice", func() {
-					Expect(mutSet).To(HaveToSliceThatConsistsOf("link"))
-				})
-			})
-
-			It("has a single element list string representation", func() {
-				Expect(mutSet).To(HaveStringRepr("[link]"))
-			})
+			g.Expect(unmodSet).To(HaveToSliceThatConsistsOf("link", "zelda"))
 		})
-
-		Context("when adding and removing one element", func() {
-			It("no longer contains the element", func() {
-				mutSet.Add("link")
-				mutSet.Remove("link")
-
-				Expect(mutSet).ToNot(Contain("link"))
-			})
-		})
-
-		Context("when adding two elements", func() {
-			BeforeEach(func() {
-				mutSet.Add("link")
-				mutSet.Add("zelda")
-			})
-
-			It("has a length of 2", func() {
-				Expect(mutSet).To(HaveLenOf(2))
-			})
-
-			It("contains both elements", func() {
-				Expect(mutSet).To(Contain("link"))
-				Expect(mutSet).To(Contain("zelda"))
-			})
-
-			It("returns both elements upon iteration", func() {
-				Expect(mutSet).To(BeSetWithForEachThatProduces("link", "zelda"))
-			})
-
-			Context("when returning a slice representation", func() {
-				It("returns a two element slice", func() {
-					Expect(mutSet).To(HaveToSliceThatConsistsOf("link", "zelda"))
-				})
-			})
-
-			It("has a two element list string representation", func() {
-				Expect(mutSet).To(HaveStringRepr(BeElementOf("[link, zelda]", "[zelda, link]")))
-			})
-
-			Context("and removing one", func() {
-				It("has a length of 1", func() {
-					mutSet.Add("link")
-					mutSet.Add("zelda")
-					mutSet.Remove("link")
-
-					Expect(mutSet).To(HaveLenOf(1))
-				})
-			})
-		})
-
-		Context("when adding three elements", func() {
-			BeforeEach(func() {
-				mutSet.Add("link")
-				mutSet.Add("zelda")
-				mutSet.Add("ganondorf")
-			})
-
-			It("contains all elements", func() {
-				Expect(mutSet).To(Contain("link"))
-				Expect(mutSet).To(Contain("zelda"))
-				Expect(mutSet).To(Contain("ganondorf"))
-			})
-
-			It("has a three element list string representation", func() {
-				Expect(mutSet).To(
-					HaveStringRepr(
-						BeElementOf(
-							"[link, zelda, ganondorf]",
-							"[link, ganondorf, zelda]",
-							"[zelda, link, ganondorf]",
-							"[zelda, ganondorf, link]",
-							"[ganondorf, link, zelda]",
-							"[ganondorf, zelda, link]")))
-			})
-		})
-
-		Context("when adding the same element twice", func() {
-			It("has a length of 1", func() {
-				mutSet.Add("link")
-				mutSet.Add("link")
-
-				Expect(mutSet).To(HaveLenOf(1))
-			})
-		})
-
-		Context("when wrapping it in an unmodifiable set", func() {
-			var unmodSet set.Set[string]
-
-			BeforeEach(func() {
-				unmodSet = set.Unmodifiable(mutSet)
-			})
-
-			It("has a length of 0", func() {
-				Expect(unmodSet).To(HaveLenOfZero())
-			})
-
-			It("returns nothing on iteration", func() {
-				Expect(unmodSet).To(BeSetWithForEachThatProducesNothing())
-			})
-
-			Context("when returning a slice representation", func() {
-				It("returns an empty slice", func() {
-					Expect(mutSet).To(HaveEmptyToSlice[string]())
-				})
-			})
-
-			It("has an empty list string representation", func() {
-				Expect(unmodSet).To(HaveStringRepr("[]"))
-			})
-
-			Context("and adding one element afterwards", func() {
-				BeforeEach(func() {
-					mutSet.Add("link")
-				})
-
-				It("has a length of 1", func() {
-					Expect(unmodSet).To(HaveLenOf(1))
-				})
-
-				It("contains the element", func() {
-					Expect(unmodSet).To(Contain("link"))
-				})
-
-				It("returns element on iteration", func() {
-					Expect(unmodSet).To(BeSetWithForEachThatProduces("link"))
-				})
-
-				Context("when returning a slice representation", func() {
-					It("returns a single element slice", func() {
-						Expect(mutSet).To(HaveToSliceThatConsistsOf("link"))
-					})
-				})
-
-				It("has a single element list string representation", func() {
-					Expect(unmodSet).To(HaveStringRepr("[link]"))
-				})
-			})
-
-			Context("and adding two elements afterwards", func() {
-				BeforeEach(func() {
-					mutSet.Add("link")
-					mutSet.Add("zelda")
-				})
-
-				Context("when returning a slice representation", func() {
-					It("returns a two element slice", func() {
-						Expect(mutSet).To(HaveToSliceThatConsistsOf("link", "zelda"))
-					})
-				})
-
-				It("has a two element list string representation", func() {
-					Expect(unmodSet).
-						To(HaveStringRepr(BeElementOf("[link, zelda]", "[zelda, link]")))
-				})
-			})
-		})
-	})
-})
+}
