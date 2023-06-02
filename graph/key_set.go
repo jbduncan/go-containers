@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jbduncan/go-containers/container/set"
+	"github.com/jbduncan/go-containers/set"
 )
 
 var _ set.Set[int] = (*keySet[int])(nil)

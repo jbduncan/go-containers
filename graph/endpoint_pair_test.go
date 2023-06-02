@@ -1,7 +1,7 @@
 package graph_test
 
 import (
-	"github.com/jbduncan/go-containers/container/graph"
+	"github.com/jbduncan/go-containers/graph"
 	. "github.com/jbduncan/go-containers/internal/matchers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

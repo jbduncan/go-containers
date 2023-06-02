@@ -3,7 +3,7 @@ package graph
 import (
 	"fmt"
 
-	"github.com/jbduncan/go-containers/container/set"
+	"github.com/jbduncan/go-containers/set"
 )
 
 // TODO: Docs

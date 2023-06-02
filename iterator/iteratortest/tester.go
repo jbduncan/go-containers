@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/jbduncan/go-containers/container/iterator"
+	"github.com/jbduncan/go-containers/iterator"
 )
 
 type IteratorOrder int

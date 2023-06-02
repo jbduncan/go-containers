@@ -3,9 +3,9 @@ package graph_test
 import (
 	"fmt"
 
-	"github.com/jbduncan/go-containers/container/graph"
-	"github.com/jbduncan/go-containers/container/set"
+	"github.com/jbduncan/go-containers/graph"
 	. "github.com/jbduncan/go-containers/internal/matchers"
+	"github.com/jbduncan/go-containers/set"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"

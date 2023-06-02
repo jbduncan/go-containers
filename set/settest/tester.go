@@ -3,8 +3,8 @@ package settest
 import (
 	"testing"
 
-	"github.com/jbduncan/go-containers/container/set"
 	. "github.com/jbduncan/go-containers/internal/matchers"
+	"github.com/jbduncan/go-containers/set"
 	. "github.com/onsi/gomega"
 )
 

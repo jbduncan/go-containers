@@ -3,7 +3,7 @@ package matchers
 import (
 	"fmt"
 
-	"github.com/jbduncan/go-containers/container/set"
+	"github.com/jbduncan/go-containers/set"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
 	"github.com/onsi/gomega/types"

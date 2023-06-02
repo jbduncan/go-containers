@@ -3,9 +3,9 @@ package set_test
 import (
 	"testing"
 
-	"github.com/jbduncan/go-containers/container/set"
-	"github.com/jbduncan/go-containers/container/set/settest"
 	. "github.com/jbduncan/go-containers/internal/matchers"
+	"github.com/jbduncan/go-containers/set"
+	"github.com/jbduncan/go-containers/set/settest"
 	. "github.com/onsi/gomega"
 )
 

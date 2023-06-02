@@ -1,6 +1,6 @@
 package graph
 
-import "github.com/jbduncan/go-containers/container/set"
+import "github.com/jbduncan/go-containers/set"
 
 var _ set.Set[EndpointPair[int]] = (*incidentEdgeSet[int])(nil)
 
