@@ -14,10 +14,13 @@ fmt_check:
 
 .PHONY: test
 test:
-	go run github.com/onsi/ginkgo/v2/ginkgo -r
-# TODO: Improve above instruction to follow Ginkgo best practices for CI:
-#       https://onsi.github.io/ginkgo/#recommended-continuous-integration-configuration
-
+	go test ./...
+# TODO: Run tests in parallel. Refer to:
+#     - https://pkg.go.dev/cmd/go#hdr-Testing_flags
+#     - https://stackoverflow.com/a/58987438/2252930
+# TODO: Turn on the race detector
+# TODO: Consider turning on test code coverage
+# TODO: Randomly shuffle the order of tests everytime (try "go test -shuffle=on")
 
 .PHONY: check
 check: fmt_check test
