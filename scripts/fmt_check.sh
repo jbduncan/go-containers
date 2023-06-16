@@ -8,6 +8,7 @@
 set -ex
 
 if ! test -z "$(go run mvdan.cc/gofumpt -l .)"; then
-    echo "gofumpt found at least one unformatted file"
+    echo "gofumpt found at least one unformatted file."
+    echo "Run 'make fmt' to fix them."
     exit 1
 fi

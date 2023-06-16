@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/jbduncan/go-containers/set"
+	//lint:ignore ST1001 dot importing gomega matchers is best practice and
+	// this package is used by test code only
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
 	"github.com/onsi/gomega/types"

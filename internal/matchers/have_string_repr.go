@@ -5,6 +5,8 @@ import (
 
 	"github.com/onsi/gomega/types"
 
+	//lint:ignore ST1001 dot importing gomega matchers is best practice and
+	// this package is used by test code only
 	. "github.com/onsi/gomega"
 )
 

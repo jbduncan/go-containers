@@ -843,6 +843,7 @@ func sanityCheckEdges(grph graph.Graph[int], allEndpointPairs set.MutableSet[gra
 	Expect(grph.Edges()).ToNot(Contain(newEndpointPair(grph, nodeNotInGraph, nodeNotInGraph)))
 }
 
+//lint:ignore U1000 this function will be used eventually
 func expectStronglyEquivalent(first graph.Graph[int], second graph.Graph[int]) {
 	// Properties not covered by Graph.Equal()
 	Expect(first.AllowsSelfLoops()).To(Equal(second.AllowsSelfLoops()))

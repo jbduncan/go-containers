@@ -3,8 +3,12 @@ package settest
 import (
 	"testing"
 
+	//lint:ignore ST1001 dot importing gomega matchers is best practice and
+	// this package is used by test code only
 	. "github.com/jbduncan/go-containers/internal/matchers"
 	"github.com/jbduncan/go-containers/set"
+	//lint:ignore ST1001 dot importing gomega matchers is best practice and
+	// this package is used by test code only
 	. "github.com/onsi/gomega"
 )
 
