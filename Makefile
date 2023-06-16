@@ -14,13 +14,8 @@ fmt_check:
 
 .PHONY: test
 test:
-	go test ./...
-# TODO: Run tests in parallel. Refer to:
-#     - https://pkg.go.dev/cmd/go#hdr-Testing_flags
-#     - https://stackoverflow.com/a/58987438/2252930
-# TODO: Turn on the race detector
+	go test -shuffle=on -race ./...
 # TODO: Consider turning on test code coverage
-# TODO: Randomly shuffle the order of tests everytime (try "go test -shuffle=on")
 
 .PHONY: check
 check: fmt_check test
