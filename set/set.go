@@ -15,8 +15,8 @@ import (
 	"strings"
 )
 
-// Set is a generic, unordered collection of elements, where each element is unique. This interface has methods for
-// reading the set; for writing to the set, use the MutableSet interface.
+// Set is a generic, unordered collection of unique elements. This interface has methods for reading the set; for
+// writing to the set, use the MutableSet interface.
 type Set[T comparable] interface {
 	// Contains returns true if this set contains the given element, otherwise
 	// it returns false.
