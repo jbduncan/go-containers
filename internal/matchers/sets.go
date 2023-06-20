@@ -8,29 +8,26 @@ import (
 	// this package is used by test code only
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
+	"github.com/onsi/gomega/gcustom"
 	"github.com/onsi/gomega/types"
 )
 
 func HaveLenOf(len int) types.GomegaMatcher {
-	// TODO: Use gcustom.MakeMatcher to improve error message
-	//  when value.Len() (the actual value) isn't equal to len
-	//  (the expected value).
-	return WithTransform(
-		func(value any) (int, error) {
-			errNoLenMethod := fmt.Errorf(format.Message(value, "to have a Len method with a single return value of type <int>"))
+	return gcustom.MakeMatcher(func(value any) (bool, error) {
+		type sized interface {
+			Len() int
+		}
 
-			type sized interface {
-				Len() int
-			}
+		s, ok := value.(sized)
+		if !ok {
+			return false, fmt.Errorf("HaveLenOf matcher expected actual with Len method with <int> return type.  Got:\n%s", format.Object(value, 1))
+		}
 
-			s, ok := value.(sized)
-			if !ok {
-				return 0, errNoLenMethod
-			}
+		actualLen := s.Len()
 
-			return s.Len(), nil
-		},
-		Equal(len))
+		return actualLen == len, nil
+	}).WithTemplate("Expected\n{{.FormattedActual}}\n {{.To}} have length\n{{format .Data 1}}").
+		WithTemplateData(len)
 }
 
 func HaveLenOfZero() types.GomegaMatcher {
