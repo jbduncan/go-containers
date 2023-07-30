@@ -13,20 +13,22 @@ import (
 )
 
 func HaveLenOf(len int) types.GomegaMatcher {
-	return gcustom.MakeMatcher(func(value any) (bool, error) {
-		type sized interface {
-			Len() int
-		}
+	return gcustom.MakeMatcher(
+		func(value any) (bool, error) {
+			type sized interface {
+				Len() int
+			}
 
-		s, ok := value.(sized)
-		if !ok {
-			return false, fmt.Errorf("HaveLenOf matcher expected actual with Len method with <int> return type.  Got:\n%s", format.Object(value, 1))
-		}
+			s, ok := value.(sized)
+			if !ok {
+				return false, fmt.Errorf("HaveLenOf matcher expected actual with Len method with <int> return type.  Got:\n%s", format.Object(value, 1))
+			}
 
-		actualLen := s.Len()
+			actualLen := s.Len()
 
-		return actualLen == len, nil
-	}).WithTemplate("Expected\n{{.FormattedActual}}\n {{.To}} have length\n{{format .Data 1}}").
+			return actualLen == len, nil
+		}).
+		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} have length\n{{format .Data 1}}").
 		WithTemplateData(len)
 }
 
@@ -35,12 +37,12 @@ func HaveLenOfZero() types.GomegaMatcher {
 }
 
 func Contain[T comparable](elem T) types.GomegaMatcher {
-	// TODO: Use gcustom.MakeMatcher to improve error message
-	return WithTransform(
-		func(set set.Set[T]) bool {
-			return set.Contains(elem)
-		},
-		BeTrue())
+	return gcustom.MakeMatcher(
+		func(set set.Set[T]) (bool, error) {
+			return set.Contains(elem), nil
+		}).
+		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} contain\n{{format .Data 1}}").
+		WithTemplateData(elem)
 }
 
 func ForEachToSlice[T comparable](s set.Set[T]) []T {

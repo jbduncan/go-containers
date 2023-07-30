@@ -23,7 +23,6 @@ staticcheck: # Uses version in internal/tools.go
 .PHONY: test
 test:
 	go test -shuffle=on -race ./...
-# TODO: Consider turning on test code coverage
 
 .PHONY: check
 check: fmt_check vet staticcheck test
