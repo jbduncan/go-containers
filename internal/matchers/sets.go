@@ -38,8 +38,8 @@ func HaveLenOfZero() types.GomegaMatcher {
 
 func Contain[T comparable](elem T) types.GomegaMatcher {
 	return gcustom.MakeMatcher(
-		func(set set.Set[T]) (bool, error) {
-			return set.Contains(elem), nil
+		func(s set.Set[T]) (bool, error) {
+			return s.Contains(elem), nil
 		}).
 		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} contain\n{{format .Data 1}}").
 		WithTemplateData(elem)
@@ -56,19 +56,17 @@ func ForEachToSlice[T comparable](s set.Set[T]) []T {
 }
 
 func HaveEmptyToSlice[T comparable]() types.GomegaMatcher {
-	// TODO: Use gcustom.MakeMatcher to improve error message
-	return WithTransform(
-		func(s set.Set[T]) []T {
-			return s.ToSlice()
-		},
-		BeEmpty())
+	return gcustom.MakeMatcher(
+		func(s set.Set[T]) (bool, error) {
+			return len(s.ToSlice()) == 0, nil
+		}).
+		WithTemplate("Expected ToSlice() of\n{{.FormattedActual}}\n{{.To}} return an empty slice")
 }
 
 func HaveToSliceThatConsistsOf[T comparable](first T, others ...T) types.GomegaMatcher {
 	all := []T{first}
 	all = append(all, others...)
 
-	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(
 		func(s set.Set[T]) []T {
 			return s.ToSlice()
@@ -82,7 +80,6 @@ func BeSetWithForEachThatProduces(first string, others ...string) types.GomegaMa
 	all := []string{first}
 	all = append(all, others...)
 
-	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(ForEachToSlice[string], ConsistOf(all))
 }
 
@@ -100,6 +97,5 @@ func BeSetThatConsistsOf[T comparable](first any, others ...any) types.GomegaMat
 	all := []any{first}
 	all = append(all, others...)
 
-	// TODO: Use gcustom.MakeMatcher to improve error message
 	return WithTransform(ForEachToSlice[T], ConsistOf(all))
 }
