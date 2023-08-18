@@ -2,6 +2,7 @@ package matchers
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/jbduncan/go-containers/set"
 	//lint:ignore ST1001 dot importing gomega matchers is best practice and
@@ -64,21 +65,20 @@ func HaveEmptyToSlice[T comparable]() types.GomegaMatcher {
 }
 
 func HaveToSliceThatConsistsOf[T comparable](first T, others ...T) types.GomegaMatcher {
-	all := []T{first}
-	all = append(all, others...)
+	all := allOf(first, others)
 
-	return WithTransform(
-		func(s set.Set[T]) []T {
-			return s.ToSlice()
-		},
-		ConsistOf(all))
+	return gcustom.MakeMatcher(
+		func(s set.Set[T]) (bool, error) {
+			return multisetOf(s.ToSlice()).equals(multisetOf(all)), nil
+		}).
+		WithTemplate("Expected ToSlice() of\n{{.FormattedActual}}\n{{.To}} consist of\n{{format .Data 1}}").
+		WithTemplateData(all)
 }
 
 // TODO: Rename to HaveForEachThatConsistsOf.
 
 func BeSetWithForEachThatProduces(first string, others ...string) types.GomegaMatcher {
-	all := []string{first}
-	all = append(all, others...)
+	all := allOf(first, others)
 
 	return WithTransform(ForEachToSlice[string], ConsistOf(all))
 }
@@ -94,8 +94,37 @@ func BeSetWithForEachThatProducesNothing() types.GomegaMatcher {
 //       Eliminate one or the other.
 
 func BeSetThatConsistsOf[T comparable](first any, others ...any) types.GomegaMatcher {
-	all := []any{first}
-	all = append(all, others...)
+	all := allOf(first, others)
 
 	return WithTransform(ForEachToSlice[T], ConsistOf(all))
+}
+
+func allOf[T any](first T, others []T) []T {
+	all := []T{first}
+	all = append(all, others...)
+	return all
+}
+
+func multisetOf[T comparable](elements []T) *multiset[T] {
+	result := &multiset[T]{
+		delegate: make(map[T]int, len(elements)),
+	}
+
+	for _, element := range elements {
+		result.add(element)
+	}
+
+	return result
+}
+
+type multiset[T comparable] struct {
+	delegate map[T]int
+}
+
+func (m *multiset[T]) add(element T) {
+	m.delegate[element]++
+}
+
+func (m *multiset[T]) equals(other *multiset[T]) bool {
+	return reflect.DeepEqual(m.delegate, other.delegate)
 }
