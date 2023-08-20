@@ -2,7 +2,6 @@ package matchers
 
 import (
 	"fmt"
-	"reflect"
 
 	"github.com/jbduncan/go-containers/set"
 	//lint:ignore ST1001 dot importing gomega matchers is best practice and
@@ -46,20 +45,11 @@ func Contain[T comparable](elem T) types.GomegaMatcher {
 		WithTemplateData(elem)
 }
 
-func ForEachToSlice[T comparable](s set.Set[T]) []T {
-	var result []T
-
-	s.ForEach(func(elem T) {
-		result = append(result, elem)
-	})
-
-	return result
-}
-
 func HaveEmptyToSlice[T comparable]() types.GomegaMatcher {
 	return gcustom.MakeMatcher(
 		func(s set.Set[T]) (bool, error) {
-			return len(s.ToSlice()) == 0, nil
+			actual := s.ToSlice()
+			return len(actual) == 0, nil
 		}).
 		WithTemplate("Expected ToSlice() of\n{{.FormattedActual}}\n{{.To}} return an empty slice")
 }
@@ -69,62 +59,61 @@ func HaveToSliceThatConsistsOf[T comparable](first T, others ...T) types.GomegaM
 
 	return gcustom.MakeMatcher(
 		func(s set.Set[T]) (bool, error) {
-			return multisetOf(s.ToSlice()).equals(multisetOf(all)), nil
+			actual := s.ToSlice()
+			return ConsistOf(all).Match(actual)
 		}).
 		WithTemplate("Expected ToSlice() of\n{{.FormattedActual}}\n{{.To}} consist of\n{{format .Data 1}}").
 		WithTemplateData(all)
 }
 
-// TODO: Rename to HaveForEachThatConsistsOf.
-
-func BeSetWithForEachThatProduces(first string, others ...string) types.GomegaMatcher {
-	all := allOf(first, others)
-
-	return WithTransform(ForEachToSlice[string], ConsistOf(all))
+func HaveForEachThatEmitsNothing[T comparable]() types.GomegaMatcher {
+	return gcustom.MakeMatcher(
+		func(s set.Set[T]) (bool, error) {
+			actual := forEachToSlice(s)
+			return len(actual) == 0, nil
+		}).
+		WithTemplate("Expected ForEach() of\n{{.FormattedActual}}\n{{.To}} emit nothing")
 }
 
-// TODO: Rename to HaveForEachThatProducesNothing
+func HaveForEachThatConsistsOf[T comparable](first any, others ...any) types.GomegaMatcher {
+	all := allOf(first, others)
 
-func BeSetWithForEachThatProducesNothing() types.GomegaMatcher {
+	return gcustom.MakeMatcher(
+		func(s set.Set[T]) (bool, error) {
+			actual := forEachToSlice(s)
+			return ConsistOf(all).Match(actual)
+		}).
+		WithTemplate("Expected ForEach() of\n{{.FormattedActual}}\n{{.To}} to emit elements consisting of\n{{format .Data 1}}").
+		WithTemplateData(all)
+}
+
+func HaveForEachThatConsistsOfElementsIn[T comparable](set set.Set[T]) types.GomegaMatcher {
 	// TODO: Use gcustom.MakeMatcher to improve error message
-	return WithTransform(ForEachToSlice[string], BeEmpty())
+	return WithTransform(forEachToSlice[T], ConsistOf(forEachToSlice(set)))
 }
 
-// TODO: This matcher is a duplicate of BeSetWithForEachThatProduces.
-//       Eliminate one or the other.
+func BeNonMutableSet[T comparable]() types.GomegaMatcher {
+	// TODO: Use gcustom.MakeMatcher to improve error message
+	return WithTransform(
+		func(s set.Set[T]) bool {
+			_, mutable := s.(set.MutableSet[T])
+			return mutable
+		},
+		BeFalse())
+}
 
-func BeSetThatConsistsOf[T comparable](first any, others ...any) types.GomegaMatcher {
-	all := allOf(first, others)
+func forEachToSlice[T comparable](s set.Set[T]) []T {
+	var result []T
 
-	return WithTransform(ForEachToSlice[T], ConsistOf(all))
+	s.ForEach(func(elem T) {
+		result = append(result, elem)
+	})
+
+	return result
 }
 
 func allOf[T any](first T, others []T) []T {
 	all := []T{first}
 	all = append(all, others...)
 	return all
-}
-
-func multisetOf[T comparable](elements []T) *multiset[T] {
-	result := &multiset[T]{
-		delegate: make(map[T]int, len(elements)),
-	}
-
-	for _, element := range elements {
-		result.add(element)
-	}
-
-	return result
-}
-
-type multiset[T comparable] struct {
-	delegate map[T]int
-}
-
-func (m *multiset[T]) add(element T) {
-	m.delegate[element]++
-}
-
-func (m *multiset[T]) equals(other *multiset[T]) bool {
-	return reflect.DeepEqual(m.delegate, other.delegate)
 }

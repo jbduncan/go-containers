@@ -104,7 +104,7 @@ func emptySetIterationDoesNothing(t *testing.T, setBuilder func(elements []strin
 		g := NewWithT(t)
 		s := setBuilder(empty())
 
-		g.Expect(s).To(BeSetWithForEachThatProducesNothing())
+		g.Expect(s).To(HaveForEachThatEmitsNothing[string]())
 	})
 }
 
@@ -237,7 +237,7 @@ func oneElementSetReturnsElementOnIteration(t *testing.T, setBuilder func(elemen
 			g := NewWithT(t)
 			s := setBuilder(oneElement())
 
-			g.Expect(s).To(BeSetWithForEachThatProduces("link"))
+			g.Expect(s).To(HaveForEachThatConsistsOf[string]("link"))
 		})
 }
 
@@ -252,7 +252,7 @@ func emptySetPlusOneReturnsElementOnIteration(t *testing.T, setBuilder func(elem
 
 				s.Add("link")
 
-				g.Expect(s).To(BeSetWithForEachThatProduces("link"))
+				g.Expect(s).To(HaveForEachThatConsistsOf[string]("link"))
 			})
 	}
 }
@@ -394,7 +394,7 @@ func twoElementSetReturnsBothElementsOnIteration(t *testing.T, setBuilder func(e
 			g := NewWithT(t)
 			s := setBuilder(twoElements())
 
-			g.Expect(s).To(BeSetWithForEachThatProduces("link", "zelda"))
+			g.Expect(s).To(HaveForEachThatConsistsOf[string]("link", "zelda"))
 		})
 }
 
@@ -411,7 +411,7 @@ func emptySetPlusTwoReturnsBothElementsOnIteration(t *testing.T, setBuilder func
 				s.Add("zelda")
 
 				g.Expect(s).To(
-					BeSetWithForEachThatProduces("link", "zelda"))
+					HaveForEachThatConsistsOf[string]("link", "zelda"))
 			})
 	}
 }
