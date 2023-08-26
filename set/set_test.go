@@ -82,20 +82,6 @@ func TestSetUnmodifiable(t *testing.T) {
 
 	t.Run(
 		"empty unmodifiable set: "+
-			"add to underlying set: "+
-			"returns one-element slice",
-		func(t *testing.T) {
-			g := NewWithT(t)
-			s := set.New[string]()
-			unmodSet := set.Unmodifiable(s)
-
-			s.Add("link")
-
-			g.Expect(unmodSet).To(HaveToSliceThatConsistsOf("link"))
-		})
-
-	t.Run(
-		"empty unmodifiable set: "+
 			"add x2 to underlying set: "+
 			"has two-element string representation",
 		func(t *testing.T) {
@@ -107,20 +93,5 @@ func TestSetUnmodifiable(t *testing.T) {
 			s.Add("zelda")
 
 			g.Expect(unmodSet).To(HaveStringRepr(BeElementOf("[link, zelda]", "[zelda, link]")))
-		})
-
-	t.Run(
-		"empty unmodifiable set: "+
-			"add x2 to underlying set: "+
-			"returns two-element slice",
-		func(t *testing.T) {
-			g := NewWithT(t)
-			s := set.New[string]()
-			unmodSet := set.Unmodifiable(s)
-
-			s.Add("link")
-			s.Add("zelda")
-
-			g.Expect(unmodSet).To(HaveToSliceThatConsistsOf("link", "zelda"))
 		})
 }

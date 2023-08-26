@@ -44,22 +44,6 @@ func (e edgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
 	})
 }
 
-func (e edgeSet[N]) ToSlice() []EndpointPair[N] {
-	// TODO: Replace with a simpler implementation like set.Set.ToSlice() once
-	//       edgeSet.Len() is O(1)
-	result := set.New[EndpointPair[N]]()
-	e.delegate.Nodes().ForEach(func(u N) {
-		e.delegate.AdjacentNodes(u).ForEach(func(v N) {
-			uv := NewUnorderedEndpointPair(u, v)
-			vu := NewUnorderedEndpointPair(v, u)
-			if !result.Contains(uv) && !result.Contains(vu) {
-				result.Add(uv)
-			}
-		})
-	})
-	return result.ToSlice()
-}
-
 func (e edgeSet[N]) String() string {
 	var builder strings.Builder
 

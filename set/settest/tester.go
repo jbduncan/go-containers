@@ -24,8 +24,6 @@ func Set(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
 
 	emptySetHasEmptyStringRepr(t, setBuilder)
 
-	emptySetReturnsEmptySlice(t, setBuilder)
-
 	emptySetRemoveDoesNothing(t, setBuilder, mutable)
 
 	oneElementSetHasLengthOfOne(t, setBuilder)
@@ -43,9 +41,6 @@ func Set(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
 	oneElementSetHasOneElementStringRepr(t, setBuilder)
 	emptySetPlusOneHasOneElementStringRepr(t, setBuilder, mutable)
 
-	oneElementSetReturnsOneElementSlice(t, setBuilder)
-	emptySetPlusOneReturnsOneElementSlice(t, setBuilder, mutable)
-
 	emptySetPlusOneMinusOneDoesNotContainAnything(t, setBuilder, mutable)
 
 	twoElementSetHasLengthOfTwo(t, setBuilder)
@@ -59,9 +54,6 @@ func Set(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
 
 	twoElementSetHasTwoElementStringRepr(t, setBuilder)
 	emptySetPlusTwoReturnsTwoElementStringRepr(t, setBuilder, mutable)
-
-	twoElementSetReturnsTwoElementSlice(t, setBuilder)
-	emptySetPlusTwoReturnsTwoElementSlice(t, setBuilder, mutable)
 
 	emptySetPlusTwoMinusOneHasLengthOfOne(t, setBuilder, mutable)
 
@@ -118,17 +110,6 @@ func emptySetHasEmptyStringRepr(t *testing.T, setBuilder func(elements []string)
 
 			g.Expect(s).To(HaveStringRepr("[]"))
 		})
-}
-
-func emptySetReturnsEmptySlice(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
-	t.Helper()
-
-	t.Run("empty set: returns empty slice", func(t *testing.T) {
-		g := NewWithT(t)
-		s := setBuilder(empty())
-
-		g.Expect(s).To(HaveEmptyToSlice[string]())
-	})
 }
 
 func emptySetRemoveDoesNothing(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
@@ -285,34 +266,6 @@ func emptySetPlusOneHasOneElementStringRepr(t *testing.T, setBuilder func(elemen
 	}
 }
 
-func oneElementSetReturnsOneElementSlice(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
-	t.Helper()
-
-	t.Run("one element set: returns one-element slice",
-		func(t *testing.T) {
-			g := NewWithT(t)
-			s := setBuilder(oneElement())
-
-			g.Expect(s).To(HaveToSliceThatConsistsOf("link"))
-		})
-}
-
-func emptySetPlusOneReturnsOneElementSlice(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
-	t.Helper()
-
-	if mutable {
-		t.Run("empty set: add: returns one-element slice",
-			func(t *testing.T) {
-				g := NewWithT(t)
-				s := setBuilder(empty()).(set.MutableSet[string])
-
-				s.Add("link")
-
-				g.Expect(s).To(HaveToSliceThatConsistsOf("link"))
-			})
-	}
-}
-
 func emptySetPlusOneMinusOneDoesNotContainAnything(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
@@ -445,34 +398,6 @@ func emptySetPlusTwoReturnsTwoElementStringRepr(t *testing.T, setBuilder func(el
 				g.Expect(s).To(
 					HaveStringRepr(
 						BeElementOf("[link, zelda]", "[zelda, link]")))
-			})
-	}
-}
-
-func twoElementSetReturnsTwoElementSlice(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
-	t.Helper()
-
-	t.Run("two element set: returns two-element slice", func(t *testing.T) {
-		g := NewWithT(t)
-		s := setBuilder(twoElements())
-
-		g.Expect(s).To(HaveToSliceThatConsistsOf("link", "zelda"))
-	})
-}
-
-func emptySetPlusTwoReturnsTwoElementSlice(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
-	t.Helper()
-
-	if mutable {
-		t.Run("empty set: add x2: returns two-element slice",
-			func(t *testing.T) {
-				g := NewWithT(t)
-				s := setBuilder(empty()).(set.MutableSet[string])
-
-				s.Add("link")
-				s.Add("zelda")
-
-				g.Expect(s).To(HaveToSliceThatConsistsOf("link", "zelda"))
 			})
 	}
 }

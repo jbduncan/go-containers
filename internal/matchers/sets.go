@@ -48,27 +48,6 @@ func Contain[T comparable](elem T) types.GomegaMatcher {
 		WithTemplateData(elem)
 }
 
-func HaveEmptyToSlice[T comparable]() types.GomegaMatcher {
-	return gcustom.MakeMatcher(
-		func(s set.Set[T]) (bool, error) {
-			actual := s.ToSlice()
-			return len(actual) == 0, nil
-		}).
-		WithTemplate("Expected ToSlice() of\n{{.FormattedActual}}\n{{.To}} return an empty slice")
-}
-
-func HaveToSliceThatConsistsOf[T comparable](first T, others ...T) types.GomegaMatcher {
-	elements := allOf(first, others)
-
-	return gcustom.MakeMatcher(
-		func(s set.Set[T]) (bool, error) {
-			actual := s.ToSlice()
-			return ConsistOf(elements).Match(actual)
-		}).
-		WithTemplate("Expected ToSlice() of\n{{.FormattedActual}}\n{{.To}} consist of\n{{format .Data 1}}").
-		WithTemplateData(elements)
-}
-
 func HaveForEachThatEmitsNothing[T comparable]() types.GomegaMatcher {
 	return gcustom.MakeMatcher(
 		func(s set.Set[T]) (bool, error) {

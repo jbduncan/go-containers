@@ -122,12 +122,6 @@ func graphTests(
 			Expect(grph.Nodes()).To(HaveForEachThatEmitsNothing[int]())
 		})
 
-		Context("when returning a slice representation of the nodes", func() {
-			It("returns an empty slice", func() {
-				Expect(grph.Nodes()).To(HaveEmptyToSlice[int]())
-			})
-		})
-
 		It("contains nodes with an empty string representation", func() {
 			Expect(grph.Nodes()).To(HaveStringRepr("[]"))
 		})
@@ -171,12 +165,6 @@ func graphTests(
 
 			It("contains just the node", func() {
 				Expect(grph.Nodes()).To(HaveForEachThatConsistsOf[int](node1))
-			})
-
-			Context("when returning a slice representation of the nodes", func() {
-				It("returns a single element slice", func() {
-					Expect(grph.Nodes()).To(HaveToSliceThatConsistsOf(node1))
-				})
 			})
 
 			It("contains nodes with a single element string representation", func() {
@@ -276,12 +264,6 @@ func graphTests(
 
 			It("contains both nodes", func() {
 				Expect(grph.Nodes()).To(HaveForEachThatConsistsOf[int](node1, node2))
-			})
-
-			Context("when returning a slice representation of the nodes", func() {
-				It("returns a two element slice", func() {
-					Expect(grph.Nodes()).To(HaveToSliceThatConsistsOf(node1, node2))
-				})
 			})
 
 			It("contains nodes with a two element string representation", func() {
@@ -396,14 +378,6 @@ func graphTests(
 
 			It("has an edges length of 1", func() {
 				Expect(grph.Edges()).To(HaveLenOf(1))
-			})
-
-			It("has an edges slice consisting of just that edge", func() {
-				Expect(grph.Edges().ToSlice()).To(
-					ConsistOf(
-						BeEquivalentToUsingEqualMethod(
-							graph.NewUnorderedEndpointPair(node1, node2))),
-					"to consist of [node1, node2] (unordered endpoint pair)")
 			})
 
 			It("has edges with a single element string representation", func() {

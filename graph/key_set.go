@@ -28,16 +28,6 @@ func (k keySet[N]) ForEach(fn func(elem N)) {
 	}
 }
 
-func (k keySet[N]) ToSlice() []N {
-	result := make([]N, 0, k.Len())
-
-	for elem := range k.delegate {
-		result = append(result, elem)
-	}
-
-	return result
-}
-
 func (k keySet[N]) String() string {
 	var builder strings.Builder
 

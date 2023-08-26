@@ -31,16 +31,6 @@ type Set[T comparable] interface {
 	// change from one call to the next.
 	ForEach(fn func(elem T))
 
-	// TODO: Move set.ToSlice to its own top-level, non-member function to
-	//       prevent the need to re-implement it for every set.
-
-	// ToSlice returns a new slice with the contents of this set copied into
-	// it.
-	//
-	// The order of the elements in this slice is undefined; it may even
-	// change from one call of ToSlice to the next.
-	ToSlice() []T
-
 	// TODO: Can we move all of our Set.String() implementations into a helper
 	//       function?
 
@@ -117,16 +107,6 @@ func (s *set[T]) ForEach(fn func(elem T)) {
 	for elem := range s.delegate {
 		fn(elem)
 	}
-}
-
-func (s *set[T]) ToSlice() []T {
-	result := make([]T, 0, s.Len())
-
-	for elem := range s.delegate {
-		result = append(result, elem)
-	}
-
-	return result
 }
 
 func (s *set[T]) String() string {
