@@ -626,6 +626,10 @@ func undirectedGraphTests(
 							graph.NewUnorderedEndpointPair(node2, node1))))
 			})
 
+			It("has an incident edge with a single edge string representation", func() {
+				Expect(grph.IncidentEdges(node1)).To(HaveStringRepr(BeElementOf("[[1, 2]]", "[[2, 1]]")))
+			})
+
 			It("has an in degree of 1 for the first node", func() {
 				Expect(grph.InDegree(node1)).To(Equal(1))
 			})

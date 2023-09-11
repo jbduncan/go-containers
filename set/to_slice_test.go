@@ -33,7 +33,7 @@ func TestToSlice(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewWithT(t)
-			g.Expect(set.ToSlice(tt.s)).To(Equal(tt.want))
+			g.Expect(set.ToSlice(tt.s)).To(ConsistOf(tt.want))
 		})
 	}
 }
