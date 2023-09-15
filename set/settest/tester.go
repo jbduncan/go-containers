@@ -12,8 +12,16 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+// TestingT is an interface for the parts of *testing.T that settest.Set needs
+// to run. Whenever you see this interface being used, pass in an instance of
+// *testing.T.
+type TestingT interface {
+	Helper()
+	Run(name string, f func(t *testing.T)) bool
+}
+
 // TODO: Document
-func Set(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func Set(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	_, mutable := setBuilder(empty()).(set.MutableSet[string])
 
 	emptySetHasLengthOfZero(t, setBuilder)
@@ -67,7 +75,7 @@ func Set(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
 	emptySetPlusSameElementTwiceHasLengthOfOne(t, setBuilder, mutable)
 }
 
-func emptySetHasLengthOfZero(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func emptySetHasLengthOfZero(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	t.Helper()
 
 	t.Run("empty set: has length of 0", func(t *testing.T) {
@@ -78,7 +86,7 @@ func emptySetHasLengthOfZero(t *testing.T, setBuilder func(elements []string) se
 	})
 }
 
-func emptySetContainsNothing(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func emptySetContainsNothing(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	t.Helper()
 
 	t.Run("empty set: contains nothing", func(t *testing.T) {
@@ -89,7 +97,7 @@ func emptySetContainsNothing(t *testing.T, setBuilder func(elements []string) se
 	})
 }
 
-func emptySetIterationDoesNothing(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func emptySetIterationDoesNothing(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	t.Helper()
 
 	t.Run("empty set: iteration does nothing", func(t *testing.T) {
@@ -100,7 +108,7 @@ func emptySetIterationDoesNothing(t *testing.T, setBuilder func(elements []strin
 	})
 }
 
-func emptySetHasEmptyStringRepr(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func emptySetHasEmptyStringRepr(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	t.Helper()
 
 	t.Run("empty set: has empty string representation",
@@ -112,7 +120,7 @@ func emptySetHasEmptyStringRepr(t *testing.T, setBuilder func(elements []string)
 		})
 }
 
-func emptySetRemoveDoesNothing(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+func emptySetRemoveDoesNothing(t TestingT, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
 	if mutable {
@@ -128,7 +136,7 @@ func emptySetRemoveDoesNothing(t *testing.T, setBuilder func(elements []string) 
 	}
 }
 
-func oneElementSetHasLengthOfOne(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func oneElementSetHasLengthOfOne(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	t.Helper()
 
 	t.Run("one element set: has length of 1", func(t *testing.T) {
@@ -139,7 +147,7 @@ func oneElementSetHasLengthOfOne(t *testing.T, setBuilder func(elements []string
 	})
 }
 
-func emptySetPlusOneHasLengthOfOne(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+func emptySetPlusOneHasLengthOfOne(t TestingT, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
 	if mutable {
@@ -154,7 +162,7 @@ func emptySetPlusOneHasLengthOfOne(t *testing.T, setBuilder func(elements []stri
 	}
 }
 
-func oneElementSetContainsPresentElement(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func oneElementSetContainsPresentElement(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	t.Helper()
 
 	t.Run("one element set: contains present element",
@@ -166,7 +174,7 @@ func oneElementSetContainsPresentElement(t *testing.T, setBuilder func(elements 
 		})
 }
 
-func emptySetPlusOneContainsPresentElement(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+func emptySetPlusOneContainsPresentElement(t TestingT, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
 	if mutable {
@@ -182,7 +190,7 @@ func emptySetPlusOneContainsPresentElement(t *testing.T, setBuilder func(element
 	}
 }
 
-func oneElementSetDoesNotContainAbsentElement(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func oneElementSetDoesNotContainAbsentElement(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	t.Helper()
 
 	t.Run("one element set: does not contain absent element",
@@ -194,7 +202,7 @@ func oneElementSetDoesNotContainAbsentElement(t *testing.T, setBuilder func(elem
 		})
 }
 
-func emptySetPlusOneDoesNotContainAbsentElement(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+func emptySetPlusOneDoesNotContainAbsentElement(t TestingT, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
 	if mutable {
@@ -210,7 +218,7 @@ func emptySetPlusOneDoesNotContainAbsentElement(t *testing.T, setBuilder func(el
 	}
 }
 
-func oneElementSetReturnsElementOnIteration(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func oneElementSetReturnsElementOnIteration(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	t.Helper()
 
 	t.Run("one element set: returns element on iteration",
@@ -222,7 +230,7 @@ func oneElementSetReturnsElementOnIteration(t *testing.T, setBuilder func(elemen
 		})
 }
 
-func emptySetPlusOneReturnsElementOnIteration(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+func emptySetPlusOneReturnsElementOnIteration(t TestingT, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
 	if mutable {
@@ -238,7 +246,7 @@ func emptySetPlusOneReturnsElementOnIteration(t *testing.T, setBuilder func(elem
 	}
 }
 
-func oneElementSetHasOneElementStringRepr(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func oneElementSetHasOneElementStringRepr(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	t.Helper()
 
 	t.Run("one element set: has one-element string representation",
@@ -250,7 +258,7 @@ func oneElementSetHasOneElementStringRepr(t *testing.T, setBuilder func(elements
 		})
 }
 
-func emptySetPlusOneHasOneElementStringRepr(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+func emptySetPlusOneHasOneElementStringRepr(t TestingT, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
 	if mutable {
@@ -266,7 +274,7 @@ func emptySetPlusOneHasOneElementStringRepr(t *testing.T, setBuilder func(elemen
 	}
 }
 
-func emptySetPlusOneMinusOneDoesNotContainAnything(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+func emptySetPlusOneMinusOneDoesNotContainAnything(t TestingT, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
 	if mutable {
@@ -283,7 +291,7 @@ func emptySetPlusOneMinusOneDoesNotContainAnything(t *testing.T, setBuilder func
 	}
 }
 
-func twoElementSetHasLengthOfTwo(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func twoElementSetHasLengthOfTwo(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	t.Helper()
 
 	t.Run("two element set: has length of 2", func(t *testing.T) {
@@ -294,7 +302,7 @@ func twoElementSetHasLengthOfTwo(t *testing.T, setBuilder func(elements []string
 	})
 }
 
-func emptySetPlusTwoHasLengthOfTwo(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+func emptySetPlusTwoHasLengthOfTwo(t TestingT, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
 	if mutable {
@@ -310,7 +318,7 @@ func emptySetPlusTwoHasLengthOfTwo(t *testing.T, setBuilder func(elements []stri
 	}
 }
 
-func twoElementSetContainsBothElements(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func twoElementSetContainsBothElements(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	t.Helper()
 
 	t.Run("two element set: contains both elements", func(t *testing.T) {
@@ -322,7 +330,7 @@ func twoElementSetContainsBothElements(t *testing.T, setBuilder func(elements []
 	})
 }
 
-func emptySetPlusTwoContainsBothElements(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+func emptySetPlusTwoContainsBothElements(t TestingT, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
 	if mutable {
@@ -339,7 +347,7 @@ func emptySetPlusTwoContainsBothElements(t *testing.T, setBuilder func(elements 
 	}
 }
 
-func twoElementSetReturnsBothElementsOnIteration(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func twoElementSetReturnsBothElementsOnIteration(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	t.Helper()
 
 	t.Run("two element set: returns both elements on iteration",
@@ -351,7 +359,7 @@ func twoElementSetReturnsBothElementsOnIteration(t *testing.T, setBuilder func(e
 		})
 }
 
-func emptySetPlusTwoReturnsBothElementsOnIteration(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+func emptySetPlusTwoReturnsBothElementsOnIteration(t TestingT, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
 	if mutable {
@@ -369,7 +377,7 @@ func emptySetPlusTwoReturnsBothElementsOnIteration(t *testing.T, setBuilder func
 	}
 }
 
-func twoElementSetHasTwoElementStringRepr(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func twoElementSetHasTwoElementStringRepr(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	t.Helper()
 
 	t.Run("two element set: has two-element string representation",
@@ -383,7 +391,7 @@ func twoElementSetHasTwoElementStringRepr(t *testing.T, setBuilder func(elements
 		})
 }
 
-func emptySetPlusTwoReturnsTwoElementStringRepr(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+func emptySetPlusTwoReturnsTwoElementStringRepr(t TestingT, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
 	if mutable {
@@ -402,7 +410,7 @@ func emptySetPlusTwoReturnsTwoElementStringRepr(t *testing.T, setBuilder func(el
 	}
 }
 
-func emptySetPlusTwoMinusOneHasLengthOfOne(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+func emptySetPlusTwoMinusOneHasLengthOfOne(t TestingT, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
 	if mutable {
@@ -420,7 +428,7 @@ func emptySetPlusTwoMinusOneHasLengthOfOne(t *testing.T, setBuilder func(element
 	}
 }
 
-func emptySetPlusThreeContainsAllThreeElements(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+func emptySetPlusThreeContainsAllThreeElements(t TestingT, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
 	if mutable {
@@ -442,7 +450,7 @@ func emptySetPlusThreeContainsAllThreeElements(t *testing.T, setBuilder func(ele
 	}
 }
 
-func threeElementSetContainsAllThreeElements(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func threeElementSetContainsAllThreeElements(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	t.Helper()
 
 	t.Run("three element set: contains all three elements", func(t *testing.T) {
@@ -458,7 +466,7 @@ func threeElementSetContainsAllThreeElements(t *testing.T, setBuilder func(eleme
 	})
 }
 
-func emptySetPlusThreeHasThreeElementStringRepr(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+func emptySetPlusThreeHasThreeElementStringRepr(t TestingT, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
 	if mutable {
@@ -484,7 +492,7 @@ func emptySetPlusThreeHasThreeElementStringRepr(t *testing.T, setBuilder func(el
 	}
 }
 
-func threeElementSetHasThreeElementStringRepr(t *testing.T, setBuilder func(elements []string) set.Set[string]) {
+func threeElementSetHasThreeElementStringRepr(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	t.Helper()
 
 	t.Run("three element set: has three-element string representation",
@@ -504,7 +512,7 @@ func threeElementSetHasThreeElementStringRepr(t *testing.T, setBuilder func(elem
 		})
 }
 
-func setInitializedFromTwoOfSameElementHasLengthOfOne(t *testing.T, setBuilder func(elements []string) set.Set[string]) bool {
+func setInitializedFromTwoOfSameElementHasLengthOfOne(t TestingT, setBuilder func(elements []string) set.Set[string]) bool {
 	t.Helper()
 
 	return t.Run("set initialized from two of same element: has length of 1",
@@ -516,7 +524,7 @@ func setInitializedFromTwoOfSameElementHasLengthOfOne(t *testing.T, setBuilder f
 		})
 }
 
-func emptySetPlusSameElementTwiceHasLengthOfOne(t *testing.T, setBuilder func(elements []string) set.Set[string], mutable bool) {
+func emptySetPlusSameElementTwiceHasLengthOfOne(t TestingT, setBuilder func(elements []string) set.Set[string], mutable bool) {
 	t.Helper()
 
 	if mutable {

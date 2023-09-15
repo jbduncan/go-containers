@@ -193,6 +193,10 @@ func cartesianProduct[T any](values [][]T) [][]T {
 	return result
 }
 
+// At time of writing, we target Go 1.18 which doesn't have access to the
+// builtin "max", which is only available as of Go 1.21+.
+//
+//goland:noinspection GoReservedWordUsedAsName
 func max(a, b int) int {
 	if a > b {
 		return a
