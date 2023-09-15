@@ -50,5 +50,7 @@ check: fmt_check vet staticcheck test
 #   - Examples in https://github.com/PicnicSupermarket/error-prone-support
 
 # TODO: Add eg templates for Graph.Equal and Set.Equal
+# TODO: Add eg template for:
+#   - `string == ""` or `string == ``` to `len(string) == 0`
 
 # TODO: Extract common eg templates into its own Git repo
