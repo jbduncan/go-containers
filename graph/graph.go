@@ -76,7 +76,7 @@ func (b Builder[N]) AllowsSelfLoops(allowsSelfLoops bool) Builder[N] {
 //       - https://github.com/golang/go/wiki/CodeReviewComments#interfaces
 
 func (b Builder[N]) Build() MutableGraph[N] {
-	return &mutableGraph[N]{
+	return &graph[N]{
 		adjacencyList:   map[N]set.MutableSet[N]{},
 		allowsSelfLoops: b.allowsSelfLoops,
 	}
@@ -86,42 +86,41 @@ func (b Builder[N]) Build() MutableGraph[N] {
 //       compile-time type assertions to a test package.
 
 var (
-	_ Graph[int]        = (*mutableGraph[int])(nil)
-	_ MutableGraph[int] = (*mutableGraph[int])(nil)
+	_ Graph[int]        = (*graph[int])(nil)
+	_ MutableGraph[int] = (*graph[int])(nil)
 )
 
-// TODO: Rename to `graph` for consistency with `set.set`.
-type mutableGraph[N comparable] struct {
+type graph[N comparable] struct {
 	adjacencyList   map[N]set.MutableSet[N]
 	allowsSelfLoops bool
 }
 
-func (m *mutableGraph[N]) IsDirected() bool {
+func (m *graph[N]) IsDirected() bool {
 	return false
 }
 
-func (m *mutableGraph[N]) AllowsSelfLoops() bool {
+func (m *graph[N]) AllowsSelfLoops() bool {
 	return m.allowsSelfLoops
 }
 
-// TODO: Add tests for all set.Set methods of mutableGraph.Nodes()
+// TODO: Add tests for all set.Set methods of graph.Nodes()
 
-func (m *mutableGraph[N]) Nodes() set.Set[N] {
+func (m *graph[N]) Nodes() set.Set[N] {
 	return keySet[N]{
 		delegate: m.adjacencyList,
 	}
 }
 
-func (m *mutableGraph[N]) Edges() set.Set[EndpointPair[N]] {
+func (m *graph[N]) Edges() set.Set[EndpointPair[N]] {
 	return edgeSet[N]{
 		delegate: m,
 	}
 }
 
-// TODO: Add tests for all set.Set methods of mutableGraph.AdjacentNodes()
+// TODO: Add tests for all set.Set methods of graph.AdjacentNodes()
 //       for both a present node and an absent node
 
-func (m *mutableGraph[N]) AdjacentNodes(node N) set.Set[N] {
+func (m *graph[N]) AdjacentNodes(node N) set.Set[N] {
 	adjacentNodes, ok := m.adjacencyList[node]
 	if !ok {
 		// TODO: Go back to panicking, as this set is not a view and
@@ -134,24 +133,24 @@ func (m *mutableGraph[N]) AdjacentNodes(node N) set.Set[N] {
 	return set.Unmodifiable(adjacentNodes)
 }
 
-// TODO: Add tests for all set.Set methods of mutableGraph.Predecessors()
+// TODO: Add tests for all set.Set methods of graph.Predecessors()
 //       for both a present node and an absent node
 
-func (m *mutableGraph[N]) Predecessors(node N) set.Set[N] {
+func (m *graph[N]) Predecessors(node N) set.Set[N] {
 	return m.AdjacentNodes(node)
 }
 
-// TODO: Add tests for all set.Set methods of mutableGraph.Successors()
+// TODO: Add tests for all set.Set methods of graph.Successors()
 //       for both a present node and an absent node
 
-func (m *mutableGraph[N]) Successors(node N) set.Set[N] {
+func (m *graph[N]) Successors(node N) set.Set[N] {
 	return m.AdjacentNodes(node)
 }
 
-// TODO: Add tests for all set.Set methods of mutableGraph.IncidentEdges()
+// TODO: Add tests for all set.Set methods of graph.IncidentEdges()
 //       for both a present node and an absent node
 
-func (m *mutableGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
+func (m *graph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 	adjacentNodes, ok := m.adjacencyList[node]
 	if !ok {
 		// TODO: Go back to panicking, as this set is not a view and
@@ -167,7 +166,7 @@ func (m *mutableGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 	}
 }
 
-func (m *mutableGraph[N]) Degree(node N) int {
+func (m *graph[N]) Degree(node N) int {
 	adjacentNodes, ok := m.adjacencyList[node]
 	if !ok {
 		return 0
@@ -176,20 +175,20 @@ func (m *mutableGraph[N]) Degree(node N) int {
 	return adjacentNodes.Len()
 }
 
-func (m *mutableGraph[N]) InDegree(node N) int {
+func (m *graph[N]) InDegree(node N) int {
 	return m.Degree(node)
 }
 
-func (m *mutableGraph[N]) OutDegree(node N) int {
+func (m *graph[N]) OutDegree(node N) int {
 	return m.Degree(node)
 }
 
-func (m *mutableGraph[N]) HasEdgeConnecting(nodeU N, nodeV N) bool {
+func (m *graph[N]) HasEdgeConnecting(nodeU N, nodeV N) bool {
 	adjacentNodes, ok := m.adjacencyList[nodeU]
 	return ok && adjacentNodes.Contains(nodeV)
 }
 
-func (m *mutableGraph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
+func (m *graph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
 	if endpointPair.IsOrdered() {
 		return false
 	}
@@ -197,7 +196,7 @@ func (m *mutableGraph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N
 	return m.HasEdgeConnecting(endpointPair.NodeU(), endpointPair.NodeV())
 }
 
-func (m *mutableGraph[N]) AddNode(node N) bool {
+func (m *graph[N]) AddNode(node N) bool {
 	if _, ok := m.adjacencyList[node]; ok {
 		return false
 	}
@@ -206,7 +205,7 @@ func (m *mutableGraph[N]) AddNode(node N) bool {
 	return true
 }
 
-func (m *mutableGraph[N]) PutEdge(nodeU N, nodeV N) bool {
+func (m *graph[N]) PutEdge(nodeU N, nodeV N) bool {
 	if !m.AllowsSelfLoops() && nodeU == nodeV {
 		panic("self-loops are disallowed")
 	}
@@ -218,7 +217,7 @@ func (m *mutableGraph[N]) PutEdge(nodeU N, nodeV N) bool {
 	return false
 }
 
-func (m *mutableGraph[N]) putEdge(nodeU N, nodeV N) {
+func (m *graph[N]) putEdge(nodeU N, nodeV N) {
 	adjacentNodes, ok := m.adjacencyList[nodeU]
 	if !ok {
 		adjacentNodes = set.New[N]()
@@ -227,7 +226,7 @@ func (m *mutableGraph[N]) putEdge(nodeU N, nodeV N) {
 	adjacentNodes.Add(nodeV)
 }
 
-func (m *mutableGraph[N]) RemoveNode(node N) bool {
+func (m *graph[N]) RemoveNode(node N) bool {
 	_, ok := m.adjacencyList[node]
 	if !ok {
 		return false
@@ -242,7 +241,7 @@ func (m *mutableGraph[N]) RemoveNode(node N) bool {
 	return true
 }
 
-func (m *mutableGraph[N]) RemoveEdge(nodeU N, nodeV N) bool {
+func (m *graph[N]) RemoveEdge(nodeU N, nodeV N) bool {
 	removedUToV := m.removeEdge(nodeU, nodeV)
 	removedVToU := m.removeEdge(nodeV, nodeU)
 
@@ -256,7 +255,7 @@ func (m *mutableGraph[N]) RemoveEdge(nodeU N, nodeV N) bool {
 	return removedUToV
 }
 
-func (m *mutableGraph[N]) removeEdge(from N, to N) bool {
+func (m *graph[N]) removeEdge(from N, to N) bool {
 	adjacentNodes, ok := m.adjacencyList[from]
 	if !ok {
 		return false
