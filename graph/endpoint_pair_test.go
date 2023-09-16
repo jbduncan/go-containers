@@ -5,6 +5,7 @@ import (
 	. "github.com/jbduncan/go-containers/internal/matchers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gcustom"
 	"github.com/onsi/gomega/types"
 )
 
@@ -204,78 +205,72 @@ var _ = Describe("EndpointPair", func() {
 	})
 })
 
-// TODO: Move to internal/matchers
 func beOrdered() types.GomegaMatcher {
-	// TODO: Use gcustom.MakeMatcher to improve error message
-	return WithTransform(
-		func(endpointPair graph.EndpointPair[string]) bool {
-			return endpointPair.IsOrdered()
-		},
-		BeTrue())
+	return gcustom.MakeMatcher(
+		func(endpointPair graph.EndpointPair[string]) (bool, error) {
+			return endpointPair.IsOrdered(), nil
+		}).
+		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} be ordered")
 }
 
-// TODO: Move to internal/matchers
 func haveSource(source string) types.GomegaMatcher {
-	// TODO: Use gcustom.MakeMatcher to improve error message
-	return WithTransform(
-		func(endpointPair graph.EndpointPair[string]) string {
-			return endpointPair.Source()
-		},
-		Equal(source))
+	return gcustom.MakeMatcher(
+		func(endpointPair graph.EndpointPair[string]) (bool, error) {
+			return endpointPair.Source() == source, nil
+		}).
+		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} to have a source equal to\n{{format .Data 1}}").
+		WithTemplateData(source)
 }
 
-// TODO: Move to internal/matchers
 func haveTarget(target string) types.GomegaMatcher {
-	// TODO: Use gcustom.MakeMatcher to improve error message
-	return WithTransform(
-		func(endpointPair graph.EndpointPair[string]) string {
-			return endpointPair.Target()
-		},
-		Equal(target))
+	return gcustom.MakeMatcher(
+		func(endpointPair graph.EndpointPair[string]) (bool, error) {
+			return endpointPair.Target() == target, nil
+		}).
+		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} to have a target equal to\n{{format .Data 1}}").
+		WithTemplateData(target)
 }
 
-// TODO: Move to internal/matchers
 func haveUnavailableSource() types.GomegaMatcher {
-	// TODO: Use gcustom.MakeMatcher to improve error message
-	return WithTransform(
-		func(endpointPair graph.EndpointPair[string]) func() {
-			return func() { endpointPair.Source() }
-		},
-		PanicWith(notAvailableOnUndirected))
+	return gcustom.MakeMatcher(
+		func(endpointPair graph.EndpointPair[string]) (bool, error) {
+			sourceMethod := func() { endpointPair.Source() }
+			return PanicWith(notAvailableOnUndirected).Match(sourceMethod)
+		}).
+		WithTemplate("Expected Source() of\n{{.FormattedActual}}\n{{.To}} to panic with\n{{format .Data 1}}").
+		WithTemplateData(notAvailableOnUndirected)
 }
 
-// TODO: Move to internal/matchers
 func haveUnavailableTarget() types.GomegaMatcher {
-	// TODO: Use gcustom.MakeMatcher to improve error message
-	return WithTransform(
-		func(endpointPair graph.EndpointPair[string]) func() {
-			return func() { endpointPair.Target() }
-		},
-		PanicWith(notAvailableOnUndirected))
+	return gcustom.MakeMatcher(
+		func(endpointPair graph.EndpointPair[string]) (bool, error) {
+			sourceMethod := func() { endpointPair.Target() }
+			return PanicWith(notAvailableOnUndirected).Match(sourceMethod)
+		}).
+		WithTemplate("Expected Target() of\n{{.FormattedActual}}\n{{.To}} to panic with\n{{format .Data 1}}").
+		WithTemplateData(notAvailableOnUndirected)
 }
 
 const notAvailableOnUndirected = "cannot call Source()/Target() on an EndpointPair from an " +
 	"undirected graph; consider calling AdjacentNode(node) if you already have a node, or " +
 	"NodeU()/NodeV() if you don't"
 
-// TODO: Move to internal/matchers
 func haveNodeU(node string) types.GomegaMatcher {
-	// TODO: Use gcustom.MakeMatcher to improve error message
-	return WithTransform(
-		func(endpointPair graph.EndpointPair[string]) string {
-			return endpointPair.NodeU()
-		},
-		Equal(node))
+	return gcustom.MakeMatcher(
+		func(endpointPair graph.EndpointPair[string]) (bool, error) {
+			return endpointPair.NodeU() == node, nil
+		}).
+		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} to have a nodeU equal to\n{{format .Data 1}}").
+		WithTemplateData(node)
 }
 
-// TODO: Move to internal/matchers
 func haveNodeV(node string) types.GomegaMatcher {
-	// TODO: Use gcustom.MakeMatcher to improve error message
-	return WithTransform(
-		func(endpointPair graph.EndpointPair[string]) string {
-			return endpointPair.NodeV()
-		},
-		Equal(node))
+	return gcustom.MakeMatcher(
+		func(endpointPair graph.EndpointPair[string]) (bool, error) {
+			return endpointPair.NodeV() == node, nil
+		}).
+		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} to have a nodeV equal to\n{{format .Data 1}}").
+		WithTemplateData(node)
 }
 
 // TODO: Guava's EndpointPairTest.java has some tests that use EndpointPair but check Graph.edges()
