@@ -103,8 +103,6 @@ func (m *graph[N]) AllowsSelfLoops() bool {
 	return m.allowsSelfLoops
 }
 
-// TODO: Add tests for all set.Set methods of graph.Nodes()
-
 func (m *graph[N]) Nodes() set.Set[N] {
 	return keySet[N]{
 		delegate: m.adjacencyList,

@@ -118,16 +118,36 @@ func graphTests(
 			validateGraphState(grph)
 		})
 
-		It("contains no nodes", func() {
+		It("has nodes with ForEach() that emits nothing", func() {
 			Expect(grph.Nodes()).To(HaveForEachThatEmitsNothing[int]())
 		})
 
-		It("contains nodes with an empty string representation", func() {
+		It("has nodes with an empty string representation", func() {
 			Expect(grph.Nodes()).To(HaveStringRepr("[]"))
 		})
 
-		It("contains no edges", func() {
+		It("has nodes that do not contain anything", func() {
+			Expect(grph.Nodes()).ToNot(Or(Contain(node1), Contain(node2), Contain(node3)))
+		})
+
+		It("has nodes with length of 0", func() {
+			Expect(grph.Nodes()).To(HaveLenOfZero())
+		})
+
+		It("has edges with ForEach() that emits nothing", func() {
 			Expect(grph.Edges()).To(HaveForEachThatEmitsNothing[graph.EndpointPair[int]]())
+		})
+
+		It("has edges with an empty string representation", func() {
+			Expect(grph.Edges()).To(HaveStringRepr("[]"))
+		})
+
+		It("has edges that do not contain anything", func() {
+			Expect(grph.Edges()).ToNot(Contain(graph.NewUnorderedEndpointPair(node1, node2)))
+		})
+
+		It("has edges with length of 0", func() {
+			Expect(grph.Edges()).To(HaveLenOfZero())
 		})
 
 		It("has an unmodifiable nodes set view", func() {
@@ -163,12 +183,22 @@ func graphTests(
 				grph = addNode(grph, node1)
 			})
 
-			It("contains just the node", func() {
+			It("has nodes with ForEach() that emits just the node", func() {
 				Expect(grph.Nodes()).To(HaveForEachThatConsistsOf[int](node1))
 			})
 
-			It("contains nodes with a single element string representation", func() {
+			It("has nodes with a single element string representation", func() {
 				Expect(grph.Nodes()).To(HaveStringRepr(fmt.Sprintf("[%d]", node1)))
+			})
+
+			It("has nodes that contains just the node", func() {
+				Expect(grph.Nodes()).To(Contain(node1))
+				Expect(grph.Nodes()).ToNot(Contain(node2))
+				Expect(grph.Nodes()).ToNot(Contain(node3))
+			})
+
+			It("has nodes with length of 1", func() {
+				Expect(grph.Nodes()).To(HaveLenOf(1))
 			})
 
 			It("reports that the node has no adjacent nodes", func() {
@@ -262,16 +292,26 @@ func graphTests(
 				grph = addNode(grph, node2)
 			})
 
-			It("contains both nodes", func() {
+			It("has nodes with ForEach() that emits both nodes", func() {
 				Expect(grph.Nodes()).To(HaveForEachThatConsistsOf[int](node1, node2))
 			})
 
-			It("contains nodes with a two element string representation", func() {
+			It("has nodes with a two element string representation", func() {
 				Expect(grph.Nodes()).To(
 					HaveStringRepr(
 						BeElementOf(
 							fmt.Sprintf("[%d, %d]", node1, node2),
 							fmt.Sprintf("[%d, %d]", node2, node1))))
+			})
+
+			It("has nodes that contains both nodes", func() {
+				Expect(grph.Nodes()).To(Contain(node1))
+				Expect(grph.Nodes()).To(Contain(node2))
+				Expect(grph.Nodes()).ToNot(Contain(node3))
+			})
+
+			It("has nodes with length of 2", func() {
+				Expect(grph.Nodes()).To(HaveLenOf(2))
 			})
 		})
 
@@ -355,28 +395,42 @@ func graphTests(
 				Expect(grph.Degree(node2)).To(Equal(1))
 			})
 
-			It("returns just that edge on iteration", func() {
-				Expect(grph.Edges()).To(
-					HaveForEachThatConsistsOf[graph.EndpointPair[int]](
-						BeEquivalentToUsingEqualMethod(
-							graph.NewUnorderedEndpointPair(node1, node2))))
+			It("has edges with ForEach() that emits just that edge", func() {
+				// Uses boolean assertion to avoid unreadable error messages
+				// from this nested matcher
+				matcher := HaveForEachThatConsistsOf[graph.EndpointPair[int]](
+					BeEquivalentToUsingEqualMethod(
+						graph.NewUnorderedEndpointPair(node1, node2)))
+				result, _ := matcher.Match(grph.Edges())
+				Expect(result).To(
+					BeTrue(),
+					"to consist of [node1, node2] (unordered endpoint pair)")
 			})
 
-			It("contains just that edge", func() {
+			It("has edges that contains just that edge", func() {
+				// Uses boolean assertions to avoid unreadable error messages.
 				containsNode1ToNode2 := grph.Edges().Contains(graph.NewUnorderedEndpointPair(node1, node2))
-				Expect(containsNode1ToNode2).To(BeTrue(), "to contain [node1, node2] (unordered endpoint pair)")
+				Expect(containsNode1ToNode2).To(
+					BeTrue(),
+					"to contain [node1, node2] (unordered endpoint pair)")
 
 				containsNode2ToNode1 := grph.Edges().Contains(graph.NewUnorderedEndpointPair(node2, node1))
-				Expect(containsNode2ToNode1).To(BeTrue(), "to contain [node2, node1] (unordered endpoint pair)")
+				Expect(containsNode2ToNode1).To(
+					BeTrue(),
+					"to contain [node2, node1] (unordered endpoint pair)")
 
 				containsNode1ToNode3 := grph.Edges().Contains(graph.NewUnorderedEndpointPair(node1, node3))
-				Expect(containsNode1ToNode3).To(BeFalse(), "to not contain [node1, node3] (unordered endpoint pair)")
+				Expect(containsNode1ToNode3).To(
+					BeFalse(),
+					"to not contain [node1, node3] (unordered endpoint pair)")
 
 				containsNode3ToNode1 := grph.Edges().Contains(graph.NewUnorderedEndpointPair(node3, node1))
-				Expect(containsNode3ToNode1).To(BeFalse(), "to not contain [node3, node1] (unordered endpoint pair)")
+				Expect(containsNode3ToNode1).To(
+					BeFalse(),
+					"to not contain [node3, node1] (unordered endpoint pair)")
 			})
 
-			It("has an edges length of 1", func() {
+			It("has edges with length of 1", func() {
 				Expect(grph.Edges()).To(HaveLenOf(1))
 			})
 
@@ -400,16 +454,19 @@ func graphTests(
 			})
 
 			It("returns both edges on iteration", func() {
-				Expect(grph.Edges()).To(
-					HaveForEachThatConsistsOf[graph.EndpointPair[int]](
-						BeEquivalentToUsingEqualMethod(
-							graph.NewUnorderedEndpointPair(node1, node2)),
-						BeEquivalentToUsingEqualMethod(
-							graph.NewUnorderedEndpointPair(node1, node3))),
+				// Uses boolean assertion to avoid unreadable error messages from nested matcher
+				matcher := HaveForEachThatConsistsOf[graph.EndpointPair[int]](
+					BeEquivalentToUsingEqualMethod(
+						graph.NewUnorderedEndpointPair(node1, node2)),
+					BeEquivalentToUsingEqualMethod(
+						graph.NewUnorderedEndpointPair(node1, node3)))
+				result, _ := matcher.Match(grph.Edges())
+				Expect(result).To(
+					BeTrue(),
 					"to consist of [node1, node2] and [node1, node3] (unordered endpoint pairs)")
 			})
 
-			It("has an edges length of 2", func() {
+			It("has edges with length of 2", func() {
 				Expect(grph.Edges()).To(HaveLenOf(2))
 			})
 		})
@@ -509,7 +566,8 @@ func graphTests(
 			})
 
 			It("leaves the existing nodes alone", func() {
-				Expect(grph.Nodes()).To(HaveForEachThatConsistsOf[int](node1, node2))
+				Expect(grph.Nodes()).
+					To(HaveForEachThatConsistsOf[int](node1, node2))
 			})
 		})
 
@@ -543,22 +601,19 @@ func graphTests(
 
 		Context("when finding the degree of an absent node", func() {
 			It("returns zero", func() {
-				Expect(grph.Degree(nodeNotInGraph)).
-					To(BeZero())
+				Expect(grph.Degree(nodeNotInGraph)).To(BeZero())
 			})
 		})
 
 		Context("when finding the in degree of an absent node", func() {
 			It("returns zero", func() {
-				Expect(grph.InDegree(nodeNotInGraph)).
-					To(BeZero())
+				Expect(grph.InDegree(nodeNotInGraph)).To(BeZero())
 			})
 		})
 
 		Context("when finding the out degree of of an absent node", func() {
 			It("returns zero", func() {
-				Expect(grph.OutDegree(nodeNotInGraph)).
-					To(BeZero())
+				Expect(grph.OutDegree(nodeNotInGraph)).To(BeZero())
 			})
 		})
 	})

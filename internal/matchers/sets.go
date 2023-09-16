@@ -65,7 +65,7 @@ func HaveForEachThatConsistsOf[T comparable](first any, others ...any) types.Gom
 			actual := forEachToSlice(s)
 			return ConsistOf(elements).Match(actual)
 		}).
-		WithTemplate("Expected ForEach() of\n{{.FormattedActual}}\n{{.To}} to emit elements consisting of\n{{format .Data 1}}").
+		WithTemplate("Expected ForEach() of\n{{.FormattedActual}}\n{{.To}} emit elements consisting of\n{{format .Data 1}}").
 		WithTemplateData(elements)
 }
 
