@@ -154,6 +154,10 @@ func (m *mutableGraph[N]) Successors(node N) set.Set[N] {
 func (m *mutableGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 	adjacentNodes, ok := m.adjacencyList[node]
 	if !ok {
+		// TODO: Go back to panicking, as this set is not a view and
+		//       there is no sane way of testing that it's a view.
+		//       Furthermore, panicking will allow programmers to
+		//       flush out bugs faster.
 		return set.Unmodifiable(set.New[EndpointPair[N]]())
 	}
 

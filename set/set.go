@@ -43,7 +43,7 @@ type Set[T comparable] interface {
 
 	// TODO: Set: make Iterator method that returns an Iterator.
 	//       Note: this depends on making a custom map type that we can easily make an
-	//       iterator for.
+	//       iterator for, or using reflect.MapIter
 	// Iterator returns an iterator for the elements in this set.
 	// Iterator() iterator.Iterator[T]
 
