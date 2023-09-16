@@ -194,7 +194,7 @@ func graphTests(
 			It("has nodes that contains just the node", func() {
 				Expect(grph.Nodes()).To(Contain(node1))
 				Expect(grph.Nodes()).ToNot(Contain(node2))
-				Expect(grph.Nodes()).ToNot(Contain(node3))
+				Expect(grph.Nodes()).ToNot(Contain(nodeNotInGraph))
 			})
 
 			It("has nodes with length of 1", func() {
@@ -307,7 +307,7 @@ func graphTests(
 			It("has nodes that contains both nodes", func() {
 				Expect(grph.Nodes()).To(Contain(node1))
 				Expect(grph.Nodes()).To(Contain(node2))
-				Expect(grph.Nodes()).ToNot(Contain(node3))
+				Expect(grph.Nodes()).ToNot(Contain(nodeNotInGraph))
 			})
 
 			It("has nodes with length of 2", func() {
@@ -886,8 +886,8 @@ func expectStronglyEquivalent(first graph.Graph[int], second graph.Graph[int]) {
 	// Expect(first).To(beGraphEqualTo(second))
 }
 
-// TODO: Consider replacing these set sanity checks with proper tests fashioned after the
-//       ones in set_test.go
+// TODO: Remove these sanity checks once all methods of all set-returning
+//  methods of graph.Graph are tested.
 
 // In some cases, graphs may return custom sets that define their own method implementations. Verify that
 // these sets are consistent with the elements produced by their ForEach.
