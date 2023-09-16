@@ -2,12 +2,14 @@ package graph_test
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/jbduncan/go-containers/graph"
 	. "github.com/jbduncan/go-containers/internal/matchers"
 	"github.com/jbduncan/go-containers/set"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"golang.org/x/exp/slices"
 )
 
 // TODO: Move mutableGraphTests to a graphtester package
@@ -118,21 +120,12 @@ func graphTests(
 			validateGraphState(grph)
 		})
 
-		It("has nodes with ForEach() that emits nothing", func() {
-			Expect(grph.Nodes()).To(HaveForEachThatEmitsNothing[int]())
+		It("has no nodes", func() {
+			testSet(grph.Nodes())
 		})
 
-		It("has nodes with an empty string representation", func() {
-			Expect(grph.Nodes()).To(HaveStringRepr("[]"))
-		})
-
-		It("has nodes that do not contain anything", func() {
-			Expect(grph.Nodes()).ToNot(Or(Contain(node1), Contain(node2), Contain(node3)))
-		})
-
-		It("has nodes with length of 0", func() {
-			Expect(grph.Nodes()).To(HaveLenOfZero())
-		})
+		// TODO: Can we replace these four tests on graph.Edges() with just
+		//  one that uses something like testSet?
 
 		It("has edges with ForEach() that emits nothing", func() {
 			Expect(grph.Edges()).To(HaveForEachThatEmitsNothing[graph.EndpointPair[int]]())
@@ -183,34 +176,20 @@ func graphTests(
 				grph = addNode(grph, node1)
 			})
 
-			It("has nodes with ForEach() that emits just the node", func() {
-				Expect(grph.Nodes()).To(HaveForEachThatConsistsOf[int](node1))
-			})
-
-			It("has nodes with a single element string representation", func() {
-				Expect(grph.Nodes()).To(HaveStringRepr(fmt.Sprintf("[%d]", node1)))
-			})
-
-			It("has nodes that contains just the node", func() {
-				Expect(grph.Nodes()).To(Contain(node1))
-				Expect(grph.Nodes()).ToNot(Contain(node2))
-				Expect(grph.Nodes()).ToNot(Contain(nodeNotInGraph))
-			})
-
-			It("has nodes with length of 1", func() {
-				Expect(grph.Nodes()).To(HaveLenOf(1))
+			It("has just that node", func() {
+				testSet(grph.Nodes(), node1)
 			})
 
 			It("reports that the node has no adjacent nodes", func() {
-				Expect(grph.AdjacentNodes(node1)).To(HaveForEachThatEmitsNothing[int]())
+				testSet(grph.AdjacentNodes(node1))
 			})
 
 			It("reports that the node has no predecessors", func() {
-				Expect(grph.Predecessors(node1)).To(HaveForEachThatEmitsNothing[int]())
+				testSet(grph.Predecessors(node1))
 			})
 
 			It("reports that the node has no successors", func() {
-				Expect(grph.Successors(node1)).To(HaveForEachThatEmitsNothing[int]())
+				testSet(grph.Successors(node1))
 			})
 
 			It("reports that the node has no incident edges", func() {
@@ -292,26 +271,8 @@ func graphTests(
 				grph = addNode(grph, node2)
 			})
 
-			It("has nodes with ForEach() that emits both nodes", func() {
-				Expect(grph.Nodes()).To(HaveForEachThatConsistsOf[int](node1, node2))
-			})
-
-			It("has nodes with a two element string representation", func() {
-				Expect(grph.Nodes()).To(
-					HaveStringRepr(
-						BeElementOf(
-							fmt.Sprintf("[%d, %d]", node1, node2),
-							fmt.Sprintf("[%d, %d]", node2, node1))))
-			})
-
-			It("has nodes that contains both nodes", func() {
-				Expect(grph.Nodes()).To(Contain(node1))
-				Expect(grph.Nodes()).To(Contain(node2))
-				Expect(grph.Nodes()).ToNot(Contain(nodeNotInGraph))
-			})
-
-			It("has nodes with length of 2", func() {
-				Expect(grph.Nodes()).To(HaveLenOf(2))
+			It("has both nodes", func() {
+				testSet(grph.Nodes(), node1, node2)
 			})
 		})
 
@@ -348,12 +309,12 @@ func graphTests(
 			})
 
 			It("it leaves the other nodes alone", func() {
-				Expect(grph.Nodes()).To(HaveForEachThatConsistsOf[int](node2, node3))
+				testSet(grph.Nodes(), node2, node3)
 			})
 
 			It("removes its connections to its adjacent nodes", func() {
-				Expect(grph.AdjacentNodes(node2)).To(HaveForEachThatEmitsNothing[int]())
-				Expect(grph.AdjacentNodes(node3)).To(HaveForEachThatEmitsNothing[int]())
+				testSet(grph.AdjacentNodes(node2))
+				testSet(grph.AdjacentNodes(node3))
 			})
 
 			It("removes the connected edges", func() {
@@ -376,7 +337,7 @@ func graphTests(
 			})
 
 			It("leaves all the nodes alone", func() {
-				Expect(grph.Nodes()).To(HaveForEachThatConsistsOf[int](node1))
+				testSet(grph.Nodes(), node1)
 			})
 		})
 
@@ -386,14 +347,17 @@ func graphTests(
 			})
 
 			It("reports that both nodes are adjacent to each other", func() {
-				Expect(grph.AdjacentNodes(node1)).To(HaveForEachThatConsistsOf[int](node2))
-				Expect(grph.AdjacentNodes(node2)).To(HaveForEachThatConsistsOf[int](node1))
+				testSet(grph.AdjacentNodes(node1), node2)
+				testSet(grph.AdjacentNodes(node2), node1)
 			})
 
 			It("reports that both nodes have a degree of 1", func() {
 				Expect(grph.Degree(node1)).To(Equal(1))
 				Expect(grph.Degree(node2)).To(Equal(1))
 			})
+
+			// TODO: Can we replace these four tests on graph.Edges() with just
+			//  one that uses something like testSet?
 
 			It("has edges with ForEach() that emits just that edge", func() {
 				// Uses boolean assertion to avoid unreadable error messages
@@ -450,7 +414,7 @@ func graphTests(
 			})
 
 			It("reports the two unique nodes as adjacent to the common one", func() {
-				Expect(grph.AdjacentNodes(node1)).To(HaveForEachThatConsistsOf[int](node2, node3))
+				testSet(grph.AdjacentNodes(node1), node2, node3)
 			})
 
 			It("returns both edges on iteration", func() {
@@ -469,6 +433,9 @@ func graphTests(
 			It("has edges with length of 2", func() {
 				Expect(grph.Edges()).To(HaveLenOf(2))
 			})
+
+			// TODO: Add a test for grph.Edges().String(), as we're missing a
+			//  case for multiple edges.
 		})
 
 		Context("when putting two anti-parallel edges", func() {
@@ -479,7 +446,7 @@ func graphTests(
 					grph = putEdge(grph, node2, node1)
 					graphAsMutable().RemoveNode(node1)
 
-					Expect(grph.Nodes()).To(HaveForEachThatConsistsOf[int](node2))
+					testSet(grph.Nodes(), node2)
 				})
 
 				It("removes both edges", func() {
@@ -504,9 +471,9 @@ func graphTests(
 			})
 
 			It("removes the connection between its nodes", func() {
-				Expect(grph.Successors(node1)).To(HaveForEachThatConsistsOf[int](node3))
-				Expect(grph.Predecessors(node3)).To(HaveForEachThatConsistsOf[int](node1))
-				Expect(grph.Predecessors(node2)).To(HaveForEachThatEmitsNothing[int]())
+				testSet(grph.Successors(node1), node3)
+				testSet(grph.Predecessors(node3), node1)
+				testSet(grph.Predecessors(node2))
 			})
 		})
 
@@ -525,8 +492,8 @@ func graphTests(
 			})
 
 			It("leaves the existing nodes alone", func() {
-				Expect(grph.Successors(node1)).To(Contain(node2))
-				Expect(grph.Predecessors(node2)).To(Contain(node1))
+				testSet(grph.Successors(node1), node2)
+				testSet(grph.Predecessors(node2), node1)
 			})
 		})
 
@@ -545,8 +512,8 @@ func graphTests(
 			})
 
 			It("leaves the existing nodes alone", func() {
-				Expect(grph.Successors(node1)).To(Contain(node2))
-				Expect(grph.Predecessors(node2)).To(Contain(node1))
+				testSet(grph.Successors(node1), node2)
+				testSet(grph.Predecessors(node2), node1)
 			})
 		})
 
@@ -566,29 +533,25 @@ func graphTests(
 			})
 
 			It("leaves the existing nodes alone", func() {
-				Expect(grph.Nodes()).
-					To(HaveForEachThatConsistsOf[int](node1, node2))
+				testSet(grph.Nodes(), node1, node2)
 			})
 		})
 
 		Context("when finding the predecessors of an absent node", func() {
 			It("returns an empty set", func() {
-				Expect(grph.Predecessors(nodeNotInGraph)).
-					To(HaveForEachThatEmitsNothing[int]())
+				testSet(grph.Predecessors(nodeNotInGraph))
 			})
 		})
 
 		Context("when finding the successors of an absent node", func() {
 			It("returns an empty set", func() {
-				Expect(grph.Successors(nodeNotInGraph)).
-					To(HaveForEachThatEmitsNothing[int]())
+				testSet(grph.Successors(nodeNotInGraph))
 			})
 		})
 
 		Context("when finding the adjacent nodes of an absent node", func() {
 			It("returns an empty set", func() {
-				Expect(grph.AdjacentNodes(nodeNotInGraph)).
-					To(HaveForEachThatEmitsNothing[int]())
+				testSet(grph.AdjacentNodes(nodeNotInGraph))
 			})
 		})
 
@@ -658,13 +621,13 @@ func undirectedGraphTests(
 			})
 
 			It("sees both nodes as predecessors of each other", func() {
-				Expect(grph.Predecessors(node2)).To(HaveForEachThatConsistsOf[int](node1))
-				Expect(grph.Predecessors(node1)).To(HaveForEachThatConsistsOf[int](node2))
+				testSet(grph.Predecessors(node2), node1)
+				testSet(grph.Predecessors(node1), node2)
 			})
 
 			It("sees both nodes as successors of each other", func() {
-				Expect(grph.Successors(node1)).To(HaveForEachThatConsistsOf[int](node2))
-				Expect(grph.Successors(node2)).To(HaveForEachThatConsistsOf[int](node1))
+				testSet(grph.Successors(node1), node2)
+				testSet(grph.Successors(node2), node1)
 			})
 
 			It("has an incident edge connecting the first node to the second", func() {
@@ -763,7 +726,7 @@ func undirectedGraphTests(
 
 					grph = putEdge(grph, node1, node1)
 
-					Expect(grph.AdjacentNodes(node1)).To(HaveForEachThatConsistsOf[int](node1))
+					testSet(grph.AdjacentNodes(node1), node1)
 				})
 			})
 		})
@@ -832,8 +795,8 @@ func sanityCheckConnections(grph graph.Graph[int], node int, allEndpointPairs se
 			selfLoopCount = 1
 		}
 		Expect(grph.Degree(node)).To(Equal(grph.AdjacentNodes(node).Len() + selfLoopCount))
-		Expect(grph.Predecessors(node)).To(HaveForEachThatConsistsOfElementsIn(grph.AdjacentNodes(node)))
-		Expect(grph.Successors(node)).To(HaveForEachThatConsistsOfElementsIn(grph.AdjacentNodes(node)))
+		Expect(grph.Predecessors(node)).To(HaveForEachThatConsistsOfElementsInSet(grph.AdjacentNodes(node)))
+		Expect(grph.Successors(node)).To(HaveForEachThatConsistsOfElementsInSet(grph.AdjacentNodes(node)))
 		Expect(grph.InDegree(node)).To(Equal(grph.Degree(node)))
 		Expect(grph.OutDegree(node)).To(Equal(grph.Degree(node)))
 	}
@@ -898,7 +861,7 @@ func sanityCheckIntSet(values set.Set[int]) set.Set[int] {
 	})
 	Expect(values).ToNot(Contain(nodeNotInGraph))
 	// TODO: Pending introduction of set.CopyOf()
-	// Expect(values).To(HaveForEachThatConsistsOfElementsIn(values.CopyOf(values)))
+	// Expect(values).To(HaveForEachThatConsistsOfElementsInSet(set.CopyOf(values)))
 	return values
 }
 
@@ -914,7 +877,7 @@ func sanityCheckEndpointPairSet(values set.Set[graph.EndpointPair[int]]) set.Set
 	Expect(values).ToNot(Contain(graph.NewOrderedEndpointPair(nodeNotInGraph, nodeNotInGraph)))
 	Expect(values).ToNot(Contain(graph.NewUnorderedEndpointPair(nodeNotInGraph, nodeNotInGraph)))
 	// TODO: Pending introduction of set.CopyOf()
-	// Expect(values).To(HaveForEachThatConsistsOfElementsIn(values.CopyOf(values)))
+	// Expect(values).To(HaveForEachThatConsistsOfElementsInSet(set.CopyOf(values)))
 	return values
 }
 
@@ -925,12 +888,52 @@ func newEndpointPair[N comparable](grph graph.Graph[N], nodeU N, nodeV N) graph.
 	return graph.NewUnorderedEndpointPair(nodeU, nodeV)
 }
 
-func forEachCount[T comparable](set set.Set[T]) int {
+func forEachCount[T comparable](s set.Set[T]) int {
 	var result int
 
-	set.ForEach(func(elem T) {
+	s.ForEach(func(elem T) {
 		result++
 	})
 
 	return result
+}
+
+func testSet(s set.Set[int], expectedValues ...int) {
+	// Test all methods of set.Set
+	Expect(s).To(HaveLenOf(len(expectedValues)))
+
+	if len(expectedValues) == 0 {
+		Expect(s).To(HaveForEachThatEmitsNothing[int]())
+	} else {
+		Expect(s).To(HaveForEachThatConsistsOfElementsInSlice(expectedValues))
+	}
+
+	for _, value := range expectedValues {
+		Expect(s).To(Contain(value))
+	}
+	for _, node := range []int{node1, node2, node3} {
+		if !slices.Contains(expectedValues, node) {
+			Expect(s).ToNot(Contain(node))
+		}
+	}
+	Expect(s).ToNot(Contain(nodeNotInGraph))
+
+	expectValidStringRepr(s, expectedValues)
+}
+
+func expectValidStringRepr[T comparable](s set.Set[T], expectedValues []T) {
+	str := s.String()
+	Expect(str).To(HavePrefix("["))
+	Expect(str).To(HaveSuffix("]"))
+
+	expectedValueStrs := make([]string, 0, len(expectedValues))
+	for _, v := range expectedValues {
+		expectedValueStrs = append(expectedValueStrs, fmt.Sprintf("%v", v))
+	}
+
+	trimmed := strings.Trim(str, "[]")
+	actualValueStrs := strings.SplitN(trimmed, ", ", s.Len())
+
+	Expect(actualValueStrs).
+		To(ConsistOf(expectedValueStrs), "to find elements in string repr of set")
 }

@@ -115,9 +115,6 @@ func (m *graph[N]) Edges() set.Set[EndpointPair[N]] {
 	}
 }
 
-// TODO: Add tests for all set.Set methods of graph.AdjacentNodes()
-//       for both a present node and an absent node
-
 func (m *graph[N]) AdjacentNodes(node N) set.Set[N] {
 	adjacentNodes, ok := m.adjacencyList[node]
 	if !ok {
@@ -131,15 +128,9 @@ func (m *graph[N]) AdjacentNodes(node N) set.Set[N] {
 	return set.Unmodifiable(adjacentNodes)
 }
 
-// TODO: Add tests for all set.Set methods of graph.Predecessors()
-//       for both a present node and an absent node
-
 func (m *graph[N]) Predecessors(node N) set.Set[N] {
 	return m.AdjacentNodes(node)
 }
-
-// TODO: Add tests for all set.Set methods of graph.Successors()
-//       for both a present node and an absent node
 
 func (m *graph[N]) Successors(node N) set.Set[N] {
 	return m.AdjacentNodes(node)

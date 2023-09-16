@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/jbduncan/go-containers/internal/slices"
 	"github.com/jbduncan/go-containers/iterator"
 )
 
@@ -30,7 +31,7 @@ func ForIteratorWithKnownOrder[T any](
 ) *Tester[T] {
 	return &Tester[T]{
 		iteratorName:     iteratorName,
-		expectedElements: copyToNonNilSlice(expectedElements),
+		expectedElements: slices.CopyToNonNilSlice(expectedElements),
 		newIterator:      newIterator,
 		knownOrder:       knownOrder,
 	}
@@ -43,7 +44,7 @@ func ForIteratorWithUnknownOrder[T any](
 ) *Tester[T] {
 	return &Tester[T]{
 		iteratorName:     iteratorName,
-		expectedElements: copyToNonNilSlice(expectedElements),
+		expectedElements: slices.CopyToNonNilSlice(expectedElements),
 		newIterator:      newIterator,
 		knownOrder:       unknownOrder,
 	}
@@ -64,11 +65,11 @@ func (n nextOp) String() string {
 func (t Tester[T]) Test() error {
 	steps := max(5, len(t.expectedElements)+1)
 	uniqueOps := []any{valueOp{}, nextOp{}}
-	opSequences := cartesianProduct(repeat(uniqueOps, steps))
+	opSequences := slices.CartesianProduct(slices.Repeat(uniqueOps, steps))
 
 	for _, opSequence := range opSequences {
 		actualIter := t.newIterator()
-		remainingExpected := copyToNonNilSlice(t.expectedElements)
+		remainingExpected := slices.CopyToNonNilSlice(t.expectedElements)
 		for _, op := range opSequence {
 			switch op.(type) {
 			case valueOp:
@@ -171,30 +172,8 @@ func indexOf[T any](haystack []T, needle T) int {
 	return -1
 }
 
-func repeat[T any](value T, times int) []T {
-	result := make([]T, times)
-	for i := range result {
-		result[i] = value
-	}
-	return result
-}
-
-func cartesianProduct[T any](values [][]T) [][]T {
-	result := [][]T{{}}
-	for _, innerValues := range values {
-		var newResult [][]T
-		for _, rest := range result {
-			for _, tail := range innerValues {
-				newResult = append(newResult, copyToNonNilSlice(append(rest, tail)))
-			}
-		}
-		result = newResult
-	}
-	return result
-}
-
 // At time of writing, we target Go 1.18 which doesn't have access to the
-// builtin "max", which is only available as of Go 1.21+.
+// builtin "max", because it is only available in Go 1.21+.
 //
 //goland:noinspection GoReservedWordUsedAsName
 func max(a, b int) int {
@@ -202,10 +181,4 @@ func max(a, b int) int {
 		return a
 	}
 	return b
-}
-
-func copyToNonNilSlice[T any](values []T) []T {
-	result := make([]T, len(values))
-	copy(result, values)
-	return result
 }

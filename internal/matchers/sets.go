@@ -69,7 +69,17 @@ func HaveForEachThatConsistsOf[T comparable](first any, others ...any) types.Gom
 		WithTemplateData(elements)
 }
 
-func HaveForEachThatConsistsOfElementsIn[T comparable](s set.Set[T]) types.GomegaMatcher {
+func HaveForEachThatConsistsOfElementsInSlice[T comparable](elements []T) types.GomegaMatcher {
+	return gcustom.MakeMatcher(
+		func(s set.Set[T]) (bool, error) {
+			actual := forEachToSlice(s)
+			return ConsistOf(elements).Match(actual)
+		}).
+		WithTemplate("Expected ForEach() of\n{{.FormattedActual}}\n{{.To}} emit elements consisting of\n{{format .Data 1}}").
+		WithTemplateData(elements)
+}
+
+func HaveForEachThatConsistsOfElementsInSet[T comparable](s set.Set[T]) types.GomegaMatcher {
 	elements := forEachToSlice(s)
 
 	return gcustom.MakeMatcher(
