@@ -54,6 +54,26 @@ const (
 	ContainersAreCopies
 )
 
+func addNode(grph graph.Graph[int], node int) graph.Graph[int] {
+	// TODO: When introducing ImmutableGraph, expand addNode to recognise when grph is not
+	//  mutable and return a copy of the graph with the added node instead.
+
+	graphAsMutable := grph.(graph.MutableGraph[int])
+	graphAsMutable.AddNode(node)
+
+	return grph
+}
+
+func putEdge(grph graph.Graph[int], node1 int, node2 int) graph.Graph[int] {
+	// TODO: When introducing ImmutableGraph, expand putEdge to recognise when grph is not
+	//  mutable and return a copy of the graph with the added edge instead.
+
+	graphAsMutable := grph.(graph.MutableGraph[int])
+	graphAsMutable.PutEdge(node1, node2)
+
+	return grph
+}
+
 // mutableGraphTests produces a suite of Ginkgo test cases for testing implementations of the
 // MutableGraph interface. MutableGraph instances created for testing are to have int nodes.
 //
@@ -68,29 +88,12 @@ func mutableGraphTests(
 	createGraph func() graph.MutableGraph[int],
 	containersMode ContainersMode,
 ) {
-	// TODO: Consider replacing addNode with graphAsMutable().AddNode
-	addNode := func(grph graph.Graph[int], node int) graph.Graph[int] {
-		graphAsMutable := grph.(graph.MutableGraph[int])
-		graphAsMutable.AddNode(node)
-
-		return grph
-	}
-	// TODO: Consider replacing putEdge with graphAsMutable().PutEdge
-	putEdge := func(grph graph.Graph[int], node1 int, node2 int) graph.Graph[int] {
-		graphAsMutable := grph.(graph.MutableGraph[int])
-		graphAsMutable.PutEdge(node1, node2)
-
-		return grph
-	}
-
-	graphTests(graphName, func() graph.Graph[int] { return createGraph() }, addNode, putEdge, containersMode)
+	graphTests(graphName, func() graph.Graph[int] { return createGraph() }, containersMode)
 }
 
 func graphTests(
 	graphName string,
 	createGraph func() graph.Graph[int],
-	addNode func(g graph.Graph[int], n int) graph.Graph[int],
-	putEdge func(g graph.Graph[int], n1 int, n2 int) graph.Graph[int],
 	containersMode ContainersMode,
 ) {
 	Context(fmt.Sprintf("%s: given a graph", graphName), func() {
@@ -581,14 +584,12 @@ func graphTests(
 		})
 	})
 
-	undirectedGraphTests(graphName, createGraph, addNode, putEdge, containersMode)
+	undirectedGraphTests(graphName, createGraph, containersMode)
 }
 
 func undirectedGraphTests(
 	graphName string,
 	createGraph func() graph.Graph[int],
-	addNode func(g graph.Graph[int], n int) graph.Graph[int],
-	putEdge func(g graph.Graph[int], n1 int, n2 int) graph.Graph[int],
 	containersMode ContainersMode,
 ) {
 	Context(fmt.Sprintf("%s: given an undirected graph", graphName), func() {
