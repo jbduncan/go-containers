@@ -5,7 +5,7 @@ ifeq (, $(shell which go))
 endif
 
 .PHONY: fmt
-fmt: # Uses version in internal/tools.go
+fmt: # Uses version imported by internal/tools.go, in turn using version in go.mod
 	go run mvdan.cc/gofumpt -l -w .
 
 .PHONY: fmt_check
@@ -19,7 +19,7 @@ vet:
 # TODO: Consider replacing with golangci-lint, even if it has to be installed manually:
 # https://github.com/uber-go/nilaway/blob/6b5d588e97aa719fc89271cda1c8aa7a804874bf/Makefile#L26-L34
 .PHONY: staticcheck
-staticcheck: # Uses version in internal/tools.go
+staticcheck: # Uses version imported by internal/tools.go, in turn using version in go.mod
 	go run honnef.co/go/tools/cmd/staticcheck ./...
 
 .PHONY: test

@@ -325,8 +325,7 @@ func twoElementSetContainsBothElements(t TestingT, setBuilder func(elements []st
 		g := NewWithT(t)
 		s := setBuilder(twoElements())
 
-		// TODO: Introduce "ContainAtLeast"
-		g.Expect(s).To(And(Contain("link"), Contain("zelda")))
+		g.Expect(s).To(ContainAtLeast("link", "zelda"))
 	})
 }
 
@@ -341,8 +340,7 @@ func emptySetPlusTwoContainsBothElements(t TestingT, setBuilder func(elements []
 			s.Add("link")
 			s.Add("zelda")
 
-			// TODO: Introduce "ContainAtLeast"
-			g.Expect(s).To(And(Contain("link"), Contain("zelda")))
+			g.Expect(s).To(ContainAtLeast("link", "zelda"))
 		})
 	}
 }
@@ -440,12 +438,8 @@ func emptySetPlusThreeContainsAllThreeElements(t TestingT, setBuilder func(eleme
 			s.Add("zelda")
 			s.Add("ganondorf")
 
-			// TODO: Introduce "ContainAtLeast"
 			g.Expect(s).To(
-				And(
-					Contain("link"),
-					Contain("zelda"),
-					Contain("ganondorf")))
+				ContainAtLeast("link", "zelda", "ganondorf"))
 		})
 	}
 }
@@ -457,12 +451,8 @@ func threeElementSetContainsAllThreeElements(t TestingT, setBuilder func(element
 		g := NewWithT(t)
 		s := setBuilder(threeElements())
 
-		// TODO: Introduce "ContainAtLeast"
 		g.Expect(s).To(
-			And(
-				Contain("link"),
-				Contain("zelda"),
-				Contain("ganondorf")))
+			ContainAtLeast("link", "zelda", "ganondorf"))
 	})
 }
 

@@ -48,6 +48,22 @@ func Contain[T comparable](elem T) types.GomegaMatcher {
 		WithTemplateData(elem)
 }
 
+func ContainAtLeast[T comparable](first T, others ...T) types.GomegaMatcher {
+	elements := allOf(first, others)
+
+	return gcustom.MakeMatcher(
+		func(s set.Set[T]) (bool, error) {
+			for _, element := range elements {
+				if !s.Contains(element) {
+					return false, nil
+				}
+			}
+			return true, nil
+		}).
+		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} contain at least\n{{format .Data 1}}").
+		WithTemplateData(elements)
+}
+
 func HaveForEachThatEmitsNothing[T comparable]() types.GomegaMatcher {
 	return gcustom.MakeMatcher(
 		func(s set.Set[T]) (bool, error) {
