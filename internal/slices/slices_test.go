@@ -64,39 +64,41 @@ func TestCartesianProduct(t *testing.T) {
 }
 
 func TestCopyToNonNilSlice(t *testing.T) {
-	type args[T any] struct {
-		values []T
+	type args struct {
+		values []int
 	}
-	type testCase[T any] struct {
+	type testCase struct {
 		name string
-		args args[T]
-		want []T
+		args args
+		want []int
 	}
-	tests := []testCase[int]{
+	tests := []testCase{
 		{
 			name: "nil",
-			args: args[int]{
+			args: args{
 				values: nil,
 			},
 			want: make([]int, 0),
 		},
 		{
 			name: "empty",
-			args: args[int]{
+			args: args{
 				values: make([]int, 0),
 			},
 			want: make([]int, 0),
 		},
 		{
 			name: "one element",
-			args: args[int]{
+			args: args{
 				values: oneElement(),
 			},
 			want: oneElement(),
 		},
 		{
 			name: "three elements",
-			args: args[int]{threeElements()},
+			args: args{
+				values: threeElements(),
+			},
 			want: threeElements(),
 		},
 	}
@@ -113,19 +115,19 @@ func TestCopyToNonNilSlice(t *testing.T) {
 }
 
 func TestRepeat(t *testing.T) {
-	type args[T any] struct {
-		value T
+	type args struct {
+		value int
 		times int
 	}
-	type testCase[T any] struct {
+	type testCase struct {
 		name string
-		args args[T]
-		want []T
+		args args
+		want []int
 	}
-	tests := []testCase[int]{
+	tests := []testCase{
 		{
 			name: "zero times",
-			args: args[int]{
+			args: args{
 				value: 1,
 				times: 0,
 			},
@@ -133,7 +135,7 @@ func TestRepeat(t *testing.T) {
 		},
 		{
 			name: "one time",
-			args: args[int]{
+			args: args{
 				value: 1,
 				times: 1,
 			},
@@ -141,7 +143,7 @@ func TestRepeat(t *testing.T) {
 		},
 		{
 			name: "three times",
-			args: args[int]{
+			args: args{
 				value: 1,
 				times: 3,
 			},
@@ -160,19 +162,19 @@ func TestRepeat(t *testing.T) {
 }
 
 func TestRepeatAndCartesianProduct(t *testing.T) {
-	type args[T any] struct {
-		value T
+	type args struct {
+		value []int
 		times int
 	}
-	type testCase[T any] struct {
+	type testCase struct {
 		name string
-		args args[T]
-		want []T
+		args args
+		want [][]int
 	}
-	tests := []testCase[[]int]{
+	tests := []testCase{
 		{
 			name: "two elems, zero times",
-			args: args[[]int]{
+			args: args{
 				value: []int{1, 2},
 				times: 0,
 			},
@@ -180,7 +182,7 @@ func TestRepeatAndCartesianProduct(t *testing.T) {
 		},
 		{
 			name: "two elems, one time",
-			args: args[[]int]{
+			args: args{
 				value: []int{1, 2},
 				times: 1,
 			},
@@ -188,7 +190,7 @@ func TestRepeatAndCartesianProduct(t *testing.T) {
 		},
 		{
 			name: "two elems, two times",
-			args: args[[]int]{
+			args: args{
 				value: []int{1, 2},
 				times: 2,
 			},
@@ -198,7 +200,7 @@ func TestRepeatAndCartesianProduct(t *testing.T) {
 		},
 		{
 			name: "two elems, three times",
-			args: args[[]int]{
+			args: args{
 				value: []int{1, 2},
 				times: 3,
 			},
@@ -215,7 +217,7 @@ func TestRepeatAndCartesianProduct(t *testing.T) {
 		},
 		{
 			name: "three elems, two times",
-			args: args[[]int]{
+			args: args{
 				value: []int{1, 2, 3},
 				times: 2,
 			},

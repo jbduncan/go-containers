@@ -19,6 +19,7 @@ func (i incidentEdgeSet[N]) Contains(elem EndpointPair[N]) bool {
 		return (i.node == elem.NodeU() && i.adjacentNodes.Contains(elem.NodeV())) ||
 			(i.node == elem.NodeV() && i.adjacentNodes.Contains(elem.NodeU()))
 	}
+	// TODO: Implement for directed graphs
 	return false
 }
 
@@ -39,6 +40,8 @@ func (i incidentEdgeSet[N]) String() string {
 	builder.WriteRune('[')
 	index := 0
 	i.ForEach(func(elem EndpointPair[N]) {
+		// TODO: This if statement is not fully test-covered. Fix that by
+		//  introducing a new test that checks a node with two incident edges.
 		if index > 0 {
 			builder.WriteString(", ")
 		}

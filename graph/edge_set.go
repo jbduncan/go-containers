@@ -14,6 +14,7 @@ type edgeSet[N comparable] struct {
 }
 
 func (e edgeSet[N]) Contains(elem EndpointPair[N]) bool {
+	// TODO: Check endpoint ordering is compatible with graph
 	return e.delegate.Nodes().Contains(elem.NodeU()) &&
 		e.delegate.AdjacentNodes(elem.NodeU()).Contains(elem.NodeV())
 }
