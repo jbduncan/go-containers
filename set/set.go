@@ -42,8 +42,10 @@ type Set[T comparable] interface {
 	String() string
 
 	// TODO: Set: make Iterator method that returns an Iterator.
-	//       Note: this depends on making a custom map type that we can easily make an
-	//       iterator for, or using reflect.MapIter
+	//       Note: this depends on any of:
+	//         - The "range over func" proposal: https://github.com/golang/go/issues/61405
+	//         - Making a custom map type that we can easily make an iterator for
+	//         - Using reflect.MapIter
 	// Iterator returns an iterator for the elements in this set.
 	// Iterator() iterator.Iterator[T]
 
