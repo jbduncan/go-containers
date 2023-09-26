@@ -9,7 +9,10 @@ import (
 func Example() {
 	// Create a new mutable set and put some strings in it.
 	exampleSet := set.New[string]()
-	exampleSet.Add("link")
+	added := exampleSet.Add("link")
+	fmt.Println(added) // true
+	addedAgain := exampleSet.Add("link")
+	fmt.Println(addedAgain) // false
 	exampleSet.Add("zelda")
 
 	fmt.Println(exampleSet.Contains("link"))      // true
@@ -31,6 +34,8 @@ func Example() {
 	fmt.Println(unmodifiableSet.Contains("zelda")) // true
 
 	// Output:
+	// true
+	// false
 	// true
 	// true
 	// false

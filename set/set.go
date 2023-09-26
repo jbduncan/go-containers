@@ -52,13 +52,15 @@ type Set[T comparable] interface {
 	// TODO: Set: make Equal method and discourage == from being used (documenting that its use is undefined).
 }
 
-// MutableSet is a Set with additional methods for adding and removing
-// elements to and from the set.
+// MutableSet is a Set with additional methods for adding elements to the set
+// and removing them.
 type MutableSet[T comparable] interface {
 	Set[T]
 
 	// Add adds the given element into this set, if it is not already present.
-	Add(elem T) // TODO: Return true if set did not already have the element, otherwise false
+	// It returns true if the set did not already contain the element,
+	// otherwise false.
+	Add(elem T) bool
 
 	// Remove removes the given element from this set.
 	Remove(elem T) // TODO: Return true if set had the element, otherwise false
@@ -88,8 +90,10 @@ var (
 	_ MutableSet[int] = (*set[int])(nil)
 )
 
-func (s *set[T]) Add(elem T) {
+func (s *set[T]) Add(elem T) bool {
+	_, ok := s.delegate[elem]
 	s.delegate[elem] = struct{}{}
+	return !ok
 }
 
 func (s *set[T]) Remove(elem T) {
