@@ -6,7 +6,7 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
-func Example() {
+func ExampleSet() {
 	// Create a new mutable set and put some strings in it.
 	exampleSet := set.New[string]()
 	added := exampleSet.Add("link")
@@ -23,16 +23,6 @@ func Example() {
 	exampleSet.Remove("zelda")
 	fmt.Println(exampleSet.Contains("zelda")) // false
 
-	// Make an unmodifiable set that wraps set.
-	unmodifiableSet := set.Unmodifiable[string](exampleSet)
-	fmt.Println(unmodifiableSet.Contains("link"))  // true
-	fmt.Println(unmodifiableSet.Contains("zelda")) // false
-
-	// Add an element back to set; this also adds it to unmodifiable set.
-	exampleSet.Add("zelda")
-	fmt.Println(unmodifiableSet.Contains("link"))  // true
-	fmt.Println(unmodifiableSet.Contains("zelda")) // true
-
 	// Output:
 	// true
 	// false
@@ -40,6 +30,24 @@ func Example() {
 	// true
 	// false
 	// false
+}
+
+func ExampleUnmodifiable() {
+	underlyingSet := set.New[string]()
+	underlyingSet.Add("link")
+
+	// Make an unmodifiable set that wraps underlyingSet.
+	unmodifiableSet := set.Unmodifiable[string](underlyingSet)
+	fmt.Println(unmodifiableSet.Contains("link"))  // true
+	fmt.Println(unmodifiableSet.Contains("zelda")) // false
+
+	// Add an element back to underlyingSet.
+	// This also adds it to unmodifiable set.
+	underlyingSet.Add("zelda")
+	fmt.Println(unmodifiableSet.Contains("link"))  // true
+	fmt.Println(unmodifiableSet.Contains("zelda")) // true
+
+	// Output:
 	// true
 	// false
 	// true
