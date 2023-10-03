@@ -80,6 +80,12 @@ func Set(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 
 	emptySetPlusSameElementTwiceThenDifferentOnceReturnsTrue(
 		t, setBuilder, mutable)
+
+	emptySetMinusOneReturnsFalse(t, setBuilder, mutable)
+
+	emptySetPlusOneMinusSameElementReturnsTrue(t, setBuilder, mutable)
+
+	emptySetPlusOneMinusSameElementTwiceReturnsFalse(t, setBuilder, mutable)
 }
 
 func emptySetHasLengthOfZero(
@@ -705,6 +711,69 @@ func emptySetPlusSameElementTwiceThenDifferentOnceReturnsTrue(
 				result := s.Add("zelda")
 
 				g.Expect(result).To(BeTrue())
+			})
+	}
+}
+
+func emptySetMinusOneReturnsFalse(
+	t TestingT,
+	setBuilder func(elements []string) set.Set[string],
+	mutable bool,
+) {
+	t.Helper()
+
+	if mutable {
+		t.Run("empty set: remove: returns false",
+			func(t *testing.T) {
+				g := NewWithT(t)
+				s := setBuilder(empty()).(set.MutableSet[string])
+
+				result := s.Remove("link")
+
+				g.Expect(result).To(BeFalse())
+			})
+	}
+}
+
+func emptySetPlusOneMinusSameElementReturnsTrue(
+	t TestingT,
+	setBuilder func(elements []string) set.Set[string],
+	mutable bool,
+) {
+	t.Helper()
+
+	if mutable {
+		t.Run("empty set: add: remove same element: returns true",
+			func(t *testing.T) {
+				g := NewWithT(t)
+				s := setBuilder(empty()).(set.MutableSet[string])
+
+				s.Add("link")
+				result := s.Remove("link")
+
+				g.Expect(result).To(BeTrue())
+			})
+	}
+}
+
+func emptySetPlusOneMinusSameElementTwiceReturnsFalse(
+	t TestingT,
+	setBuilder func(elements []string) set.Set[string],
+	mutable bool,
+) {
+	t.Helper()
+
+	if mutable {
+		t.Run("empty set: add: remove same element x2: returns false",
+			func(t *testing.T) {
+				g := NewWithT(t)
+				s := setBuilder(empty()).(set.MutableSet[string])
+
+				s.Add("link")
+				s.Remove("link")
+				result := s.Remove("link")
+
+				g.Expect(result).To(BeFalse())
 			})
 	}
 }

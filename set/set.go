@@ -27,8 +27,8 @@ type Set[T comparable] interface {
 
 	// ForEach runs the given function on each element in this set.
 	//
-	// The order in which the elements are returned is undefined; it may even
-	// change from one call to the next.
+	// The iteration order of the elements is undefined; it may even change
+	// from one call to the next.
 	ForEach(fn func(elem T))
 
 	// TODO: Can we move all of our Set.String() implementations into a helper
@@ -57,13 +57,14 @@ type Set[T comparable] interface {
 type MutableSet[T comparable] interface {
 	Set[T]
 
-	// Add adds the given element into this set, if it is not already present.
-	// It returns true if the set did not already contain the element,
+	// Add adds the given element to this set if it is not already present.
+	// Returns true if the element was not already present in the set,
 	// otherwise false.
 	Add(elem T) bool
 
-	// Remove removes the given element from this set.
-	Remove(elem T) // TODO: Return true if set had the element, otherwise false
+	// Remove removes the given element from this set if it is present. Returns
+	// true if the element was already present in the set, otherwise false.
+	Remove(elem T) bool
 }
 
 // TODO: Consider returning a public version of the concrete type, rather
@@ -96,8 +97,10 @@ func (s *set[T]) Add(elem T) bool {
 	return !ok
 }
 
-func (s *set[T]) Remove(elem T) {
+func (s *set[T]) Remove(elem T) bool {
+	_, ok := s.delegate[elem]
 	delete(s.delegate, elem)
+	return ok
 }
 
 func (s *set[T]) Contains(elem T) bool {

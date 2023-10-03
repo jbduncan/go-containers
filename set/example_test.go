@@ -15,8 +15,10 @@ func ExampleSet() {
 	fmt.Println(addedAgain) // false
 	exampleSet.Add("zelda")
 
-	fmt.Println(exampleSet.Contains("link"))      // true
-	fmt.Println(exampleSet.Contains("zelda"))     // true
+	// Check that the set contains everything added to it...
+	fmt.Println(exampleSet.Contains("link"))  // true
+	fmt.Println(exampleSet.Contains("zelda")) // true
+	// ...and that it doesn't contain anything that wasn't added to it.
 	fmt.Println(exampleSet.Contains("ganondorf")) // false
 
 	// Remove a string from the set.
