@@ -79,6 +79,7 @@ func (b Builder[N]) Build() MutableGraph[N] {
 	return &graph[N]{
 		adjacencyList:   map[N]set.MutableSet[N]{},
 		allowsSelfLoops: b.allowsSelfLoops,
+		numEdges:        0,
 	}
 }
 
@@ -93,6 +94,7 @@ var (
 type graph[N comparable] struct {
 	adjacencyList   map[N]set.MutableSet[N]
 	allowsSelfLoops bool
+	numEdges        int
 }
 
 func (m *graph[N]) IsDirected() bool {
@@ -199,24 +201,33 @@ func (m *graph[N]) PutEdge(nodeU N, nodeV N) bool {
 		panic("self-loops are disallowed")
 	}
 
-	m.putEdge(nodeU, nodeV)
+	addedUToV := m.putEdge(nodeU, nodeV)
 	m.putEdge(nodeV, nodeU)
+
+	if addedUToV {
+		m.numEdges++
+	}
 
 	// TODO: return booleans at all the right times
 	return false
 }
 
-func (m *graph[N]) putEdge(nodeU N, nodeV N) {
+func (m *graph[N]) putEdge(nodeU N, nodeV N) bool {
+	added := false
 	adjacentNodes, ok := m.adjacencyList[nodeU]
 	if !ok {
 		adjacentNodes = set.New[N]()
 		m.adjacencyList[nodeU] = adjacentNodes
+		added = true
 	}
-	adjacentNodes.Add(nodeV)
+	if adjacentNodes.Add(nodeV) {
+		added = true
+	}
+	return added
 }
 
 func (m *graph[N]) RemoveNode(node N) bool {
-	_, ok := m.adjacencyList[node]
+	adjacentNodes, ok := m.adjacencyList[node]
 	if !ok {
 		return false
 	}
@@ -224,8 +235,15 @@ func (m *graph[N]) RemoveNode(node N) bool {
 	delete(m.adjacencyList, node)
 
 	for _, adjacentNodes := range m.adjacencyList {
-		adjacentNodes.Remove(node)
+		if !adjacentNodes.Remove(node) {
+			panic(
+				fmt.Sprintf(
+					"Unexpected: adjacent node %v was not removed",
+					node))
+		}
 	}
+
+	m.numEdges -= adjacentNodes.Len()
 
 	return true
 }
@@ -240,6 +258,8 @@ func (m *graph[N]) RemoveEdge(nodeU N, nodeV N) bool {
 				"Unexpected: removedUToV (%t) != removedVToU (%t)",
 				removedUToV, removedVToU))
 	}
+
+	m.numEdges--
 
 	return removedUToV
 }

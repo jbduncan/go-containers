@@ -33,6 +33,8 @@ type Set[T comparable] interface {
 
 	// TODO: Can we move all of our Set.String() implementations into a helper
 	//       function?
+	// TODO: If so, do we just admit that the format of the string _is_
+	//       defined, it just has an undefined order?
 
 	// String returns a string representation of all the elements in this set.
 	//

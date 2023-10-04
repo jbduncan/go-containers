@@ -20,13 +20,7 @@ func (e edgeSet[N]) Contains(elem EndpointPair[N]) bool {
 }
 
 func (e edgeSet[N]) Len() int {
-	// TODO: Optimise to O(1) time by keeping track of a numEdges field in
-	//       e.delegate.
-	var result uint64
-	e.ForEach(func(elem EndpointPair[N]) {
-		result++
-	})
-	return int(result)
+	return e.delegate.numEdges
 }
 
 func (e edgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
