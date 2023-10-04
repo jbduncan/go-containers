@@ -270,10 +270,5 @@ func (m *graph[N]) removeEdge(from N, to N) bool {
 		return false
 	}
 
-	// TODO: Simplify when MutableSet.Remove returns bools
-	if adjacentNodes.Contains(to) {
-		adjacentNodes.Remove(to)
-		return true
-	}
-	return false
+	return adjacentNodes.Remove(to)
 }
