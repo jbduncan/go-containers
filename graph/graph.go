@@ -38,6 +38,7 @@ type Graph[N comparable] interface {
 	OutDegree(node N) int
 	HasEdgeConnecting(nodeU N, nodeV N) bool
 	HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
+	// TODO: Implement Graph.String()
 	// String() string
 	// TODO: Is an Equal function needed to meet Guava's Graph::equals rules?
 	// Equal(other Graph[N]) bool
@@ -137,9 +138,6 @@ func (m *graph[N]) Predecessors(node N) set.Set[N] {
 func (m *graph[N]) Successors(node N) set.Set[N] {
 	return m.AdjacentNodes(node)
 }
-
-// TODO: Add tests for all set.Set methods of graph.IncidentEdges()
-//       for both a present node and an absent node
 
 func (m *graph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 	adjacentNodes, ok := m.adjacencyList[node]
