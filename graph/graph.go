@@ -40,7 +40,10 @@ type Graph[N comparable] interface {
 	HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
 	// TODO: Implement Graph.String()
 	// String() string
-	// TODO: Is an Equal function needed to meet Guava's Graph::equals rules?
+	// TODO: Is an Equal method needed to meet Guava's Graph::equals rules?
+	//  If so, make the Equal method, discourage == from being used (documenting that its use is undefined), and
+	//  optionally, if we decide to remove this interface, make the graph implementations have an incomparable field
+	//  to force == to be unusable at compile time (see https://github.com/tailscale/tailscale/blob/main/types/structs/structs.go).
 	// Equal(other Graph[N]) bool
 }
 

@@ -51,7 +51,9 @@ type Set[T comparable] interface {
 	// Iterator returns an iterator for the elements in this set.
 	// Iterator() iterator.Iterator[T]
 
-	// TODO: Set: make Equal method and discourage == from being used (documenting that its use is undefined).
+	// TODO: Set: make Equal method, discourage == from being used (documenting that its use is undefined), and
+	//  optionally, if we decide to remove this interface, make the set implementations have an incomparable field
+	//  to force == to be unusable at compile time (see https://github.com/tailscale/tailscale/blob/main/types/structs/structs.go).
 }
 
 // MutableSet is a Set with additional methods for adding elements to the set
