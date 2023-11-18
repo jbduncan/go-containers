@@ -359,6 +359,8 @@ func graphTests(
 				Expect(grph.Edges()).To(
 					Contain(newEndpointPair(grph, node1, node2)))
 				Expect(grph.Edges()).ToNot(
+					Contain(newEndpointPairWithOtherOrder(grph, node1, node2)))
+				Expect(grph.Edges()).ToNot(
 					Contain(
 						graph.NewOrderedEndpointPair(
 							nodeNotInGraph, nodeNotInGraph)))
@@ -443,8 +445,12 @@ func graphTests(
 				// Set.Contains()
 				Expect(grph.Edges()).To(
 					Contain(newEndpointPair(grph, node1, node2)))
+				Expect(grph.Edges()).ToNot(
+					Contain(newEndpointPairWithOtherOrder(grph, node1, node2)))
 				Expect(grph.Edges()).To(
 					Contain(newEndpointPair(grph, node1, node3)))
+				Expect(grph.Edges()).ToNot(
+					Contain(newEndpointPairWithOtherOrder(grph, node1, node3)))
 				Expect(grph.Edges()).ToNot(
 					Contain(
 						graph.NewOrderedEndpointPair(
@@ -478,8 +484,12 @@ func graphTests(
 				// Set.Contains()
 				Expect(grph.IncidentEdges(node1)).To(
 					Contain(newEndpointPair(grph, node1, node2)))
+				Expect(grph.IncidentEdges(node1)).ToNot(
+					Contain(newEndpointPairWithOtherOrder(grph, node1, node2)))
 				Expect(grph.IncidentEdges(node1)).To(
 					Contain(newEndpointPair(grph, node1, node3)))
+				Expect(grph.IncidentEdges(node1)).ToNot(
+					Contain(newEndpointPairWithOtherOrder(grph, node1, node3)))
 				Expect(grph.IncidentEdges(node1)).ToNot(
 					Contain(
 						graph.NewOrderedEndpointPair(
@@ -693,8 +703,20 @@ func undirectedGraphTests(
 				// Set.Contains()
 				Expect(grph.Edges()).To(
 					Contain(newEndpointPair(grph, node2, node1)))
+				Expect(grph.Edges()).ToNot(
+					Contain(newEndpointPairWithOtherOrder(grph, node2, node1)))
 				Expect(grph.Edges()).To(
 					Contain(newEndpointPair(grph, node3, node1)))
+				Expect(grph.Edges()).ToNot(
+					Contain(newEndpointPairWithOtherOrder(grph, node3, node1)))
+				Expect(grph.Edges()).ToNot(
+					Contain(
+						graph.NewOrderedEndpointPair(
+							nodeNotInGraph, nodeNotInGraph)))
+				Expect(grph.Edges()).ToNot(
+					Contain(
+						graph.NewUnorderedEndpointPair(
+							nodeNotInGraph, nodeNotInGraph)))
 
 				// Set.String()
 				Expect(grph.Edges()).To(
@@ -732,8 +754,20 @@ func undirectedGraphTests(
 				// Set.Contains()
 				Expect(grph.IncidentEdges(node1)).To(
 					Contain(newEndpointPair(grph, node2, node1)))
+				Expect(grph.IncidentEdges(node1)).ToNot(
+					Contain(newEndpointPairWithOtherOrder(grph, node2, node1)))
 				Expect(grph.IncidentEdges(node1)).To(
 					Contain(newEndpointPair(grph, node3, node1)))
+				Expect(grph.IncidentEdges(node1)).ToNot(
+					Contain(newEndpointPairWithOtherOrder(grph, node3, node1)))
+				Expect(grph.IncidentEdges(node1)).ToNot(
+					Contain(
+						graph.NewOrderedEndpointPair(
+							nodeNotInGraph, nodeNotInGraph)))
+				Expect(grph.IncidentEdges(node1)).ToNot(
+					Contain(
+						graph.NewUnorderedEndpointPair(
+							nodeNotInGraph, nodeNotInGraph)))
 
 				// Set.String()
 				Expect(grph.IncidentEdges(node1)).To(
@@ -772,6 +806,16 @@ func undirectedGraphTests(
 				// Set.Contains()
 				Expect(grph.Edges()).To(
 					Contain(newEndpointPair(grph, node2, node1)))
+				Expect(grph.Edges()).ToNot(
+					Contain(newEndpointPairWithOtherOrder(grph, node2, node1)))
+				Expect(grph.Edges()).ToNot(
+					Contain(
+						graph.NewOrderedEndpointPair(
+							nodeNotInGraph, nodeNotInGraph)))
+				Expect(grph.Edges()).ToNot(
+					Contain(
+						graph.NewUnorderedEndpointPair(
+							nodeNotInGraph, nodeNotInGraph)))
 
 				// Set.String()
 				Expect(grph.Edges()).To(
@@ -814,8 +858,20 @@ func undirectedGraphTests(
 				// Set.Contains()
 				Expect(grph.IncidentEdges(node2)).To(
 					Contain(newEndpointPair(grph, node1, node2)))
+				Expect(grph.IncidentEdges(node2)).ToNot(
+					Contain(newEndpointPairWithOtherOrder(grph, node1, node2)))
 				Expect(grph.IncidentEdges(node2)).To(
 					Contain(newEndpointPair(grph, node2, node1)))
+				Expect(grph.IncidentEdges(node2)).ToNot(
+					Contain(newEndpointPairWithOtherOrder(grph, node2, node1)))
+				Expect(grph.IncidentEdges(node2)).ToNot(
+					Contain(
+						graph.NewOrderedEndpointPair(
+							nodeNotInGraph, nodeNotInGraph)))
+				Expect(grph.IncidentEdges(node2)).ToNot(
+					Contain(
+						graph.NewUnorderedEndpointPair(
+							nodeNotInGraph, nodeNotInGraph)))
 
 				// Set.String()
 				Expect(grph.IncidentEdges(node2)).To(
@@ -927,6 +983,13 @@ func newEndpointPair[N comparable](g graph.Graph[N], nodeU N, nodeV N) graph.End
 		return graph.NewOrderedEndpointPair(nodeU, nodeV)
 	}
 	return graph.NewUnorderedEndpointPair(nodeU, nodeV)
+}
+
+func newEndpointPairWithOtherOrder[N comparable](g graph.Graph[N], nodeU N, nodeV N) graph.EndpointPair[N] {
+	if g.IsDirected() {
+		return graph.NewUnorderedEndpointPair(nodeU, nodeV)
+	}
+	return graph.NewOrderedEndpointPair(nodeU, nodeV)
 }
 
 func testSet(s set.Set[int], expectedValues ...int) {
