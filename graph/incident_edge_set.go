@@ -51,3 +51,8 @@ func (i incidentEdgeSet[N]) String() string {
 	builder.WriteRune(']')
 	return builder.String()
 }
+
+func (i incidentEdgeSet[N]) Equal(other set.Set[EndpointPair[N]]) bool {
+	// TODO
+	panic("not yet implemented")
+}

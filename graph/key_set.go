@@ -45,3 +45,8 @@ func (k keySet[N]) String() string {
 	builder.WriteRune(']')
 	return builder.String()
 }
+
+func (k keySet[N]) Equal(other set.Set[N]) bool {
+	// TODO
+	panic("not yet implemented")
+}

@@ -57,3 +57,8 @@ func (e edgeSet[N]) String() string {
 	builder.WriteRune(']')
 	return builder.String()
 }
+
+func (e edgeSet[N]) Equal(other set.Set[EndpointPair[N]]) bool {
+	// TODO
+	panic("not yet implemented")
+}

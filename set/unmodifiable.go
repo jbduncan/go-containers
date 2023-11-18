@@ -36,3 +36,8 @@ func (u unmodifiableSet[T]) ForEach(fn func(elem T)) {
 func (u unmodifiableSet[T]) String() string {
 	return u.set.String()
 }
+
+func (u unmodifiableSet[T]) Equal(other Set[T]) bool {
+	// TODO
+	panic("not yet implemented")
+}
