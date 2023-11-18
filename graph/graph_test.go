@@ -124,25 +124,7 @@ func graphTests(
 		})
 
 		It("has no edges", func() {
-			// Set.Len()
-			Expect(grph.Edges()).To(HaveLenOfZero())
-
-			// Set.ForEach()
-			Expect(grph.Edges()).To(
-				HaveForEachThatEmitsNothing[graph.EndpointPair[int]]())
-
-			// Set.Contains()
-			Expect(grph.Edges()).ToNot(
-				Contain(
-					graph.NewOrderedEndpointPair(
-						nodeNotInGraph, nodeNotInGraph)))
-			Expect(grph.Edges()).ToNot(
-				Contain(
-					graph.NewUnorderedEndpointPair(
-						nodeNotInGraph, nodeNotInGraph)))
-
-			// Set.String()
-			Expect(grph.Edges()).To(HaveStringRepr("[]"))
+			testEmptyEdges(grph.Edges())
 		})
 
 		It("has an unmodifiable nodes set view", func() {
@@ -195,25 +177,7 @@ func graphTests(
 			})
 
 			It("reports that the node has no incident edges", func() {
-				// Set.Len()
-				Expect(grph.IncidentEdges(node1)).To(HaveLenOfZero())
-
-				// Set.ForEach()
-				Expect(grph.IncidentEdges(node1)).To(
-					HaveForEachThatEmitsNothing[graph.EndpointPair[int]]())
-
-				// Set.Contains()
-				Expect(grph.IncidentEdges(node1)).ToNot(
-					Contain(
-						graph.NewOrderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
-				Expect(grph.IncidentEdges(node1)).ToNot(
-					Contain(
-						graph.NewUnorderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
-
-				// Set.String()
-				Expect(grph.IncidentEdges(node1)).To(HaveStringRepr("[]"))
+				testEmptyEdges(grph.IncidentEdges(node1))
 			})
 
 			It("reports that the node has a degree of 0", func() {
@@ -338,27 +302,7 @@ func graphTests(
 			})
 
 			It("removes the connected edges", func() {
-				// Set.Len()
-				Expect(grph.Edges()).To(HaveLenOfZero())
-
-				// Set.ForEach()
-				Expect(grph.Edges()).To(
-					HaveForEachThatEmitsNothing[graph.EndpointPair[int]]())
-
-				// Set.Contains()
-				Expect(grph.Edges()).ToNot(
-					Contain(
-						graph.NewOrderedEndpointPair(
-							nodeNotInGraph,
-							nodeNotInGraph)))
-				Expect(grph.Edges()).ToNot(
-					Contain(
-						graph.NewUnorderedEndpointPair(
-							nodeNotInGraph,
-							nodeNotInGraph)))
-
-				// Set.String()
-				Expect(grph.Edges()).To(HaveStringRepr("[]"))
+				testEmptyEdges(grph.Edges())
 			})
 		})
 
@@ -559,25 +503,7 @@ func graphTests(
 				})
 
 				It("removes both edges", func() {
-					// Set.Len()
-					Expect(grph.Edges()).To(HaveLenOfZero())
-
-					// Set.ForEach()
-					Expect(grph.Edges()).To(
-						HaveForEachThatEmitsNothing[graph.EndpointPair[int]]())
-
-					// Set.Contains()
-					Expect(grph.Edges()).ToNot(
-						Contain(
-							graph.NewOrderedEndpointPair(
-								nodeNotInGraph, nodeNotInGraph)))
-					Expect(grph.Edges()).ToNot(
-						Contain(
-							graph.NewUnorderedEndpointPair(
-								nodeNotInGraph, nodeNotInGraph)))
-
-					// Set.String()
-					Expect(grph.Edges()).To(HaveStringRepr("[]"))
+					testEmptyEdges(grph.Edges())
 				})
 			})
 		})
@@ -684,26 +610,7 @@ func graphTests(
 
 		Context("when finding the incident edges of an absent node", func() {
 			It("returns an empty set", func() {
-				// Set.Len()
-				Expect(grph.IncidentEdges(nodeNotInGraph)).To(HaveLenOfZero())
-
-				// Set.ForEach()
-				Expect(grph.IncidentEdges(nodeNotInGraph)).To(
-					HaveForEachThatEmitsNothing[graph.EndpointPair[int]]())
-
-				// Set.Contains()
-				Expect(grph.IncidentEdges(nodeNotInGraph)).ToNot(
-					Contain(
-						graph.NewOrderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
-				Expect(grph.IncidentEdges(nodeNotInGraph)).ToNot(
-					Contain(
-						graph.NewUnorderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
-
-				// Set.String()
-				Expect(grph.IncidentEdges(nodeNotInGraph)).To(
-					HaveStringRepr("[]"))
+				testEmptyEdges(grph.IncidentEdges(nodeNotInGraph))
 			})
 		})
 
@@ -1059,4 +966,26 @@ func testSet(s set.Set[int], expectedValues ...int) {
 	Expect(actualValueStrs).To(
 		ConsistOf(expectedValueStrs),
 		"to find all elements in string repr of set")
+}
+
+func testEmptyEdges(edges set.Set[graph.EndpointPair[int]]) {
+	// Set.Len()
+	Expect(edges).To(HaveLenOfZero())
+
+	// Set.ForEach()
+	Expect(edges).To(
+		HaveForEachThatEmitsNothing[graph.EndpointPair[int]]())
+
+	// Set.Contains()
+	Expect(edges).ToNot(
+		Contain(
+			graph.NewOrderedEndpointPair(
+				nodeNotInGraph, nodeNotInGraph)))
+	Expect(edges).ToNot(
+		Contain(
+			graph.NewUnorderedEndpointPair(
+				nodeNotInGraph, nodeNotInGraph)))
+
+	// Set.String()
+	Expect(edges).To(HaveStringRepr("[]"))
 }
