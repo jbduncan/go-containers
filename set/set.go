@@ -49,8 +49,11 @@ type Set[T comparable] interface {
 	// Iterator returns an iterator for the elements in this set.
 	// Iterator() iterator.Iterator[T]
 
-	// TODO: Discourage == from being used (documenting that its use is undefined)
-
+	// Equal returns true if this set has the same elements as the other set
+	// in any order. Otherwise, it returns false.
+	//
+	// This method should be used over `==`, the behaviour of which is
+	// undefined.
 	Equal(other Set[T]) bool
 }
 
