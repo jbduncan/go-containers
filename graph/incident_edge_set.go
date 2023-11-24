@@ -1,9 +1,6 @@
 package graph
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/jbduncan/go-containers/set"
 )
 
@@ -35,21 +32,7 @@ func (i incidentEdgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
 }
 
 func (i incidentEdgeSet[N]) String() string {
-	var builder strings.Builder
-
-	builder.WriteRune('[')
-	index := 0
-	i.ForEach(func(elem EndpointPair[N]) {
-		if index > 0 {
-			builder.WriteString(", ")
-		}
-
-		builder.WriteString(fmt.Sprintf("%v", elem))
-		index++
-	})
-
-	builder.WriteRune(']')
-	return builder.String()
+	return set.StringImpl[EndpointPair[N]](i)
 }
 
 func (i incidentEdgeSet[N]) Equal(other set.Set[EndpointPair[N]]) bool {

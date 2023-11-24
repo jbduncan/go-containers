@@ -10,11 +10,6 @@
 // Unmodifiable for more information.
 package set
 
-import (
-	"fmt"
-	"strings"
-)
-
 // Set is a generic, unordered collection of unique elements. This interface has methods for reading the set; for
 // writing to the set, use the MutableSet interface.
 type Set[T comparable] interface {
@@ -37,8 +32,9 @@ type Set[T comparable] interface {
 	// String returns a string representation of all the elements in this set.
 	//
 	// The format of this string is a single "[" followed by a comma-separated
-	// list (", ") of this set's elements in the same order as ForEach,
-	// followed by a single "]".
+	// list (", ") of this set's elements in the same order as ForEach (which
+	// is undefined and may change from one call to the next), followed by a
+	// single "]".
 	String() string
 
 	// TODO: Set: make Iterator method that returns an Iterator.
@@ -124,21 +120,7 @@ func (s *set[T]) ForEach(fn func(elem T)) {
 }
 
 func (s *set[T]) String() string {
-	var builder strings.Builder
-
-	builder.WriteRune('[')
-	index := 0
-	for elem := range s.delegate {
-		if index > 0 {
-			builder.WriteString(", ")
-		}
-
-		builder.WriteString(fmt.Sprintf("%v", elem))
-		index++
-	}
-
-	builder.WriteRune(']')
-	return builder.String()
+	return StringImpl[T](s)
 }
 
 func (s *set[T]) Equal(other Set[T]) bool {

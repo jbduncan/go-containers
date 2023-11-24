@@ -1,9 +1,6 @@
 package graph
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/jbduncan/go-containers/set"
 )
 
@@ -29,21 +26,7 @@ func (k keySet[N]) ForEach(fn func(elem N)) {
 }
 
 func (k keySet[N]) String() string {
-	var builder strings.Builder
-
-	builder.WriteRune('[')
-	index := 0
-	for elem := range k.delegate {
-		if index > 0 {
-			builder.WriteString(", ")
-		}
-
-		builder.WriteString(fmt.Sprintf("%v", elem))
-		index++
-	}
-
-	builder.WriteRune(']')
-	return builder.String()
+	return set.StringImpl[N](k)
 }
 
 func (k keySet[N]) Equal(other set.Set[N]) bool {
