@@ -32,15 +32,13 @@ type Set[T comparable] interface {
 	ForEach(fn func(elem T))
 
 	// TODO: Can we move all of our Set.String() implementations into a helper
-	//       function?
-	// TODO: If so, do we just admit that the format of the string _is_
-	//       defined, it just has an undefined order?
+	//       function like set.StringImpl()?
 
 	// String returns a string representation of all the elements in this set.
 	//
-	// The format of this string is undefined. The order of the elements in
-	// this string is also undefined; it may even change from one call to the
-	// next.
+	// The format of this string is a single "[" followed by a comma-separated
+	// list (", ") of this set's elements in the same order as ForEach,
+	// followed by a single "]".
 	String() string
 
 	// TODO: Set: make Iterator method that returns an Iterator.
