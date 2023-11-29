@@ -18,6 +18,8 @@ vet:
 
 # TODO: Consider replacing with golangci-lint, even if it has to be installed manually:
 # https://github.com/uber-go/nilaway/blob/6b5d588e97aa719fc89271cda1c8aa7a804874bf/Makefile#L26-L34
+# Alternatively, do it as tailscale have:
+# https://github.com/tailscale/tailscale/commit/280255acae604796a1113861f5a84e6fa2dc6121
 .PHONY: staticcheck
 staticcheck: # Uses version imported by internal/tools.go, in turn using version in go.mod
 	go run honnef.co/go/tools/cmd/staticcheck ./...
