@@ -56,3 +56,5 @@ check: fmt_check vet staticcheck test
 #   - `string == ""` or `string == ``` to `len(string) == 0`
 
 # TODO: Extract common eg templates into its own Git repo
+
+# TODO: Use gofmt's refactoring feature to turn `interface{}` to `any`
