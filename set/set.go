@@ -77,6 +77,10 @@ type MutableSet[T comparable] interface {
 //       than the MutableSet interface, to allow new methods to be added
 //       without breaking backwards compatibility:
 //       - https://github.com/golang/go/wiki/CodeReviewComments#interfaces
+//       In doing so, move Set.Equal to its own helper method (as gonum does
+//       for its graph type) and make all implementations incomparable with ==
+//       by using the same trick as:
+//       https://github.com/tailscale/tailscale/blob/e5e5ebda44e7d28df279e89d3cc3a8b904843304/types/structs/structs.go
 
 // New returns a new empty MutableSet.
 func New[T comparable]() MutableSet[T] {
