@@ -26,9 +26,6 @@ type Set[T comparable] interface {
 	// from one call to the next.
 	ForEach(fn func(elem T))
 
-	// TODO: Can we move all of our Set.String() implementations into a helper
-	//       function like set.StringImpl()?
-
 	// String returns a string representation of all the elements in this set.
 	//
 	// The format of this string is a single "[" followed by a comma-separated
@@ -48,8 +45,16 @@ type Set[T comparable] interface {
 	// Equal returns true if this set has the same elements as the other set
 	// in any order. Otherwise, it returns false.
 	//
-	// This method should be used over `==`, the behaviour of which is
+	// This method should be used over ==, the behaviour of which is
 	// undefined.
+	//
+	// Equal implementations follow these rules:
+	//   - Reflexive: for any potentially-nil set x, x.Equal(x) should be true.
+	//   - Symmetric: for any potentially-nil sets x and y, x.Equal(y) and y.Equal(x) should have the same results.
+	//   - Transitive: for any potentially-nil sets x, y and z, if x.Equal(y) and y.Equal(z), then x.Equal(z) should be
+	//     true.
+	//   - Consistent: for any potentially-nil sets x and y, multiple calls to x.Equal(y) should consistently return
+	//     true or consistently return false, as long as no information used by the Equal calls is changed.
 	Equal(other Set[T]) bool
 }
 
@@ -75,14 +80,10 @@ type MutableSet[T comparable] interface {
 
 // New returns a new empty MutableSet.
 func New[T comparable]() MutableSet[T] {
-	return &set[T]{
-		delegate: map[T]struct{}{},
-	}
+	return set[T]{}
 }
 
-type set[T comparable] struct {
-	delegate map[T]struct{}
-}
+type set[T comparable] map[T]struct{}
 
 // TODO: If the Set and MutableSet interfaces are ever eliminated, move them and these
 //       compile-time type assertions to a test package.
@@ -92,38 +93,38 @@ var (
 	_ MutableSet[int] = (*set[int])(nil)
 )
 
-func (s *set[T]) Add(elem T) bool {
-	_, ok := s.delegate[elem]
-	s.delegate[elem] = struct{}{}
+func (s set[T]) Add(elem T) bool {
+	_, ok := s[elem]
+	s[elem] = struct{}{}
 	return !ok
 }
 
-func (s *set[T]) Remove(elem T) bool {
-	_, ok := s.delegate[elem]
-	delete(s.delegate, elem)
+func (s set[T]) Remove(elem T) bool {
+	_, ok := s[elem]
+	delete(s, elem)
 	return ok
 }
 
-func (s *set[T]) Contains(elem T) bool {
-	_, ok := s.delegate[elem]
+func (s set[T]) Contains(elem T) bool {
+	_, ok := s[elem]
 	return ok
 }
 
-func (s *set[T]) Len() int {
-	return len(s.delegate)
+func (s set[T]) Len() int {
+	return len(s)
 }
 
-func (s *set[T]) ForEach(fn func(elem T)) {
-	for elem := range s.delegate {
+func (s set[T]) ForEach(fn func(elem T)) {
+	for elem := range s {
 		fn(elem)
 	}
 }
 
-func (s *set[T]) String() string {
+func (s set[T]) String() string {
 	return StringImpl[T](s)
 }
 
-func (s *set[T]) Equal(other Set[T]) bool {
+func (s set[T]) Equal(other Set[T]) bool {
 	// TODO
 	panic("not yet implemented")
 }
