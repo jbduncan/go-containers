@@ -40,8 +40,3 @@ func (e edgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
 func (e edgeSet[N]) String() string {
 	return set.StringImpl[EndpointPair[N]](e)
 }
-
-func (e edgeSet[N]) Equal(other set.Set[EndpointPair[N]]) bool {
-	// TODO
-	panic("not yet implemented")
-}

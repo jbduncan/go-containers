@@ -28,8 +28,3 @@ func (k keySet[N]) ForEach(fn func(elem N)) {
 func (k keySet[N]) String() string {
 	return set.StringImpl[N](k)
 }
-
-func (k keySet[N]) Equal(other set.Set[N]) bool {
-	// TODO
-	panic("not yet implemented")
-}

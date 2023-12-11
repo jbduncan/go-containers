@@ -32,6 +32,8 @@ type Set[T comparable] interface {
 	// list (", ") of this set's elements in the same order as ForEach (which
 	// is undefined and may change from one call to the next), followed by a
 	// single "]".
+	//
+	// This method satisfies fmt.Stringer.
 	String() string
 
 	// TODO: Set: make Iterator method that returns an Iterator.
@@ -41,21 +43,6 @@ type Set[T comparable] interface {
 	//         - Using reflect.MapIter
 	// Iterator returns an iterator for the elements in this set.
 	// Iterator() iterator.Iterator[T]
-
-	// Equal returns true if this set has the same elements as the other set
-	// in any order. Otherwise, it returns false.
-	//
-	// This method should be used over ==, the behaviour of which is
-	// undefined.
-	//
-	// Equal implementations follow these rules:
-	//   - Reflexive: for any potentially-nil set x, x.Equal(x) should be true.
-	//   - Symmetric: for any potentially-nil sets x and y, x.Equal(y) and y.Equal(x) should have the same results.
-	//   - Transitive: for any potentially-nil sets x, y and z, if x.Equal(y) and y.Equal(z), then x.Equal(z) should be
-	//     true.
-	//   - Consistent: for any potentially-nil sets x and y, multiple calls to x.Equal(y) should consistently return
-	//     true or consistently return false, as long as no information used by the Equal calls is changed.
-	Equal(other Set[T]) bool
 }
 
 // MutableSet is a Set with additional methods for adding elements to the set
@@ -126,9 +113,4 @@ func (s set[T]) ForEach(fn func(elem T)) {
 
 func (s set[T]) String() string {
 	return StringImpl[T](s)
-}
-
-func (s set[T]) Equal(other Set[T]) bool {
-	// TODO
-	panic("not yet implemented")
 }

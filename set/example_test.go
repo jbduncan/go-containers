@@ -25,12 +25,27 @@ func ExampleSet() {
 	exampleSet.Remove("zelda")
 	fmt.Println(exampleSet.Contains("zelda")) // false
 
+	// Print the contents of the set
+	fmt.Println(exampleSet.String()) // [link]
+
+	// Check if the contents are equal to another set's contents
+	anotherSet := set.New[string]()
+	anotherSet.Add("link")
+	fmt.Println(set.Equal[string](exampleSet, anotherSet)) // true
+
+	yetAnotherSet := set.New[string]()
+	yetAnotherSet.Add("ganondorf")
+	fmt.Println(set.Equal[string](exampleSet, yetAnotherSet)) // false
+
 	// Output:
 	// true
 	// false
 	// true
 	// true
 	// false
+	// false
+	// [link]
+	// true
 	// false
 }
 
