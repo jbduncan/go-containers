@@ -20,7 +20,7 @@ type TestingT interface {
 	Run(name string, f func(t *testing.T)) bool
 }
 
-// TODO: Document
+// TODO: Document; make a note of the fact that the returned set can have mutation methods...
 func Set(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	_, mutable := setBuilder(empty()).(set.MutableSet[string])
 

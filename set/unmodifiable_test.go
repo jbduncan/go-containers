@@ -23,7 +23,7 @@ func TestSetUnmodifiable(t *testing.T) {
 		func(t *testing.T) {
 			g := NewWithT(t)
 			s := set.New[string]()
-			unmodSet := set.Unmodifiable(s)
+			unmodSet := set.Unmodifiable[string](s)
 
 			s.Add("link")
 
@@ -35,7 +35,7 @@ func TestSetUnmodifiable(t *testing.T) {
 		func(t *testing.T) {
 			g := NewWithT(t)
 			s := set.New[string]()
-			unmodSet := set.Unmodifiable(s)
+			unmodSet := set.Unmodifiable[string](s)
 
 			s.Add("link")
 
@@ -49,7 +49,7 @@ func TestSetUnmodifiable(t *testing.T) {
 		func(t *testing.T) {
 			g := NewWithT(t)
 			s := set.New[string]()
-			unmodSet := set.Unmodifiable(s)
+			unmodSet := set.Unmodifiable[string](s)
 
 			s.Add("link")
 
@@ -63,7 +63,7 @@ func TestSetUnmodifiable(t *testing.T) {
 		func(t *testing.T) {
 			g := NewWithT(t)
 			s := set.New[string]()
-			unmodSet := set.Unmodifiable(s)
+			unmodSet := set.Unmodifiable[string](s)
 
 			s.Add("link")
 
@@ -77,7 +77,7 @@ func TestSetUnmodifiable(t *testing.T) {
 		func(t *testing.T) {
 			g := NewWithT(t)
 			s := set.New[string]()
-			unmodSet := set.Unmodifiable(s)
+			unmodSet := set.Unmodifiable[string](s)
 
 			s.Add("link")
 			s.Add("zelda")

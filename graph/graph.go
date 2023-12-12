@@ -128,7 +128,7 @@ func (m *graph[N]) AdjacentNodes(node N) set.Set[N] {
 		//       there is no sane way of testing that it's a view.
 		//       Furthermore, panicking will allow programmers to
 		//       flush out bugs faster.
-		return set.Unmodifiable(set.New[N]())
+		return set.Unmodifiable[N](set.New[N]())
 	}
 
 	return set.Unmodifiable(adjacentNodes)
@@ -149,7 +149,7 @@ func (m *graph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 		//       there is no sane way of testing that it's a view.
 		//       Furthermore, panicking will allow programmers to
 		//       flush out bugs faster.
-		return set.Unmodifiable(set.New[EndpointPair[N]]())
+		return set.Unmodifiable[EndpointPair[N]](set.New[EndpointPair[N]]())
 	}
 
 	return incidentEdgeSet[N]{

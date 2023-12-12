@@ -1,13 +1,15 @@
 // Package set provides a set data structure, which is a generic, unordered container of elements where no two elements
-// can be equal according to Go's '==' operator.
+// can be equal according to Go's == operator.
 //
 // A set can be created with the New function.
 //
-// Sets satisfy two interfaces: Set and MutableSet. Read those interfaces' docs and their methods' docs for more
-// information.
-//
 // An existing set can be made "unmodifiable", which turns it into a read-only Set view. Read the docs for the function
 // Unmodifiable for more information.
+//
+// Two sets can be compared for "equality", returning true if they both have the same elements as each other in any
+// order, otherwise false. Read the docs for the function Equal for more information.
+//
+// Third-party set implementations can be made, which can be tested with settest.Set.
 package set
 
 // Set is a generic, unordered collection of unique elements. This interface has methods for reading the set; for
@@ -60,57 +62,69 @@ type MutableSet[T comparable] interface {
 	Remove(elem T) bool
 }
 
-// TODO: Consider returning a public version of the concrete type, rather
-//       than the MutableSet interface, to allow new methods to be added
-//       without breaking backwards compatibility:
-//       - https://github.com/golang/go/wiki/CodeReviewComments#interfaces
-//       In doing so, move Set.Equal to its own helper method (as gonum does
-//       for its graph type) and make all implementations incomparable with ==
-//       by using the same trick as:
+// TODO: Make all set implementations incomparable with == by using the same trick as:
 //       https://github.com/tailscale/tailscale/blob/e5e5ebda44e7d28df279e89d3cc3a8b904843304/types/structs/structs.go
 
-// New returns a new empty MutableSet.
-func New[T comparable]() MutableSet[T] {
-	return set[T]{}
+// New returns a new non-nil, empty, mutable set. It implements Set and MutableSet.
+func New[T comparable]() *MapBasedSet[T] {
+	return &MapBasedSet[T]{
+		delegate: map[T]struct{}{},
+	}
 }
 
-type set[T comparable] map[T]struct{}
-
-// TODO: If the Set and MutableSet interfaces are ever eliminated, move them and these
-//       compile-time type assertions to a test package.
+// MapBasedSet is a generic, unordered container of elements where no two elements can be equal according to Go's ==
+// operator. Its implementation is based on a Go map, with similar performance characteristics.
+type MapBasedSet[T comparable] struct {
+	delegate map[T]struct{}
+}
 
 var (
-	_ Set[int]        = (*set[int])(nil)
-	_ MutableSet[int] = (*set[int])(nil)
+	_ Set[int]        = (*MapBasedSet[int])(nil)
+	_ MutableSet[int] = (*MapBasedSet[int])(nil)
 )
 
-func (s set[T]) Add(elem T) bool {
-	_, ok := s[elem]
-	s[elem] = struct{}{}
+// Add adds the given element to this set if it is not already present. Returns true if the element was not already
+// present in the set, otherwise false.
+func (s *MapBasedSet[T]) Add(elem T) bool {
+	_, ok := s.delegate[elem]
+	s.delegate[elem] = struct{}{}
 	return !ok
 }
 
-func (s set[T]) Remove(elem T) bool {
-	_, ok := s[elem]
-	delete(s, elem)
+// Remove removes the given element from this set if it is present. Returns true if the element was already present in
+// the set, otherwise false.
+func (s *MapBasedSet[T]) Remove(elem T) bool {
+	_, ok := s.delegate[elem]
+	delete(s.delegate, elem)
 	return ok
 }
 
-func (s set[T]) Contains(elem T) bool {
-	_, ok := s[elem]
+// Contains returns true if this set contains the given element, otherwise it returns false.
+func (s *MapBasedSet[T]) Contains(elem T) bool {
+	_, ok := s.delegate[elem]
 	return ok
 }
 
-func (s set[T]) Len() int {
-	return len(s)
+// Len returns the number of elements in this set.
+func (s *MapBasedSet[T]) Len() int {
+	return len(s.delegate)
 }
 
-func (s set[T]) ForEach(fn func(elem T)) {
-	for elem := range s {
+// ForEach runs the given function on each element in this set.
+//
+// The iteration order of the elements is undefined; it may even change from one call to the next.
+func (s *MapBasedSet[T]) ForEach(fn func(elem T)) {
+	for elem := range s.delegate {
 		fn(elem)
 	}
 }
 
-func (s set[T]) String() string {
+// String returns a string representation of all the elements in this set.
+//
+// The format of this string is a single "[" followed by a comma-separated list (", ") of this set's elements in the
+// same order as ForEach (which is undefined and may change from one call to the next), followed by a single "]".
+//
+// This method satisfies fmt.Stringer.
+func (s *MapBasedSet[T]) String() string {
 	return StringImpl[T](s)
 }
