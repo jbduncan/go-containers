@@ -10,7 +10,7 @@ fmt: # Uses version imported by internal/tools.go, in turn using version in go.m
 
 .PHONY: fmt_check
 fmt_check:
-	scripts/fmt_check.sh
+	scripts/gofumpt_check.sh
 
 .PHONY: vet
 vet:
@@ -20,16 +20,25 @@ vet:
 # https://github.com/uber-go/nilaway/blob/6b5d588e97aa719fc89271cda1c8aa7a804874bf/Makefile#L26-L34
 # Alternatively, do it as tailscale have:
 # https://github.com/tailscale/tailscale/commit/280255acae604796a1113861f5a84e6fa2dc6121
-.PHONY: staticcheck
-staticcheck: # Uses version imported by internal/tools.go, in turn using version in go.mod
+.PHONY: lint
+lint:
+	# Uses version imported by internal/tools.go, in turn using version in go.mod
 	go run honnef.co/go/tools/cmd/staticcheck ./...
+	scripts/gofmt_check.sh
+
+.PHONY: lint_fix
+lint_fix:
+	go run cmd/gofmt -r 'interface{} -> any' -w .
+	go run cmd/gofmt -r '(a) -> a' -w .
+	go run cmd/gofmt -r 'a[b:len(a)] -> a[b:]' -w .
+	go run cmd/gofmt -s -w .
 
 .PHONY: test
 test:
 	go test -shuffle=on -race ./...
 
 .PHONY: check
-check: fmt_check vet staticcheck test
+check: fmt_check vet lint test
 
 # TODO: Add https://github.com/uber-go/nilaway
 # TODO: Add a 'go mod tidy' lint:
@@ -56,5 +65,3 @@ check: fmt_check vet staticcheck test
 #   - `string == ""` or `string == ``` to `len(string) == 0`
 
 # TODO: Extract common eg templates into its own Git repo
-
-# TODO: Use gofmt's refactoring feature to turn `interface{}` to `any`
