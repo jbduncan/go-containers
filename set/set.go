@@ -1,15 +1,3 @@
-// Package set provides a set data structure, which is a generic, unordered container of elements where no two elements
-// can be equal according to Go's == operator.
-//
-// A set can be created with the New function.
-//
-// An existing set can be made "unmodifiable", which turns it into a read-only Set view. Read the docs for the function
-// Unmodifiable for more information.
-//
-// Two sets can be compared for "equality", returning true if they both have the same elements as each other in any
-// order, otherwise false. Read the docs for the function Equal for more information.
-//
-// Third-party set implementations can be tested with settest.Set.
 package set
 
 // Set is a generic, unordered collection of unique elements. This interface has methods for reading the set; for
@@ -17,6 +5,9 @@ package set
 type Set[T comparable] interface {
 	// Contains returns true if this set contains the given element, otherwise it returns false.
 	Contains(elem T) bool
+
+	// TODO: Introduce ContainsAll(set.Set) (no need for varargs overload as set.Of allows for chaining)
+	// TODO: Consider introducing ContainsAny(set.Set) as per string.ContainsAny
 
 	// Len returns the number of elements in this set.
 	Len() int
@@ -50,11 +41,15 @@ type MutableSet[T comparable] interface {
 
 	// Add adds the given element to this set if it is not already present. Returns true if the element was not already
 	// present in the set, otherwise false.
-	Add(elem T) bool
+	Add(elem T) bool // TODO: Change Add to accept varargs
+
+	// TODO: Introduce AddSet
 
 	// Remove removes the given element from this set if it is present. Returns true if the element was already present
 	// in the set, otherwise false.
-	Remove(elem T) bool
+	Remove(elem T) bool // TODO: Change Remove to accept varargs
+
+	// TODO: Introduce RemoveSet
 }
 
 // TODO: Make all set implementations incomparable with == by using the same trick as:
@@ -67,7 +62,7 @@ func New[T comparable]() *MapSet[T] {
 	}
 }
 
-// TODO: Introduce set.Of[T comparable](elems ...T), which returns an unmodifiable set
+// TODO: Replace set.New with set.Of[T comparable](elems ...T), which returns an unmodifiable set
 // TODO: Introduce set.OfMutable[T comparable](elems ...T) ...
 
 // MapSet is a generic, unordered container of elements where no two elements can be equal according to Go's ==
