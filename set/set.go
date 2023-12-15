@@ -6,8 +6,10 @@ type Set[T comparable] interface {
 	// Contains returns true if this set contains the given element, otherwise it returns false.
 	Contains(elem T) bool
 
-	// TODO: Introduce ContainsAll(set.Set) (no need for varargs overload as set.Of allows for chaining)
-	// TODO: Consider introducing ContainsAny(set.Set) as per string.ContainsAny
+	// TODO: Introduce ContainsAll(Rangeable) (no need for varargs overload as set.Of allows for chaining),
+	//       where Rangeable is a type alias for a range-able function (as per
+	//       https://github.com/golang/go/issues/61405).
+	// TODO: Consider introducing ContainsAny(Rangeable) similarly to string.ContainsAny
 
 	// Len returns the number of elements in this set.
 	Len() int
@@ -43,13 +45,13 @@ type MutableSet[T comparable] interface {
 	// present in the set, otherwise false.
 	Add(elem T) bool // TODO: Change Add to accept varargs
 
-	// TODO: Introduce AddSet
+	// TODO: Introduce AddAll(Rangeable)
 
 	// Remove removes the given element from this set if it is present. Returns true if the element was already present
 	// in the set, otherwise false.
 	Remove(elem T) bool // TODO: Change Remove to accept varargs
 
-	// TODO: Introduce RemoveSet
+	// TODO: Introduce RemoveAll(Rangeable)
 }
 
 // TODO: Make all set implementations incomparable with == by using the same trick as:
