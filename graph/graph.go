@@ -128,7 +128,7 @@ func (m *graph[N]) AdjacentNodes(node N) set.Set[N] {
 		//       there is no sane way of testing that it's a view.
 		//       Furthermore, panicking will allow programmers to
 		//       flush out bugs faster.
-		return set.Unmodifiable[N](set.New[N]())
+		return set.Unmodifiable[N](set.NewMutable[N]())
 	}
 
 	return set.Unmodifiable(adjacentNodes)
@@ -149,7 +149,7 @@ func (m *graph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 		//       there is no sane way of testing that it's a view.
 		//       Furthermore, panicking will allow programmers to
 		//       flush out bugs faster.
-		return set.Unmodifiable[EndpointPair[N]](set.New[EndpointPair[N]]())
+		return set.Unmodifiable[EndpointPair[N]](set.NewMutable[EndpointPair[N]]())
 	}
 
 	return incidentEdgeSet[N]{
@@ -193,7 +193,7 @@ func (m *graph[N]) AddNode(node N) bool {
 		return false
 	}
 
-	m.adjacencyList[node] = set.New[N]()
+	m.adjacencyList[node] = set.NewMutable[N]()
 	return true
 }
 
@@ -217,7 +217,7 @@ func (m *graph[N]) putEdge(nodeU N, nodeV N) bool {
 	added := false
 	adjacentNodes, ok := m.adjacencyList[nodeU]
 	if !ok {
-		adjacentNodes = set.New[N]()
+		adjacentNodes = set.NewMutable[N]()
 		m.adjacencyList[nodeU] = adjacentNodes
 		added = true
 	}

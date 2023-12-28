@@ -22,7 +22,7 @@ func (e edgeSet[N]) Len() int {
 }
 
 func (e edgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
-	result := set.New[EndpointPair[N]]()
+	result := set.NewMutable[EndpointPair[N]]()
 	e.delegate.Nodes().ForEach(func(u N) {
 		// TODO: Replace .AdjacentNodes with .Successors when building
 		//       a directed graph type.

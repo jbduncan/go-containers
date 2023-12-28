@@ -476,8 +476,7 @@ func twoElementSetHasTwoElementStringRepr(
 			s := setBuilder(twoElements())
 
 			g.Expect(s).To(
-				HaveStringRepr(
-					BeElementOf("[link, zelda]", "[zelda, link]")))
+				HaveStringReprThatIsAnyOf("[link, zelda]", "[zelda, link]"))
 		})
 }
 
@@ -498,8 +497,7 @@ func emptySetPlusTwoReturnsTwoElementStringRepr(
 				s.Add("zelda")
 
 				g.Expect(s).To(
-					HaveStringRepr(
-						BeElementOf("[link, zelda]", "[zelda, link]")))
+					HaveStringReprThatIsAnyOf("[link, zelda]", "[zelda, link]"))
 			})
 	}
 }
@@ -581,14 +579,13 @@ func emptySetPlusThreeHasThreeElementStringRepr(
 				s.Add("ganondorf")
 
 				g.Expect(s).To(
-					HaveStringRepr(
-						BeElementOf(
-							"[link, zelda, ganondorf]",
-							"[link, ganondorf, zelda]",
-							"[zelda, link, ganondorf]",
-							"[zelda, ganondorf, link]",
-							"[ganondorf, link, zelda]",
-							"[ganondorf, zelda, link]")))
+					HaveStringReprThatIsAnyOf(
+						"[link, zelda, ganondorf]",
+						"[link, ganondorf, zelda]",
+						"[zelda, link, ganondorf]",
+						"[zelda, ganondorf, link]",
+						"[ganondorf, link, zelda]",
+						"[ganondorf, zelda, link]"))
 			})
 	}
 }
@@ -605,14 +602,13 @@ func threeElementSetHasThreeElementStringRepr(
 			s := setBuilder(threeElements())
 
 			g.Expect(s).To(
-				HaveStringRepr(
-					BeElementOf(
-						"[link, zelda, ganondorf]",
-						"[link, ganondorf, zelda]",
-						"[zelda, link, ganondorf]",
-						"[zelda, ganondorf, link]",
-						"[ganondorf, link, zelda]",
-						"[ganondorf, zelda, link]")))
+				HaveStringReprThatIsAnyOf(
+					"[link, zelda, ganondorf]",
+					"[link, ganondorf, zelda]",
+					"[zelda, link, ganondorf]",
+					"[zelda, ganondorf, link]",
+					"[ganondorf, link, zelda]",
+					"[ganondorf, zelda, link]"))
 		})
 }
 

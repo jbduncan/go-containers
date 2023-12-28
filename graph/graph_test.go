@@ -720,16 +720,15 @@ func undirectedGraphTests(
 
 				// Set.String()
 				Expect(grph.Edges()).To(
-					HaveStringRepr(
-						BeElementOf(
-							"[[1, 2], [1, 3]]",
-							"[[1, 2], [3, 1]]",
-							"[[2, 1], [1, 3]]",
-							"[[2, 1], [3, 1]]",
-							"[[1, 3], [1, 2]]",
-							"[[1, 3], [2, 1]]",
-							"[[3, 1], [1, 2]]",
-							"[[3, 1], [2, 1]]")))
+					HaveStringReprThatIsAnyOf(
+						"[[1, 2], [1, 3]]",
+						"[[1, 2], [3, 1]]",
+						"[[2, 1], [1, 3]]",
+						"[[2, 1], [3, 1]]",
+						"[[1, 3], [1, 2]]",
+						"[[1, 3], [2, 1]]",
+						"[[3, 1], [1, 2]]",
+						"[[3, 1], [2, 1]]"))
 			})
 
 			It("has two incident edges connected to the common node", func() {
@@ -771,16 +770,15 @@ func undirectedGraphTests(
 
 				// Set.String()
 				Expect(grph.IncidentEdges(node1)).To(
-					HaveStringRepr(
-						BeElementOf(
-							"[[1, 2], [1, 3]]",
-							"[[1, 2], [3, 1]]",
-							"[[2, 1], [1, 3]]",
-							"[[2, 1], [3, 1]]",
-							"[[1, 3], [1, 2]]",
-							"[[1, 3], [2, 1]]",
-							"[[3, 1], [1, 2]]",
-							"[[3, 1], [2, 1]]")))
+					HaveStringReprThatIsAnyOf(
+						"[[1, 2], [1, 3]]",
+						"[[1, 2], [3, 1]]",
+						"[[2, 1], [1, 3]]",
+						"[[2, 1], [3, 1]]",
+						"[[1, 3], [1, 2]]",
+						"[[1, 3], [2, 1]]",
+						"[[3, 1], [1, 2]]",
+						"[[3, 1], [2, 1]]"))
 			})
 		})
 
@@ -819,8 +817,7 @@ func undirectedGraphTests(
 
 				// Set.String()
 				Expect(grph.Edges()).To(
-					HaveStringRepr(
-						BeElementOf("[[1, 2]]", "[[2, 1]]")))
+					HaveStringReprThatIsAnyOf("[[1, 2]]", "[[2, 1]]"))
 			})
 
 			It("sees both nodes as predecessors of each other", func() {
@@ -875,8 +872,7 @@ func undirectedGraphTests(
 
 				// Set.String()
 				Expect(grph.IncidentEdges(node2)).To(
-					HaveStringRepr(
-						BeElementOf("[[1, 2]]", "[[2, 1]]")))
+					HaveStringReprThatIsAnyOf("[[1, 2]]", "[[2, 1]]"))
 			})
 
 			It("has an in degree of 1 for the first node", func() {

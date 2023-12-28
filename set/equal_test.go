@@ -17,18 +17,18 @@ func TestEqual(t *testing.T) {
 	t.Run("set a: [link]; set b: nil; not equal", func(t *testing.T) {
 		g := NewWithT(t)
 
-		g.Expect(set.Equal(setOf("link"), nil)).To(BeFalse())
+		g.Expect(set.Equal[string](set.Of("link"), nil)).To(BeFalse())
 	})
 
 	t.Run("set a: [link]; set b: [zelda]; not equal", func(t *testing.T) {
 		g := NewWithT(t)
 
-		g.Expect(set.Equal(setOf("link"), setOf("zelda"))).To(BeFalse())
+		g.Expect(set.Equal[string](set.Of("link"), set.Of("zelda"))).To(BeFalse())
 	})
 
 	t.Run("set a: [link]; set b: [link, zelda]; not equal", func(t *testing.T) {
 		g := NewWithT(t)
 
-		g.Expect(set.Equal(setOf("link", "zelda"), setOf("link"))).To(BeFalse())
+		g.Expect(set.Equal[string](set.Of("link", "zelda"), set.Of("link"))).To(BeFalse())
 	})
 }

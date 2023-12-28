@@ -16,17 +16,17 @@ func TestStringImpl(t *testing.T) {
 	tests := []testCase{
 		{
 			name:    "empty set",
-			arg:     set.New[string](),
+			arg:     set.Of[string](),
 			wantAny: []string{"[]"},
 		},
 		{
 			name:    "one element set",
-			arg:     oneElementSet(),
+			arg:     set.Of("link"),
 			wantAny: []string{"[link]"},
 		},
 		{
 			name:    "two element set",
-			arg:     twoElementSet(),
+			arg:     set.Of("link", "zelda"),
 			wantAny: []string{"[link, zelda]", "[zelda, link]"},
 		},
 	}

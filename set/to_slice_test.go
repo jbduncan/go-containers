@@ -16,17 +16,17 @@ func TestToSlice(t *testing.T) {
 	tests := []testCase{
 		{
 			name: "empty set",
-			s:    set.New[string](),
+			s:    set.Of[string](),
 			want: make([]string, 0),
 		},
 		{
 			name: "one-element set",
-			s:    oneElementSet(),
+			s:    set.Of("link"),
 			want: []string{"link"},
 		},
 		{
 			name: "two-element set",
-			s:    twoElementSet(),
+			s:    set.Of("link", "zelda"),
 			want: []string{"link", "zelda"},
 		},
 	}

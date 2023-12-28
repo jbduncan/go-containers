@@ -7,9 +7,15 @@ import (
 	"github.com/jbduncan/go-containers/set/settest"
 )
 
-func TestSetNew(t *testing.T) {
+func TestSetOf(t *testing.T) {
 	settest.Set(t, func(elements []string) set.Set[string] {
-		s := set.New[string]()
+		return set.Of(elements...)
+	})
+}
+
+func TestSetNewMutable(t *testing.T) {
+	settest.Set(t, func(elements []string) set.Set[string] {
+		s := set.NewMutable[string]()
 		for _, element := range elements {
 			s.Add(element)
 		}

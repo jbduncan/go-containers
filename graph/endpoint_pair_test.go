@@ -106,7 +106,7 @@ var _ = Describe("EndpointPair", func() {
 		Context("when calling .String()", func() {
 			It("returns a string representation", func() {
 				Expect(endpointPair).To(
-					HaveStringRepr(BeElementOf("[link, zelda]", "[zelda, link]")))
+					HaveStringReprThatIsAnyOf("[link, zelda]", "[zelda, link]"))
 			})
 		})
 	})
