@@ -101,28 +101,28 @@ type graph[N comparable] struct {
 	numEdges        int
 }
 
-func (m *graph[N]) IsDirected() bool {
+func (g *graph[N]) IsDirected() bool {
 	return false
 }
 
-func (m *graph[N]) AllowsSelfLoops() bool {
-	return m.allowsSelfLoops
+func (g *graph[N]) AllowsSelfLoops() bool {
+	return g.allowsSelfLoops
 }
 
-func (m *graph[N]) Nodes() set.Set[N] {
+func (g *graph[N]) Nodes() set.Set[N] {
 	return keySet[N]{
-		delegate: m.adjacencyList,
+		delegate: g.adjacencyList,
 	}
 }
 
-func (m *graph[N]) Edges() set.Set[EndpointPair[N]] {
+func (g *graph[N]) Edges() set.Set[EndpointPair[N]] {
 	return edgeSet[N]{
-		delegate: m,
+		delegate: g,
 	}
 }
 
-func (m *graph[N]) AdjacentNodes(node N) set.Set[N] {
-	adjacentNodes, ok := m.adjacencyList[node]
+func (g *graph[N]) AdjacentNodes(node N) set.Set[N] {
+	adjacentNodes, ok := g.adjacencyList[node]
 	if !ok {
 		// TODO: Go back to panicking, as this set is not a view and
 		//       there is no sane way of testing that it's a view.
@@ -134,16 +134,16 @@ func (m *graph[N]) AdjacentNodes(node N) set.Set[N] {
 	return set.Unmodifiable(adjacentNodes)
 }
 
-func (m *graph[N]) Predecessors(node N) set.Set[N] {
-	return m.AdjacentNodes(node)
+func (g *graph[N]) Predecessors(node N) set.Set[N] {
+	return g.AdjacentNodes(node)
 }
 
-func (m *graph[N]) Successors(node N) set.Set[N] {
-	return m.AdjacentNodes(node)
+func (g *graph[N]) Successors(node N) set.Set[N] {
+	return g.AdjacentNodes(node)
 }
 
-func (m *graph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
-	adjacentNodes, ok := m.adjacencyList[node]
+func (g *graph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
+	adjacentNodes, ok := g.adjacencyList[node]
 	if !ok {
 		// TODO: Go back to panicking, as this set is not a view and
 		//       there is no sane way of testing that it's a view.
@@ -158,8 +158,8 @@ func (m *graph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 	}
 }
 
-func (m *graph[N]) Degree(node N) int {
-	adjacentNodes, ok := m.adjacencyList[node]
+func (g *graph[N]) Degree(node N) int {
+	adjacentNodes, ok := g.adjacencyList[node]
 	if !ok {
 		return 0
 	}
@@ -167,58 +167,58 @@ func (m *graph[N]) Degree(node N) int {
 	return adjacentNodes.Len()
 }
 
-func (m *graph[N]) InDegree(node N) int {
-	return m.Degree(node)
+func (g *graph[N]) InDegree(node N) int {
+	return g.Degree(node)
 }
 
-func (m *graph[N]) OutDegree(node N) int {
-	return m.Degree(node)
+func (g *graph[N]) OutDegree(node N) int {
+	return g.Degree(node)
 }
 
-func (m *graph[N]) HasEdgeConnecting(nodeU N, nodeV N) bool {
-	adjacentNodes, ok := m.adjacencyList[nodeU]
+func (g *graph[N]) HasEdgeConnecting(nodeU, nodeV N) bool {
+	adjacentNodes, ok := g.adjacencyList[nodeU]
 	return ok && adjacentNodes.Contains(nodeV)
 }
 
-func (m *graph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
+func (g *graph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
 	if endpointPair.IsOrdered() {
 		return false
 	}
 
-	return m.HasEdgeConnecting(endpointPair.NodeU(), endpointPair.NodeV())
+	return g.HasEdgeConnecting(endpointPair.NodeU(), endpointPair.NodeV())
 }
 
-func (m *graph[N]) AddNode(node N) bool {
-	if _, ok := m.adjacencyList[node]; ok {
+func (g *graph[N]) AddNode(node N) bool {
+	if _, ok := g.adjacencyList[node]; ok {
 		return false
 	}
 
-	m.adjacencyList[node] = set.NewMutable[N]()
+	g.adjacencyList[node] = set.NewMutable[N]()
 	return true
 }
 
-func (m *graph[N]) PutEdge(nodeU N, nodeV N) bool {
-	if !m.AllowsSelfLoops() && nodeU == nodeV {
+func (g *graph[N]) PutEdge(nodeU, nodeV N) bool {
+	if !g.AllowsSelfLoops() && nodeU == nodeV {
 		panic("self-loops are disallowed")
 	}
 
-	addedUToV := m.putEdge(nodeU, nodeV)
-	m.putEdge(nodeV, nodeU)
+	addedUToV := g.putEdge(nodeU, nodeV)
+	g.putEdge(nodeV, nodeU)
 
 	if addedUToV {
-		m.numEdges++
+		g.numEdges++
 	}
 
 	// TODO: return booleans at all the right times
 	return false
 }
 
-func (m *graph[N]) putEdge(nodeU N, nodeV N) bool {
+func (g *graph[N]) putEdge(nodeU, nodeV N) bool {
 	added := false
-	adjacentNodes, ok := m.adjacencyList[nodeU]
+	adjacentNodes, ok := g.adjacencyList[nodeU]
 	if !ok {
 		adjacentNodes = set.NewMutable[N]()
-		m.adjacencyList[nodeU] = adjacentNodes
+		g.adjacencyList[nodeU] = adjacentNodes
 		added = true
 	}
 	if adjacentNodes.Add(nodeV) {
@@ -227,15 +227,15 @@ func (m *graph[N]) putEdge(nodeU N, nodeV N) bool {
 	return added
 }
 
-func (m *graph[N]) RemoveNode(node N) bool {
-	adjacentNodes, ok := m.adjacencyList[node]
+func (g *graph[N]) RemoveNode(node N) bool {
+	adjacentNodes, ok := g.adjacencyList[node]
 	if !ok {
 		return false
 	}
 
-	delete(m.adjacencyList, node)
+	delete(g.adjacencyList, node)
 
-	for _, adjacentNodes := range m.adjacencyList {
+	for _, adjacentNodes := range g.adjacencyList {
 		if !adjacentNodes.Remove(node) {
 			panic(
 				fmt.Sprintf(
@@ -244,14 +244,14 @@ func (m *graph[N]) RemoveNode(node N) bool {
 		}
 	}
 
-	m.numEdges -= adjacentNodes.Len()
+	g.numEdges -= adjacentNodes.Len()
 
 	return true
 }
 
-func (m *graph[N]) RemoveEdge(nodeU N, nodeV N) bool {
-	removedUToV := m.removeEdge(nodeU, nodeV)
-	removedVToU := m.removeEdge(nodeV, nodeU)
+func (g *graph[N]) RemoveEdge(nodeU, nodeV N) bool {
+	removedUToV := g.removeEdge(nodeU, nodeV)
+	removedVToU := g.removeEdge(nodeV, nodeU)
 
 	if removedUToV != removedVToU {
 		panic(
@@ -260,13 +260,13 @@ func (m *graph[N]) RemoveEdge(nodeU N, nodeV N) bool {
 				removedUToV, removedVToU))
 	}
 
-	m.numEdges--
+	g.numEdges--
 
 	return removedUToV
 }
 
-func (m *graph[N]) removeEdge(from N, to N) bool {
-	adjacentNodes, ok := m.adjacencyList[from]
+func (g *graph[N]) removeEdge(from, to N) bool {
+	adjacentNodes, ok := g.adjacencyList[from]
 	if !ok {
 		return false
 	}

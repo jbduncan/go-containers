@@ -3,7 +3,6 @@ package iteratortest_test
 import (
 	"github.com/jbduncan/go-containers/iterator"
 	"github.com/jbduncan/go-containers/iterator/iteratortest"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -103,7 +102,7 @@ func (i *intSliceIterator) Value() int {
 	}
 
 	result := i.ints[i.index]
-	i.index += 1
+	i.index++
 	return result
 }
 

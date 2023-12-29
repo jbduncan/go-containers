@@ -1,8 +1,9 @@
-package slices
+package slices_test
 
 import (
 	"testing"
 
+	"github.com/jbduncan/go-containers/internal/slices"
 	. "github.com/onsi/gomega"
 )
 
@@ -56,7 +57,7 @@ func TestCartesianProduct(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewWithT(t)
 
-			got := CartesianProduct(tt.args.values)
+			got := slices.CartesianProduct(tt.args.values)
 
 			g.Expect(got).To(Equal(tt.want))
 		})
@@ -106,7 +107,7 @@ func TestCopyToNonNilSlice(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewWithT(t)
 
-			got := CopyToNonNilSlice(tt.args.values)
+			got := slices.CopyToNonNilSlice(tt.args.values)
 
 			g.Expect(got).ToNot(BeIdenticalTo(tt.args.values))
 			g.Expect(got).To(Equal(tt.want))
@@ -154,7 +155,7 @@ func TestRepeat(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewWithT(t)
 
-			got := Repeat(tt.args.value, tt.args.times)
+			got := slices.Repeat(tt.args.value, tt.args.times)
 
 			g.Expect(got).To(Equal(tt.want))
 		})
@@ -238,7 +239,7 @@ func TestRepeatAndCartesianProduct(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewWithT(t)
 
-			got := CartesianProduct(Repeat(tt.args.value, tt.args.times))
+			got := slices.CartesianProduct(slices.Repeat(tt.args.value, tt.args.times))
 
 			g.Expect(got).To(Equal(tt.want))
 		})

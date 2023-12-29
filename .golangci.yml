@@ -1,0 +1,132 @@
+run:
+  modules-download-mode: readonly
+
+linters:
+  # Disable all linters by default and only explicitly enable the ones below.
+  disable-all: true
+  enable:
+    - bidichk
+    - errcheck
+    - errname
+    - ginkgolinter
+    - gofmt
+    - gofumpt
+    - gosec
+    - gosimple
+    - govet
+    - misspell
+    - nolintlint
+    - predeclared
+    - revive
+    - staticcheck
+    - stylecheck
+    - testpackage
+    - unused
+    - usestdlibvars
+
+linters-settings:
+  gofmt:
+    rewrite-rules:
+      - pattern: 'interface{}'
+        replacement: 'any'
+      - pattern: 'a[b:len(a)]'
+        replacement: 'a[b:]'
+      - pattern: '(a)'
+        replacement: 'a'
+  govet:
+    check-shadowing: true
+    enable:
+      - appends
+      - asmdecl
+      - assign
+      - atomic
+      - bools
+      - buildtag
+      - cgocall
+      - composites
+      - copylocks
+      - defers
+      - directive
+      - deepequalerrors
+      - errorsas
+      - framepointer
+      - httpresponse
+      - ifaceassert
+      - loopclosure
+      - lostcancel
+      - nilfunc
+      - printf
+      - reflectvaluecompare
+      - shift
+      - sigchanyzer
+      - slog
+      - sortslice
+      - stdmethods
+      - stringintconv
+      - structtag
+      - testinggoroutine
+      - tests
+      - timeformat
+      - unmarshal
+      - unreachable
+      - unsafeptr
+      - unusedresult
+  revive:
+    enable-all-rules: false
+    rules:
+      - name: atomic
+      - name: bool-literal-in-expr
+      - name: call-to-gc
+      - name: confusing-results
+      - name: constant-logical-expr
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: datarace
+      - name: deep-exit
+      - name: defer
+      - name: duplicated-imports
+      - name: early-return
+        arguments:
+          # Do not suggest refactorings that would increase variable scope
+          - preserveScope
+      - name: empty-block
+      - name: error-naming
+      - name: error-return
+      - name: error-strings
+      - name: errorf
+      - name: exported
+      - name: flag-parameter
+      - name: get-return
+      - name: if-return
+      - name: import-alias-naming
+        arguments:
+          # Ensure aliases like foobar are allowed and dot imports are let through (dot imports are caught by
+          # stylecheck), but aliases with underscores like foo_bar are disallowed.
+          - "^[a-z\\.][a-z0-9]{0,}$"
+      - name: increment-decrement
+      - name: indent-error-flow
+        arguments:
+          # Do not suggest refactorings that would increase variable scope
+          - "preserveScope"
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: redefines-builtin-id
+      - name: redundant-import-alias
+      - name: string-of-int
+      - name: superfluous-else
+        arguments:
+          # Do not suggest refactorings that would increase variable scope
+          - "preserveScope"
+      - name: time-equal
+      - name: unchecked-type-assertion
+      - name: unconditional-recursion
+      - name: unexported-return
+      - name: unnecessary-stmt
+      - name: unused-parameter
+        arguments:
+          - allowRegex: "^_"
+      - name: useless-break
+      - name: var-declaration
+      - name: var-naming
+      - name: waitgroup-by-value

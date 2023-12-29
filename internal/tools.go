@@ -7,6 +7,5 @@ package internal
 // a 'go mod tidy', in turn ensuring that the versions we use are
 // deterministic.
 import (
-	_ "honnef.co/go/tools/cmd/staticcheck"
-	_ "mvdan.cc/gofumpt"
+	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
 )

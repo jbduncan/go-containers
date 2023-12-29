@@ -4,15 +4,14 @@ import (
 	"fmt"
 
 	"github.com/jbduncan/go-containers/set"
-	//lint:ignore ST1001 dot importing gomega matchers is best practice and
-	// this package is used by test code only
-	. "github.com/onsi/gomega"
+	// dot importing gomega matchers is best practice and this package is used by test code only
+	. "github.com/onsi/gomega" //nolint:stylecheck
 	"github.com/onsi/gomega/format"
 	"github.com/onsi/gomega/gcustom"
 	"github.com/onsi/gomega/types"
 )
 
-func HaveLenOf(len int) types.GomegaMatcher {
+func HaveLenOf(length int) types.GomegaMatcher {
 	return gcustom.MakeMatcher(
 		func(value any) (bool, error) {
 			type sized interface {
@@ -29,10 +28,10 @@ func HaveLenOf(len int) types.GomegaMatcher {
 
 			actualLen := s.Len()
 
-			return actualLen == len, nil
+			return actualLen == length, nil
 		}).
 		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} have length\n{{format .Data 1}}").
-		WithTemplateData(len)
+		WithTemplateData(length)
 }
 
 func HaveLenOfZero() types.GomegaMatcher {

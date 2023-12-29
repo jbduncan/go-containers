@@ -11,7 +11,7 @@ import (
 type IteratorOrder int
 
 const (
-	knownOrder = iota
+	knownOrder IteratorOrder = iota
 	unknownOrder
 )
 

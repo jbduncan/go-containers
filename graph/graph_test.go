@@ -58,8 +58,9 @@ func addNode(grph graph.Graph[int], node int) graph.Graph[int] {
 	// TODO: When introducing ImmutableGraph, expand addNode to recognise when grph is not
 	//  mutable and return a copy of the graph with the added node instead.
 
-	graphAsMutable := grph.(graph.MutableGraph[int])
-	graphAsMutable.AddNode(node)
+	if graphAsMutable, ok := grph.(graph.MutableGraph[int]); ok {
+		graphAsMutable.AddNode(node)
+	}
 
 	return grph
 }
@@ -68,8 +69,9 @@ func putEdge(grph graph.Graph[int], node1 int, node2 int) graph.Graph[int] {
 	// TODO: When introducing ImmutableGraph, expand putEdge to recognise when grph is not
 	//  mutable and return a copy of the graph with the added edge instead.
 
-	graphAsMutable := grph.(graph.MutableGraph[int])
-	graphAsMutable.PutEdge(node1, node2)
+	if graphAsMutable, ok := grph.(graph.MutableGraph[int]); ok {
+		graphAsMutable.PutEdge(node1, node2)
+	}
 
 	return grph
 }
@@ -100,6 +102,8 @@ func graphTests(
 		var grph graph.Graph[int]
 
 		graphAsMutable := func() graph.MutableGraph[int] {
+			// This function is only ever called after skipIfGraphIsNotMutable
+			//nolint:revive
 			result, _ := grph.(graph.MutableGraph[int])
 
 			return result
