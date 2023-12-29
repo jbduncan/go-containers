@@ -8,6 +8,10 @@ endif
 build:
 	go build ./...
 
+# TODO: Move to a binary installation of golangci-lint managed by Nix so that all of golangci-lint's dependencies
+# do not pollute the go.mod dependency graph and potential problems with using the source version of golangci-lint
+# are avoided (see: https://golangci-lint.run/usage/install/#install-from-source).
+
 .PHONY: lint
 lint:
 	# Uses version imported by internal/tools.go, in turn using version in go.mod
