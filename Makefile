@@ -8,18 +8,16 @@ endif
 build:
 	go build ./...
 
-# TODO: Move to a binary installation of golangci-lint managed by Nix so that all of golangci-lint's dependencies
-# do not pollute the go.mod dependency graph and potential problems with using the source version of golangci-lint
-# are avoided (see: https://golangci-lint.run/usage/install/#install-from-source).
+# TODO: Experiment with managing Go and golangci-lint with Nix.
 
 .PHONY: lint
 lint:
-	# Uses version imported by internal/tools.go, in turn using version in go.mod
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint run
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2 run
 
 .PHONY: lint_fix
 lint_fix:
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2 run --fix
+
 .PHONY: test
 test:
 	go test -shuffle=on -race ./...
@@ -31,6 +29,7 @@ check: build lint test
 .PHONY: update_versions
 update_versions:
 	go get -u ./... && go get -u -t ./... && go mod tidy && go mod verify && go mod download
+	# Make sure to update the golangci-lint version in Makefile, too.
 
 # TODO: Adopt https://github.com/uber-go/nilaway
 # TODO: Add a 'go mod tidy' lint:
