@@ -41,9 +41,9 @@ type Set[T comparable] interface {
 type MutableSet[T comparable] interface {
 	Set[T]
 
-	// Add adds the given element to this set if it is not already present. Returns true if the element was not already
-	// present in the set, otherwise false.
-	Add(elem T) bool // TODO: Change Add to accept varargs
+	// Add adds the given element(s) to this set if they are not already present. Returns true if this set changed as a
+	// result of this call, otherwise false.
+	Add(elems ...T) bool
 
 	// TODO: Introduce AddAll(Rangeable)
 
@@ -126,9 +126,20 @@ type MutableMapSet[T comparable] struct {
 	delegate map[T]struct{}
 }
 
-// Add adds the given element to this set if it is not already present. Returns true if the element was not already
-// present in the set, otherwise false.
-func (m *MutableMapSet[T]) Add(elem T) bool {
+// Add adds the given element(s) to this set if they are not already present. Returns true if this set changed as a
+// result of this call, otherwise false.
+func (m *MutableMapSet[T]) Add(elems ...T) bool {
+	result := false
+	for _, elem := range elems {
+		added := m.add(elem)
+		if added {
+			result = true
+		}
+	}
+	return result
+}
+
+func (m *MutableMapSet[T]) add(elem T) bool {
 	_, ok := m.delegate[elem]
 	m.delegate[elem] = struct{}{}
 	return !ok

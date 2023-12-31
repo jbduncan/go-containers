@@ -56,6 +56,7 @@ func Set(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 
 	tt.twoElementSetReturnsBothElementsOnIteration()
 	tt.emptySetPlusTwoReturnsBothElementsOnIteration()
+	tt.emptySetPlusVarargsReturnsBothElementsOnIteration()
 
 	tt.twoElementSetHasTwoElementStringRepr()
 	tt.emptySetPlusTwoReturnsTwoElementStringRepr()
@@ -76,6 +77,8 @@ func Set(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	tt.emptySetPlusSameElementTwiceReturnsFalse()
 
 	tt.emptySetPlusSameElementTwiceThenDifferentOnceReturnsTrue()
+
+	tt.emptySetPlusOnePlusVarargsReturnsTrue()
 
 	tt.emptySetMinusOneReturnsFalse()
 
@@ -110,6 +113,8 @@ func (tt tester) runEmptyIfMutable(name string, f func(t *testing.T, s set.Mutab
 }
 
 func (tt tester) emptySetHasLengthOfZero() {
+	tt.t.Helper()
+
 	tt.t.Run(
 		"empty set: has length of 0",
 		func(t *testing.T) {
@@ -166,6 +171,7 @@ func (tt tester) emptySetRemoveDoesNothing() {
 	tt.runEmptyIfMutable(
 		"empty set: remove does nothing",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Remove("link")
@@ -193,6 +199,7 @@ func (tt tester) emptySetPlusOneHasLengthOfOne() {
 	tt.runEmptyIfMutable(
 		"empty set: add: has length of 1",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
@@ -220,6 +227,7 @@ func (tt tester) emptySetPlusOneContainsPresentElement() {
 	tt.runEmptyIfMutable(
 		"empty set: add: contains present element",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
@@ -247,6 +255,7 @@ func (tt tester) emptySetPlusOneDoesNotContainAbsentElement() {
 	tt.runEmptyIfMutable(
 		"empty set: add: does not contain absent element",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
@@ -274,6 +283,7 @@ func (tt tester) emptySetPlusOneReturnsElementOnIteration() {
 	tt.runEmptyIfMutable(
 		"empty set: add: returns element on iteration",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
@@ -301,6 +311,7 @@ func (tt tester) emptySetPlusOneHasOneElementStringRepr() {
 	tt.runEmptyIfMutable(
 		"empty set: add: has one-element string representation",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
@@ -315,6 +326,7 @@ func (tt tester) emptySetPlusOneMinusOneDoesNotContainAnything() {
 	tt.runEmptyIfMutable(
 		"empty set: add: remove: does not contain anything",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
@@ -343,6 +355,7 @@ func (tt tester) emptySetPlusTwoHasLengthOfTwo() {
 	tt.runEmptyIfMutable(
 		"empty set: add x2: has length of 2",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
@@ -371,6 +384,7 @@ func (tt tester) emptySetPlusTwoContainsBothElements() {
 	tt.runEmptyIfMutable(
 		"empty set: add x2: contains both elements",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
@@ -399,10 +413,25 @@ func (tt tester) emptySetPlusTwoReturnsBothElementsOnIteration() {
 	tt.runEmptyIfMutable(
 		"empty set: add x2: returns both elements on iteration",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
 			s.Add("zelda")
+
+			g.Expect(s).To(
+				HaveForEachThatConsistsOf[string]("link", "zelda"))
+		})
+}
+
+func (tt tester) emptySetPlusVarargsReturnsBothElementsOnIteration() {
+	tt.runEmptyIfMutable(
+		"empty set: add varargs: returns all elements on iteration",
+		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
+			g := NewWithT(t)
+
+			s.Add("link", "zelda")
 
 			g.Expect(s).To(
 				HaveForEachThatConsistsOf[string]("link", "zelda"))
@@ -429,6 +458,7 @@ func (tt tester) emptySetPlusTwoReturnsTwoElementStringRepr() {
 	tt.runEmptyIfMutable(
 		"empty set: add x2: has two-element string representation",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
@@ -445,6 +475,7 @@ func (tt tester) emptySetPlusTwoMinusOneHasLengthOfOne() {
 	tt.runEmptyIfMutable(
 		"empty set: add x2: remove x1: has length of 1",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
@@ -461,6 +492,7 @@ func (tt tester) emptySetPlusThreeContainsAllThreeElements() {
 	tt.runEmptyIfMutable(
 		"empty set: add x3: contains all three elements",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
@@ -490,6 +522,7 @@ func (tt tester) emptySetPlusThreeHasThreeElementStringRepr() {
 	tt.runEmptyIfMutable(
 		"empty set: add x3: has three-element string representation",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
@@ -544,6 +577,7 @@ func (tt tester) emptySetPlusSameElementTwiceHasLengthOfOne() {
 	tt.runEmptyIfMutable(
 		"empty set: add same element x2: has length of 1",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
@@ -559,6 +593,7 @@ func (tt tester) emptySetPlusOneReturnsTrue() {
 	tt.runEmptyIfMutable(
 		"empty set: add: returns true",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			result := s.Add("link")
@@ -573,6 +608,7 @@ func (tt tester) emptySetPlusSameElementTwiceReturnsFalse() {
 	tt.runEmptyIfMutable(
 		"empty set: add same element x2: returns true",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
@@ -588,11 +624,28 @@ func (tt tester) emptySetPlusSameElementTwiceThenDifferentOnceReturnsTrue() {
 	tt.runEmptyIfMutable(
 		"empty set: add same element x2: add different element: returns true",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
 			s.Add("link")
 			result := s.Add("zelda")
+
+			g.Expect(result).To(BeTrue())
+		})
+}
+
+func (tt tester) emptySetPlusOnePlusVarargsReturnsTrue() {
+	tt.t.Helper()
+
+	tt.runEmptyIfMutable(
+		"empty set: add x1: add varargs: returns true",
+		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
+			g := NewWithT(t)
+
+			s.Add("link")
+			result := s.Add("zelda", "link")
 
 			g.Expect(result).To(BeTrue())
 		})
@@ -604,6 +657,7 @@ func (tt tester) emptySetMinusOneReturnsFalse() {
 	tt.runEmptyIfMutable(
 		"empty set: remove: returns false",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			result := s.Remove("link")
@@ -618,6 +672,7 @@ func (tt tester) emptySetPlusOneMinusSameElementReturnsTrue() {
 	tt.runEmptyIfMutable(
 		"empty set: add: remove same element: returns true",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
@@ -633,6 +688,7 @@ func (tt tester) emptySetPlusOneMinusSameElementTwiceReturnsFalse() {
 	tt.runEmptyIfMutable(
 		"empty set: add: remove same element x2: returns false",
 		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
 			g := NewWithT(t)
 
 			s.Add("link")
