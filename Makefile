@@ -13,14 +13,14 @@ build:
 
 .PHONY: lint
 lint:
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2 run
-	go run go.uber.org/nilaway/cmd/nilaway@v0.0.0-20231204220708-2f6a74d7c0e2 ./...
 	@echo "Linting 'go mod tidy'..."
 	@go mod tidy && \
 		git diff --exit-code -- go.mod go.sum || \
 		(echo "'go mod tidy' changed files" && false)
 	@echo "Linting 'go mod verify'..."
 	@go mod verify
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2 run
+	go run go.uber.org/nilaway/cmd/nilaway@v0.0.0-20231204220708-2f6a74d7c0e2 ./...
 
 .PHONY: lint_fix
 lint_fix:
