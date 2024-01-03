@@ -176,8 +176,11 @@ func (g *graph[N]) OutDegree(node N) int {
 }
 
 func (g *graph[N]) HasEdgeConnecting(nodeU, nodeV N) bool {
-	adjacentNodes, ok := g.adjacencyList[nodeU]
-	return ok && adjacentNodes.Contains(nodeV)
+	if adjacentNodes, ok := g.adjacencyList[nodeU]; ok {
+		return adjacentNodes.Contains(nodeV)
+	}
+
+	return false
 }
 
 func (g *graph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
