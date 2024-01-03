@@ -9,6 +9,7 @@ build:
 	go build ./...
 
 # TODO: Experiment with managing Go and golangci-lint with Nix.
+# TODO: Experiment with spinning up the Nix environment in a devcontainer for VSCode & IntelliJ IDEA.
 
 .PHONY: lint
 lint:
