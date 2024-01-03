@@ -13,18 +13,21 @@ func ExampleNewMutable() {
 	fmt.Println(added) // true
 	addedAgain := exampleSet.Add("link")
 	fmt.Println(addedAgain) // false
-	exampleSet.Add("zelda")
+	exampleSet.Add("zelda", "ganondorf")
 
 	// Check that the set contains everything added to it.
 	fmt.Println(exampleSet.Contains("link"))      // true
 	fmt.Println(exampleSet.Contains("zelda"))     // true
-	fmt.Println(exampleSet.Contains("ganondorf")) // false
-	fmt.Println(exampleSet.Len())                 // 2
+	fmt.Println(exampleSet.Contains("ganondorf")) // true
+	fmt.Println(exampleSet.Contains("mario"))     // false
+	fmt.Println(exampleSet.Len())                 // 3
 
-	// Remove a string from the set.
+	// Remove strings from the set.
 	exampleSet.Remove("zelda")
-	fmt.Println(exampleSet.Contains("zelda")) // false
-	fmt.Println(exampleSet.String())          // [link]
+	exampleSet.Remove("ganondorf")
+	fmt.Println(exampleSet.Contains("zelda"))     // false
+	fmt.Println(exampleSet.Contains("ganondorf")) // false
+	fmt.Println(exampleSet.String())              // [link]
 
 	// Loop over all elements in the set.
 	exampleSet.ForEach(func(elem string) {
@@ -36,8 +39,10 @@ func ExampleNewMutable() {
 	// false
 	// true
 	// true
+	// true
 	// false
-	// 2
+	// 3
+	// false
 	// false
 	// [link]
 	// link
