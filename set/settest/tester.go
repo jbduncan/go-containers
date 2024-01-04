@@ -63,6 +63,8 @@ func Set(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 
 	tt.emptySetPlusTwoMinusOneHasLengthOfOne()
 
+	tt.emptySetPlusTwoMinusVarargsHasLengthOfZero()
+
 	tt.threeElementSetContainsAllThreeElements()
 	tt.emptySetPlusThreeContainsAllThreeElements()
 
@@ -85,6 +87,8 @@ func Set(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 	tt.emptySetPlusOneMinusSameElementReturnsTrue()
 
 	tt.emptySetPlusOneMinusSameElementTwiceReturnsFalse()
+
+	tt.emptySetPlusOneMinusVarargsReturnsTrue()
 }
 
 type tester struct {
@@ -486,6 +490,23 @@ func (tt tester) emptySetPlusTwoMinusOneHasLengthOfOne() {
 		})
 }
 
+func (tt tester) emptySetPlusTwoMinusVarargsHasLengthOfZero() {
+	tt.t.Helper()
+
+	tt.runEmptyIfMutable(
+		"empty set: add x2: remove varargs: has length of 0",
+		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
+			g := NewWithT(t)
+
+			s.Add("link")
+			s.Add("zelda")
+			s.Remove("link", "zelda")
+
+			g.Expect(s).To(HaveLenOf(0))
+		})
+}
+
 func (tt tester) emptySetPlusThreeContainsAllThreeElements() {
 	tt.t.Helper()
 
@@ -696,6 +717,22 @@ func (tt tester) emptySetPlusOneMinusSameElementTwiceReturnsFalse() {
 			result := s.Remove("link")
 
 			g.Expect(result).To(BeFalse())
+		})
+}
+
+func (tt tester) emptySetPlusOneMinusVarargsReturnsTrue() {
+	tt.t.Helper()
+
+	tt.runEmptyIfMutable(
+		"empty set: add: remove varargs: returns true",
+		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
+			g := NewWithT(t)
+
+			s.Add("link")
+			result := s.Remove("zelda", "link")
+
+			g.Expect(result).To(BeTrue())
 		})
 }
 
