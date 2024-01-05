@@ -8,8 +8,10 @@ type Set[T comparable] interface {
 
 	// TODO: Introduce ContainsAll(Rangeable) (no need for varargs overload as set.Of allows for chaining),
 	//       where Rangeable is a type alias for a range-able function (as per
-	//       https://github.com/golang/go/issues/61405).
-	// TODO: Consider introducing ContainsAny(Rangeable) similarly to string.ContainsAny
+	//       https://github.com/golang/go/issues/61405). Inspired by proposal
+	//       https://github.com/golang/go/discussions/47331.
+	// TODO: Consider introducing ContainsAny(Rangeable) similarly to string.ContainsAny. Inspired by proposal
+	//       https://github.com/golang/go/discussions/47331.
 
 	// Len returns the number of elements in this set.
 	Len() int
