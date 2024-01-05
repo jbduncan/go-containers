@@ -8,8 +8,11 @@ endif
 build:
 	go build ./...
 
+# TODO: Refer to https://github.com/binkley/modern-java-practices for inspiration to make the project better.
 # TODO: Experiment with managing Go and golangci-lint with Nix.
-# TODO: Experiment with spinning up the Nix environment in a devcontainer for VSCode & IntelliJ IDEA.
+# TODO: Experiment with replacing the Makefile with Earthly or enhancing it with batect.
+# TODO: Experiment with spinning up a devcontainer for VSCode/IntelliJ, possibly using Nix and Earthly/batect.
+# TODO: Introduce CI. Earthly/batect should help with this.
 
 .PHONY: lint
 lint:

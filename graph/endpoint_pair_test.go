@@ -9,6 +9,8 @@ import (
 	"github.com/onsi/gomega/types"
 )
 
+// TODO: Experiment with migrating to go test. Does it make the tests easier to read?
+
 var _ = Describe("EndpointPair", func() {
 	Describe("given a new unordered endpoint pair", func() {
 		var endpointPair graph.EndpointPair[string]

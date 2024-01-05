@@ -12,9 +12,11 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-// TODO: Move mutableGraphTests to a graphtester package
+// TODO: Experiment with migrating to go test. Does it make the tests easier to read?
+
+// TODO: Move mutableGraphTests to a graphtest package
 // TODO: Migrate mutableGraphTests to a struct with a constructor function like:
-//       graphtester.ForMutableGraph(
+//       graphtest.MutableGraph(
 //           name string,
 //           newGraph func() graph.MutableGraph[int],
 //           ...graphtester.Option options)

@@ -18,7 +18,7 @@ type TestingT interface {
 }
 
 // TODO: Document; make a note of the fact that the returned set can have mutation methods...
-func Set(t TestingT, setBuilder func(elements []string) set.Set[string]) {
+func Set(t TestingT, setBuilder func(elems []string) set.Set[string]) {
 	tt := newTester(t, setBuilder)
 
 	tt.emptySetHasLengthOfZero()
@@ -93,11 +93,11 @@ func Set(t TestingT, setBuilder func(elements []string) set.Set[string]) {
 
 type tester struct {
 	t          TestingT
-	setBuilder func(elements []string) set.Set[string]
+	setBuilder func(elems []string) set.Set[string]
 	mutable    bool
 }
 
-func newTester(t TestingT, setBuilder func(elements []string) set.Set[string]) *tester {
+func newTester(t TestingT, setBuilder func(elems []string) set.Set[string]) *tester {
 	_, mutable := setBuilder(empty()).(set.MutableSet[string])
 	return &tester{
 		t:          t,
