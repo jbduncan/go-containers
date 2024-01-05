@@ -8,17 +8,23 @@ import (
 )
 
 func TestSetOf(t *testing.T) {
-	settest.Set(t, func(elements []string) set.Set[string] {
-		return set.Of(elements...)
+	settest.Set(t, func(elems []string) set.Set[string] {
+		return set.Of(elems...)
 	})
 }
 
-func TestSetNewMutable(t *testing.T) {
-	settest.Set(t, func(elements []string) set.Set[string] {
+func TestSetNewMutableInitializedWithAdd(t *testing.T) {
+	settest.Set(t, func(elems []string) set.Set[string] {
 		s := set.NewMutable[string]()
-		for _, element := range elements {
-			s.Add(element)
+		for _, elem := range elems {
+			s.Add(elem)
 		}
 		return s
+	})
+}
+
+func TestSetNewMutableInitializedWithInit(t *testing.T) {
+	settest.Set(t, func(elems []string) set.Set[string] {
+		return set.NewMutable[string](elems...)
 	})
 }

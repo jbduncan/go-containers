@@ -73,12 +73,14 @@ func Of[T comparable](elems ...T) *MapSet[T] {
 	}
 }
 
-// TODO: Change NewMutable to accept varargs elems ...T
-
 // NewMutable returns a new non-nil, empty, mutable set. See MutableMapSet for more details.
-func NewMutable[T comparable]() *MutableMapSet[T] {
+func NewMutable[T comparable](elems ...T) *MutableMapSet[T] {
+	delegate := map[T]struct{}{}
+	for _, elem := range elems {
+		delegate[elem] = struct{}{}
+	}
 	return &MutableMapSet[T]{
-		delegate: map[T]struct{}{},
+		delegate: delegate,
 	}
 }
 
