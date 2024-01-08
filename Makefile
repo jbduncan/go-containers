@@ -6,7 +6,9 @@ endif
 
 .PHONY: build
 build:
-	go build ./...
+	go install golang.org/dl/go1.22rc1@latest
+	go1.22rc1 download
+	GOEXPERIMENT=rangefunc go1.22rc1 build ./...
 
 # TODO: Refer to https://github.com/binkley/modern-java-practices for inspiration to make the project better.
 # TODO: Experiment with managing Go and golangci-lint with Nix.
@@ -36,7 +38,7 @@ lint_fix:
 
 .PHONY: test
 test:
-	go test -shuffle=on -race ./...
+	GOEXPERIMENT=rangefunc go1.22rc1 test -shuffle=on -race ./...
 
 .PHONY: check
 # Build early to catch compiler errors sooner

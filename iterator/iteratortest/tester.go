@@ -171,14 +171,3 @@ func indexOf[T any](haystack []T, needle T) int {
 	}
 	return -1
 }
-
-// At time of writing, we target Go 1.18 which doesn't have access to the
-// builtin "max", because it is only available in Go 1.21+.
-//
-//goland:noinspection GoReservedWordUsedAsName
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}

@@ -1,10 +1,10 @@
 package set_test
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/jbduncan/go-containers/set"
-	"golang.org/x/exp/slices"
 )
 
 func TestStringImpl(t *testing.T) {

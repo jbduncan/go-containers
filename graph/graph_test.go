@@ -2,6 +2,7 @@ package graph_test
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/jbduncan/go-containers/graph"
@@ -9,7 +10,6 @@ import (
 	"github.com/jbduncan/go-containers/set"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"golang.org/x/exp/slices"
 )
 
 // TODO: Experiment with migrating to go test. Does it make the tests easier to read?
