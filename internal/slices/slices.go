@@ -1,5 +1,7 @@
 package slices
 
+import "golang.org/x/exp/slices"
+
 func CartesianProduct[T any](values [][]T) [][]T {
 	result := [][]T{{}}
 	for _, innerValues := range values {
@@ -15,9 +17,11 @@ func CartesianProduct[T any](values [][]T) [][]T {
 }
 
 func CopyToNonNilSlice[T any](values []T) []T {
-	result := make([]T, len(values))
-	copy(result, values)
-	return result
+	if values == nil {
+		return []T{}
+	}
+
+	return slices.Clone(values)
 }
 
 func Repeat[T any](value T, times int) []T {
