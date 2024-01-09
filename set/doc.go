@@ -5,6 +5,8 @@
 //
 // An existing mutable set can be passed into Unmodifiable, which turns it into a read-only Set view.
 //
+// Sets have a String method that satisfies fmt.Stringer.
+//
 // Two sets can be compared for "equality" with Equal, returning true if they both have the same elements in any order,
 // otherwise false.
 //
