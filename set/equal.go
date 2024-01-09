@@ -26,11 +26,10 @@ func Equal[T comparable](a, b Set[T]) bool {
 		return false
 	}
 
-	result := true
-	b.ForEach(func(elem T) {
+	for elem := range b.All() {
 		if !a.Contains(elem) {
-			result = false
+			return false
 		}
-	})
-	return result
+	}
+	return true
 }

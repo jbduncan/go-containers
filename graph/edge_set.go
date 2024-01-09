@@ -1,6 +1,8 @@
 package graph
 
 import (
+	"iter"
+
 	"github.com/jbduncan/go-containers/set"
 )
 
@@ -20,27 +22,31 @@ func (e edgeSet[N]) Len() int {
 	return e.edgeCount()
 }
 
-func (e edgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
-	seen := set.NewMutable[EndpointPair[N]]()
+func (e edgeSet[N]) All() iter.Seq[EndpointPair[N]] {
+	return func(yield func(EndpointPair[N]) bool) {
+		seen := set.NewMutable[EndpointPair[N]]()
 
-	e.delegate.Nodes().ForEach(func(source N) {
-		e.delegate.Successors(source).ForEach(func(target N) {
-			edge := EndpointPairOf(source, target)
-			if e.delegate.IsDirected() {
-				if seen.Contains(edge) {
-					return
+		for source := range e.delegate.Nodes().All() {
+			for target := range e.delegate.Successors(source).All() {
+				edge := EndpointPairOf(source, target)
+				if e.delegate.IsDirected() {
+					if seen.Contains(edge) {
+						continue
+					}
+				} else {
+					reverse := EndpointPairOf(target, source)
+					if seen.Contains(edge) || seen.Contains(reverse) {
+						continue
+					}
 				}
-			} else {
-				reverse := EndpointPairOf(target, source)
-				if seen.Contains(edge) || seen.Contains(reverse) {
+
+				seen.Add(edge)
+				if !yield(edge) {
 					return
 				}
 			}
-
-			seen.Add(edge)
-			fn(edge)
-		})
-	})
+		}
+	}
 }
 
 func (e edgeSet[N]) String() string {

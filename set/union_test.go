@@ -44,7 +44,7 @@ func TestUnionIsView(t *testing.T) {
 
 	g.Expect(union).To(Contain(1))
 	g.Expect(union).To(HaveLenOf(1))
-	g.Expect(union).To(HaveForEachThatConsistsOf[int](1))
+	g.Expect(union).To(HaveAllThatConsistsOf[int](1))
 	g.Expect(union).To(HaveStringRepr("[1]"))
 }
 

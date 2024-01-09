@@ -1,6 +1,10 @@
 package graph
 
-import "github.com/jbduncan/go-containers/set"
+import (
+	"iter"
+
+	"github.com/jbduncan/go-containers/set"
+)
 
 var _ set.Set[EndpointPair[int]] = (*incidentEdgeSet[int])(nil)
 
@@ -27,25 +31,40 @@ func (i incidentEdgeSet[N]) Len() int {
 	return i.delegate.AdjacentNodes(i.node).Len()
 }
 
-func (i incidentEdgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
+func (i incidentEdgeSet[N]) All() iter.Seq[EndpointPair[N]] {
 	if !i.delegate.IsDirected() {
-		i.delegate.AdjacentNodes(i.node).ForEach(
-			func(adjNode N) {
-				fn(EndpointPairOf(i.node, adjNode))
-			})
-		return
+		return i.allDirected()
 	}
 
-	i.delegate.Predecessors(i.node).ForEach(
-		func(predecessor N) {
-			fn(EndpointPairOf(predecessor, i.node))
-		})
-	i.delegate.Successors(i.node).ForEach(
-		func(successor N) {
-			if !i.delegate.Predecessors(i.node).Contains(successor) {
-				fn(EndpointPairOf(i.node, successor))
+	return i.allUndirected()
+}
+
+func (i incidentEdgeSet[N]) allDirected() func(yield func(EndpointPair[N]) bool) {
+	return func(yield func(EndpointPair[N]) bool) {
+		for adjNode := range i.delegate.AdjacentNodes(i.node).All() {
+			if !yield(EndpointPairOf(i.node, adjNode)) {
+				return
 			}
-		})
+		}
+		return
+	}
+}
+
+func (i incidentEdgeSet[N]) allUndirected() func(yield func(EndpointPair[N]) bool) {
+	return func(yield func(EndpointPair[N]) bool) {
+		for predecessor := range i.delegate.Predecessors(i.node).All() {
+			if !yield(EndpointPairOf(predecessor, i.node)) {
+				return
+			}
+		}
+		for successor := range i.delegate.Successors(i.node).All() {
+			if !i.delegate.Predecessors(i.node).Contains(successor) {
+				if !yield(EndpointPairOf(i.node, successor)) {
+					return
+				}
+			}
+		}
+	}
 }
 
 func (i incidentEdgeSet[N]) String() string {

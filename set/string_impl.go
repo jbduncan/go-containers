@@ -7,7 +7,7 @@ import (
 
 // StringImpl is a helper function for implementors of Set.String.
 //
-// This function is implemented in terms of Set.ForEach, so the order of the
+// This function is implemented in terms of Set.All, so the order of the
 // elements in the returned string is undefined; it may even change from one
 // call of StringImpl to the next.
 func StringImpl[T comparable](s Set[T]) string {
@@ -15,14 +15,14 @@ func StringImpl[T comparable](s Set[T]) string {
 
 	builder.WriteRune('[')
 	index := 0
-	s.ForEach(func(elem T) {
+	for elem := range s.All() {
 		if index > 0 {
 			builder.WriteString(", ")
 		}
 
 		builder.WriteString(fmt.Sprintf("%v", elem))
 		index++
-	})
+	}
 
 	builder.WriteRune(']')
 	return builder.String()

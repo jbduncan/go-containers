@@ -154,7 +154,7 @@ func (tt tester) emptySetIterationDoesNothing() {
 			g := NewWithT(t)
 			s := tt.setBuilder(empty())
 
-			g.Expect(s).To(HaveForEachThatEmitsNothing[string]())
+			g.Expect(s).To(HaveAllThatEmitsNothing[string]())
 		})
 }
 
@@ -279,7 +279,7 @@ func (tt tester) oneElementSetReturnsElementOnIteration() {
 			g := NewWithT(t)
 			s := tt.setBuilder(oneElement())
 
-			g.Expect(s).To(HaveForEachThatConsistsOf[string]("link"))
+			g.Expect(s).To(HaveAllThatConsistsOf[string]("link"))
 		})
 }
 
@@ -294,7 +294,7 @@ func (tt tester) emptySetPlusOneReturnsElementOnIteration() {
 
 			s.Add("link")
 
-			g.Expect(s).To(HaveForEachThatConsistsOf[string]("link"))
+			g.Expect(s).To(HaveAllThatConsistsOf[string]("link"))
 		})
 }
 
@@ -409,7 +409,7 @@ func (tt tester) twoElementSetReturnsBothElementsOnIteration() {
 			g := NewWithT(t)
 			s := tt.setBuilder(twoElements())
 
-			g.Expect(s).To(HaveForEachThatConsistsOf[string]("link", "zelda"))
+			g.Expect(s).To(HaveAllThatConsistsOf[string]("link", "zelda"))
 		})
 }
 
@@ -426,7 +426,7 @@ func (tt tester) emptySetPlusTwoReturnsBothElementsOnIteration() {
 			s.Add("zelda")
 
 			g.Expect(s).To(
-				HaveForEachThatConsistsOf[string]("link", "zelda"))
+				HaveAllThatConsistsOf[string]("link", "zelda"))
 		})
 }
 
@@ -440,7 +440,7 @@ func (tt tester) emptySetPlusVarargsReturnsBothElementsOnIteration() {
 			s.Add("link", "zelda")
 
 			g.Expect(s).To(
-				HaveForEachThatConsistsOf[string]("link", "zelda"))
+				HaveAllThatConsistsOf[string]("link", "zelda"))
 		})
 }
 
@@ -618,7 +618,7 @@ func (tt tester) setInitializedFromTwoOfSameElementReturnsOneElementOnIteration(
 			g := NewWithT(t)
 			s := tt.setBuilder(twoSameElements())
 
-			g.Expect(s).To(HaveForEachThatConsistsOf[string]("link"))
+			g.Expect(s).To(HaveAllThatConsistsOf[string]("link"))
 		})
 }
 
@@ -634,7 +634,7 @@ func (tt tester) emptySetPlusSameElementTwiceReturnsOneElementOnIteration() {
 			s.Add("link")
 			s.Add("link")
 
-			g.Expect(s).To(HaveForEachThatConsistsOf[string]("link"))
+			g.Expect(s).To(HaveAllThatConsistsOf[string]("link"))
 		})
 }
 

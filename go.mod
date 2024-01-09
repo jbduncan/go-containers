@@ -1,6 +1,8 @@
 module github.com/jbduncan/go-containers
 
-go 1.18
+go 1.22
+
+toolchain go1.22.1
 
 require (
 	github.com/onsi/ginkgo/v2 v2.15.0

@@ -64,8 +64,8 @@ func FuzzStringImpl(f *testing.F) {
 
 		g.Expect(got).To(HavePrefix("["))
 		g.Expect(got).To(HaveSuffix("]"))
-		s.ForEach(func(elem byte) {
+		for elem := range s.All() {
 			g.Expect(got).To(ContainSubstring(fmt.Sprintf("%v", elem)))
-		})
+		}
 	})
 }

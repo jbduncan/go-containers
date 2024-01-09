@@ -1,5 +1,7 @@
 package set
 
+import "iter"
+
 var _ Set[int] = (*UnmodifiableSet[int])(nil)
 
 // Unmodifiable wraps a given MutableSet as a read-only Set view. This allows for sets that can be mutated by your own
@@ -26,8 +28,8 @@ func (u UnmodifiableSet[T]) Len() int {
 	return u.set.Len()
 }
 
-func (u UnmodifiableSet[T]) ForEach(fn func(elem T)) {
-	u.set.ForEach(fn)
+func (u UnmodifiableSet[T]) All() iter.Seq[T] {
+	return u.set.All()
 }
 
 func (u UnmodifiableSet[T]) String() string {
