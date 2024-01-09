@@ -1,10 +1,13 @@
 module github.com/jbduncan/go-containers
 
-go 1.21
+// TODO: When upgrading to 1.21+, replace "max" function w/ builtin "max"
+//  function, and replace "golang.org/x/exp/slices" with stdlib "slices".
+go 1.18
 
 require (
 	github.com/onsi/ginkgo/v2 v2.13.2
 	github.com/onsi/gomega v1.30.0
+	golang.org/x/exp v0.0.0-20231226003508-02704c960a9b
 )
 
 require (
