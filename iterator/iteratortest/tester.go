@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/jbduncan/go-containers/internal/slices"
+	slices2 "github.com/jbduncan/go-containers/internal/slices"
 	"github.com/jbduncan/go-containers/iterator"
+	"golang.org/x/exp/slices"
 )
 
 type IteratorOrder int
@@ -31,7 +32,7 @@ func ForIteratorWithKnownOrder[T any](
 ) *Tester[T] {
 	return &Tester[T]{
 		iteratorName:     iteratorName,
-		expectedElements: slices.CopyToNonNilSlice(expectedElements),
+		expectedElements: slices2.CopyToNonNilSlice(expectedElements),
 		newIterator:      newIterator,
 		knownOrder:       knownOrder,
 	}
@@ -44,7 +45,7 @@ func ForIteratorWithUnknownOrder[T any](
 ) *Tester[T] {
 	return &Tester[T]{
 		iteratorName:     iteratorName,
-		expectedElements: slices.CopyToNonNilSlice(expectedElements),
+		expectedElements: slices2.CopyToNonNilSlice(expectedElements),
 		newIterator:      newIterator,
 		knownOrder:       unknownOrder,
 	}
@@ -65,11 +66,11 @@ func (n nextOp) String() string {
 func (t Tester[T]) Test() error {
 	steps := max(5, len(t.expectedElements)+1)
 	uniqueOps := []any{valueOp{}, nextOp{}}
-	opSequences := slices.CartesianProduct(slices.Repeat(uniqueOps, steps))
+	opSequences := slices2.CartesianProduct(slices2.Repeat(uniqueOps, steps))
 
 	for _, opSequence := range opSequences {
 		actualIter := t.newIterator()
-		remainingExpected := slices.CopyToNonNilSlice(t.expectedElements)
+		remainingExpected := slices2.CopyToNonNilSlice(t.expectedElements)
 		for _, op := range opSequence {
 			switch op.(type) {
 			case valueOp:
@@ -110,14 +111,17 @@ func (t Tester[T]) doValueOpAndCheck(actualIter iterator.Iterator[T], remainingE
 		if !equal(value, remainingExpected[0]) {
 			return remainingExpected, t.misbehavingIteratorError(opSequence)
 		}
-		return deleteInPlace(remainingExpected, 0), nil
+		return slices.Delete(remainingExpected, 0, 1), nil
 
 	case unknownOrder:
-		i := indexOf(remainingExpected, value)
+		i := slices.IndexFunc(
+			remainingExpected,
+			func(t T) bool { return equal(t, value) },
+		)
 		if i == -1 {
 			return remainingExpected, t.misbehavingIteratorError(opSequence)
 		}
-		return deleteInPlace(remainingExpected, i), nil
+		return slices.Delete(remainingExpected, i, i+1), nil
 	}
 
 	panic(fmt.Sprintf("unrecognised order: %v", t.knownOrder))
@@ -157,19 +161,6 @@ func (t Tester[T]) doNextOpAndCheck(actualIter iterator.Iterator[T], remainingEx
 
 func (t Tester[T]) misbehavingIteratorError(opSequence []any) error {
 	return fmt.Errorf("iterator '%s' misbehaves when running operations %v", t.iteratorName, opSequence)
-}
-
-func deleteInPlace[T any](values []T, index int) []T {
-	return append(values[:index], values[index+1:]...)
-}
-
-func indexOf[T any](haystack []T, needle T) int {
-	for i, x := range haystack {
-		if equal(x, needle) {
-			return i
-		}
-	}
-	return -1
 }
 
 // At time of writing, we target Go 1.18 which doesn't have access to the

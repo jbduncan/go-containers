@@ -2,6 +2,7 @@ package graph_test
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/jbduncan/go-containers/graph"
@@ -103,19 +104,19 @@ func graphTests(
 	Context(fmt.Sprintf("%s: given a graph", graphName), func() {
 		var grph graph.Graph[int]
 
-		graphAsMutable := func() graph.MutableGraph[int] {
-			// This function is only ever called after skipIfGraphIsNotMutable
-			//nolint:revive
-			result, _ := grph.(graph.MutableGraph[int])
-
-			return result
+		ifGraphIsMutableIt := func(text string, f func(g graph.MutableGraph[int])) {
+			if mutableGraph, ok := grph.(graph.MutableGraph[int]); ok {
+				It(text, func() {
+					f(mutableGraph)
+				})
+			}
 		}
 
-		skipIfGraphIsNotMutable := func() {
-			_, mutable := grph.(graph.MutableGraph[int])
-
-			if !mutable {
-				Skip("Graph is not mutable")
+		beforeEachIfGraphIsMutable := func(f func(g graph.MutableGraph[int])) {
+			if mutableGraph, ok := grph.(graph.MutableGraph[int]); ok {
+				BeforeEach(func() {
+					f(mutableGraph)
+				})
 			}
 		}
 
@@ -267,86 +268,92 @@ func graphTests(
 		})
 
 		Context("when adding a new node", func() {
-			It("returns true", func() {
-				skipIfGraphIsNotMutable()
-
-				Expect(graphAsMutable().AddNode(node1)).To(BeTrue())
+			ifGraphIsMutableIt("returns true", func(g graph.MutableGraph[int]) {
+				Expect(g.AddNode(node1)).To(BeTrue())
 			})
 		})
 
 		Context("when adding an existing node", func() {
-			It("returns false", func() {
-				skipIfGraphIsNotMutable()
-				grph = addNode(grph, node1)
+			ifGraphIsMutableIt("returns false", func(g graph.MutableGraph[int]) {
+				g.AddNode(node1)
 
-				Expect(graphAsMutable().AddNode(node1)).To(BeFalse())
+				Expect(g.AddNode(node1)).To(BeFalse())
 			})
 		})
 
 		Context("when removing an existing node", func() {
 			var removed bool
 
-			BeforeEach(func() {
-				skipIfGraphIsNotMutable()
-				grph = putEdge(grph, node1, node2)
-				grph = putEdge(grph, node3, node1)
+			beforeEachIfGraphIsMutable(func(g graph.MutableGraph[int]) {
+				g.PutEdge(node1, node2)
+				g.PutEdge(node3, node1)
 
-				removed = graphAsMutable().RemoveNode(node1)
+				removed = g.RemoveNode(node1)
 			})
 
-			It("returns true", func() {
+			ifGraphIsMutableIt("returns true", func(_ graph.MutableGraph[int]) {
 				Expect(removed).To(BeTrue())
 			})
 
-			It("it leaves the other nodes alone", func() {
-				testSet(grph.Nodes(), node2, node3)
-			})
+			ifGraphIsMutableIt(
+				"it leaves the other nodes alone",
+				func(g graph.MutableGraph[int]) {
+					testSet(g.Nodes(), node2, node3)
+				},
+			)
 
-			It("removes its connections to its adjacent nodes", func() {
-				testSet(grph.AdjacentNodes(node2))
-				testSet(grph.AdjacentNodes(node3))
-			})
+			ifGraphIsMutableIt(
+				"removes its connections to its adjacent nodes",
+				func(g graph.MutableGraph[int]) {
+					testSet(g.AdjacentNodes(node2))
+					testSet(g.AdjacentNodes(node3))
+				},
+			)
 
-			It("removes the connected edges", func() {
-				testEmptyEdges(grph.Edges())
-			})
+			ifGraphIsMutableIt(
+				"removes the connected edges",
+				func(g graph.MutableGraph[int]) {
+					testEmptyEdges(g.Edges())
+				},
+			)
 		})
 
 		Context("when removing an absent node", func() {
 			var removed bool
 
-			BeforeEach(func() {
-				skipIfGraphIsNotMutable()
-				grph = addNode(grph, node1)
+			beforeEachIfGraphIsMutable(func(g graph.MutableGraph[int]) {
+				g.AddNode(node1)
 
-				removed = graphAsMutable().RemoveNode(nodeNotInGraph)
+				removed = g.RemoveNode(nodeNotInGraph)
 			})
 
-			It("returns false", func() {
+			ifGraphIsMutableIt("returns false", func(_ graph.MutableGraph[int]) {
 				Expect(removed).To(BeFalse())
 			})
 
-			It("leaves all the nodes alone", func() {
-				testSet(grph.Nodes(), node1)
+			ifGraphIsMutableIt("leaves all the nodes alone", func(g graph.MutableGraph[int]) {
+				testSet(g.Nodes(), node1)
 			})
 		})
 
 		Context("when putting one edge", func() {
-			BeforeEach(func() {
-				grph = putEdge(grph, node1, node2)
-			})
-
 			It("reports that both nodes are adjacent to each other", func() {
+				grph = putEdge(grph, node1, node2)
+
 				testSet(grph.AdjacentNodes(node1), node2)
 				testSet(grph.AdjacentNodes(node2), node1)
 			})
 
 			It("reports that both nodes have a degree of 1", func() {
+				grph = putEdge(grph, node1, node2)
+
 				Expect(grph.Degree(node1)).To(Equal(1))
 				Expect(grph.Degree(node2)).To(Equal(1))
 			})
 
 			It("has just that edge", func() {
+				grph = putEdge(grph, node1, node2)
+
 				// Set.Len()
 				Expect(grph.Edges()).To(HaveLenOf(1))
 
@@ -377,6 +384,8 @@ func graphTests(
 			})
 
 			It("has an incident edge connecting the first node to the second node", func() {
+				grph = putEdge(grph, node1, node2)
+
 				// Set.Len()
 				Expect(grph.IncidentEdges(node1)).To(HaveLenOf(1))
 
@@ -411,6 +420,22 @@ func graphTests(
 					Contain(
 						graph.NewUnorderedEndpointPair(
 							nodeNotInGraph, nodeNotInGraph)))
+			})
+
+			ifGraphIsMutableIt("returns true", func(g graph.MutableGraph[int]) {
+				result := g.PutEdge(node1, node2)
+
+				Expect(result).To(BeTrue())
+			})
+		})
+
+		Context("when putting an existing edge", func() {
+			ifGraphIsMutableIt("returns false", func(g graph.MutableGraph[int]) {
+				g.PutEdge(node1, node2)
+
+				result := g.PutEdge(node1, node2)
+
+				Expect(result).To(BeFalse())
 			})
 		})
 
@@ -509,101 +534,110 @@ func graphTests(
 
 		Context("when putting two anti-parallel edges", func() {
 			Context("and removing one of the nodes", func() {
-				It("leaves the other node alone", func() {
-					skipIfGraphIsNotMutable()
-					grph = putEdge(grph, node1, node2)
-					grph = putEdge(grph, node2, node1)
-					graphAsMutable().RemoveNode(node1)
-
-					testSet(grph.Nodes(), node2)
+				beforeEachIfGraphIsMutable(func(g graph.MutableGraph[int]) {
+					g.PutEdge(node1, node2)
+					g.PutEdge(node2, node1)
+					g.RemoveNode(node1)
 				})
 
-				It("removes both edges", func() {
-					testEmptyEdges(grph.Edges())
-				})
+				ifGraphIsMutableIt(
+					"leaves the other node alone",
+					func(g graph.MutableGraph[int]) {
+						testSet(g.Nodes(), node2)
+					},
+				)
+
+				ifGraphIsMutableIt(
+					"removes both edges",
+					func(g graph.MutableGraph[int]) {
+						testEmptyEdges(g.Edges())
+					},
+				)
 			})
 		})
 
 		Context("when removing an existing edge", func() {
 			var removed bool
 
-			BeforeEach(func() {
-				skipIfGraphIsNotMutable()
-				grph = putEdge(grph, node1, node2)
-				grph = putEdge(grph, node1, node3)
+			beforeEachIfGraphIsMutable(func(g graph.MutableGraph[int]) {
+				g.PutEdge(node1, node2)
+				g.PutEdge(node1, node3)
 
-				removed = graphAsMutable().RemoveEdge(node1, node2)
+				removed = g.RemoveEdge(node1, node2)
 			})
 
-			It("returns true", func() {
+			ifGraphIsMutableIt("returns true", func(_ graph.MutableGraph[int]) {
 				Expect(removed).To(BeTrue())
 			})
 
-			It("removes the connection between its nodes", func() {
-				testSet(grph.Successors(node1), node3)
-				testSet(grph.Predecessors(node3), node1)
-				testSet(grph.Predecessors(node2))
+			ifGraphIsMutableIt("removes the connection between its nodes", func(g graph.MutableGraph[int]) {
+				testSet(g.Successors(node1), node3)
+				testSet(g.Predecessors(node3), node1)
+				testSet(g.Predecessors(node2))
 			})
 		})
 
 		Context("when removing an absent edge with an existing nodeU", func() {
 			var removed bool
 
-			BeforeEach(func() {
-				skipIfGraphIsNotMutable()
-				grph = putEdge(grph, node1, node2)
+			beforeEachIfGraphIsMutable(func(g graph.MutableGraph[int]) {
+				g.PutEdge(node1, node2)
 
-				removed = graphAsMutable().RemoveEdge(node1, nodeNotInGraph)
+				removed = g.RemoveEdge(node1, nodeNotInGraph)
 			})
 
-			It("returns false", func() {
+			ifGraphIsMutableIt("returns false", func(_ graph.MutableGraph[int]) {
 				Expect(removed).To(BeFalse())
 			})
 
-			It("leaves the existing nodes alone", func() {
-				testSet(grph.Successors(node1), node2)
-				testSet(grph.Predecessors(node2), node1)
-			})
+			ifGraphIsMutableIt(
+				"leaves the existing nodes alone",
+				func(g graph.MutableGraph[int]) {
+					testSet(g.Successors(node1), node2)
+					testSet(g.Predecessors(node2), node1)
+				},
+			)
 		})
 
 		Context("when removing an absent edge with an existing nodeV", func() {
 			var removed bool
 
-			BeforeEach(func() {
-				skipIfGraphIsNotMutable()
-				grph = putEdge(grph, node1, node2)
+			beforeEachIfGraphIsMutable(func(g graph.MutableGraph[int]) {
+				g.PutEdge(node1, node2)
 
-				removed = graphAsMutable().RemoveEdge(nodeNotInGraph, node2)
+				removed = g.RemoveEdge(nodeNotInGraph, node2)
 			})
 
-			It("returns false", func() {
+			ifGraphIsMutableIt("returns false", func(_ graph.MutableGraph[int]) {
 				Expect(removed).To(BeFalse())
 			})
 
-			It("leaves the existing nodes alone", func() {
-				testSet(grph.Successors(node1), node2)
-				testSet(grph.Predecessors(node2), node1)
+			ifGraphIsMutableIt("leaves the existing nodes alone", func(g graph.MutableGraph[int]) {
+				testSet(g.Successors(node1), node2)
+				testSet(g.Predecessors(node2), node1)
 			})
 		})
 
 		Context("when removing an absent edge with two existing nodes", func() {
 			var removed bool
 
-			BeforeEach(func() {
-				skipIfGraphIsNotMutable()
-				grph = addNode(grph, node1)
-				grph = addNode(grph, node2)
+			beforeEachIfGraphIsMutable(func(g graph.MutableGraph[int]) {
+				g.AddNode(node1)
+				g.AddNode(node2)
 
-				removed = graphAsMutable().RemoveEdge(node1, node2)
+				removed = g.RemoveEdge(node1, node2)
 			})
 
-			It("returns false", func() {
+			ifGraphIsMutableIt("returns false", func(g graph.MutableGraph[int]) {
 				Expect(removed).To(BeFalse())
 			})
 
-			It("leaves the existing nodes alone", func() {
-				testSet(grph.Nodes(), node1, node2)
-			})
+			ifGraphIsMutableIt(
+				"leaves the existing nodes alone",
+				func(g graph.MutableGraph[int]) {
+					testSet(grph.Nodes(), node1, node2)
+				},
+			)
 		})
 
 		Context("when finding the predecessors of an absent node", func() {
@@ -1022,7 +1056,7 @@ func testSet(s set.Set[int], expectedValues ...int) {
 
 	expectedValueStrs := make([]string, 0, len(expectedValues))
 	for _, v := range expectedValues {
-		expectedValueStrs = append(expectedValueStrs, fmt.Sprintf("%v", v))
+		expectedValueStrs = append(expectedValueStrs, strconv.Itoa(v))
 	}
 
 	trimmed := strings.Trim(str, "[]")

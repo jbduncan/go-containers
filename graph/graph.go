@@ -210,9 +210,9 @@ func (g *graph[N]) PutEdge(nodeU, nodeV N) bool {
 
 	if addedUToV {
 		g.numEdges++
+		return true
 	}
 
-	// TODO: return booleans at all the right times
 	return false
 }
 
