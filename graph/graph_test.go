@@ -20,7 +20,7 @@ import (
 //       graphtest.MutableGraph(
 //           name string,
 //           newGraph func() graph.MutableGraph[int],
-//           ...graphtester.Option options)
+//           ...graphtest.Option options)
 //       ...where options is any of:
 //         - WhereContainersAreViews
 //         - WhereContainersAreCopies
@@ -143,7 +143,7 @@ func graphTests(
 			Expect(nodes).To(BeNonMutableSet[int]())
 
 			grph = addNode(grph, node1)
-			Expect(nodes).To(Contain(node1))
+			testSet(nodes, node1)
 		})
 
 		// TODO: Write an equivalent test to above for ContainersAreCopies
@@ -157,10 +157,64 @@ func graphTests(
 			Expect(edges).To(BeNonMutableSet[graph.EndpointPair[int]]())
 
 			grph = putEdge(grph, node1, node2)
-			Expect(edges).To(Contain(newEndpointPair(grph, node1, node2)))
+			testSingleEdge(edges, grph)
 		})
 
 		// TODO: Write an equivalent test to above for ContainersAreCopies
+
+		It("has an unmodifiable adjacent nodes set view", func() {
+			if containersMode != ContainersAreViews {
+				Skip("Graph.AdjacentNodes() is not expected to return an unmodifiable view")
+			}
+
+			adjacentNodes := grph.AdjacentNodes(node1)
+			Expect(adjacentNodes).To(BeNonMutableSet[int]())
+
+			grph = putEdge(grph, node1, node2)
+			testSet(adjacentNodes, node2)
+		})
+
+		// TODO: Write an equivalent test to above for ContainersAreCopies
+
+		It("had an unmodifiable predecessors set view", func() {
+			if containersMode != ContainersAreViews {
+				Skip("Graph.Predecessors() is not expected to return an unmodifiable view")
+			}
+
+			predecessors := grph.Predecessors(node1)
+			Expect(predecessors).To(BeNonMutableSet[int]())
+
+			grph = putEdge(grph, node2, node1)
+			testSet(predecessors, node2)
+		})
+
+		// TODO: Write an equivalent test to above for ContainersAreCopies
+
+		It("has an unmodifiable successors set view", func() {
+			if containersMode != ContainersAreViews {
+				Skip("Graph.Successors() is not expected to return an unmodifiable view")
+			}
+
+			successors := grph.Successors(node1)
+			Expect(successors).To(BeNonMutableSet[int]())
+
+			grph = putEdge(grph, node1, node2)
+			testSet(successors, node2)
+		})
+
+		// TODO: Write an equivalent test to above for ContainersAreCopies
+
+		It("has an unmodifiable incident edges set view", func() {
+			if containersMode != ContainersAreViews {
+				Skip("Graph.IncidentEdges() is not expected to return an unmodifiable view")
+			}
+
+			incidentEdges := grph.IncidentEdges(node1)
+			Expect(incidentEdges).To(BeNonMutableSet[graph.EndpointPair[int]]())
+
+			grph = putEdge(grph, node1, node2)
+			testSingleEdge(incidentEdges, grph)
+		})
 
 		Context("when adding one node", func() {
 			BeforeEach(func() {
@@ -198,62 +252,6 @@ func graphTests(
 			It("reports that the node has an out degree of 0", func() {
 				Expect(grph.OutDegree(node1)).To(BeZero())
 			})
-
-			It("has an unmodifiable adjacent nodes set view", func() {
-				if containersMode != ContainersAreViews {
-					Skip("Graph.AdjacentNodes() is not expected to return an unmodifiable view")
-				}
-
-				adjacentNodes := grph.AdjacentNodes(node1)
-				Expect(adjacentNodes).To(BeNonMutableSet[int]())
-
-				grph = putEdge(grph, node1, node2)
-				Expect(adjacentNodes).To(Contain(node2))
-			})
-
-			// TODO: Write an equivalent test to above for ContainersAreCopies
-
-			It("had an unmodifiable predecessors set view", func() {
-				if containersMode != ContainersAreViews {
-					Skip("Graph.Predecessors() is not expected to return an unmodifiable view")
-				}
-
-				predecessors := grph.Predecessors(node1)
-				Expect(predecessors).To(BeNonMutableSet[int]())
-
-				grph = putEdge(grph, node2, node1)
-				Expect(predecessors).To(Contain(node2))
-			})
-
-			// TODO: Write an equivalent test to above for ContainersAreCopies
-
-			It("has an unmodifiable successors set view", func() {
-				if containersMode != ContainersAreViews {
-					Skip("Graph.Successors() is not expected to return an unmodifiable view")
-				}
-
-				successors := grph.Successors(node1)
-				Expect(successors).To(BeNonMutableSet[int]())
-
-				grph = putEdge(grph, node1, node2)
-				Expect(successors).To(Contain(node2))
-			})
-
-			// TODO: Write an equivalent test to above for ContainersAreCopies
-
-			It("has an unmodifiable incident edges set view", func() {
-				if containersMode != ContainersAreViews {
-					Skip("Graph.IncidentEdges() is not expected to return an unmodifiable view")
-				}
-
-				incidentEdges := grph.IncidentEdges(node1)
-				Expect(incidentEdges).To(BeNonMutableSet[graph.EndpointPair[int]]())
-
-				grph = putEdge(grph, node1, node2)
-				Expect(incidentEdges).To(Contain(newEndpointPair(grph, node1, node2)))
-			})
-
-			// TODO: Write an equivalent test to above for ContainersAreCopies
 		})
 
 		Context("when adding two nodes", func() {
@@ -354,72 +352,13 @@ func graphTests(
 			It("has just that edge", func() {
 				grph = putEdge(grph, node1, node2)
 
-				// Set.Len()
-				Expect(grph.Edges()).To(HaveLenOf(1))
-
-				// Set.ForEach()
-				// Uses boolean assertions to avoid unreadable error messages
-				// from this nested matcher
-				matcher := HaveForEachThatConsistsOf[graph.EndpointPair[int]](
-					BeEquivalentToUsingEqualMethod(
-						newEndpointPair(grph, node1, node2)))
-				Expect(matcher.Match(grph.Edges())).To(
-					BeTrue(),
-					"to consist of %v according to graph.EndpointPair.Equal()",
-					newEndpointPair(grph, node1, node2))
-
-				// Set.Contains()
-				Expect(grph.Edges()).To(
-					Contain(newEndpointPair(grph, node1, node2)))
-				Expect(grph.Edges()).ToNot(
-					Contain(newEndpointPairWithOtherOrder(grph, node1, node2)))
-				Expect(grph.Edges()).ToNot(
-					Contain(
-						graph.NewOrderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
-				Expect(grph.Edges()).ToNot(
-					Contain(
-						graph.NewUnorderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
+				testSingleEdge(grph.Edges(), grph)
 			})
 
 			It("has an incident edge connecting the first node to the second node", func() {
 				grph = putEdge(grph, node1, node2)
 
-				// Set.Len()
-				Expect(grph.IncidentEdges(node1)).To(HaveLenOf(1))
-
-				// Set.ForEach()
-				// Uses boolean assertions to avoid unreadable error messages
-				// from this nested matcher
-				matcher := HaveForEachThatConsistsOf[graph.EndpointPair[int]](
-					BeEquivalentToUsingEqualMethod(
-						newEndpointPair(grph, node1, node2)))
-				Expect(matcher.Match(grph.IncidentEdges(node1))).To(
-					BeTrue(),
-					"to consist of %v according to graph.EndpointPair.Equal()",
-					newEndpointPair(grph, node1, node2))
-				matcher = HaveForEachThatConsistsOf[graph.EndpointPair[int]](
-					BeEquivalentToUsingEqualMethod(
-						newEndpointPair(grph, node2, node1)))
-				Expect(matcher.Match(grph.IncidentEdges(node1))).To(
-					BeTrue(),
-					"to consist of %v according to graph.EndpointPair.Equal()",
-					newEndpointPair(grph, node2, node1))
-
-				// Set.Contains()
-				Expect(grph.IncidentEdges(node1)).To(
-					Contain(newEndpointPair(grph, node1, node2)))
-				Expect(grph.IncidentEdges(node1)).To(
-					Contain(newEndpointPair(grph, node2, node1)))
-				Expect(grph.IncidentEdges(node1)).ToNot(
-					Contain(
-						graph.NewOrderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
-				Expect(grph.IncidentEdges(node1)).ToNot(
-					Contain(
-						graph.NewUnorderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
+				testSingleEdge(grph.IncidentEdges(node1), grph)
 			})
 
 			ifGraphIsMutableIt("returns true", func(g graph.MutableGraph[int]) {
@@ -454,81 +393,11 @@ func graphTests(
 			})
 
 			It("has both edges", func() {
-				// Set.Len()
-				Expect(grph.Edges()).To(HaveLenOf(2))
-
-				// Set.ForEach()
-				// Uses boolean assertions to avoid unreadable error messages
-				// from this nested matcher
-				matcher := HaveForEachThatConsistsOf[graph.EndpointPair[int]](
-					BeEquivalentToUsingEqualMethod(
-						newEndpointPair(grph, node1, node2)),
-					BeEquivalentToUsingEqualMethod(
-						newEndpointPair(grph, node1, node3)))
-				Expect(matcher.Match(grph.Edges())).To(
-					BeTrue(),
-					"to consist of %v according to graph.EndpointPair.Equal()",
-					[]graph.EndpointPair[int]{
-						newEndpointPair(grph, node1, node2),
-						newEndpointPair(grph, node1, node3),
-					})
-
-				// Set.Contains()
-				Expect(grph.Edges()).To(
-					Contain(newEndpointPair(grph, node1, node2)))
-				Expect(grph.Edges()).ToNot(
-					Contain(newEndpointPairWithOtherOrder(grph, node1, node2)))
-				Expect(grph.Edges()).To(
-					Contain(newEndpointPair(grph, node1, node3)))
-				Expect(grph.Edges()).ToNot(
-					Contain(newEndpointPairWithOtherOrder(grph, node1, node3)))
-				Expect(grph.Edges()).ToNot(
-					Contain(
-						graph.NewOrderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
-				Expect(grph.Edges()).ToNot(
-					Contain(
-						graph.NewUnorderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
+				testTwoEdges(grph.Edges(), grph)
 			})
 
 			It("has two incident edges connected to the common node", func() {
-				// Set.Len()
-				Expect(grph.IncidentEdges(node1)).To(HaveLenOf(2))
-
-				// Set.ForEach()
-				// Uses boolean assertions to avoid unreadable error messages
-				// from this nested matcher
-				matcher := HaveForEachThatConsistsOf[graph.EndpointPair[int]](
-					BeEquivalentToUsingEqualMethod(
-						newEndpointPair(grph, node1, node2)),
-					BeEquivalentToUsingEqualMethod(
-						newEndpointPair(grph, node1, node3)))
-				Expect(matcher.Match(grph.IncidentEdges(node1))).To(
-					BeTrue(),
-					"to consist of %v according to graph.EndpointPair.Equal()",
-					[]graph.EndpointPair[int]{
-						newEndpointPair(grph, node1, node2),
-						newEndpointPair(grph, node1, node3),
-					})
-
-				// Set.Contains()
-				Expect(grph.IncidentEdges(node1)).To(
-					Contain(newEndpointPair(grph, node1, node2)))
-				Expect(grph.IncidentEdges(node1)).ToNot(
-					Contain(newEndpointPairWithOtherOrder(grph, node1, node2)))
-				Expect(grph.IncidentEdges(node1)).To(
-					Contain(newEndpointPair(grph, node1, node3)))
-				Expect(grph.IncidentEdges(node1)).ToNot(
-					Contain(newEndpointPairWithOtherOrder(grph, node1, node3)))
-				Expect(grph.IncidentEdges(node1)).ToNot(
-					Contain(
-						graph.NewOrderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
-				Expect(grph.IncidentEdges(node1)).ToNot(
-					Contain(
-						graph.NewUnorderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
+				testTwoEdges(grph.IncidentEdges(node1), grph)
 			})
 		})
 
@@ -722,7 +591,7 @@ func undirectedGraphTests(
 			})
 
 			It("has both edges", func() {
-				// TODO: Write equivalent test for directed graphs
+				testTwoEdges(grph.Edges(), grph)
 
 				// Set.ForEach()
 				// Uses boolean assertions to avoid unreadable error messages
@@ -827,39 +696,6 @@ func undirectedGraphTests(
 				grph = putEdge(grph, node1, node2)
 			})
 
-			It("has just that undirected edge", func() {
-				// TODO: Write equivalent test for directed graphs
-
-				// Set.ForEach()
-				// Uses boolean assertions to avoid unreadable error messages
-				// from this nested matcher
-				matcher := HaveForEachThatConsistsOf[graph.EndpointPair[int]](
-					BeEquivalentToUsingEqualMethod(
-						newEndpointPair(grph, node2, node1)))
-				Expect(matcher.Match(grph.Edges())).To(
-					BeTrue(),
-					"to consist of %v according to graph.EndpointPair.Equal()",
-					newEndpointPair(grph, node2, node1))
-
-				// Set.Contains()
-				Expect(grph.Edges()).To(
-					Contain(newEndpointPair(grph, node2, node1)))
-				Expect(grph.Edges()).ToNot(
-					Contain(newEndpointPairWithOtherOrder(grph, node2, node1)))
-				Expect(grph.Edges()).ToNot(
-					Contain(
-						graph.NewOrderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
-				Expect(grph.Edges()).ToNot(
-					Contain(
-						graph.NewUnorderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
-
-				// Set.String()
-				Expect(grph.Edges()).To(
-					HaveStringReprThatIsAnyOf("[[1, 2]]", "[[2, 1]]"))
-			})
-
 			It("sees both nodes as predecessors of each other", func() {
 				testSet(grph.Predecessors(node2), node1)
 				testSet(grph.Predecessors(node1), node2)
@@ -871,48 +707,7 @@ func undirectedGraphTests(
 			})
 
 			It("has an incident edge connecting the second node to the first node", func() {
-				// Set.Len()
-				Expect(grph.IncidentEdges(node2)).To(HaveLenOf(1))
-
-				// Set.ForEach()
-				// Uses boolean assertions to avoid unreadable error messages
-				// from this nested matcher
-				matcher := HaveForEachThatConsistsOf[graph.EndpointPair[int]](
-					BeEquivalentToUsingEqualMethod(
-						newEndpointPair(grph, node1, node2)))
-				Expect(matcher.Match(grph.IncidentEdges(node2))).To(
-					BeTrue(),
-					"to consist of %v according to graph.EndpointPair.Equal()",
-					newEndpointPair(grph, node1, node2))
-				matcher = HaveForEachThatConsistsOf[graph.EndpointPair[int]](
-					BeEquivalentToUsingEqualMethod(
-						newEndpointPair(grph, node2, node1)))
-				Expect(matcher.Match(grph.IncidentEdges(node2))).To(
-					BeTrue(),
-					"to consist of %v according to graph.EndpointPair.Equal()",
-					newEndpointPair(grph, node2, node1))
-
-				// Set.Contains()
-				Expect(grph.IncidentEdges(node2)).To(
-					Contain(newEndpointPair(grph, node1, node2)))
-				Expect(grph.IncidentEdges(node2)).ToNot(
-					Contain(newEndpointPairWithOtherOrder(grph, node1, node2)))
-				Expect(grph.IncidentEdges(node2)).To(
-					Contain(newEndpointPair(grph, node2, node1)))
-				Expect(grph.IncidentEdges(node2)).ToNot(
-					Contain(newEndpointPairWithOtherOrder(grph, node2, node1)))
-				Expect(grph.IncidentEdges(node2)).ToNot(
-					Contain(
-						graph.NewOrderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
-				Expect(grph.IncidentEdges(node2)).ToNot(
-					Contain(
-						graph.NewUnorderedEndpointPair(
-							nodeNotInGraph, nodeNotInGraph)))
-
-				// Set.String()
-				Expect(grph.IncidentEdges(node2)).To(
-					HaveStringReprThatIsAnyOf("[[1, 2]]", "[[2, 1]]"))
+				testSingleEdge(grph.IncidentEdges(node2), grph)
 			})
 
 			It("has an in degree of 1 for the first node", func() {
@@ -1087,4 +882,160 @@ func testEmptyEdges(edges set.Set[graph.EndpointPair[int]]) {
 
 	// Set.String()
 	Expect(edges).To(HaveStringRepr("[]"))
+}
+
+func testSingleEdge(edges set.Set[graph.EndpointPair[int]], grph graph.Graph[int]) {
+	// Set.Len()
+	Expect(edges).To(HaveLenOf(1))
+
+	// Set.ForEach()
+	//
+	// Uses boolean assertions to avoid unreadable error messages
+	// from this nested matcher.
+	//
+	// Note: on undirected graphs, this assertion checks that the edges emitted
+	// by .ForEach() are equal to any of the following:
+	// - [[1, 2]]
+	// - [[2, 1]]
+	//
+	// For directed graphs, it checks that the edges emitted by .ForEach() are
+	// exactly equal to [<1 -> 2>].
+	matcher := HaveForEachThatConsistsOf[graph.EndpointPair[int]](
+		BeEquivalentToUsingEqualMethod(
+			newEndpointPair(grph, node1, node2)))
+	Expect(matcher.Match(edges)).To(
+		BeTrue(),
+		"to consist of %v according to graph.EndpointPair.Equal()",
+		[]graph.EndpointPair[int]{
+			newEndpointPair(grph, node1, node2),
+		})
+
+	// Set.Contains()
+	Expect(edges).To(
+		Contain(newEndpointPair(grph, node1, node2)))
+	Expect(edges).ToNot(
+		Contain(
+			newEndpointPairWithOtherOrder(
+				grph,
+				node1,
+				node2)))
+	if !grph.IsDirected() {
+		Expect(edges).To(
+			Contain(newEndpointPair(grph, node2, node1)))
+	} else {
+		Expect(edges).ToNot(
+			Contain(newEndpointPair(grph, node2, node1)))
+	}
+	Expect(edges).ToNot(
+		Contain(
+			newEndpointPairWithOtherOrder(
+				grph,
+				node2,
+				node1)))
+	Expect(edges).ToNot(
+		Contain(
+			graph.NewOrderedEndpointPair(
+				nodeNotInGraph, nodeNotInGraph)))
+	Expect(edges).ToNot(
+		Contain(
+			graph.NewUnorderedEndpointPair(
+				nodeNotInGraph, nodeNotInGraph)))
+
+	// Set.String()
+	if !grph.IsDirected() {
+		Expect(grph.Edges()).To(
+			HaveStringReprThatIsAnyOf("[[1, 2]]", "[[2, 1]]"))
+	} else {
+		Expect(grph.Edges()).To(HaveStringRepr("<1 -> 2>"))
+	}
+}
+
+func testTwoEdges(edges set.Set[graph.EndpointPair[int]], grph graph.Graph[int]) {
+	// Set.Len()
+	Expect(edges).To(HaveLenOf(2))
+
+	// Set.ForEach()
+	//
+	// Uses boolean assertions to avoid unreadable error messages
+	// from this nested matcher.
+	//
+	// Note: on undirected graphs, this assertion checks that the edges emitted
+	// by .ForEach() are equal to any of the following:
+	// - [[1, 2], [1, 3]]
+	// - [[1, 2], [3, 1]]
+	// - [[2, 1], [1, 3]]
+	// - [[2, 1], [3, 1]]
+	// - [[1, 3], [1, 2]]
+	// - [[1, 3], [2, 1]]
+	// - [[3, 1], [1, 2]]
+	// - [[3, 1], [2, 1]]
+	//
+	// For directed graphs, it checks that the edges emitted by .ForEach() are
+	// equal to any of the following:
+	// - [<1 -> 2>, <1 -> 3>]
+	// - [<1 -> 3>, <1 -> 2>]
+	matcher := HaveForEachThatConsistsOf[graph.EndpointPair[int]](
+		BeEquivalentToUsingEqualMethod(
+			newEndpointPair(grph, node1, node2)),
+		BeEquivalentToUsingEqualMethod(
+			newEndpointPair(grph, node1, node3)))
+	Expect(matcher.Match(edges)).To(
+		BeTrue(),
+		"to consist of %v according to graph.EndpointPair.Equal()",
+		[]graph.EndpointPair[int]{
+			newEndpointPair(grph, node1, node2),
+			newEndpointPair(grph, node1, node3),
+		})
+
+	// Set.Contains()
+	Expect(edges).To(
+		Contain(newEndpointPair(grph, node1, node2)))
+	Expect(edges).To(
+		Contain(newEndpointPair(grph, node1, node3)))
+	if !grph.IsDirected() {
+		Expect(edges).To(
+			Contain(newEndpointPair(grph, node2, node1)))
+		Expect(edges).To(
+			Contain(newEndpointPair(grph, node3, node1)))
+	} else {
+		Expect(edges).ToNot(
+			Contain(newEndpointPair(grph, node2, node1)))
+		Expect(edges).ToNot(
+			Contain(newEndpointPair(grph, node3, node1)))
+	}
+	Expect(edges).ToNot(
+		Contain(newEndpointPairWithOtherOrder(grph, node1, node2)))
+	Expect(edges).ToNot(
+		Contain(newEndpointPairWithOtherOrder(grph, node1, node3)))
+	Expect(edges).ToNot(
+		Contain(newEndpointPairWithOtherOrder(grph, node2, node1)))
+	Expect(edges).ToNot(
+		Contain(newEndpointPairWithOtherOrder(grph, node3, node1)))
+	Expect(edges).ToNot(
+		Contain(
+			graph.NewOrderedEndpointPair(
+				nodeNotInGraph, nodeNotInGraph)))
+	Expect(edges).ToNot(
+		Contain(
+			graph.NewUnorderedEndpointPair(
+				nodeNotInGraph, nodeNotInGraph)))
+
+	// Set.String()
+	if !grph.IsDirected() {
+		Expect(grph.Edges()).To(
+			HaveStringReprThatIsAnyOf(
+				"[[1, 2], [1, 3]]",
+				"[[1, 2], [3, 1]]",
+				"[[2, 1], [1, 3]]",
+				"[[2, 1], [3, 1]]",
+				"[[1, 3], [1, 2]]",
+				"[[1, 3], [2, 1]]",
+				"[[3, 1], [1, 2]]",
+				"[[3, 1], [2, 1]]"))
+	} else {
+		Expect(grph.Edges()).To(
+			HaveStringReprThatIsAnyOf(
+				"[<1 -> 2>, <1 -> 3>]",
+				"[<1 -> 3>, <1 -> 2>]"))
+	}
 }

@@ -1,8 +1,6 @@
 package graph
 
 import (
-	"fmt"
-
 	"github.com/jbduncan/go-containers/set"
 )
 
@@ -15,35 +13,21 @@ type Graph[N comparable] interface {
 	AllowsSelfLoops() bool
 	// NodeOrder() ElementOrder
 	// IncidentEdgeOrder() ElementOrder
-	// TODO: Document that passing in an absent node panics, and to use Nodes().Contains() to tell when a
-	//       given node is in the graph or not.
 	AdjacentNodes(node N) set.Set[N]
-	// TODO: Document that passing in an absent node panics, and to use Nodes().Contains() to tell when a
-	//       given node is in the graph or not.
 	Predecessors(node N) set.Set[N]
-	// TODO: Document that passing in an absent node panics, and to use Nodes().Contains() to tell when a
-	//       given node is in the graph or not.
 	Successors(node N) set.Set[N]
-	// TODO: Document that passing in an absent node panics, and to use Nodes().Contains() to tell when a
-	//       given node is in the graph or not.
 	IncidentEdges(node N) set.Set[EndpointPair[N]]
-	// TODO: Document that passing in an absent node panics, and to use Nodes().Contains() to tell when a
-	//       given node is in the graph or not.
 	Degree(node N) int
-	// TODO: Document that passing in an absent node panics, and to use Nodes().Contains() to tell when a
-	//       given node is in the graph or not.
 	InDegree(node N) int
-	// TODO: Document that passing in an absent node panics, and to use Nodes().Contains() to tell when a
-	//       given node is in the graph or not.
 	OutDegree(node N) int
 	HasEdgeConnecting(nodeU N, nodeV N) bool
 	HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
 	// TODO: Implement Graph.String()
 	// String() string
-	// TODO: Is an Equal method needed to meet Guava's Graph::equals rules?
-	//  If so, make the Equal method, discourage == from being used (documenting that its use is undefined), and
-	//  optionally, if we decide to remove this interface, make the graph implementations have an incomparable field
-	//  to force == to be unusable at compile time (see https://github.com/tailscale/tailscale/blob/main/types/structs/structs.go).
+	// TODO: Make a graph.Equal method similar to set.Equal, discourage == from being used (documenting that its use is
+	//  undefined), and optionally, if we decide to make the builder return a concrete type, make the graph
+	//  implementations have an incomparable field to force == to be unusable at compile time (see
+	//  https://github.com/tailscale/tailscale/blob/main/types/structs/structs.go).
 	// Equal(other Graph[N]) bool
 }
 
@@ -122,16 +106,10 @@ func (g *graph[N]) Edges() set.Set[EndpointPair[N]] {
 }
 
 func (g *graph[N]) AdjacentNodes(node N) set.Set[N] {
-	adjacentNodes, ok := g.adjacencyList[node]
-	if !ok {
-		// TODO: Go back to panicking, as this set is not a view and
-		//       there is no sane way of testing that it's a view.
-		//       Furthermore, panicking will allow programmers to
-		//       flush out bugs faster.
-		return set.Unmodifiable[N](set.NewMutable[N]())
+	return adjacentNodeSet[N]{
+		node:          node,
+		adjacencyList: g.adjacencyList,
 	}
-
-	return set.Unmodifiable(adjacentNodes)
 }
 
 func (g *graph[N]) Predecessors(node N) set.Set[N] {
@@ -143,18 +121,9 @@ func (g *graph[N]) Successors(node N) set.Set[N] {
 }
 
 func (g *graph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
-	adjacentNodes, ok := g.adjacencyList[node]
-	if !ok {
-		// TODO: Go back to panicking, as this set is not a view and
-		//       there is no sane way of testing that it's a view.
-		//       Furthermore, panicking will allow programmers to
-		//       flush out bugs faster.
-		return set.Unmodifiable[EndpointPair[N]](set.NewMutable[EndpointPair[N]]())
-	}
-
 	return incidentEdgeSet[N]{
-		node,
-		adjacentNodes,
+		node:          node,
+		adjacencyList: g.adjacencyList,
 	}
 }
 
@@ -239,12 +208,7 @@ func (g *graph[N]) RemoveNode(node N) bool {
 	delete(g.adjacencyList, node)
 
 	for _, adjacentNodes := range g.adjacencyList {
-		if !adjacentNodes.Remove(node) {
-			panic(
-				fmt.Sprintf(
-					"Unexpected: adjacent node %v was not removed",
-					node))
-		}
+		adjacentNodes.Remove(node)
 	}
 
 	g.numEdges -= adjacentNodes.Len()
@@ -254,14 +218,7 @@ func (g *graph[N]) RemoveNode(node N) bool {
 
 func (g *graph[N]) RemoveEdge(nodeU, nodeV N) bool {
 	removedUToV := g.removeEdge(nodeU, nodeV)
-	removedVToU := g.removeEdge(nodeV, nodeU)
-
-	if removedUToV != removedVToU {
-		panic(
-			fmt.Sprintf(
-				"Unexpected: removedUToV (%t) != removedVToU (%t)",
-				removedUToV, removedVToU))
-	}
+	g.removeEdge(nodeV, nodeU)
 
 	g.numEdges--
 

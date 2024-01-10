@@ -8,24 +8,39 @@ var _ set.Set[EndpointPair[int]] = (*incidentEdgeSet[int])(nil)
 
 type incidentEdgeSet[N comparable] struct {
 	node          N
-	adjacentNodes set.MutableSet[N]
+	adjacencyList map[N]set.MutableSet[N]
 }
 
 func (i incidentEdgeSet[N]) Contains(elem EndpointPair[N]) bool {
 	if !elem.IsOrdered() {
-		return i.node == elem.NodeU() && i.adjacentNodes.Contains(elem.NodeV()) ||
-			i.node == elem.NodeV() && i.adjacentNodes.Contains(elem.NodeU())
+		adjacentNodes, ok := i.adjacencyList[i.node]
+		if !ok {
+			return false
+		}
+
+		return i.node == elem.NodeU() && adjacentNodes.Contains(elem.NodeV()) ||
+			i.node == elem.NodeV() && adjacentNodes.Contains(elem.NodeU())
 	}
 	// TODO: Implement for directed graphs
 	return false
 }
 
 func (i incidentEdgeSet[N]) Len() int {
-	return i.adjacentNodes.Len()
+	adjacentNodes, ok := i.adjacencyList[i.node]
+	if !ok {
+		return 0
+	}
+
+	return adjacentNodes.Len()
 }
 
 func (i incidentEdgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
-	i.adjacentNodes.ForEach(
+	adjacentNodes, ok := i.adjacencyList[i.node]
+	if !ok {
+		return
+	}
+
+	adjacentNodes.ForEach(
 		func(adjNode N) {
 			fn(NewUnorderedEndpointPair(i.node, adjNode))
 		})
