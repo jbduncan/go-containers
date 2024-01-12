@@ -25,11 +25,6 @@ type Graph[N comparable] interface {
 	HasEdgeConnecting(nodeU N, nodeV N) bool
 	HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
 	String() string
-	// TODO: Make a graph.Equal method similar to set.Equal, discourage == from being used (documenting that its use is
-	//  undefined), and optionally, if we decide to make the builder return a concrete type, make the graph
-	//  implementations have an incomparable field to force == to be unusable at compile time (see
-	//  https://github.com/tailscale/tailscale/blob/main/types/structs/structs.go).
-	// Equal(other Graph[N]) bool
 }
 
 // TODO: Docs
@@ -40,10 +35,8 @@ type MutableGraph[N comparable] interface {
 	// TODO: Document that PutEdge will panic if Graph.AllowsSelfLoops() is true and nodeU and nodeV are equal
 	//       according to ==, and to check that nodeU != nodeV beforehand.
 	PutEdge(nodeU N, nodeV N) bool
-	// PutEdgeWithEndpoints(e EndpointPair[N]) bool
 	RemoveNode(node N) bool
 	RemoveEdge(nodeU N, nodeV N) bool
-	// RemoveEdgeWithEndpoints(e EndpointPair[N]) bool
 }
 
 func Undirected[N comparable]() Builder[N] {
