@@ -45,6 +45,15 @@ var _ = Describe("Graphs", func() {
 		Undirected,
 		AllowsSelfLoops,
 		ContainersAreViews)
+	graphTests(
+		"graph.Directed[int]().Build()",
+		func() graph.Graph[int] {
+			return graph.Directed[int]().Build()
+		},
+		Mutable,
+		Directed,
+		DisallowsSelfLoops,
+		ContainersAreViews)
 })
 
 const (
@@ -615,14 +624,20 @@ func undirectedGraphTests(
 				testSingleEdgeForUndirectedGraph(grph.IncidentEdges(node1))
 			})
 
-			It("sees both nodes as predecessors of each other", func() {
+			It("sees that the second node has the first node as a predecessor", func() {
 				testSet(grph.Predecessors(node2), node1)
+			})
+
+			It("sees that the first node has the second node as a predecessor", func() {
 				testSet(grph.Predecessors(node1), node2)
 			})
 
-			It("sees both nodes as successors of each other", func() {
-				testSet(grph.Successors(node1), node2)
+			It("sees that the second node has the first node as a successor", func() {
 				testSet(grph.Successors(node2), node1)
+			})
+
+			It("sees that the first node has the second node as a successor", func() {
+				testSet(grph.Successors(node1), node2)
 			})
 
 			It("has an unordered incident edge connecting the second node to the first node", func() {
@@ -749,6 +764,22 @@ func directedGraphTests(
 		Context("when putting one edge", func() {
 			BeforeEach(func() {
 				grph = putEdge(grph, node1, node2)
+			})
+
+			It("sees that the second node has the first node as a predecessor", func() {
+				testSet(grph.Predecessors(node2), node1)
+			})
+
+			It("sees that the first node has no predecessors", func() {
+				testSet(grph.Predecessors(node1))
+			})
+
+			It("sees that the first node has the second node as a successor", func() {
+				testSet(grph.Successors(node1), node2)
+			})
+
+			It("sees that the second node has no successors", func() {
+				testSet(grph.Successors(node2))
 			})
 
 			It("has just one ordered edge", func() {
@@ -1054,9 +1085,9 @@ func testSingleEdgeForDirectedGraph(endpointPairs set.Set[graph.EndpointPair[int
 	Expect(endpointPairs).ToNot(
 		Contain(graph.NewUnorderedEndpointPair(node1, node2)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewOrderedEndpointPair(node1, node2)))
+		Contain(graph.NewOrderedEndpointPair(node2, node1)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewUnorderedEndpointPair(node1, node2)))
+		Contain(graph.NewUnorderedEndpointPair(node2, node1)))
 	Expect(endpointPairs).ToNot(
 		Contain(
 			graph.NewOrderedEndpointPair(

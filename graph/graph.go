@@ -43,6 +43,10 @@ func Undirected[N comparable]() Builder[N] {
 	return Builder[N]{}
 }
 
+func Directed[N comparable]() Builder[N] {
+	return Builder[N]{}
+}
+
 type Builder[N comparable] struct {
 	allowsSelfLoops bool
 }
