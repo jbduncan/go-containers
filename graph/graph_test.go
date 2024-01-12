@@ -298,6 +298,14 @@ func graphTests(
 	allowsSelfLoopsGraphTests(graphName, createGraph, containersMode)
 
 	disallowsSelfLoopsGraphTests(graphName, createGraph, containersMode)
+
+	undirectedAllowsSelfLoopGraphTests(graphName, createGraph, containersMode)
+
+	undirectedDisallowsSelfLoopGraphTests(graphName, createGraph, containersMode)
+
+	directedAllowsSelfLoopGraphTests(graphName, createGraph, containersMode)
+
+	directedDisallowsSelfLoopGraphTests(graphName, createGraph, containersMode)
 }
 
 func mutableGraphTests(
@@ -783,6 +791,130 @@ func disallowsSelfLoopsGraphTests(
 				Expect(func() { grph = putEdge(grph, node1, node1) }).
 					To(PanicWith("self-loops are disallowed"))
 			})
+		})
+	})
+}
+
+func undirectedAllowsSelfLoopGraphTests(
+	graphName string,
+	createGraph func() graph.Graph[int],
+	containersMode ContainersMode,
+) {
+	if createGraph().IsDirected() {
+		// skip
+		return
+	}
+	if !createGraph().AllowsSelfLoops() {
+		// skip
+		return
+	}
+
+	Context(fmt.Sprintf("%s: given an undirected graph that allows self loops", graphName), func() {
+		var grph graph.Graph[int]
+
+		BeforeEach(func() {
+			assertContainersMode(containersMode)
+
+			grph = createGraph()
+		})
+
+		It("has an appropriate string representation", func() {
+			Expect(grph).To(
+				HaveStringRepr(
+					"isDirected: false, allowsSelfLoops: true, nodes: [], edges: []"))
+		})
+	})
+}
+
+func undirectedDisallowsSelfLoopGraphTests(
+	graphName string,
+	createGraph func() graph.Graph[int],
+	containersMode ContainersMode,
+) {
+	if createGraph().IsDirected() {
+		// skip
+		return
+	}
+	if createGraph().AllowsSelfLoops() {
+		// skip
+		return
+	}
+
+	Context(fmt.Sprintf("%s: given an undirected graph that disallows self loops", graphName), func() {
+		var grph graph.Graph[int]
+
+		BeforeEach(func() {
+			assertContainersMode(containersMode)
+
+			grph = createGraph()
+		})
+
+		It("has an appropriate string representation", func() {
+			Expect(grph).To(
+				HaveStringRepr(
+					"isDirected: false, allowsSelfLoops: false, nodes: [], edges: []"))
+		})
+	})
+}
+
+func directedAllowsSelfLoopGraphTests(
+	graphName string,
+	createGraph func() graph.Graph[int],
+	containersMode ContainersMode,
+) {
+	if !createGraph().IsDirected() {
+		// skip
+		return
+	}
+	if !createGraph().AllowsSelfLoops() {
+		// skip
+		return
+	}
+
+	Context(fmt.Sprintf("%s: given a directed graph that allows self loops", graphName), func() {
+		var grph graph.Graph[int]
+
+		BeforeEach(func() {
+			assertContainersMode(containersMode)
+
+			grph = createGraph()
+		})
+
+		It("has an appropriate string representation", func() {
+			Expect(grph).To(
+				HaveStringRepr(
+					"isDirected: true, allowsSelfLoops: true, nodes: [], edges: []"))
+		})
+	})
+}
+
+func directedDisallowsSelfLoopGraphTests(
+	graphName string,
+	createGraph func() graph.Graph[int],
+	containersMode ContainersMode,
+) {
+	if !createGraph().IsDirected() {
+		// skip
+		return
+	}
+	if !createGraph().AllowsSelfLoops() {
+		// skip
+		return
+	}
+
+	Context(fmt.Sprintf("%s: given a directed graph that disallows self loops", graphName), func() {
+		var grph graph.Graph[int]
+
+		BeforeEach(func() {
+			assertContainersMode(containersMode)
+
+			grph = createGraph()
+		})
+
+		It("has an appropriate string representation", func() {
+			Expect(grph).To(
+				HaveStringRepr(
+					"isDirected: true, allowsSelfLoops: false, nodes: [], edges: []"))
 		})
 	})
 }

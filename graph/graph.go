@@ -1,6 +1,8 @@
 package graph
 
 import (
+	"strconv"
+
 	"github.com/jbduncan/go-containers/set"
 )
 
@@ -22,8 +24,7 @@ type Graph[N comparable] interface {
 	OutDegree(node N) int
 	HasEdgeConnecting(nodeU N, nodeV N) bool
 	HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
-	// TODO: Implement Graph.String()
-	// String() string
+	String() string
 	// TODO: Make a graph.Equal method similar to set.Equal, discourage == from being used (documenting that its use is
 	//  undefined), and optionally, if we decide to make the builder return a concrete type, make the graph
 	//  implementations have an incomparable field to force == to be unusable at compile time (see
@@ -158,6 +159,12 @@ func (g *graph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
 	}
 
 	return g.HasEdgeConnecting(endpointPair.NodeU(), endpointPair.NodeV())
+}
+
+func (g *graph[N]) String() string {
+	return "isDirected: false, allowsSelfLoops: " +
+		strconv.FormatBool(g.allowsSelfLoops) +
+		", nodes: [], edges: []"
 }
 
 func (g *graph[N]) AddNode(node N) bool {
