@@ -32,12 +32,18 @@ var _ = Describe("Graphs", func() {
 		func() graph.Graph[int] {
 			return graph.Undirected[int]().Build()
 		},
+		Mutable,
+		Undirected,
+		DisallowsSelfLoops,
 		ContainersAreViews)
 	graphTests(
 		"graph.Undirected[int]().AllowsSelfLoops().Build()",
 		func() graph.Graph[int] {
 			return graph.Undirected[int]().AllowsSelfLoops(true).Build()
 		},
+		Mutable,
+		Undirected,
+		AllowsSelfLoops,
 		ContainersAreViews)
 })
 
@@ -46,6 +52,27 @@ const (
 	node2          = 2
 	node3          = 3
 	nodeNotInGraph = 1_000
+)
+
+type Mutability int
+
+const (
+	Mutable Mutability = iota
+	Immutable
+)
+
+type DirectionMode int
+
+const (
+	Directed DirectionMode = iota
+	Undirected
+)
+
+type SelfLoopsMode int
+
+const (
+	AllowsSelfLoops SelfLoopsMode = iota
+	DisallowsSelfLoops
 )
 
 type ContainersMode int
@@ -91,14 +118,15 @@ func putEdge(grph graph.Graph[int], node1 int, node2 int) graph.Graph[int] {
 func graphTests(
 	graphName string,
 	createGraph func() graph.Graph[int],
+	mutability Mutability,
+	directionMode DirectionMode,
+	selfLoopsMode SelfLoopsMode,
 	containersMode ContainersMode,
 ) {
 	Context(fmt.Sprintf("%s: given a graph", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
-			assertContainersMode(containersMode)
-
 			grph = createGraph()
 		})
 
@@ -110,59 +138,51 @@ func graphTests(
 			testEmptyEdges(grph.Edges())
 		})
 
-		It("has an unmodifiable nodes set view", func() {
-			if containersMode != ContainersAreViews {
-				Skip("Graph.Nodes() is not expected to return an unmodifiable view")
-			}
+		if containersMode == ContainersAreViews {
+			It("has an unmodifiable nodes set view", func() {
+				nodes := grph.Nodes()
+				Expect(nodes).To(BeNonMutableSet[int]())
 
-			nodes := grph.Nodes()
-			Expect(nodes).To(BeNonMutableSet[int]())
-
-			grph = addNode(grph, node1)
-			testSet(nodes, node1)
-		})
+				grph = addNode(grph, node1)
+				testSet(nodes, node1)
+			})
+		}
 
 		// TODO: Write an equivalent test to above for ContainersAreCopies
 
-		It("has an unmodifiable adjacent nodes set view", func() {
-			if containersMode != ContainersAreViews {
-				Skip("Graph.AdjacentNodes() is not expected to return an unmodifiable view")
-			}
+		if containersMode == ContainersAreViews {
+			It("has an unmodifiable adjacent nodes set view", func() {
+				adjacentNodes := grph.AdjacentNodes(node1)
+				Expect(adjacentNodes).To(BeNonMutableSet[int]())
 
-			adjacentNodes := grph.AdjacentNodes(node1)
-			Expect(adjacentNodes).To(BeNonMutableSet[int]())
-
-			grph = putEdge(grph, node1, node2)
-			testSet(adjacentNodes, node2)
-		})
+				grph = putEdge(grph, node1, node2)
+				testSet(adjacentNodes, node2)
+			})
+		}
 
 		// TODO: Write an equivalent test to above for ContainersAreCopies
 
-		It("had an unmodifiable predecessors set view", func() {
-			if containersMode != ContainersAreViews {
-				Skip("Graph.Predecessors() is not expected to return an unmodifiable view")
-			}
+		if containersMode == ContainersAreViews {
+			It("had an unmodifiable predecessors set view", func() {
+				predecessors := grph.Predecessors(node1)
+				Expect(predecessors).To(BeNonMutableSet[int]())
 
-			predecessors := grph.Predecessors(node1)
-			Expect(predecessors).To(BeNonMutableSet[int]())
-
-			grph = putEdge(grph, node2, node1)
-			testSet(predecessors, node2)
-		})
+				grph = putEdge(grph, node2, node1)
+				testSet(predecessors, node2)
+			})
+		}
 
 		// TODO: Write an equivalent test to above for ContainersAreCopies
 
-		It("has an unmodifiable successors set view", func() {
-			if containersMode != ContainersAreViews {
-				Skip("Graph.Successors() is not expected to return an unmodifiable view")
-			}
+		if containersMode == ContainersAreViews {
+			It("has an unmodifiable successors set view", func() {
+				successors := grph.Successors(node1)
+				Expect(successors).To(BeNonMutableSet[int]())
 
-			successors := grph.Successors(node1)
-			Expect(successors).To(BeNonMutableSet[int]())
-
-			grph = putEdge(grph, node1, node2)
-			testSet(successors, node2)
-		})
+				grph = putEdge(grph, node1, node2)
+				testSet(successors, node2)
+			})
+		}
 
 		// TODO: Write an equivalent test to above for ContainersAreCopies
 
@@ -289,53 +309,59 @@ func graphTests(
 		})
 	})
 
-	mutableGraphTests(graphName, createGraph, containersMode)
-
-	undirectedGraphTests(graphName, createGraph, containersMode)
-
-	directedGraphsTests(graphName, createGraph, containersMode)
-
-	allowsSelfLoopsGraphTests(graphName, createGraph, containersMode)
-
-	disallowsSelfLoopsGraphTests(graphName, createGraph, containersMode)
-
-	undirectedAllowsSelfLoopGraphTests(graphName, createGraph, containersMode)
-
-	undirectedDisallowsSelfLoopGraphTests(graphName, createGraph, containersMode)
-
-	directedAllowsSelfLoopGraphTests(graphName, createGraph, containersMode)
-
-	directedDisallowsSelfLoopGraphTests(graphName, createGraph, containersMode)
-}
-
-func mutableGraphTests(
-	graphName string,
-	createGraph func() graph.Graph[int],
-	containersMode ContainersMode,
-) {
-	_, mutable := createGraph().(graph.MutableGraph[int])
-	if !mutable {
-		// skip
-		return
+	if mutability == Mutable {
+		mutableGraphTests(graphName, createGraph)
+	}
+	if mutability == Immutable {
+		immutableGraphTests(graphName, createGraph)
 	}
 
+	if selfLoopsMode == AllowsSelfLoops {
+		allowsSelfLoopsGraphTests(graphName, createGraph)
+	}
+	if selfLoopsMode == DisallowsSelfLoops {
+		disallowsSelfLoopsGraphTests(graphName, createGraph)
+	}
+
+	if directionMode == Undirected {
+		undirectedGraphTests(graphName, createGraph, containersMode)
+
+		if selfLoopsMode == AllowsSelfLoops {
+			undirectedAllowsSelfLoopGraphTests(graphName, createGraph)
+		}
+		if selfLoopsMode == DisallowsSelfLoops {
+			undirectedDisallowsSelfLoopGraphTests(graphName, createGraph)
+		}
+	}
+
+	if directionMode == Directed {
+		directedGraphTests(graphName, createGraph, containersMode)
+
+		if selfLoopsMode == AllowsSelfLoops {
+			directedAllowsSelfLoopGraphTests(graphName, createGraph)
+		}
+		if selfLoopsMode == DisallowsSelfLoops {
+			directedDisallowsSelfLoopGraphTests(graphName, createGraph)
+		}
+	}
+}
+
+func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 	Context(fmt.Sprintf("%s: given a mutable graph", graphName), func() {
 		var grph graph.MutableGraph[int]
 
 		createGraphAsMutable := func() graph.MutableGraph[int] {
-			grph := createGraph()
+			g := createGraph()
 
-			g, ok := grph.(graph.MutableGraph[int])
+			mutG, ok := g.(graph.MutableGraph[int])
 			if !ok {
-				panic("grph is expected to be mutable but was not")
+				panic("g is expected to implement graph.MutableGraph, but it doesn't")
 			}
 
-			return g
+			return mutG
 		}
 
 		BeforeEach(func() {
-			assertContainersMode(containersMode)
-
 			grph = createGraphAsMutable()
 		})
 
@@ -515,50 +541,64 @@ func mutableGraphTests(
 	})
 }
 
+func immutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
+	Context(fmt.Sprintf("%s: given an immutable graph", graphName), func() {
+		var _ graph.Graph[int]
+
+		createGraphAsImmutable := func() graph.Graph[int] {
+			g := createGraph()
+
+			_, ok := g.(graph.MutableGraph[int])
+			if ok {
+				panic("g is expected to not implement graph.MutableGraph, but it does")
+			}
+
+			return g
+		}
+
+		BeforeEach(func() {
+			_ = createGraphAsImmutable()
+		})
+	})
+}
+
 func undirectedGraphTests(
 	graphName string,
 	createGraph func() graph.Graph[int],
 	containersMode ContainersMode,
 ) {
-	if createGraph().IsDirected() {
-		// skip
-		return
-	}
-
 	Context(fmt.Sprintf("%s: given an undirected graph", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
-			assertContainersMode(containersMode)
-
 			grph = createGraph()
 		})
 
-		It("has an unmodifiable set view of unordered edges", func() {
-			if containersMode != ContainersAreViews {
-				Skip("Graph.Edges() is not expected to return an unmodifiable view")
-			}
-
-			edges := grph.Edges()
-			Expect(edges).To(BeNonMutableSet[graph.EndpointPair[int]]())
-
-			grph = putEdge(grph, node1, node2)
-			testSingleEdgeForUndirectedGraph(edges)
+		It("is undirected", func() {
+			Expect(grph.IsDirected()).To(BeFalse())
 		})
+
+		if containersMode == ContainersAreViews {
+			It("has an unmodifiable set view of unordered edges", func() {
+				edges := grph.Edges()
+				Expect(edges).To(BeNonMutableSet[graph.EndpointPair[int]]())
+
+				grph = putEdge(grph, node1, node2)
+				testSingleEdgeForUndirectedGraph(edges)
+			})
+		}
 
 		// TODO: Write an equivalent test to above for ContainersAreCopies
 
-		It("has an unmodifiable set view of unordered incident edges", func() {
-			if containersMode != ContainersAreViews {
-				Skip("Graph.IncidentEdges() is not expected to return an unmodifiable view")
-			}
+		if containersMode == ContainersAreViews {
+			It("has an unmodifiable set view of unordered incident edges", func() {
+				incidentEdges := grph.IncidentEdges(node1)
+				Expect(incidentEdges).To(BeNonMutableSet[graph.EndpointPair[int]]())
 
-			incidentEdges := grph.IncidentEdges(node1)
-			Expect(incidentEdges).To(BeNonMutableSet[graph.EndpointPair[int]]())
-
-			grph = putEdge(grph, node1, node2)
-			testSingleEdgeForUndirectedGraph(incidentEdges)
-		})
+				grph = putEdge(grph, node1, node2)
+				testSingleEdgeForUndirectedGraph(incidentEdges)
+			})
+		}
 
 		// TODO: Write an equivalent test to above for ContainersAreCopies
 
@@ -666,50 +706,43 @@ func undirectedGraphTests(
 	})
 }
 
-func directedGraphsTests(
+func directedGraphTests(
 	graphName string,
 	createGraph func() graph.Graph[int],
 	containersMode ContainersMode,
 ) {
-	if !createGraph().IsDirected() {
-		// skip
-		return
-	}
-
 	Context(fmt.Sprintf("%s: given a directed graph", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
-			assertContainersMode(containersMode)
-
 			grph = createGraph()
 		})
 
-		It("has an unmodifiable set view of unordered edges", func() {
-			if containersMode != ContainersAreViews {
-				Skip("Graph.Edges() is not expected to return an unmodifiable view")
-			}
-
-			edges := grph.Edges()
-			Expect(edges).To(BeNonMutableSet[graph.EndpointPair[int]]())
-
-			grph = putEdge(grph, node1, node2)
-			testSingleEdgeForDirectedGraph(edges)
+		It("is directed", func() {
+			Expect(grph.IsDirected()).To(BeTrue())
 		})
+
+		if containersMode == ContainersAreViews {
+			It("has an unmodifiable set view of unordered edges", func() {
+				edges := grph.Edges()
+				Expect(edges).To(BeNonMutableSet[graph.EndpointPair[int]]())
+
+				grph = putEdge(grph, node1, node2)
+				testSingleEdgeForDirectedGraph(edges)
+			})
+		}
 
 		// TODO: Write an equivalent test to above for ContainersAreCopies
 
-		It("has an unmodifiable set view of ordered incident edges", func() {
-			if containersMode != ContainersAreViews {
-				Skip("Graph.IncidentEdges() is not expected to return an unmodifiable view")
-			}
+		if containersMode == ContainersAreViews {
+			It("has an unmodifiable set view of ordered incident edges", func() {
+				incidentEdges := grph.IncidentEdges(node1)
+				Expect(incidentEdges).To(BeNonMutableSet[graph.EndpointPair[int]]())
 
-			incidentEdges := grph.IncidentEdges(node1)
-			Expect(incidentEdges).To(BeNonMutableSet[graph.EndpointPair[int]]())
-
-			grph = putEdge(grph, node1, node2)
-			testSingleEdgeForDirectedGraph(incidentEdges)
-		})
+				grph = putEdge(grph, node1, node2)
+				testSingleEdgeForDirectedGraph(incidentEdges)
+			})
+		}
 
 		// TODO: Write an equivalent test to above for ContainersAreCopies
 
@@ -742,25 +775,20 @@ func directedGraphsTests(
 	})
 }
 
-func allowsSelfLoopsGraphTests(
-	graphName string,
-	createGraph func() graph.Graph[int],
-	containersMode ContainersMode,
-) {
-	if !createGraph().AllowsSelfLoops() {
-		// skip
-		return
-	}
-
+func allowsSelfLoopsGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 	Context(fmt.Sprintf("%s: given a graph that allows self loops", graphName), func() {
+		var grph graph.Graph[int]
+
 		BeforeEach(func() {
-			assertContainersMode(containersMode)
+			grph = createGraph()
+		})
+
+		It("allows self loops", func() {
+			Expect(grph.AllowsSelfLoops()).To(BeTrue())
 		})
 
 		Context("when putting one self-loop edge", func() {
 			It("sees the shared node as its own adjacent node", func() {
-				grph := createGraph()
-
 				grph = putEdge(grph, node1, node1)
 
 				testSet(grph.AdjacentNodes(node1), node1)
@@ -769,25 +797,20 @@ func allowsSelfLoopsGraphTests(
 	})
 }
 
-func disallowsSelfLoopsGraphTests(
-	graphName string,
-	createGraph func() graph.Graph[int],
-	containersMode ContainersMode,
-) {
-	if createGraph().AllowsSelfLoops() {
-		// skip
-		return
-	}
-
+func disallowsSelfLoopsGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 	Context(fmt.Sprintf("%s: given a graph that disallows self loops", graphName), func() {
+		var grph graph.Graph[int]
+
 		BeforeEach(func() {
-			assertContainersMode(containersMode)
+			grph = createGraph()
+		})
+
+		It("disallows self loops", func() {
+			Expect(grph.AllowsSelfLoops()).To(BeFalse())
 		})
 
 		Context("when putting one self-loop edge", func() {
 			It("panics", func() {
-				grph := createGraph()
-
 				Expect(func() { grph = putEdge(grph, node1, node1) }).
 					To(PanicWith("self-loops are disallowed"))
 			})
@@ -795,26 +818,11 @@ func disallowsSelfLoopsGraphTests(
 	})
 }
 
-func undirectedAllowsSelfLoopGraphTests(
-	graphName string,
-	createGraph func() graph.Graph[int],
-	containersMode ContainersMode,
-) {
-	if createGraph().IsDirected() {
-		// skip
-		return
-	}
-	if !createGraph().AllowsSelfLoops() {
-		// skip
-		return
-	}
-
+func undirectedAllowsSelfLoopGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 	Context(fmt.Sprintf("%s: given an undirected graph that allows self loops", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
-			assertContainersMode(containersMode)
-
 			grph = createGraph()
 		})
 
@@ -823,29 +831,37 @@ func undirectedAllowsSelfLoopGraphTests(
 				HaveStringRepr(
 					"isDirected: false, allowsSelfLoops: true, nodes: [], edges: []"))
 		})
+
+		Context("when adding one node", func() {
+			It("has an appropriate string representation", func() {
+				grph = addNode(grph, node1)
+
+				Expect(grph).To(
+					HaveStringRepr(
+						"isDirected: false, allowsSelfLoops: true, nodes: [1], edges: []"))
+			})
+		})
+
+		Context("when putting one edge", func() {
+			It("has an appropriate string representation", func() {
+				grph = putEdge(grph, node1, node2)
+
+				Expect(grph).To(
+					HaveStringReprThatIsAnyOf(
+						"isDirected: false, allowsSelfLoops: true, nodes: [1, 2], edges: [[1, 2]]",
+						"isDirected: false, allowsSelfLoops: true, nodes: [2, 1], edges: [[1, 2]]",
+						"isDirected: false, allowsSelfLoops: true, nodes: [1, 2], edges: [[2, 1]]",
+						"isDirected: false, allowsSelfLoops: true, nodes: [2, 1], edges: [[2, 1]]"))
+			})
+		})
 	})
 }
 
-func undirectedDisallowsSelfLoopGraphTests(
-	graphName string,
-	createGraph func() graph.Graph[int],
-	containersMode ContainersMode,
-) {
-	if createGraph().IsDirected() {
-		// skip
-		return
-	}
-	if createGraph().AllowsSelfLoops() {
-		// skip
-		return
-	}
-
+func undirectedDisallowsSelfLoopGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 	Context(fmt.Sprintf("%s: given an undirected graph that disallows self loops", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
-			assertContainersMode(containersMode)
-
 			grph = createGraph()
 		})
 
@@ -854,33 +870,37 @@ func undirectedDisallowsSelfLoopGraphTests(
 				HaveStringRepr(
 					"isDirected: false, allowsSelfLoops: false, nodes: [], edges: []"))
 		})
+
+		Context("when adding one node", func() {
+			It("has an appropriate string representation", func() {
+				grph = addNode(grph, node1)
+
+				Expect(grph).To(
+					HaveStringRepr(
+						"isDirected: false, allowsSelfLoops: false, nodes: [1], edges: []"))
+			})
+		})
+
+		Context("when putting one edge", func() {
+			It("has an appropriate string representation", func() {
+				grph = putEdge(grph, node1, node2)
+
+				Expect(grph).To(
+					HaveStringReprThatIsAnyOf(
+						"isDirected: false, allowsSelfLoops: false, nodes: [1, 2], edges: [[1, 2]]",
+						"isDirected: false, allowsSelfLoops: false, nodes: [2, 1], edges: [[1, 2]]",
+						"isDirected: false, allowsSelfLoops: false, nodes: [1, 2], edges: [[2, 1]]",
+						"isDirected: false, allowsSelfLoops: false, nodes: [2, 1], edges: [[2, 1]]"))
+			})
+		})
 	})
 }
 
-func directedAllowsSelfLoopGraphTests(
-	graphName string,
-	createGraph func() graph.Graph[int],
-	containersMode ContainersMode,
-) {
-	if !createGraph().IsDirected() {
-		// skip
-		return
-	}
-	if !createGraph().AllowsSelfLoops() {
-		// skip
-		return
-	}
-
+func directedAllowsSelfLoopGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 	Context(fmt.Sprintf("%s: given a directed graph that allows self loops", graphName), func() {
-		var grph graph.Graph[int]
-
-		BeforeEach(func() {
-			assertContainersMode(containersMode)
-
-			grph = createGraph()
-		})
-
 		It("has an appropriate string representation", func() {
+			grph := createGraph()
+
 			Expect(grph).To(
 				HaveStringRepr(
 					"isDirected: true, allowsSelfLoops: true, nodes: [], edges: []"))
@@ -888,46 +908,16 @@ func directedAllowsSelfLoopGraphTests(
 	})
 }
 
-func directedDisallowsSelfLoopGraphTests(
-	graphName string,
-	createGraph func() graph.Graph[int],
-	containersMode ContainersMode,
-) {
-	if !createGraph().IsDirected() {
-		// skip
-		return
-	}
-	if !createGraph().AllowsSelfLoops() {
-		// skip
-		return
-	}
-
+func directedDisallowsSelfLoopGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 	Context(fmt.Sprintf("%s: given a directed graph that disallows self loops", graphName), func() {
-		var grph graph.Graph[int]
-
-		BeforeEach(func() {
-			assertContainersMode(containersMode)
-
-			grph = createGraph()
-		})
-
 		It("has an appropriate string representation", func() {
+			grph := createGraph()
+
 			Expect(grph).To(
 				HaveStringRepr(
 					"isDirected: true, allowsSelfLoops: false, nodes: [], edges: []"))
 		})
 	})
-}
-
-func assertContainersMode(containersMode ContainersMode) {
-	if containersMode != ContainersAreViews &&
-		containersMode != ContainersAreCopies {
-		Fail(
-			fmt.Sprintf(
-				"containersMode is neither ContainersAreViews nor "+
-					"ContainersAreCopies, but %d instead",
-				containersMode))
-	}
 }
 
 func testSet(s set.Set[int], expectedValues ...int) {

@@ -164,7 +164,10 @@ func (g *graph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
 func (g *graph[N]) String() string {
 	return "isDirected: false, allowsSelfLoops: " +
 		strconv.FormatBool(g.allowsSelfLoops) +
-		", nodes: [], edges: []"
+		", nodes: " +
+		g.Nodes().String() +
+		", edges: " +
+		g.Edges().String()
 }
 
 func (g *graph[N]) AddNode(node N) bool {
