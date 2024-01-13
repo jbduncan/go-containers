@@ -664,7 +664,7 @@ func undirectedGraphTests(
 				Expect(grph.HasEdgeConnecting(node1, node2)).
 					To(BeTrue())
 
-				Expect(grph.HasEdgeConnectingEndpoints(graph.NewUnorderedEndpointPair(node1, node2))).
+				Expect(grph.HasEdgeConnectingEndpoints(graph.UnorderedEndpointPair(node1, node2))).
 					To(BeTrue())
 			})
 
@@ -672,7 +672,7 @@ func undirectedGraphTests(
 				Expect(grph.HasEdgeConnecting(node2, node1)).
 					To(BeTrue())
 
-				Expect(grph.HasEdgeConnectingEndpoints(graph.NewUnorderedEndpointPair(node2, node1))).
+				Expect(grph.HasEdgeConnectingEndpoints(graph.UnorderedEndpointPair(node2, node1))).
 					To(BeTrue())
 			})
 
@@ -682,9 +682,9 @@ func undirectedGraphTests(
 				Expect(grph.HasEdgeConnecting(nodeNotInGraph, node1)).
 					To(BeFalse())
 
-				Expect(grph.HasEdgeConnectingEndpoints(graph.NewUnorderedEndpointPair(node1, nodeNotInGraph))).
+				Expect(grph.HasEdgeConnectingEndpoints(graph.UnorderedEndpointPair(node1, nodeNotInGraph))).
 					To(BeFalse())
-				Expect(grph.HasEdgeConnectingEndpoints(graph.NewUnorderedEndpointPair(nodeNotInGraph, node1))).
+				Expect(grph.HasEdgeConnectingEndpoints(graph.UnorderedEndpointPair(nodeNotInGraph, node1))).
 					To(BeFalse())
 			})
 
@@ -692,13 +692,13 @@ func undirectedGraphTests(
 				Expect(grph.HasEdgeConnecting(node2, nodeNotInGraph)).
 					To(BeFalse())
 
-				Expect(grph.HasEdgeConnectingEndpoints(graph.NewUnorderedEndpointPair(node2, nodeNotInGraph))).
+				Expect(grph.HasEdgeConnectingEndpoints(graph.UnorderedEndpointPair(node2, nodeNotInGraph))).
 					To(BeFalse())
 			})
 
 			Context("and trying to find that edge with ordered endpoints", func() {
 				It("returns false", func() {
-					Expect(grph.HasEdgeConnectingEndpoints(graph.NewOrderedEndpointPair(node1, node2))).
+					Expect(grph.HasEdgeConnectingEndpoints(graph.OrderedEndpointPair(node1, node2))).
 						To(BeFalse())
 				})
 			})
@@ -1001,11 +1001,11 @@ func testEmptyEdges(edges set.Set[graph.EndpointPair[int]]) {
 	// Set.Contains()
 	Expect(edges).ToNot(
 		Contain(
-			graph.NewOrderedEndpointPair(
+			graph.OrderedEndpointPair(
 				nodeNotInGraph, nodeNotInGraph)))
 	Expect(edges).ToNot(
 		Contain(
-			graph.NewUnorderedEndpointPair(
+			graph.UnorderedEndpointPair(
 				nodeNotInGraph, nodeNotInGraph)))
 
 	// Set.String()
@@ -1027,30 +1027,30 @@ func testSingleEdgeForUndirectedGraph(endpointPairs set.Set[graph.EndpointPair[i
 	// - [[2, 1]]
 	matcher := HaveForEachThatConsistsOf[graph.EndpointPair[int]](
 		BeEquivalentToUsingEqualMethod(
-			graph.NewUnorderedEndpointPair(node1, node2)))
+			graph.UnorderedEndpointPair(node1, node2)))
 	Expect(matcher.Match(endpointPairs)).To(
 		BeTrue(),
 		"to consist of %v according to graph.EndpointPair.Equal()",
 		[]graph.EndpointPair[int]{
-			graph.NewUnorderedEndpointPair(node1, node2),
+			graph.UnorderedEndpointPair(node1, node2),
 		})
 
 	// Set.Contains()
 	Expect(endpointPairs).To(
-		Contain(graph.NewUnorderedEndpointPair(node1, node2)))
+		Contain(graph.UnorderedEndpointPair(node1, node2)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewOrderedEndpointPair(node1, node2)))
+		Contain(graph.OrderedEndpointPair(node1, node2)))
 	Expect(endpointPairs).To(
-		Contain(graph.NewUnorderedEndpointPair(node2, node1)))
+		Contain(graph.UnorderedEndpointPair(node2, node1)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewOrderedEndpointPair(node2, node1)))
+		Contain(graph.OrderedEndpointPair(node2, node1)))
 	Expect(endpointPairs).ToNot(
 		Contain(
-			graph.NewOrderedEndpointPair(
+			graph.OrderedEndpointPair(
 				nodeNotInGraph, nodeNotInGraph)))
 	Expect(endpointPairs).ToNot(
 		Contain(
-			graph.NewUnorderedEndpointPair(
+			graph.UnorderedEndpointPair(
 				nodeNotInGraph, nodeNotInGraph)))
 
 	// Set.String()
@@ -1071,30 +1071,30 @@ func testSingleEdgeForDirectedGraph(endpointPairs set.Set[graph.EndpointPair[int
 	// .ForEach() are exactly equal to [<1 -> 2>].
 	matcher := HaveForEachThatConsistsOf[graph.EndpointPair[int]](
 		BeEquivalentToUsingEqualMethod(
-			graph.NewOrderedEndpointPair(node1, node2)))
+			graph.OrderedEndpointPair(node1, node2)))
 	Expect(matcher.Match(endpointPairs)).To(
 		BeTrue(),
 		"to consist of %v according to graph.EndpointPair.Equal()",
 		[]graph.EndpointPair[int]{
-			graph.NewOrderedEndpointPair(node1, node2),
+			graph.OrderedEndpointPair(node1, node2),
 		})
 
 	// Set.Contains()
 	Expect(endpointPairs).To(
-		Contain(graph.NewOrderedEndpointPair(node1, node2)))
+		Contain(graph.OrderedEndpointPair(node1, node2)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewUnorderedEndpointPair(node1, node2)))
+		Contain(graph.UnorderedEndpointPair(node1, node2)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewOrderedEndpointPair(node2, node1)))
+		Contain(graph.OrderedEndpointPair(node2, node1)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewUnorderedEndpointPair(node2, node1)))
+		Contain(graph.UnorderedEndpointPair(node2, node1)))
 	Expect(endpointPairs).ToNot(
 		Contain(
-			graph.NewOrderedEndpointPair(
+			graph.OrderedEndpointPair(
 				nodeNotInGraph, nodeNotInGraph)))
 	Expect(endpointPairs).ToNot(
 		Contain(
-			graph.NewUnorderedEndpointPair(
+			graph.UnorderedEndpointPair(
 				nodeNotInGraph, nodeNotInGraph)))
 
 	// Set.String()
@@ -1122,41 +1122,41 @@ func testTwoEdgesForUndirectedGraphs(endpointPairs set.Set[graph.EndpointPair[in
 	// - [[3, 1], [2, 1]]
 	matcher := HaveForEachThatConsistsOf[graph.EndpointPair[int]](
 		BeEquivalentToUsingEqualMethod(
-			graph.NewUnorderedEndpointPair(node1, node2)),
+			graph.UnorderedEndpointPair(node1, node2)),
 		BeEquivalentToUsingEqualMethod(
-			graph.NewUnorderedEndpointPair(node1, node3)))
+			graph.UnorderedEndpointPair(node1, node3)))
 	Expect(matcher.Match(endpointPairs)).To(
 		BeTrue(),
 		"to consist of %v according to graph.EndpointPair.Equal()",
 		[]graph.EndpointPair[int]{
-			graph.NewUnorderedEndpointPair(node1, node2),
-			graph.NewUnorderedEndpointPair(node1, node3),
+			graph.UnorderedEndpointPair(node1, node2),
+			graph.UnorderedEndpointPair(node1, node3),
 		})
 
 	// Set.Contains()
 	Expect(endpointPairs).To(
-		Contain(graph.NewUnorderedEndpointPair(node1, node2)))
+		Contain(graph.UnorderedEndpointPair(node1, node2)))
 	Expect(endpointPairs).To(
-		Contain(graph.NewUnorderedEndpointPair(node1, node3)))
+		Contain(graph.UnorderedEndpointPair(node1, node3)))
 	Expect(endpointPairs).To(
-		Contain(graph.NewUnorderedEndpointPair(node2, node1)))
+		Contain(graph.UnorderedEndpointPair(node2, node1)))
 	Expect(endpointPairs).To(
-		Contain(graph.NewUnorderedEndpointPair(node3, node1)))
+		Contain(graph.UnorderedEndpointPair(node3, node1)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewOrderedEndpointPair(node1, node2)))
+		Contain(graph.OrderedEndpointPair(node1, node2)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewOrderedEndpointPair(node1, node3)))
+		Contain(graph.OrderedEndpointPair(node1, node3)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewOrderedEndpointPair(node2, node1)))
+		Contain(graph.OrderedEndpointPair(node2, node1)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewOrderedEndpointPair(node3, node1)))
+		Contain(graph.OrderedEndpointPair(node3, node1)))
 	Expect(endpointPairs).ToNot(
 		Contain(
-			graph.NewOrderedEndpointPair(
+			graph.OrderedEndpointPair(
 				nodeNotInGraph, nodeNotInGraph)))
 	Expect(endpointPairs).ToNot(
 		Contain(
-			graph.NewUnorderedEndpointPair(
+			graph.UnorderedEndpointPair(
 				nodeNotInGraph, nodeNotInGraph)))
 
 	// Set.String()
@@ -1198,41 +1198,41 @@ func testTwoEdgesForDirectedGraphs(endpointPairs set.Set[graph.EndpointPair[int]
 	// - [<1 -> 3>, <1 -> 2>]
 	matcher := HaveForEachThatConsistsOf[graph.EndpointPair[int]](
 		BeEquivalentToUsingEqualMethod(
-			graph.NewOrderedEndpointPair(node1, node2)),
+			graph.OrderedEndpointPair(node1, node2)),
 		BeEquivalentToUsingEqualMethod(
-			graph.NewOrderedEndpointPair(node1, node3)))
+			graph.OrderedEndpointPair(node1, node3)))
 	Expect(matcher.Match(endpointPairs)).To(
 		BeTrue(),
 		"to consist of %v according to graph.EndpointPair.Equal()",
 		[]graph.EndpointPair[int]{
-			graph.NewOrderedEndpointPair(node1, node2),
-			graph.NewOrderedEndpointPair(node1, node3),
+			graph.OrderedEndpointPair(node1, node2),
+			graph.OrderedEndpointPair(node1, node3),
 		})
 
 	// Set.Contains()
 	Expect(endpointPairs).To(
-		Contain(graph.NewOrderedEndpointPair(node1, node2)))
+		Contain(graph.OrderedEndpointPair(node1, node2)))
 	Expect(endpointPairs).To(
-		Contain(graph.NewOrderedEndpointPair(node1, node3)))
+		Contain(graph.OrderedEndpointPair(node1, node3)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewOrderedEndpointPair(node2, node1)))
+		Contain(graph.OrderedEndpointPair(node2, node1)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewOrderedEndpointPair(node3, node1)))
+		Contain(graph.OrderedEndpointPair(node3, node1)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewUnorderedEndpointPair(node1, node2)))
+		Contain(graph.UnorderedEndpointPair(node1, node2)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewUnorderedEndpointPair(node1, node3)))
+		Contain(graph.UnorderedEndpointPair(node1, node3)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewUnorderedEndpointPair(node2, node1)))
+		Contain(graph.UnorderedEndpointPair(node2, node1)))
 	Expect(endpointPairs).ToNot(
-		Contain(graph.NewUnorderedEndpointPair(node3, node1)))
+		Contain(graph.UnorderedEndpointPair(node3, node1)))
 	Expect(endpointPairs).ToNot(
 		Contain(
-			graph.NewOrderedEndpointPair(
+			graph.OrderedEndpointPair(
 				nodeNotInGraph, nodeNotInGraph)))
 	Expect(endpointPairs).ToNot(
 		Contain(
-			graph.NewUnorderedEndpointPair(
+			graph.UnorderedEndpointPair(
 				nodeNotInGraph, nodeNotInGraph)))
 
 	// Set.String()

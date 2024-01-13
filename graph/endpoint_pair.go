@@ -7,8 +7,7 @@ import "fmt"
 // TODO: Document that an unordered endpoint pair and its reverse are equal to each other,
 //       and repeat again in the docs for EndpointPair.Equal().
 
-// TODO: Rename to just UnorderedEndpointPair to reflect that this function doesn't call new
-func NewUnorderedEndpointPair[N comparable](nodeU N, nodeV N) EndpointPair[N] {
+func UnorderedEndpointPair[N comparable](nodeU N, nodeV N) EndpointPair[N] {
 	// TODO: Strongly consider swapping nodeU and nodeV to prevent users from
 	//       relying on the "ordering" of an unordered endpoint pair.
 	return EndpointPair[N]{
@@ -18,8 +17,7 @@ func NewUnorderedEndpointPair[N comparable](nodeU N, nodeV N) EndpointPair[N] {
 	}
 }
 
-// TODO: Rename to just OrderedEndpointPair to reflect that this function doesn't call new
-func NewOrderedEndpointPair[N comparable](source N, target N) EndpointPair[N] {
+func OrderedEndpointPair[N comparable](source N, target N) EndpointPair[N] {
 	return EndpointPair[N]{
 		nodeU:     source,
 		nodeV:     target,

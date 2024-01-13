@@ -58,7 +58,7 @@ func TestEqual(t *testing.T) {
 	t.Run("graph a: [[link, zelda]]; graph b: [[link], [zelda]]; not equal", func(t *testing.T) {
 		g := NewWithT(t)
 		a := undirectedGraphOf(
-			graph.NewUnorderedEndpointPair("link", "zelda"))
+			graph.UnorderedEndpointPair("link", "zelda"))
 		b := undirectedGraphOf("link", "zelda")
 
 		g.Expect(graph.Equal(a, b)).To(BeFalse())

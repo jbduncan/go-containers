@@ -42,7 +42,7 @@ func (i incidentEdgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
 
 	adjacentNodes.ForEach(
 		func(adjNode N) {
-			fn(NewUnorderedEndpointPair(i.node, adjNode))
+			fn(UnorderedEndpointPair(i.node, adjNode))
 		})
 }
 

@@ -27,8 +27,8 @@ func (e edgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
 		// TODO: Replace .AdjacentNodes with .Successors when building
 		//       a directed graph type.
 		e.delegate.AdjacentNodes(u).ForEach(func(v N) {
-			uv := NewUnorderedEndpointPair(u, v)
-			vu := NewUnorderedEndpointPair(v, u)
+			uv := UnorderedEndpointPair(u, v)
+			vu := UnorderedEndpointPair(v, u)
 			if !result.Contains(uv) && !result.Contains(vu) {
 				result.Add(uv)
 				fn(uv)
