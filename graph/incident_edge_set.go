@@ -12,6 +12,10 @@ type incidentEdgeSet[N comparable] struct {
 }
 
 func (i incidentEdgeSet[N]) Contains(elem EndpointPair[N]) bool {
+	if elem.IsOrdered() {
+		return false
+	}
+
 	adjacentNodes, ok := i.adjacencyList[i.node]
 	if !ok {
 		return false
