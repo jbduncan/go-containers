@@ -6,15 +6,11 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
-// TODO: Docs
-// TODO: Document with an example use
 type Graph[N comparable] interface {
 	Nodes() set.Set[N]
 	Edges() set.Set[EndpointPair[N]]
 	IsDirected() bool
 	AllowsSelfLoops() bool
-	// NodeOrder() ElementOrder
-	// IncidentEdgeOrder() ElementOrder
 	AdjacentNodes(node N) set.Set[N]
 	Predecessors(node N) set.Set[N]
 	Successors(node N) set.Set[N]
@@ -27,13 +23,10 @@ type Graph[N comparable] interface {
 	String() string
 }
 
-// TODO: Docs
 type MutableGraph[N comparable] interface {
 	Graph[N]
 
 	AddNode(node N) bool
-	// TODO: Document that PutEdge will panic if Graph.AllowsSelfLoops() is true and nodeU and nodeV are equal
-	//       according to ==, and to check that nodeU != nodeV beforehand.
 	PutEdge(nodeU N, nodeV N) bool
 	RemoveNode(node N) bool
 	RemoveEdge(nodeU N, nodeV N) bool
@@ -56,11 +49,6 @@ func (b Builder[N]) AllowsSelfLoops(allowsSelfLoops bool) Builder[N] {
 	return b
 }
 
-// TODO: Consider returning a public version of the concrete type, rather
-//       than the MutableGraph interface, to allow new methods to be
-//       added without breaking backwards compatibility:
-//       - https://github.com/golang/go/wiki/CodeReviewComments#interfaces
-
 func (b Builder[N]) Build() MutableGraph[N] {
 	return &graph[N]{
 		adjacencyList:   map[N]set.MutableSet[N]{},
@@ -68,9 +56,6 @@ func (b Builder[N]) Build() MutableGraph[N] {
 		numEdges:        0,
 	}
 }
-
-// TODO: If the Graph and MutableGraph interfaces are ever eliminated, move them and these
-//       compile-time type assertions to a test package.
 
 var (
 	_ Graph[int]        = (*graph[int])(nil)

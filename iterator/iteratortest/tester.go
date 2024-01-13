@@ -23,8 +23,6 @@ type Tester[T any] struct {
 	knownOrder       IteratorOrder
 }
 
-// TODO: Change to a style similar to
-// https://www.calhoun.io/more-effective-ddd-with-interface-test-suites/
 func ForIteratorWithKnownOrder[T any](
 	iteratorName string,
 	newIterator func() iterator.Iterator[T],

@@ -9,8 +9,6 @@ import (
 	"github.com/onsi/gomega/types"
 )
 
-// TODO: Experiment with migrating to go test. Does it make the tests easier to read?
-
 var _ = Describe("EndpointPair", func() {
 	Describe("given a new unordered endpoint pair", func() {
 		var endpointPair graph.EndpointPair[string]
@@ -274,7 +272,3 @@ func haveNodeV(node string) types.GomegaMatcher {
 		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} to have a nodeV equal to\n{{format .Data 1}}").
 		WithTemplateData(node)
 }
-
-// TODO: Guava's EndpointPairTest.java has some tests that use EndpointPair but check Graph.edges()
-//       and Network.asGraph().edges() for both directed and undirected graphs. Adapt these tests
-//       for our own graph types.

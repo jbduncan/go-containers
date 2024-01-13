@@ -8,12 +8,6 @@ endif
 build:
 	go build ./...
 
-# TODO: Refer to https://github.com/binkley/modern-java-practices for inspiration to make the project better.
-# TODO: Experiment with managing Go and golangci-lint with Nix.
-# TODO: Experiment with replacing the Makefile with Earthly or enhancing it with batect.
-# TODO: Experiment with spinning up a devcontainer for VSCode/IntelliJ, possibly using Nix and Earthly/batect.
-# TODO: Introduce CI. Earthly/batect should help with this.
-
 .PHONY: lint
 lint:
 	@echo "Linting 'go mod tidy'..."
@@ -46,21 +40,3 @@ check: build lint test
 update_versions:
 	go get -u ./... && go get -u -t ./... && go mod tidy && go mod verify && go mod download
 	@echo "Make sure to update the golangci-lint version in Makefile, too."
-
-# TODO: Adopt eg refactoring templates for:
-#   - time package:
-#     - == to Equal (even if revive catches this, being able to auto-fix it is valuable)
-#   - bool expression simplifications
-#     - !(a >= b) to a < b
-#     - !(a > b) to a <= b
-#     - !(a <= b) to a > b
-#     - !(a < b) to a >= b
-#     - !(a != b) to a == b
-#     - !(a == b) to a != b
-#     - !!a to a
-#   - `string == ""` or `string == ``` to `len(string) == 0`
-#   - Examples in https://errorprone.info/docs/refaster
-#   - Examples in https://github.com/PicnicSupermarket/error-prone-support
-#   - Any other examples that tools like revive can catch but can't auto-fix
-
-# TODO: Add eg templates for Graph.Equal and Set.Equal

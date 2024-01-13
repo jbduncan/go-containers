@@ -19,7 +19,6 @@ func Equal[T comparable](a, b Set[T]) bool {
 		return false
 	}
 
-	// TODO: If Set.Iterator() is ever made, optimise this by returning when result = false
 	result := true
 	b.ForEach(func(elem T) {
 		if !a.Contains(elem) {

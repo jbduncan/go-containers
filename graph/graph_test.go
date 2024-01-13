@@ -13,19 +13,6 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-// TODO: Experiment with migrating to go test. Does it make the tests easier to read?
-
-// TODO: Move mutableGraphTests to a graphtest package
-// TODO: Migrate mutableGraphTests to a struct with a constructor function like:
-//       graphtest.MutableGraph(
-//           name string,
-//           newGraph func() graph.MutableGraph[int],
-//           ...graphtest.Option options)
-//       ...where options is any of:
-//         - WhereContainersAreViews
-//         - WhereContainersAreCopies
-//       ...and the default is `WhereContainersAreViews`
-
 var _ = Describe("Graphs", func() {
 	graphTests(
 		"graph.Undirected[int]().Build()",
@@ -34,8 +21,7 @@ var _ = Describe("Graphs", func() {
 		},
 		Mutable,
 		Undirected,
-		DisallowsSelfLoops,
-		ContainersAreViews)
+		DisallowsSelfLoops)
 	graphTests(
 		"graph.Undirected[int]().AllowsSelfLoops().Build()",
 		func() graph.Graph[int] {
@@ -43,8 +29,7 @@ var _ = Describe("Graphs", func() {
 		},
 		Mutable,
 		Undirected,
-		AllowsSelfLoops,
-		ContainersAreViews)
+		AllowsSelfLoops)
 	graphTests(
 		"graph.Directed[int]().Build()",
 		func() graph.Graph[int] {
@@ -52,8 +37,7 @@ var _ = Describe("Graphs", func() {
 		},
 		Mutable,
 		Directed,
-		DisallowsSelfLoops,
-		ContainersAreViews)
+		DisallowsSelfLoops)
 })
 
 const (
@@ -88,15 +72,9 @@ type ContainersMode int
 
 const (
 	ContainersAreViews ContainersMode = iota
-	// TODO: Add additional test cases for graphs whose accessor containers (Nodes(), Edges(), etc.)
-	//       are immutable copies.
-	ContainersAreCopies
 )
 
 func addNode(grph graph.Graph[int], node int) graph.Graph[int] {
-	// TODO: When introducing ImmutableGraph, expand addNode to recognise when grph is not
-	//  mutable and return a copy of the graph with the added node instead.
-
 	if graphAsMutable, ok := grph.(graph.MutableGraph[int]); ok {
 		graphAsMutable.AddNode(node)
 	}
@@ -105,9 +83,6 @@ func addNode(grph graph.Graph[int], node int) graph.Graph[int] {
 }
 
 func putEdge(grph graph.Graph[int], node1 int, node2 int) graph.Graph[int] {
-	// TODO: When introducing ImmutableGraph, expand putEdge to recognise when grph is not
-	//  mutable and return a copy of the graph with the added edge instead.
-
 	if graphAsMutable, ok := grph.(graph.MutableGraph[int]); ok {
 		graphAsMutable.PutEdge(node1, node2)
 	}
@@ -122,15 +97,12 @@ func putEdge(grph graph.Graph[int], node1 int, node2 int) graph.Graph[int] {
 // function; for example, testing that the `Nodes()` method returns the set of the nodes in the
 // graph. Details of specific implementations of the Graph and MutableGraph interfaces are
 // explicitly not tested.
-//
-// TODO: Move to a public package for graph testing utilities
 func graphTests(
 	graphName string,
 	createGraph func() graph.Graph[int],
 	mutability Mutability,
 	directionMode DirectionMode,
 	selfLoopsMode SelfLoopsMode,
-	containersMode ContainersMode,
 ) {
 	Context(fmt.Sprintf("%s: given a graph", graphName), func() {
 		var grph graph.Graph[int]
@@ -147,53 +119,37 @@ func graphTests(
 			testEmptyEdges(grph.Edges())
 		})
 
-		if containersMode == ContainersAreViews {
-			It("has an unmodifiable nodes set view", func() {
-				nodes := grph.Nodes()
-				Expect(nodes).To(BeNonMutableSet[int]())
+		It("has an unmodifiable nodes set view", func() {
+			nodes := grph.Nodes()
+			Expect(nodes).To(BeNonMutableSet[int]())
 
-				grph = addNode(grph, node1)
-				testSet(nodes, node1)
-			})
-		}
+			grph = addNode(grph, node1)
+			testSet(nodes, node1)
+		})
 
-		// TODO: Write an equivalent test to above for ContainersAreCopies
+		It("has an unmodifiable adjacent nodes set view", func() {
+			adjacentNodes := grph.AdjacentNodes(node1)
+			Expect(adjacentNodes).To(BeNonMutableSet[int]())
 
-		if containersMode == ContainersAreViews {
-			It("has an unmodifiable adjacent nodes set view", func() {
-				adjacentNodes := grph.AdjacentNodes(node1)
-				Expect(adjacentNodes).To(BeNonMutableSet[int]())
+			grph = putEdge(grph, node1, node2)
+			testSet(adjacentNodes, node2)
+		})
 
-				grph = putEdge(grph, node1, node2)
-				testSet(adjacentNodes, node2)
-			})
-		}
+		It("had an unmodifiable predecessors set view", func() {
+			predecessors := grph.Predecessors(node1)
+			Expect(predecessors).To(BeNonMutableSet[int]())
 
-		// TODO: Write an equivalent test to above for ContainersAreCopies
+			grph = putEdge(grph, node2, node1)
+			testSet(predecessors, node2)
+		})
 
-		if containersMode == ContainersAreViews {
-			It("had an unmodifiable predecessors set view", func() {
-				predecessors := grph.Predecessors(node1)
-				Expect(predecessors).To(BeNonMutableSet[int]())
+		It("has an unmodifiable successors set view", func() {
+			successors := grph.Successors(node1)
+			Expect(successors).To(BeNonMutableSet[int]())
 
-				grph = putEdge(grph, node2, node1)
-				testSet(predecessors, node2)
-			})
-		}
-
-		// TODO: Write an equivalent test to above for ContainersAreCopies
-
-		if containersMode == ContainersAreViews {
-			It("has an unmodifiable successors set view", func() {
-				successors := grph.Successors(node1)
-				Expect(successors).To(BeNonMutableSet[int]())
-
-				grph = putEdge(grph, node1, node2)
-				testSet(successors, node2)
-			})
-		}
-
-		// TODO: Write an equivalent test to above for ContainersAreCopies
+			grph = putEdge(grph, node1, node2)
+			testSet(successors, node2)
+		})
 
 		Context("when adding one node", func() {
 			BeforeEach(func() {
@@ -333,7 +289,7 @@ func graphTests(
 	}
 
 	if directionMode == Undirected {
-		undirectedGraphTests(graphName, createGraph, containersMode)
+		undirectedGraphTests(graphName, createGraph)
 
 		if selfLoopsMode == AllowsSelfLoops {
 			undirectedAllowsSelfLoopGraphTests(graphName, createGraph)
@@ -344,7 +300,7 @@ func graphTests(
 	}
 
 	if directionMode == Directed {
-		directedGraphTests(graphName, createGraph, containersMode)
+		directedGraphTests(graphName, createGraph)
 
 		if selfLoopsMode == AllowsSelfLoops {
 			directedAllowsSelfLoopGraphTests(graphName, createGraph)
@@ -574,7 +530,6 @@ func immutableGraphTests(graphName string, createGraph func() graph.Graph[int]) 
 func undirectedGraphTests(
 	graphName string,
 	createGraph func() graph.Graph[int],
-	containersMode ContainersMode,
 ) {
 	Context(fmt.Sprintf("%s: given an undirected graph", graphName), func() {
 		var grph graph.Graph[int]
@@ -587,29 +542,21 @@ func undirectedGraphTests(
 			Expect(grph.IsDirected()).To(BeFalse())
 		})
 
-		if containersMode == ContainersAreViews {
-			It("has an unmodifiable set view of unordered edges", func() {
-				edges := grph.Edges()
-				Expect(edges).To(BeNonMutableSet[graph.EndpointPair[int]]())
+		It("has an unmodifiable set view of unordered edges", func() {
+			edges := grph.Edges()
+			Expect(edges).To(BeNonMutableSet[graph.EndpointPair[int]]())
 
-				grph = putEdge(grph, node1, node2)
-				testSingleEdgeForUndirectedGraph(edges)
-			})
-		}
+			grph = putEdge(grph, node1, node2)
+			testSingleEdgeForUndirectedGraph(edges)
+		})
 
-		// TODO: Write an equivalent test to above for ContainersAreCopies
+		It("has an unmodifiable set view of unordered incident edges", func() {
+			incidentEdges := grph.IncidentEdges(node1)
+			Expect(incidentEdges).To(BeNonMutableSet[graph.EndpointPair[int]]())
 
-		if containersMode == ContainersAreViews {
-			It("has an unmodifiable set view of unordered incident edges", func() {
-				incidentEdges := grph.IncidentEdges(node1)
-				Expect(incidentEdges).To(BeNonMutableSet[graph.EndpointPair[int]]())
-
-				grph = putEdge(grph, node1, node2)
-				testSingleEdgeForUndirectedGraph(incidentEdges)
-			})
-		}
-
-		// TODO: Write an equivalent test to above for ContainersAreCopies
+			grph = putEdge(grph, node1, node2)
+			testSingleEdgeForUndirectedGraph(incidentEdges)
+		})
 
 		Context("when putting one edge", func() {
 			BeforeEach(func() {
@@ -724,7 +671,6 @@ func undirectedGraphTests(
 func directedGraphTests(
 	graphName string,
 	createGraph func() graph.Graph[int],
-	containersMode ContainersMode,
 ) {
 	Context(fmt.Sprintf("%s: given a directed graph", graphName), func() {
 		var grph graph.Graph[int]
@@ -737,29 +683,21 @@ func directedGraphTests(
 			Expect(grph.IsDirected()).To(BeTrue())
 		})
 
-		if containersMode == ContainersAreViews {
-			It("has an unmodifiable set view of unordered edges", func() {
-				edges := grph.Edges()
-				Expect(edges).To(BeNonMutableSet[graph.EndpointPair[int]]())
+		It("has an unmodifiable set view of unordered edges", func() {
+			edges := grph.Edges()
+			Expect(edges).To(BeNonMutableSet[graph.EndpointPair[int]]())
 
-				grph = putEdge(grph, node1, node2)
-				testSingleEdgeForDirectedGraph(edges)
-			})
-		}
+			grph = putEdge(grph, node1, node2)
+			testSingleEdgeForDirectedGraph(edges)
+		})
 
-		// TODO: Write an equivalent test to above for ContainersAreCopies
+		It("has an unmodifiable set view of ordered incident edges", func() {
+			incidentEdges := grph.IncidentEdges(node1)
+			Expect(incidentEdges).To(BeNonMutableSet[graph.EndpointPair[int]]())
 
-		if containersMode == ContainersAreViews {
-			It("has an unmodifiable set view of ordered incident edges", func() {
-				incidentEdges := grph.IncidentEdges(node1)
-				Expect(incidentEdges).To(BeNonMutableSet[graph.EndpointPair[int]]())
-
-				grph = putEdge(grph, node1, node2)
-				testSingleEdgeForDirectedGraph(incidentEdges)
-			})
-		}
-
-		// TODO: Write an equivalent test to above for ContainersAreCopies
+			grph = putEdge(grph, node1, node2)
+			testSingleEdgeForDirectedGraph(incidentEdges)
+		})
 
 		Context("when putting one edge", func() {
 			BeforeEach(func() {

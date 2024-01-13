@@ -12,17 +12,13 @@ type incidentEdgeSet[N comparable] struct {
 }
 
 func (i incidentEdgeSet[N]) Contains(elem EndpointPair[N]) bool {
-	if !elem.IsOrdered() {
-		adjacentNodes, ok := i.adjacencyList[i.node]
-		if !ok {
-			return false
-		}
-
-		return i.node == elem.NodeU() && adjacentNodes.Contains(elem.NodeV()) ||
-			i.node == elem.NodeV() && adjacentNodes.Contains(elem.NodeU())
+	adjacentNodes, ok := i.adjacencyList[i.node]
+	if !ok {
+		return false
 	}
-	// TODO: Implement for directed graphs
-	return false
+
+	return i.node == elem.NodeU() && adjacentNodes.Contains(elem.NodeV()) ||
+		i.node == elem.NodeV() && adjacentNodes.Contains(elem.NodeU())
 }
 
 func (i incidentEdgeSet[N]) Len() int {

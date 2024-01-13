@@ -2,11 +2,6 @@ package graph
 
 import "fmt"
 
-// TODO: Docs
-
-// TODO: Document that an unordered endpoint pair and its reverse are equal to each other,
-//       and repeat again in the docs for EndpointPair.Equal().
-
 func UnorderedEndpointPair[N comparable](nodeU N, nodeV N) EndpointPair[N] {
 	return EndpointPair[N]{
 		nodeU:     nodeV,
@@ -71,8 +66,6 @@ func (e EndpointPair[N]) AdjacentNode(node N) N {
 func (e EndpointPair[N]) IsOrdered() bool {
 	return e.isOrdered
 }
-
-// TODO: Document that == is discouraged.
 
 func (e EndpointPair[N]) Equal(other EndpointPair[N]) bool {
 	if e.IsOrdered() && other.IsOrdered() {

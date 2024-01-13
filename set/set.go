@@ -6,13 +6,6 @@ type Set[T comparable] interface {
 	// Contains returns true if this set contains the given element, otherwise it returns false.
 	Contains(elem T) bool
 
-	// TODO: Introduce ContainsAll(Rangeable) (no need for varargs overload as set.Of allows for chaining),
-	//       where Rangeable is a type alias for a range-able function (as per
-	//       https://github.com/golang/go/issues/61405). Inspired by proposal
-	//       https://github.com/golang/go/discussions/47331.
-	// TODO: Consider introducing ContainsAny(Rangeable) similarly to string.ContainsAny. Inspired by proposal
-	//       https://github.com/golang/go/discussions/47331.
-
 	// Len returns the number of elements in this set.
 	Len() int
 
@@ -29,14 +22,6 @@ type Set[T comparable] interface {
 	//
 	// This method satisfies fmt.Stringer.
 	String() string
-
-	// TODO: Set: make Iterator method that returns an Iterator.
-	//       Note: this depends on any of:
-	//         - The "range over func" proposal: https://github.com/golang/go/issues/61405
-	//         - Making a custom map type that we can easily make an iterator for
-	//         - Using reflect.MapIter
-	// Iterator returns an iterator for the elements in this set.
-	// Iterator() iterator.Iterator[T]
 }
 
 // MutableSet is a Set with additional methods for adding elements to the set and removing them.
@@ -47,17 +32,10 @@ type MutableSet[T comparable] interface {
 	// those elements again. Returns true if this set changed as a result of this call, otherwise false.
 	Add(elem T, others ...T) bool
 
-	// TODO: Introduce AddAll(Rangeable)
-
 	// Remove removes the given element(s) from this set. If any of the elements are already absent, the set will not
 	// attempt to remove those elements. Returns true if this set changed as a result of this call, otherwise false.
 	Remove(elem T, others ...T) bool
-
-	// TODO: Introduce RemoveAll(Rangeable)
 }
-
-// TODO: Make all set implementations incomparable with == by using the same trick as:
-//       https://github.com/tailscale/tailscale/blob/e5e5ebda44e7d28df279e89d3cc3a8b904843304/types/structs/structs.go
 
 var (
 	_ Set[int]        = (*MutableMapSet[int])(nil)
