@@ -8,11 +8,9 @@ import "fmt"
 //       and repeat again in the docs for EndpointPair.Equal().
 
 func UnorderedEndpointPair[N comparable](nodeU N, nodeV N) EndpointPair[N] {
-	// TODO: Strongly consider swapping nodeU and nodeV to prevent users from
-	//       relying on the "ordering" of an unordered endpoint pair.
 	return EndpointPair[N]{
-		nodeU:     nodeU,
-		nodeV:     nodeV,
+		nodeU:     nodeV,
+		nodeV:     nodeU,
 		isOrdered: false,
 	}
 }

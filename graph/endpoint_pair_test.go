@@ -38,14 +38,14 @@ var _ = Describe("EndpointPair", func() {
 		})
 
 		Context("when calling .NodeU()", func() {
-			It("returns the first node", func() {
-				Expect(endpointPair).To(haveNodeU("link"))
+			It("returns node V to eliminate a dependency on ordering", func() {
+				Expect(endpointPair).To(haveNodeU("zelda"))
 			})
 		})
 
 		Context("when calling .NodeV()", func() {
-			It("returns the second node", func() {
-				Expect(endpointPair).To(haveNodeV("zelda"))
+			It("returns node U to eliminate a dependency on ordering", func() {
+				Expect(endpointPair).To(haveNodeV("link"))
 			})
 		})
 
