@@ -33,14 +33,21 @@ type MutableGraph[N comparable] interface {
 }
 
 func Undirected[N comparable]() Builder[N] {
-	return Builder[N]{}
+	return Builder[N]{
+		directed:        false,
+		allowsSelfLoops: false,
+	}
 }
 
 func Directed[N comparable]() Builder[N] {
-	return Builder[N]{}
+	return Builder[N]{
+		directed:        true,
+		allowsSelfLoops: false,
+	}
 }
 
 type Builder[N comparable] struct {
+	directed        bool
 	allowsSelfLoops bool
 }
 
@@ -50,6 +57,10 @@ func (b Builder[N]) AllowsSelfLoops(allowsSelfLoops bool) Builder[N] {
 }
 
 func (b Builder[N]) Build() MutableGraph[N] {
+	if b.directed {
+		panic("unimplemented")
+	}
+
 	return &graph[N]{
 		adjacencyList:   map[N]set.MutableSet[N]{},
 		allowsSelfLoops: b.allowsSelfLoops,
