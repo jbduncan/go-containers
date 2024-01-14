@@ -68,12 +68,6 @@ const (
 	DisallowsSelfLoops
 )
 
-type ContainersMode int
-
-const (
-	ContainersAreViews ContainersMode = iota
-)
-
 func addNode(grph graph.Graph[int], node int) graph.Graph[int] {
 	if graphAsMutable, ok := grph.(graph.MutableGraph[int]); ok {
 		graphAsMutable.AddNode(node)
