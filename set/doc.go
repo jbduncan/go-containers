@@ -7,7 +7,7 @@
 //
 // Sets have a String method that satisfies fmt.Stringer.
 //
-// Two sets can be compared for "equality" with Equal, returning true if they both have the same elements in any order,
+// Two sets can be compared for "equality" with Equal, returning true if they have the same elements in any order,
 // otherwise false.
 //
 // The contents of a set can be copied into a slice with ToSlice.
