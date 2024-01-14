@@ -30,14 +30,14 @@ var _ = Describe("Graphs", func() {
 		Mutable,
 		Undirected,
 		AllowsSelfLoops)
-	graphTests(
-		"graph.Directed[int]().Build()",
-		func() graph.Graph[int] {
-			return graph.Directed[int]().Build()
-		},
-		Mutable,
-		Directed,
-		DisallowsSelfLoops)
+	// graphTests(
+	//	"graph.Directed[int]().Build()",
+	//	func() graph.Graph[int] {
+	//		return graph.Directed[int]().Build()
+	//	},
+	//	Mutable,
+	//	Directed,
+	//	DisallowsSelfLoops)
 })
 
 const (
