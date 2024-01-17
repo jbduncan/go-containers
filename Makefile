@@ -4,10 +4,6 @@ ifeq (, $(shell which go))
 	$(error "No go in $(PATH)")
 endif
 
-.PHONY: build
-build:
-	go build ./...
-
 .PHONY: lint
 lint:
 	@echo "Linting 'go mod tidy'..."
@@ -16,10 +12,7 @@ lint:
 		(echo "'go mod tidy' changed files" && false)
 	@echo "Linting 'go mod verify'..."
 	@go mod verify
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2 run
-	go run go.uber.org/nilaway/cmd/nilaway@v0.0.0-20231204220708-2f6a74d7c0e2 \
-		-include-pkgs github.com/jbduncan/go-containers ./...
-	./scripts/eg_lint.sh
+	./scripts/run_lints_in_parallel.sh
 
 .PHONY: lint_fix
 lint_fix:
@@ -33,8 +26,7 @@ test:
 	go test -shuffle=on -race ./...
 
 .PHONY: check
-# Build early to catch compiler errors sooner
-check: build lint test
+check: lint test
 
 .PHONY: update_versions
 update_versions:
