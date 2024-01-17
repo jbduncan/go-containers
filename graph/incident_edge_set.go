@@ -12,17 +12,13 @@ type incidentEdgeSet[N comparable] struct {
 }
 
 func (i incidentEdgeSet[N]) Contains(elem EndpointPair[N]) bool {
-	if elem.IsOrdered() {
-		return false
-	}
-
 	adjacentNodes, ok := i.adjacencyList[i.node]
 	if !ok {
 		return false
 	}
 
-	return i.node == elem.NodeU() && adjacentNodes.Contains(elem.NodeV()) ||
-		i.node == elem.NodeV() && adjacentNodes.Contains(elem.NodeU())
+	return i.node == elem.Source() && adjacentNodes.Contains(elem.Target()) ||
+		i.node == elem.Target() && adjacentNodes.Contains(elem.Source())
 }
 
 func (i incidentEdgeSet[N]) Len() int {
@@ -42,7 +38,7 @@ func (i incidentEdgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
 
 	adjacentNodes.ForEach(
 		func(adjNode N) {
-			fn(UnorderedEndpointPair(i.node, adjNode))
+			fn(EndpointPairOf(i.node, adjNode))
 		})
 }
 

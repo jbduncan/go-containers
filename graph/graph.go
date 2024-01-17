@@ -18,7 +18,7 @@ type Graph[N comparable] interface {
 	Degree(node N) int
 	InDegree(node N) int
 	OutDegree(node N) int
-	HasEdgeConnecting(nodeU N, nodeV N) bool
+	HasEdgeConnecting(source N, target N) bool
 	HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
 	String() string
 }
@@ -27,9 +27,9 @@ type MutableGraph[N comparable] interface {
 	Graph[N]
 
 	AddNode(node N) bool
-	PutEdge(nodeU N, nodeV N) bool
+	PutEdge(source N, target N) bool
 	RemoveNode(node N) bool
-	RemoveEdge(nodeU N, nodeV N) bool
+	RemoveEdge(source N, target N) bool
 }
 
 func Undirected[N comparable]() Builder[N] {
@@ -138,20 +138,16 @@ func (g *graph[N]) OutDegree(node N) int {
 	return g.Degree(node)
 }
 
-func (g *graph[N]) HasEdgeConnecting(nodeU, nodeV N) bool {
-	if adjacentNodes, ok := g.adjacencyList[nodeU]; ok {
-		return adjacentNodes.Contains(nodeV)
+func (g *graph[N]) HasEdgeConnecting(source, target N) bool {
+	if adjacentNodes, ok := g.adjacencyList[source]; ok {
+		return adjacentNodes.Contains(target)
 	}
 
 	return false
 }
 
 func (g *graph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
-	if endpointPair.IsOrdered() {
-		return false
-	}
-
-	return g.HasEdgeConnecting(endpointPair.NodeU(), endpointPair.NodeV())
+	return g.HasEdgeConnecting(endpointPair.Source(), endpointPair.Target())
 }
 
 func (g *graph[N]) String() string {
@@ -172,13 +168,13 @@ func (g *graph[N]) AddNode(node N) bool {
 	return true
 }
 
-func (g *graph[N]) PutEdge(nodeU, nodeV N) bool {
-	if !g.AllowsSelfLoops() && nodeU == nodeV {
+func (g *graph[N]) PutEdge(source, target N) bool {
+	if !g.AllowsSelfLoops() && source == target {
 		panic("self-loops are disallowed")
 	}
 
-	addedUToV := g.putEdge(nodeU, nodeV)
-	g.putEdge(nodeV, nodeU)
+	addedUToV := g.putEdge(source, target)
+	g.putEdge(target, source)
 
 	if addedUToV {
 		g.numEdges++
@@ -188,15 +184,15 @@ func (g *graph[N]) PutEdge(nodeU, nodeV N) bool {
 	return false
 }
 
-func (g *graph[N]) putEdge(nodeU, nodeV N) bool {
+func (g *graph[N]) putEdge(source, target N) bool {
 	added := false
-	adjacentNodes, ok := g.adjacencyList[nodeU]
+	adjacentNodes, ok := g.adjacencyList[source]
 	if !ok {
 		adjacentNodes = set.NewMutable[N]()
-		g.adjacencyList[nodeU] = adjacentNodes
+		g.adjacencyList[source] = adjacentNodes
 		added = true
 	}
-	if adjacentNodes.Add(nodeV) {
+	if adjacentNodes.Add(target) {
 		added = true
 	}
 	return added
@@ -219,9 +215,9 @@ func (g *graph[N]) RemoveNode(node N) bool {
 	return true
 }
 
-func (g *graph[N]) RemoveEdge(nodeU, nodeV N) bool {
-	removedUToV := g.removeEdge(nodeU, nodeV)
-	g.removeEdge(nodeV, nodeU)
+func (g *graph[N]) RemoveEdge(source, target N) bool {
+	removedUToV := g.removeEdge(source, target)
+	g.removeEdge(target, source)
 
 	g.numEdges--
 

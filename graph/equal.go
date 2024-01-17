@@ -6,7 +6,7 @@ import "github.com/jbduncan/go-containers/set"
 //   - a.IsDirected() == b.IsDirected()
 //   - a.AllowsSelfLoops() == b.AllowsSelfLoops()
 //   - a.Nodes() and b.Nodes() are equal according to set.Equal
-//   - a.Edges() and b.Edges() are equal according to set.Equal and EndpointPair.Equal
+//   - a.Edges() and b.Edges() are equal according to set.Equal
 //
 // This method should be used over ==, the behaviour of which is undefined.
 //

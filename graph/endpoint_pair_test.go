@@ -10,118 +10,11 @@ import (
 )
 
 var _ = Describe("EndpointPair", func() {
-	Describe("given a new unordered endpoint pair", func() {
+	Describe("given a new endpoint pair", func() {
 		var endpointPair graph.EndpointPair[string]
 
 		BeforeEach(func() {
-			endpointPair = graph.UnorderedEndpointPair("link", "zelda")
-		})
-
-		Context("when calling .IsOrdered()", func() {
-			It("returns false", func() {
-				Expect(endpointPair).ToNot(beOrdered())
-			})
-		})
-
-		Context("when calling .Source()", func() {
-			It("panics", func() {
-				Expect(endpointPair).To(haveUnavailableSource())
-			})
-		})
-
-		Context("when calling .Target()", func() {
-			It("panics", func() {
-				Expect(endpointPair).To(haveUnavailableTarget())
-			})
-		})
-
-		Context("when calling .NodeU()", func() {
-			It("returns node V to eliminate a dependency on ordering", func() {
-				Expect(endpointPair).To(haveNodeU("zelda"))
-			})
-		})
-
-		Context("when calling .NodeV()", func() {
-			It("returns node U to eliminate a dependency on ordering", func() {
-				Expect(endpointPair).To(haveNodeV("link"))
-			})
-		})
-
-		Context("when calling .AdjacentNode() with NodeU", func() {
-			It("returns NodeV", func() {
-				Expect(endpointPair.AdjacentNode(endpointPair.NodeU())).
-					To(Equal(endpointPair.NodeV()))
-			})
-		})
-
-		Context("when calling .AdjacentNode() with NodeV", func() {
-			It("returns NodeU", func() {
-				Expect(endpointPair.AdjacentNode(endpointPair.NodeV())).
-					To(Equal(endpointPair.NodeU()))
-			})
-		})
-
-		Context("when calling .AdjacentNode() with a non-adjacent node", func() {
-			It("panics", func() {
-				Expect(func() { endpointPair.AdjacentNode("ganondorf") }).
-					To(PanicWith(MatchRegexp(`^EndpointPair (\[link, zelda\]|\[zelda, link\]) does not contain node ganondorf$`)))
-			})
-		})
-
-		Context("when calling .Equal() with an equivalent unordered endpoint pair", func() {
-			It("returns true", func() {
-				other := graph.UnorderedEndpointPair("link", "zelda")
-				Expect(endpointPair).To(BeEquivalentToUsingEqualMethod(other))
-			})
-		})
-
-		Context("when calling .Equal() with an ordered endpoint pair", func() {
-			It("returns false", func() {
-				other := graph.OrderedEndpointPair("link", "zelda")
-				Expect(endpointPair).ToNot(BeEquivalentToUsingEqualMethod(other))
-			})
-		})
-
-		Context("when calling .Equal() with an unordered endpoint pair with a different NodeU", func() {
-			It("returns false", func() {
-				other := graph.UnorderedEndpointPair("ganon", "zelda")
-				Expect(endpointPair).ToNot(BeEquivalentToUsingEqualMethod(other))
-			})
-		})
-
-		Context("when calling .Equal() with an unordered endpoint pair with a different NodeV", func() {
-			It("returns false", func() {
-				other := graph.UnorderedEndpointPair("link", "ganon")
-				Expect(endpointPair).ToNot(BeEquivalentToUsingEqualMethod(other))
-			})
-		})
-
-		Context("when calling .Equal() with a reversed unordered endpoint pair", func() {
-			It("returns true", func() {
-				other := graph.UnorderedEndpointPair("zelda", "link")
-				Expect(endpointPair).To(BeEquivalentToUsingEqualMethod(other))
-			})
-		})
-
-		Context("when calling .String()", func() {
-			It("returns a string representation", func() {
-				Expect(endpointPair).To(
-					HaveStringReprThatIsAnyOf("[link, zelda]", "[zelda, link]"))
-			})
-		})
-	})
-
-	Describe("given a new ordered endpoint pair", func() {
-		var endpointPair graph.EndpointPair[string]
-
-		BeforeEach(func() {
-			endpointPair = graph.OrderedEndpointPair("link", "zelda")
-		})
-
-		Context("when calling .IsOrdered()", func() {
-			It("returns true", func() {
-				Expect(endpointPair).To(beOrdered())
-			})
+			endpointPair = graph.EndpointPairOf("link", "zelda")
 		})
 
 		Context("when calling .Source()", func() {
@@ -131,34 +24,22 @@ var _ = Describe("EndpointPair", func() {
 		})
 
 		Context("when calling .Target()", func() {
-			It("panics", func() {
+			It("returns the second node", func() {
 				Expect(endpointPair).To(haveTarget("zelda"))
 			})
 		})
 
-		Context("when calling .NodeU()", func() {
-			It("returns the first node", func() {
-				Expect(endpointPair).To(haveNodeU("link"))
+		Context("when calling .AdjacentNode() with Source", func() {
+			It("returns Target", func() {
+				Expect(endpointPair.AdjacentNode(endpointPair.Source())).
+					To(Equal(endpointPair.Target()))
 			})
 		})
 
-		Context("when calling .NodeV()", func() {
-			It("returns the second node", func() {
-				Expect(endpointPair).To(haveNodeV("zelda"))
-			})
-		})
-
-		Context("when calling .AdjacentNode() with NodeU", func() {
-			It("returns NodeV", func() {
-				Expect(endpointPair.AdjacentNode(endpointPair.NodeU())).
-					To(Equal(endpointPair.NodeV()))
-			})
-		})
-
-		Context("when calling .AdjacentNode() with NodeV", func() {
-			It("returns NodeU", func() {
-				Expect(endpointPair.AdjacentNode(endpointPair.NodeV())).
-					To(Equal(endpointPair.NodeU()))
+		Context("when calling .AdjacentNode() with Target", func() {
+			It("returns Source", func() {
+				Expect(endpointPair.AdjacentNode(endpointPair.Target())).
+					To(Equal(endpointPair.Source()))
 			})
 		})
 
@@ -169,34 +50,6 @@ var _ = Describe("EndpointPair", func() {
 			})
 		})
 
-		Context("when calling .Equal() with an equivalent ordered endpoint pair", func() {
-			It("returns true", func() {
-				other := graph.OrderedEndpointPair("link", "zelda")
-				Expect(endpointPair).To(BeEquivalentToUsingEqualMethod(other))
-			})
-		})
-
-		Context("when calling .Equal() with an unordered endpoint pair", func() {
-			It("returns false", func() {
-				other := graph.UnorderedEndpointPair("link", "zelda")
-				Expect(endpointPair).ToNot(BeEquivalentToUsingEqualMethod(other))
-			})
-		})
-
-		Context("when calling .Equal() with an ordered endpoint pair with a different source", func() {
-			It("returns false", func() {
-				other := graph.OrderedEndpointPair("ganon", "zelda")
-				Expect(endpointPair).ToNot(BeEquivalentToUsingEqualMethod(other))
-			})
-		})
-
-		Context("when calling .Equal() with an ordered endpoint pair with a different target", func() {
-			It("returns false", func() {
-				other := graph.OrderedEndpointPair("link", "ganon")
-				Expect(endpointPair).ToNot(BeEquivalentToUsingEqualMethod(other))
-			})
-		})
-
 		Context("when calling .String()", func() {
 			It("returns a string representation", func() {
 				Expect(endpointPair).To(HaveStringRepr("<link -> zelda>"))
@@ -204,14 +57,6 @@ var _ = Describe("EndpointPair", func() {
 		})
 	})
 })
-
-func beOrdered() types.GomegaMatcher {
-	return gcustom.MakeMatcher(
-		func(endpointPair graph.EndpointPair[string]) (bool, error) {
-			return endpointPair.IsOrdered(), nil
-		}).
-		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} be ordered")
-}
 
 func haveSource(source string) types.GomegaMatcher {
 	return gcustom.MakeMatcher(
@@ -229,46 +74,4 @@ func haveTarget(target string) types.GomegaMatcher {
 		}).
 		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} to have a target equal to\n{{format .Data 1}}").
 		WithTemplateData(target)
-}
-
-func haveUnavailableSource() types.GomegaMatcher {
-	return gcustom.MakeMatcher(
-		func(endpointPair graph.EndpointPair[string]) (bool, error) {
-			sourceMethod := func() { endpointPair.Source() }
-			return PanicWith(notAvailableOnUndirected).Match(sourceMethod)
-		}).
-		WithTemplate("Expected Source() of\n{{.FormattedActual}}\n{{.To}} to panic with\n{{format .Data 1}}").
-		WithTemplateData(notAvailableOnUndirected)
-}
-
-func haveUnavailableTarget() types.GomegaMatcher {
-	return gcustom.MakeMatcher(
-		func(endpointPair graph.EndpointPair[string]) (bool, error) {
-			sourceMethod := func() { endpointPair.Target() }
-			return PanicWith(notAvailableOnUndirected).Match(sourceMethod)
-		}).
-		WithTemplate("Expected Target() of\n{{.FormattedActual}}\n{{.To}} to panic with\n{{format .Data 1}}").
-		WithTemplateData(notAvailableOnUndirected)
-}
-
-const notAvailableOnUndirected = "cannot call Source()/Target() on an EndpointPair from an " +
-	"undirected graph; consider calling AdjacentNode(node) if you already have a node, or " +
-	"NodeU()/NodeV() if you don't"
-
-func haveNodeU(node string) types.GomegaMatcher {
-	return gcustom.MakeMatcher(
-		func(endpointPair graph.EndpointPair[string]) (bool, error) {
-			return endpointPair.NodeU() == node, nil
-		}).
-		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} to have a nodeU equal to\n{{format .Data 1}}").
-		WithTemplateData(node)
-}
-
-func haveNodeV(node string) types.GomegaMatcher {
-	return gcustom.MakeMatcher(
-		func(endpointPair graph.EndpointPair[string]) (bool, error) {
-			return endpointPair.NodeV() == node, nil
-		}).
-		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} to have a nodeV equal to\n{{format .Data 1}}").
-		WithTemplateData(node)
 }

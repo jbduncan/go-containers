@@ -57,8 +57,7 @@ func TestEqual(t *testing.T) {
 
 	t.Run("graph a: [[link, zelda]]; graph b: [[link], [zelda]]; not equal", func(t *testing.T) {
 		g := NewWithT(t)
-		a := undirectedGraphOf(
-			graph.UnorderedEndpointPair("link", "zelda"))
+		a := undirectedGraphOf(edge("link", "zelda"))
 		b := undirectedGraphOf("link", "zelda")
 
 		g.Expect(graph.Equal(a, b)).To(BeFalse())
@@ -68,11 +67,11 @@ func TestEqual(t *testing.T) {
 func undirectedGraphOf(nodesAndEndpointPairs ...any) graph.Graph[string] {
 	result := graph.Undirected[string]().Build()
 	for _, elem := range nodesAndEndpointPairs {
-		switch e := elem.(type) {
+		switch el := elem.(type) {
 		case string:
-			result.AddNode(e)
+			result.AddNode(el)
 		case graph.EndpointPair[string]:
-			result.PutEdge(e.NodeU(), e.NodeV())
+			result.PutEdge(el.Source(), el.Target())
 		default:
 			panic(fmt.Sprintf("Unexpected elem: %v", elem))
 		}
@@ -87,7 +86,7 @@ func undirectedAllowsSelfLoopsGraphOf(nodesAndEndpointPairs ...any) graph.Graph[
 		case string:
 			result.AddNode(e)
 		case graph.EndpointPair[string]:
-			result.PutEdge(e.NodeU(), e.NodeV())
+			result.PutEdge(e.Source(), e.Target())
 		default:
 			panic(fmt.Sprintf("Unexpected elem: %v", elem))
 		}
@@ -159,4 +158,8 @@ func (d minimalDirectedGraph) HasEdgeConnectingEndpoints(_ graph.EndpointPair[st
 
 func (d minimalDirectedGraph) String() string {
 	panic("this is a minimal graph, so this method is purposefully not implemented")
+}
+
+func edge(source string, target string) graph.EndpointPair[string] {
+	return graph.EndpointPairOf(source, target)
 }

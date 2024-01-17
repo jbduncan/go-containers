@@ -66,7 +66,7 @@ func ContainAtLeast[T comparable](first T, others ...T) types.GomegaMatcher {
 func HaveForEachThatEmitsNothing[T comparable]() types.GomegaMatcher {
 	return gcustom.MakeMatcher(
 		func(s set.Set[T]) (bool, error) {
-			actual := forEachToSlice(s)
+			actual := ForEachToSlice(s)
 			return len(actual) == 0, nil
 		}).
 		WithTemplate("Expected ForEach() of\n{{.FormattedActual}}\n{{.To}} emit nothing")
@@ -77,7 +77,7 @@ func HaveForEachThatConsistsOf[T comparable](first any, others ...any) types.Gom
 
 	return gcustom.MakeMatcher(
 		func(s set.Set[T]) (bool, error) {
-			actual := forEachToSlice(s)
+			actual := ForEachToSlice(s)
 			return ConsistOf(elements).Match(actual)
 		}).
 		WithTemplate("Expected ForEach() of\n{{.FormattedActual}}\n{{.To}} emit elements consisting of\n{{format .Data 1}}").
@@ -87,7 +87,7 @@ func HaveForEachThatConsistsOf[T comparable](first any, others ...any) types.Gom
 func HaveForEachThatConsistsOfElementsInSlice[T comparable](elements []T) types.GomegaMatcher {
 	return gcustom.MakeMatcher(
 		func(s set.Set[T]) (bool, error) {
-			actual := forEachToSlice(s)
+			actual := ForEachToSlice(s)
 			return ConsistOf(elements).Match(actual)
 		}).
 		WithTemplate("Expected ForEach() of\n{{.FormattedActual}}\n{{.To}} emit elements consisting of\n{{format .Data 1}}").
@@ -103,7 +103,7 @@ func BeNonMutableSet[T comparable]() types.GomegaMatcher {
 		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} implement set.Set but not set.MutableSet")
 }
 
-func forEachToSlice[T comparable](s set.Set[T]) []T {
+func ForEachToSlice[T comparable](s set.Set[T]) []T {
 	var result []T
 
 	s.ForEach(func(elem T) {

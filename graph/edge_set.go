@@ -11,9 +11,8 @@ type edgeSet[N comparable] struct {
 }
 
 func (e edgeSet[N]) Contains(elem EndpointPair[N]) bool {
-	return e.delegate.IsDirected() == elem.IsOrdered() &&
-		e.delegate.Nodes().Contains(elem.NodeU()) &&
-		e.delegate.AdjacentNodes(elem.NodeU()).Contains(elem.NodeV())
+	return e.delegate.Nodes().Contains(elem.Source()) &&
+		e.delegate.AdjacentNodes(elem.Source()).Contains(elem.Target())
 }
 
 func (e edgeSet[N]) Len() int {
@@ -22,13 +21,13 @@ func (e edgeSet[N]) Len() int {
 
 func (e edgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
 	result := set.NewMutable[EndpointPair[N]]()
-	e.delegate.Nodes().ForEach(func(u N) {
-		e.delegate.AdjacentNodes(u).ForEach(func(v N) {
-			uv := UnorderedEndpointPair(u, v)
-			vu := UnorderedEndpointPair(v, u)
-			if !result.Contains(uv) && !result.Contains(vu) {
-				result.Add(uv)
-				fn(uv)
+	e.delegate.Nodes().ForEach(func(s N) {
+		e.delegate.AdjacentNodes(s).ForEach(func(t N) {
+			st := EndpointPairOf(s, t)
+			tu := EndpointPairOf(t, s)
+			if !result.Contains(st) && !result.Contains(tu) {
+				result.Add(st)
+				fn(st)
 			}
 		})
 	})
