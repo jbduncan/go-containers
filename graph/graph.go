@@ -58,7 +58,9 @@ func (b Builder[N]) AllowsSelfLoops(allowsSelfLoops bool) Builder[N] {
 
 func (b Builder[N]) Build() MutableGraph[N] {
 	if b.directed {
-		return &directedGraph[N]{}
+		return &directedGraph[N]{
+			nodes: set.NewMutable[N](),
+		}
 	}
 
 	return &undirectedGraph[N]{
@@ -236,14 +238,11 @@ func (g *undirectedGraph[N]) removeEdge(from, to N) bool {
 }
 
 type directedGraph[N comparable] struct {
-	node *N
+	nodes set.MutableSet[N]
 }
 
 func (d *directedGraph[N]) Nodes() set.Set[N] {
-	if d.node == nil {
-		return set.Of[N]()
-	}
-	return set.Of[N](*d.node)
+	return d.nodes
 }
 
 func (d *directedGraph[N]) Edges() set.Set[EndpointPair[N]] {
@@ -308,7 +307,8 @@ func (d *directedGraph[N]) String() string {
 }
 
 func (d *directedGraph[N]) AddNode(node N) bool {
-	d.node = &node
+	d.nodes.Add(node)
+
 	return false
 }
 

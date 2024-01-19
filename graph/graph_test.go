@@ -157,7 +157,7 @@ func graphTests(
 				grph = addNode(grph, node2)
 			})
 
-			It("has both nodes", func() {
+			FIt("has both nodes", func() {
 				testSet(grph.Nodes(), node1, node2)
 			})
 		})
