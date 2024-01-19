@@ -569,11 +569,11 @@ func undirectedGraphTests(
 				grph = putEdge(grph, node1, node2)
 			})
 
-			It("has just one unordered edge", func() {
+			It("has just one edge", func() {
 				testSingleEdgeForUndirectedGraph(grph.Edges())
 			})
 
-			It("has an unordered incident edge connecting the first node to the second node", func() {
+			It("has an incident edge connecting the first node to the second node", func() {
 				testSingleEdgeForUndirectedGraph(grph.IncidentEdges(node1))
 			})
 
@@ -593,7 +593,7 @@ func undirectedGraphTests(
 				testSet(grph.Successors(node1), node2)
 			})
 
-			It("has an unordered incident edge connecting the second node to the first node", func() {
+			It("has an incident edge connecting the second node to the first node", func() {
 				testSingleEdgeForUndirectedGraph(grph.IncidentEdges(node2))
 			})
 
@@ -628,11 +628,11 @@ func undirectedGraphTests(
 				grph = putEdge(grph, node1, node3)
 			})
 
-			It("has two unordered edges sharing a common node", func() {
+			It("has two edges sharing a common node", func() {
 				testTwoEdgesForUndirectedGraphs(grph.Edges())
 			})
 
-			It("has two unordered incident edges connected to the common node", func() {
+			It("has two incident edges connected to the common node", func() {
 				testTwoEdgesForUndirectedGraphs(grph.IncidentEdges(node1))
 			})
 		})
@@ -691,24 +691,24 @@ func directedGraphTests(
 				testSet(grph.Successors(node2))
 			})
 
-			It("has just one ordered edge", func() {
+			It("has just one edge", func() {
 				testSingleEdgeForDirectedGraph(grph.Edges())
 			})
 
-			It("has an ordered incident edge connecting the first node to the second node", func() {
+			It("has an incident edge connecting the first node to the second node", func() {
 				testSingleEdgeForDirectedGraph(grph.IncidentEdges(node1))
 			})
 		})
 
 		Context("when putting two connected edges", func() {
-			It("has two ordered edges sharing a common node", func() {
+			It("has two edges sharing a common node", func() {
 				grph = putEdge(grph, node1, node2)
 				grph = putEdge(grph, node1, node3)
 
 				testTwoEdgesForDirectedGraphs(grph.Edges())
 			})
 
-			It("has two ordered incident edges connected to the common node", func() {
+			It("has two incident edges connected to the common node", func() {
 				testTwoEdgesForDirectedGraphs(grph.IncidentEdges(node1))
 			})
 		})
