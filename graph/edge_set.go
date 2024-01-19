@@ -7,7 +7,7 @@ import (
 var _ set.Set[EndpointPair[int]] = (*edgeSet[int])(nil)
 
 type edgeSet[N comparable] struct {
-	delegate *graph[N]
+	delegate *undirectedGraph[N]
 }
 
 func (e edgeSet[N]) Contains(elem EndpointPair[N]) bool {

@@ -58,10 +58,10 @@ func (b Builder[N]) AllowsSelfLoops(allowsSelfLoops bool) Builder[N] {
 
 func (b Builder[N]) Build() MutableGraph[N] {
 	if b.directed {
-		panic("unimplemented")
+		return &directedGraph[N]{}
 	}
 
-	return &graph[N]{
+	return &undirectedGraph[N]{
 		adjacencyList:   map[N]set.MutableSet[N]{},
 		allowsSelfLoops: b.allowsSelfLoops,
 		numEdges:        0,
@@ -69,59 +69,61 @@ func (b Builder[N]) Build() MutableGraph[N] {
 }
 
 var (
-	_ Graph[int]        = (*graph[int])(nil)
-	_ MutableGraph[int] = (*graph[int])(nil)
+	_ Graph[int]        = (*undirectedGraph[int])(nil)
+	_ MutableGraph[int] = (*undirectedGraph[int])(nil)
+	_ Graph[int]        = (*directedGraph[int])(nil)
+	_ MutableGraph[int] = (*directedGraph[int])(nil)
 )
 
-type graph[N comparable] struct {
+type undirectedGraph[N comparable] struct {
 	adjacencyList   map[N]set.MutableSet[N]
 	allowsSelfLoops bool
 	numEdges        int
 }
 
-func (g *graph[N]) IsDirected() bool {
+func (g *undirectedGraph[N]) IsDirected() bool {
 	return false
 }
 
-func (g *graph[N]) AllowsSelfLoops() bool {
+func (g *undirectedGraph[N]) AllowsSelfLoops() bool {
 	return g.allowsSelfLoops
 }
 
-func (g *graph[N]) Nodes() set.Set[N] {
+func (g *undirectedGraph[N]) Nodes() set.Set[N] {
 	return keySet[N]{
 		delegate: g.adjacencyList,
 	}
 }
 
-func (g *graph[N]) Edges() set.Set[EndpointPair[N]] {
+func (g *undirectedGraph[N]) Edges() set.Set[EndpointPair[N]] {
 	return edgeSet[N]{
 		delegate: g,
 	}
 }
 
-func (g *graph[N]) AdjacentNodes(node N) set.Set[N] {
+func (g *undirectedGraph[N]) AdjacentNodes(node N) set.Set[N] {
 	return adjacentNodeSet[N]{
 		node:          node,
 		adjacencyList: g.adjacencyList,
 	}
 }
 
-func (g *graph[N]) Predecessors(node N) set.Set[N] {
+func (g *undirectedGraph[N]) Predecessors(node N) set.Set[N] {
 	return g.AdjacentNodes(node)
 }
 
-func (g *graph[N]) Successors(node N) set.Set[N] {
+func (g *undirectedGraph[N]) Successors(node N) set.Set[N] {
 	return g.AdjacentNodes(node)
 }
 
-func (g *graph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
+func (g *undirectedGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 	return incidentEdgeSet[N]{
 		node:          node,
 		adjacencyList: g.adjacencyList,
 	}
 }
 
-func (g *graph[N]) Degree(node N) int {
+func (g *undirectedGraph[N]) Degree(node N) int {
 	adjacentNodes, ok := g.adjacencyList[node]
 	if !ok {
 		return 0
@@ -130,15 +132,15 @@ func (g *graph[N]) Degree(node N) int {
 	return adjacentNodes.Len()
 }
 
-func (g *graph[N]) InDegree(node N) int {
+func (g *undirectedGraph[N]) InDegree(node N) int {
 	return g.Degree(node)
 }
 
-func (g *graph[N]) OutDegree(node N) int {
+func (g *undirectedGraph[N]) OutDegree(node N) int {
 	return g.Degree(node)
 }
 
-func (g *graph[N]) HasEdgeConnecting(source, target N) bool {
+func (g *undirectedGraph[N]) HasEdgeConnecting(source, target N) bool {
 	if adjacentNodes, ok := g.adjacencyList[source]; ok {
 		return adjacentNodes.Contains(target)
 	}
@@ -146,11 +148,11 @@ func (g *graph[N]) HasEdgeConnecting(source, target N) bool {
 	return false
 }
 
-func (g *graph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
+func (g *undirectedGraph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
 	return g.HasEdgeConnecting(endpointPair.Source(), endpointPair.Target())
 }
 
-func (g *graph[N]) String() string {
+func (g *undirectedGraph[N]) String() string {
 	return "isDirected: false, allowsSelfLoops: " +
 		strconv.FormatBool(g.allowsSelfLoops) +
 		", nodes: " +
@@ -159,7 +161,7 @@ func (g *graph[N]) String() string {
 		g.Edges().String()
 }
 
-func (g *graph[N]) AddNode(node N) bool {
+func (g *undirectedGraph[N]) AddNode(node N) bool {
 	if _, ok := g.adjacencyList[node]; ok {
 		return false
 	}
@@ -168,7 +170,7 @@ func (g *graph[N]) AddNode(node N) bool {
 	return true
 }
 
-func (g *graph[N]) PutEdge(source, target N) bool {
+func (g *undirectedGraph[N]) PutEdge(source, target N) bool {
 	if !g.AllowsSelfLoops() && source == target {
 		panic("self-loops are disallowed")
 	}
@@ -184,7 +186,7 @@ func (g *graph[N]) PutEdge(source, target N) bool {
 	return false
 }
 
-func (g *graph[N]) putEdge(source, target N) bool {
+func (g *undirectedGraph[N]) putEdge(source, target N) bool {
 	added := false
 	adjacentNodes, ok := g.adjacencyList[source]
 	if !ok {
@@ -198,7 +200,7 @@ func (g *graph[N]) putEdge(source, target N) bool {
 	return added
 }
 
-func (g *graph[N]) RemoveNode(node N) bool {
+func (g *undirectedGraph[N]) RemoveNode(node N) bool {
 	adjacentNodes, ok := g.adjacencyList[node]
 	if !ok {
 		return false
@@ -215,7 +217,7 @@ func (g *graph[N]) RemoveNode(node N) bool {
 	return true
 }
 
-func (g *graph[N]) RemoveEdge(source, target N) bool {
+func (g *undirectedGraph[N]) RemoveEdge(source, target N) bool {
 	removedUToV := g.removeEdge(source, target)
 	g.removeEdge(target, source)
 
@@ -224,11 +226,85 @@ func (g *graph[N]) RemoveEdge(source, target N) bool {
 	return removedUToV
 }
 
-func (g *graph[N]) removeEdge(from, to N) bool {
+func (g *undirectedGraph[N]) removeEdge(from, to N) bool {
 	adjacentNodes, ok := g.adjacencyList[from]
 	if !ok {
 		return false
 	}
 
 	return adjacentNodes.Remove(to)
+}
+
+type directedGraph[N comparable] struct{}
+
+func (d *directedGraph[N]) Nodes() set.Set[N] {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) Edges() set.Set[EndpointPair[N]] {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) IsDirected() bool {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) AllowsSelfLoops() bool {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) AdjacentNodes(node N) set.Set[N] {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) Predecessors(node N) set.Set[N] {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) Successors(node N) set.Set[N] {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) Degree(node N) int {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) InDegree(node N) int {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) OutDegree(node N) int {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) HasEdgeConnecting(source N, target N) bool {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) String() string {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) AddNode(node N) bool {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) PutEdge(source, target N) bool {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) RemoveNode(node N) bool {
+	panic("implement me")
+}
+
+func (d *directedGraph[N]) RemoveEdge(source, target N) bool {
+	panic("implement me")
 }
