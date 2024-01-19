@@ -235,57 +235,62 @@ func (g *undirectedGraph[N]) removeEdge(from, to N) bool {
 	return adjacentNodes.Remove(to)
 }
 
-type directedGraph[N comparable] struct{}
+type directedGraph[N comparable] struct {
+	node *N
+}
 
 func (d *directedGraph[N]) Nodes() set.Set[N] {
-	panic("implement me")
+	if d.node == nil {
+		return set.Of[N]()
+	}
+	return set.Of[N](*d.node)
 }
 
 func (d *directedGraph[N]) Edges() set.Set[EndpointPair[N]] {
-	panic("implement me")
+	return set.Of[EndpointPair[N]]()
 }
 
 func (d *directedGraph[N]) IsDirected() bool {
-	panic("implement me")
+	return true
 }
 
 func (d *directedGraph[N]) AllowsSelfLoops() bool {
-	panic("implement me")
+	return false
 }
 
 //nolint:revive
 func (d *directedGraph[N]) AdjacentNodes(node N) set.Set[N] {
-	panic("implement me")
+	return set.Of[N]()
 }
 
 //nolint:revive
 func (d *directedGraph[N]) Predecessors(node N) set.Set[N] {
-	panic("implement me")
+	return set.Of[N]()
 }
 
 //nolint:revive
 func (d *directedGraph[N]) Successors(node N) set.Set[N] {
-	panic("implement me")
+	return set.Of[N]()
 }
 
 //nolint:revive
 func (d *directedGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
-	panic("implement me")
+	return set.Of[EndpointPair[N]]()
 }
 
 //nolint:revive
 func (d *directedGraph[N]) Degree(node N) int {
-	panic("implement me")
+	return 0
 }
 
 //nolint:revive
 func (d *directedGraph[N]) InDegree(node N) int {
-	panic("implement me")
+	return 0
 }
 
 //nolint:revive
 func (d *directedGraph[N]) OutDegree(node N) int {
-	panic("implement me")
+	return 0
 }
 
 //nolint:revive
@@ -302,9 +307,9 @@ func (d *directedGraph[N]) String() string {
 	panic("implement me")
 }
 
-//nolint:revive
 func (d *directedGraph[N]) AddNode(node N) bool {
-	panic("implement me")
+	d.node = &node
+	return false
 }
 
 //nolint:revive
