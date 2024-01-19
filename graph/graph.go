@@ -253,38 +253,47 @@ func (d *directedGraph[N]) AllowsSelfLoops() bool {
 	panic("implement me")
 }
 
+//nolint:revive
 func (d *directedGraph[N]) AdjacentNodes(node N) set.Set[N] {
 	panic("implement me")
 }
 
+//nolint:revive
 func (d *directedGraph[N]) Predecessors(node N) set.Set[N] {
 	panic("implement me")
 }
 
+//nolint:revive
 func (d *directedGraph[N]) Successors(node N) set.Set[N] {
 	panic("implement me")
 }
 
+//nolint:revive
 func (d *directedGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 	panic("implement me")
 }
 
+//nolint:revive
 func (d *directedGraph[N]) Degree(node N) int {
 	panic("implement me")
 }
 
+//nolint:revive
 func (d *directedGraph[N]) InDegree(node N) int {
 	panic("implement me")
 }
 
+//nolint:revive
 func (d *directedGraph[N]) OutDegree(node N) int {
 	panic("implement me")
 }
 
+//nolint:revive
 func (d *directedGraph[N]) HasEdgeConnecting(source N, target N) bool {
 	panic("implement me")
 }
 
+//nolint:revive
 func (d *directedGraph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
 	panic("implement me")
 }
@@ -293,18 +302,22 @@ func (d *directedGraph[N]) String() string {
 	panic("implement me")
 }
 
+//nolint:revive
 func (d *directedGraph[N]) AddNode(node N) bool {
 	panic("implement me")
 }
 
+//nolint:revive
 func (d *directedGraph[N]) PutEdge(source, target N) bool {
 	panic("implement me")
 }
 
+//nolint:revive
 func (d *directedGraph[N]) RemoveNode(node N) bool {
 	panic("implement me")
 }
 
+//nolint:revive
 func (d *directedGraph[N]) RemoveEdge(source, target N) bool {
 	panic("implement me")
 }

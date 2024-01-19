@@ -12,7 +12,10 @@ lint:
 		(echo "'go mod tidy' changed files" && false)
 	@echo "Linting 'go mod verify'..."
 	@go mod verify
-	./scripts/run_lints_in_parallel.sh
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2 run
+	go run go.uber.org/nilaway/cmd/nilaway@v0.0.0-20231204220708-2f6a74d7c0e2 \
+		-include-pkgs github.com/jbduncan/go-containers ./...
+	./scripts/eg_lint.sh
 
 .PHONY: lint_fix
 lint_fix:
