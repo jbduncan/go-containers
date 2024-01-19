@@ -1,7 +1,9 @@
 package set
 
-// Set is a generic, unordered collection of unique elements. This interface has methods for reading the set; for
-// writing to the set, use the MutableSet interface.
+// Set is a generic, unordered collection of unique elements.
+//
+// An instance of Set can be made with set.Of. If a mutable set is needed, use set.NewMutable
+// instead.
 type Set[T comparable] interface {
 	// Contains returns true if this set contains the given element, otherwise it returns false.
 	Contains(elem T) bool
@@ -24,7 +26,9 @@ type Set[T comparable] interface {
 	String() string
 }
 
-// MutableSet is a Set with additional methods for adding elements to the set and removing them.
+// MutableSet is a Set with additional methods for adding and removing elements.
+//
+// An instance of MutableSet can be made with set.NewMutable.
 type MutableSet[T comparable] interface {
 	Set[T]
 
@@ -38,96 +42,77 @@ type MutableSet[T comparable] interface {
 }
 
 var (
-	_ Set[int]        = (*MutableMapSet[int])(nil)
-	_ MutableSet[int] = (*MutableMapSet[int])(nil)
+	_ Set[int]        = (*mutableMapSet[int])(nil)
+	_ MutableSet[int] = (*mutableMapSet[int])(nil)
 )
 
-// Of returns a new non-nil, empty, immutable set. See MapSet for more details.
-func Of[T comparable](elems ...T) *MapSet[T] {
+// Of returns a new non-nil, empty, immutable Set. Its implementation is based on a Go map, with
+// similar performance characteristics.
+func Of[T comparable](elems ...T) Set[T] {
 	delegate := map[T]struct{}{}
 	for _, elem := range elems {
 		delegate[elem] = struct{}{}
 	}
-	return &MapSet[T]{
+	return &mapSet[T]{
 		delegate: delegate,
 	}
 }
 
-// NewMutable returns a new non-nil, empty, mutable set. See MutableMapSet for more details.
-func NewMutable[T comparable](elems ...T) *MutableMapSet[T] {
+// NewMutable returns a new non-nil, empty MutableSet. Its implementation is based on a Go map,
+// with similar performance characteristics.
+func NewMutable[T comparable](elems ...T) MutableSet[T] {
 	delegate := map[T]struct{}{}
 	for _, elem := range elems {
 		delegate[elem] = struct{}{}
 	}
-	return &MutableMapSet[T]{
+	return &mutableMapSet[T]{
 		delegate: delegate,
 	}
 }
 
-// MapSet is an immutable, generic, unordered container of elements where no two elements can be equal according to
-// Go's == operator. It implements Set and MutableSet. Its implementation is based on a Go map, with similar
-// performance characteristics.
-type MapSet[T comparable] struct {
+type mapSet[T comparable] struct {
 	delegate map[T]struct{}
 }
 
-// Contains returns true if this set contains the given element, otherwise it returns false.
-func (m *MapSet[T]) Contains(elem T) bool {
+func (m *mapSet[T]) Contains(elem T) bool {
 	_, ok := m.delegate[elem]
 	return ok
 }
 
-// Len returns the number of elements in this set.
-func (m *MapSet[T]) Len() int {
+func (m *mapSet[T]) Len() int {
 	return len(m.delegate)
 }
 
-// ForEach runs the given function on each element in this set.
-//
-// The iteration order of the elements is undefined; it may even change from one call to the next.
-func (m *MapSet[T]) ForEach(fn func(elem T)) {
+func (m *mapSet[T]) ForEach(fn func(elem T)) {
 	for elem := range m.delegate {
 		fn(elem)
 	}
 }
 
-// String returns a string representation of all the elements in this set.
-//
-// The format of this string is a single "[" followed by a comma-separated list (", ") of this set's elements in the
-// same order as ForEach (which is undefined and may change from one call to the next), followed by a single "]".
-//
-// This method satisfies fmt.Stringer.
-func (m *MapSet[T]) String() string {
+func (m *mapSet[T]) String() string {
 	return StringImpl[T](m)
 }
 
-// MutableMapSet is a mutable, generic, unordered container of elements where no two elements can be equal according to
-// Go's == operator. It implements Set and MutableSet. Its implementation is based on a Go map, with similar performance
-// characteristics.
-type MutableMapSet[T comparable] struct {
+type mutableMapSet[T comparable] struct {
 	delegate map[T]struct{}
 }
 
-// Add adds the given element(s) to this set. If any of the elements are already present, the set will not add those
-// elements again. Returns true if this set changed as a result of this call, otherwise false.
-func (m *MutableMapSet[T]) Add(elem T, others ...T) bool {
+func (m *mutableMapSet[T]) Add(elem T, others ...T) bool {
 	result := m.add(elem)
-	for _, elem := range others {
-		added := m.add(elem)
+	for _, other := range others {
+		added := m.add(other)
 		result = result || added
 	}
 	return result
 }
 
-func (m *MutableMapSet[T]) add(elem T) bool {
+func (m *mutableMapSet[T]) add(elem T) bool {
 	_, ok := m.delegate[elem]
 	m.delegate[elem] = struct{}{}
 	return !ok
 }
 
-// Remove removes the given element(s) from this set. If any of the elements are already absent, the set will not
-// attempt to remove those elements. Returns true if this set changed as a result of this call, otherwise false.
-func (m *MutableMapSet[T]) Remove(elem T, others ...T) bool {
+func (m *mutableMapSet[T]) Remove(elem T, others ...T) bool {
 	result := m.remove(elem)
 	for _, other := range others {
 		removed := m.remove(other)
@@ -136,38 +121,27 @@ func (m *MutableMapSet[T]) Remove(elem T, others ...T) bool {
 	return result
 }
 
-func (m *MutableMapSet[T]) remove(elem T) bool {
+func (m *mutableMapSet[T]) remove(elem T) bool {
 	_, ok := m.delegate[elem]
 	delete(m.delegate, elem)
 	return ok
 }
 
-// Contains returns true if this set contains the given element, otherwise it returns false.
-func (m *MutableMapSet[T]) Contains(elem T) bool {
+func (m *mutableMapSet[T]) Contains(elem T) bool {
 	_, ok := m.delegate[elem]
 	return ok
 }
 
-// Len returns the number of elements in this set.
-func (m *MutableMapSet[T]) Len() int {
+func (m *mutableMapSet[T]) Len() int {
 	return len(m.delegate)
 }
 
-// ForEach runs the given function on each element in this set.
-//
-// The iteration order of the elements is undefined; it may even change from one call to the next.
-func (m *MutableMapSet[T]) ForEach(fn func(elem T)) {
+func (m *mutableMapSet[T]) ForEach(fn func(elem T)) {
 	for elem := range m.delegate {
 		fn(elem)
 	}
 }
 
-// String returns a string representation of all the elements in this set.
-//
-// The format of this string is a single "[" followed by a comma-separated list (", ") of this set's elements in the
-// same order as ForEach (which is undefined and may change from one call to the next), followed by a single "]".
-//
-// This method satisfies fmt.Stringer.
-func (m *MutableMapSet[T]) String() string {
+func (m *mutableMapSet[T]) String() string {
 	return StringImpl[T](m)
 }
