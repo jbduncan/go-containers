@@ -4,6 +4,10 @@ ifeq (, $(shell which go))
 	$(error "No go in $(PATH)")
 endif
 
+.PHONY: build
+build:
+	go build ./...
+
 .PHONY: lint
 lint:
 	@echo "Linting 'go mod tidy'..."
@@ -29,7 +33,7 @@ test:
 	go test -shuffle=on -race ./...
 
 .PHONY: check
-check: lint test
+check: build lint test
 
 .PHONY: update_versions
 update_versions:

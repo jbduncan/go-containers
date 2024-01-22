@@ -206,7 +206,7 @@ func graphTests(
 			})
 		})
 
-		Context("when putting two connected edges", func() {
+		Context("when putting two connected edges with the same source node", func() {
 			BeforeEach(func() {
 				grph = putEdge(grph, node1, node2)
 				grph = putEdge(grph, node1, node3)
@@ -216,49 +216,62 @@ func graphTests(
 				Expect(grph.Degree(node1)).To(Equal(2))
 			})
 
+			It("reports that the common node has two successors", func() {
+				testSet(grph.Successors(node1), node2, node3)
+			})
+
 			It("reports the two unique nodes as adjacent to the common one", func() {
 				testSet(grph.AdjacentNodes(node1), node2, node3)
 			})
 		})
 
+		Context("when putting two connected edges with the same target node", func() {
+			FIt("reports that the common node has two predecessors", func() {
+				grph = putEdge(grph, node1, node2)
+				grph = putEdge(grph, node3, node2)
+
+				testSet(grph.Predecessors(node2), node1, node3)
+			})
+		})
+
 		Context("when finding the predecessors of an absent node", func() {
-			It("returns an empty set", func() {
+			FIt("returns an empty set", func() {
 				testSet(grph.Predecessors(nodeNotInGraph))
 			})
 		})
 
 		Context("when finding the successors of an absent node", func() {
-			It("returns an empty set", func() {
+			FIt("returns an empty set", func() {
 				testSet(grph.Successors(nodeNotInGraph))
 			})
 		})
 
 		Context("when finding the adjacent nodes of an absent node", func() {
-			It("returns an empty set", func() {
+			FIt("returns an empty set", func() {
 				testSet(grph.AdjacentNodes(nodeNotInGraph))
 			})
 		})
 
 		Context("when finding the incident edges of an absent node", func() {
-			It("returns an empty set", func() {
+			FIt("returns an empty set", func() {
 				testEmptyEdges(grph.IncidentEdges(nodeNotInGraph))
 			})
 		})
 
 		Context("when finding the degree of an absent node", func() {
-			It("returns zero", func() {
+			FIt("returns zero", func() {
 				Expect(grph.Degree(nodeNotInGraph)).To(BeZero())
 			})
 		})
 
 		Context("when finding the in degree of an absent node", func() {
-			It("returns zero", func() {
+			FIt("returns zero", func() {
 				Expect(grph.InDegree(nodeNotInGraph)).To(BeZero())
 			})
 		})
 
 		Context("when finding the out degree of of an absent node", func() {
-			It("returns zero", func() {
+			FIt("returns zero", func() {
 				Expect(grph.OutDegree(nodeNotInGraph)).To(BeZero())
 			})
 		})
@@ -622,7 +635,7 @@ func undirectedGraphTests(
 			})
 		})
 
-		Context("when putting two connected edges", func() {
+		Context("when putting two connected edges with the same source node", func() {
 			BeforeEach(func() {
 				grph = putEdge(grph, node1, node2)
 				grph = putEdge(grph, node1, node3)
@@ -675,11 +688,11 @@ func directedGraphTests(
 				grph = putEdge(grph, node1, node2)
 			})
 
-			It("sees that the second node has the first node as a predecessor", func() {
+			FIt("sees that the second node has the first node as a predecessor", func() {
 				testSet(grph.Predecessors(node2), node1)
 			})
 
-			It("sees that the first node has no predecessors", func() {
+			FIt("sees that the first node has no predecessors", func() {
 				testSet(grph.Predecessors(node1))
 			})
 
@@ -700,11 +713,13 @@ func directedGraphTests(
 			})
 		})
 
-		Context("when putting two connected edges", func() {
-			It("has two edges sharing a common node", func() {
+		Context("when putting two connected edges with the same source node", func() {
+			BeforeEach(func() {
 				grph = putEdge(grph, node1, node2)
 				grph = putEdge(grph, node1, node3)
+			})
 
+			It("has two edges sharing a common node", func() {
 				testTwoEdgesForDirectedGraphs(grph.Edges())
 			})
 

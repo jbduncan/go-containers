@@ -59,7 +59,8 @@ func (b Builder[N]) AllowsSelfLoops(allowsSelfLoops bool) Builder[N] {
 func (b Builder[N]) Build() MutableGraph[N] {
 	if b.directed {
 		return &directedGraph[N]{
-			nodes: set.NewMutable[N](),
+			nodes:              set.NewMutable[N](),
+			nodeToPredecessors: map[N]set.MutableSet[N]{},
 		}
 	}
 
@@ -238,7 +239,8 @@ func (g *undirectedGraph[N]) removeEdge(from, to N) bool {
 }
 
 type directedGraph[N comparable] struct {
-	nodes set.MutableSet[N]
+	nodes              set.MutableSet[N]
+	nodeToPredecessors map[N]set.MutableSet[N]
 }
 
 func (d *directedGraph[N]) Nodes() set.Set[N] {
@@ -262,8 +264,10 @@ func (d *directedGraph[N]) AdjacentNodes(node N) set.Set[N] {
 	return set.Of[N]()
 }
 
-//nolint:revive
 func (d *directedGraph[N]) Predecessors(node N) set.Set[N] {
+	if predecessors, ok := d.nodeToPredecessors[node]; ok {
+		return predecessors
+	}
 	return set.Of[N]()
 }
 
@@ -314,7 +318,15 @@ func (d *directedGraph[N]) AddNode(node N) bool {
 
 //nolint:revive
 func (d *directedGraph[N]) PutEdge(source, target N) bool {
-	panic("implement me")
+	predecessors, ok := d.nodeToPredecessors[target]
+	if !ok {
+		predecessors = set.NewMutable[N]()
+		d.nodeToPredecessors[target] = predecessors
+	}
+
+	predecessors.Add(source)
+
+	return false
 }
 
 //nolint:revive
