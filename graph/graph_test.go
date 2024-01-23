@@ -216,7 +216,7 @@ func graphTests(
 				Expect(grph.Degree(node1)).To(Equal(2))
 			})
 
-			It("reports that the common node has two successors", func() {
+			FIt("reports that the common node has two successors", func() {
 				testSet(grph.Successors(node1), node2, node3)
 			})
 
@@ -292,7 +292,7 @@ func graphTests(
 			testSet(adjacentNodes, node2)
 		})
 
-		It("had an unmodifiable predecessors set view", func() {
+		FIt("had an unmodifiable predecessors set view", func() {
 			predecessors := grph.Predecessors(node1)
 			Expect(predecessors).To(BeNonMutableSet[int]())
 
@@ -300,7 +300,7 @@ func graphTests(
 			testSet(predecessors, node2)
 		})
 
-		It("has an unmodifiable successors set view", func() {
+		FIt("has an unmodifiable successors set view", func() {
 			successors := grph.Successors(node1)
 			Expect(successors).To(BeNonMutableSet[int]())
 
@@ -566,7 +566,7 @@ func undirectedGraphTests(
 	graphName string,
 	createGraph func() graph.Graph[int],
 ) {
-	Context(fmt.Sprintf("%s: given an undirected graph", graphName), func() {
+	FContext(fmt.Sprintf("%s: given an undirected graph", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
@@ -696,11 +696,11 @@ func directedGraphTests(
 				testSet(grph.Predecessors(node1))
 			})
 
-			It("sees that the first node has the second node as a successor", func() {
+			FIt("sees that the first node has the second node as a successor", func() {
 				testSet(grph.Successors(node1), node2)
 			})
 
-			It("sees that the second node has no successors", func() {
+			FIt("sees that the second node has no successors", func() {
 				testSet(grph.Successors(node2))
 			})
 

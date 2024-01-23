@@ -5,35 +5,30 @@ import "github.com/jbduncan/go-containers/set"
 var _ set.Set[int] = (*adjacentNodeSet[int])(nil)
 
 type adjacentNodeSet[N comparable] struct {
-	node          N
-	adjacencyList map[N]set.MutableSet[N]
+	node                N
+	nodeToAdjacentNodes map[N]set.MutableSet[N]
 }
 
 func (a adjacentNodeSet[N]) Contains(elem N) bool {
-	adjacentNodes, ok := a.adjacencyList[a.node]
-	if !ok {
-		return false
+	if adjacentNodes, ok := a.nodeToAdjacentNodes[a.node]; ok {
+		return adjacentNodes.Contains(elem)
 	}
 
-	return adjacentNodes.Contains(elem)
+	return false
 }
 
 func (a adjacentNodeSet[N]) Len() int {
-	adjacentNodes, ok := a.adjacencyList[a.node]
-	if !ok {
-		return 0
+	if adjacentNodes, ok := a.nodeToAdjacentNodes[a.node]; ok {
+		return adjacentNodes.Len()
 	}
 
-	return adjacentNodes.Len()
+	return 0
 }
 
 func (a adjacentNodeSet[N]) ForEach(fn func(elem N)) {
-	adjacentNodes, ok := a.adjacencyList[a.node]
-	if !ok {
-		return
+	if adjacentNodes, ok := a.nodeToAdjacentNodes[a.node]; ok {
+		adjacentNodes.ForEach(fn)
 	}
-
-	adjacentNodes.ForEach(fn)
 }
 
 func (a adjacentNodeSet[N]) String() string {

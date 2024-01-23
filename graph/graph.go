@@ -61,13 +61,14 @@ func (b Builder[N]) Build() MutableGraph[N] {
 		return &directedGraph[N]{
 			nodes:              set.NewMutable[N](),
 			nodeToPredecessors: map[N]set.MutableSet[N]{},
+			nodeToSuccessors:   map[N]set.MutableSet[N]{},
 		}
 	}
 
 	return &undirectedGraph[N]{
-		adjacencyList:   map[N]set.MutableSet[N]{},
-		allowsSelfLoops: b.allowsSelfLoops,
-		numEdges:        0,
+		nodeToAdjacentNodes: map[N]set.MutableSet[N]{},
+		allowsSelfLoops:     b.allowsSelfLoops,
+		numEdges:            0,
 	}
 }
 
@@ -79,9 +80,9 @@ var (
 )
 
 type undirectedGraph[N comparable] struct {
-	adjacencyList   map[N]set.MutableSet[N]
-	allowsSelfLoops bool
-	numEdges        int
+	nodeToAdjacentNodes map[N]set.MutableSet[N]
+	allowsSelfLoops     bool
+	numEdges            int
 }
 
 func (g *undirectedGraph[N]) IsDirected() bool {
@@ -94,7 +95,7 @@ func (g *undirectedGraph[N]) AllowsSelfLoops() bool {
 
 func (g *undirectedGraph[N]) Nodes() set.Set[N] {
 	return keySet[N]{
-		delegate: g.adjacencyList,
+		delegate: g.nodeToAdjacentNodes,
 	}
 }
 
@@ -106,8 +107,8 @@ func (g *undirectedGraph[N]) Edges() set.Set[EndpointPair[N]] {
 
 func (g *undirectedGraph[N]) AdjacentNodes(node N) set.Set[N] {
 	return adjacentNodeSet[N]{
-		node:          node,
-		adjacencyList: g.adjacencyList,
+		node:                node,
+		nodeToAdjacentNodes: g.nodeToAdjacentNodes,
 	}
 }
 
@@ -122,17 +123,12 @@ func (g *undirectedGraph[N]) Successors(node N) set.Set[N] {
 func (g *undirectedGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 	return incidentEdgeSet[N]{
 		node:          node,
-		adjacencyList: g.adjacencyList,
+		adjacencyList: g.nodeToAdjacentNodes,
 	}
 }
 
 func (g *undirectedGraph[N]) Degree(node N) int {
-	adjacentNodes, ok := g.adjacencyList[node]
-	if !ok {
-		return 0
-	}
-
-	return adjacentNodes.Len()
+	return g.AdjacentNodes(node).Len()
 }
 
 func (g *undirectedGraph[N]) InDegree(node N) int {
@@ -144,11 +140,7 @@ func (g *undirectedGraph[N]) OutDegree(node N) int {
 }
 
 func (g *undirectedGraph[N]) HasEdgeConnecting(source, target N) bool {
-	if adjacentNodes, ok := g.adjacencyList[source]; ok {
-		return adjacentNodes.Contains(target)
-	}
-
-	return false
+	return g.AdjacentNodes(source).Contains(target)
 }
 
 func (g *undirectedGraph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
@@ -165,11 +157,11 @@ func (g *undirectedGraph[N]) String() string {
 }
 
 func (g *undirectedGraph[N]) AddNode(node N) bool {
-	if _, ok := g.adjacencyList[node]; ok {
+	if _, ok := g.nodeToAdjacentNodes[node]; ok {
 		return false
 	}
 
-	g.adjacencyList[node] = set.NewMutable[N]()
+	g.nodeToAdjacentNodes[node] = set.NewMutable[N]()
 	return true
 }
 
@@ -191,10 +183,10 @@ func (g *undirectedGraph[N]) PutEdge(source, target N) bool {
 
 func (g *undirectedGraph[N]) putEdge(source, target N) bool {
 	added := false
-	adjacentNodes, ok := g.adjacencyList[source]
+	adjacentNodes, ok := g.nodeToAdjacentNodes[source]
 	if !ok {
 		adjacentNodes = set.NewMutable[N]()
-		g.adjacencyList[source] = adjacentNodes
+		g.nodeToAdjacentNodes[source] = adjacentNodes
 		added = true
 	}
 	if adjacentNodes.Add(target) {
@@ -204,14 +196,14 @@ func (g *undirectedGraph[N]) putEdge(source, target N) bool {
 }
 
 func (g *undirectedGraph[N]) RemoveNode(node N) bool {
-	adjacentNodes, ok := g.adjacencyList[node]
+	adjacentNodes, ok := g.nodeToAdjacentNodes[node]
 	if !ok {
 		return false
 	}
 
-	delete(g.adjacencyList, node)
+	delete(g.nodeToAdjacentNodes, node)
 
-	for _, adjacentNodes := range g.adjacencyList {
+	for _, adjacentNodes := range g.nodeToAdjacentNodes {
 		adjacentNodes.Remove(node)
 	}
 
@@ -230,7 +222,7 @@ func (g *undirectedGraph[N]) RemoveEdge(source, target N) bool {
 }
 
 func (g *undirectedGraph[N]) removeEdge(from, to N) bool {
-	adjacentNodes, ok := g.adjacencyList[from]
+	adjacentNodes, ok := g.nodeToAdjacentNodes[from]
 	if !ok {
 		return false
 	}
@@ -241,6 +233,7 @@ func (g *undirectedGraph[N]) removeEdge(from, to N) bool {
 type directedGraph[N comparable] struct {
 	nodes              set.MutableSet[N]
 	nodeToPredecessors map[N]set.MutableSet[N]
+	nodeToSuccessors   map[N]set.MutableSet[N]
 }
 
 func (d *directedGraph[N]) Nodes() set.Set[N] {
@@ -265,15 +258,17 @@ func (d *directedGraph[N]) AdjacentNodes(node N) set.Set[N] {
 }
 
 func (d *directedGraph[N]) Predecessors(node N) set.Set[N] {
-	if predecessors, ok := d.nodeToPredecessors[node]; ok {
-		return predecessors
+	return adjacentNodeSet[N]{
+		node:                node,
+		nodeToAdjacentNodes: d.nodeToPredecessors,
 	}
-	return set.Of[N]()
 }
 
-//nolint:revive
 func (d *directedGraph[N]) Successors(node N) set.Set[N] {
-	return set.Of[N]()
+	return adjacentNodeSet[N]{
+		node:                node,
+		nodeToAdjacentNodes: d.nodeToSuccessors,
+	}
 }
 
 //nolint:revive
@@ -316,15 +311,20 @@ func (d *directedGraph[N]) AddNode(node N) bool {
 	return false
 }
 
-//nolint:revive
 func (d *directedGraph[N]) PutEdge(source, target N) bool {
 	predecessors, ok := d.nodeToPredecessors[target]
 	if !ok {
 		predecessors = set.NewMutable[N]()
 		d.nodeToPredecessors[target] = predecessors
 	}
-
 	predecessors.Add(source)
+
+	successors, ok := d.nodeToSuccessors[source]
+	if !ok {
+		successors = set.NewMutable[N]()
+		d.nodeToSuccessors[source] = successors
+	}
+	successors.Add(target)
 
 	return false
 }
