@@ -85,108 +85,108 @@ type undirectedGraph[N comparable] struct {
 	numEdges            int
 }
 
-func (g *undirectedGraph[N]) IsDirected() bool {
+func (u *undirectedGraph[N]) IsDirected() bool {
 	return false
 }
 
-func (g *undirectedGraph[N]) AllowsSelfLoops() bool {
-	return g.allowsSelfLoops
+func (u *undirectedGraph[N]) AllowsSelfLoops() bool {
+	return u.allowsSelfLoops
 }
 
-func (g *undirectedGraph[N]) Nodes() set.Set[N] {
+func (u *undirectedGraph[N]) Nodes() set.Set[N] {
 	return keySet[N]{
-		delegate: g.nodeToAdjacentNodes,
+		delegate: u.nodeToAdjacentNodes,
 	}
 }
 
-func (g *undirectedGraph[N]) Edges() set.Set[EndpointPair[N]] {
+func (u *undirectedGraph[N]) Edges() set.Set[EndpointPair[N]] {
 	return edgeSet[N]{
-		delegate: g,
+		delegate: u,
 	}
 }
 
-func (g *undirectedGraph[N]) AdjacentNodes(node N) set.Set[N] {
+func (u *undirectedGraph[N]) AdjacentNodes(node N) set.Set[N] {
 	return adjacentNodeSet[N]{
 		node:                node,
-		nodeToAdjacentNodes: g.nodeToAdjacentNodes,
+		nodeToAdjacentNodes: u.nodeToAdjacentNodes,
 	}
 }
 
-func (g *undirectedGraph[N]) Predecessors(node N) set.Set[N] {
-	return g.AdjacentNodes(node)
+func (u *undirectedGraph[N]) Predecessors(node N) set.Set[N] {
+	return u.AdjacentNodes(node)
 }
 
-func (g *undirectedGraph[N]) Successors(node N) set.Set[N] {
-	return g.AdjacentNodes(node)
+func (u *undirectedGraph[N]) Successors(node N) set.Set[N] {
+	return u.AdjacentNodes(node)
 }
 
-func (g *undirectedGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
+func (u *undirectedGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 	return incidentEdgeSet[N]{
 		node:          node,
-		adjacencyList: g.nodeToAdjacentNodes,
+		adjacencyList: u.nodeToAdjacentNodes,
 	}
 }
 
-func (g *undirectedGraph[N]) Degree(node N) int {
-	return g.AdjacentNodes(node).Len()
+func (u *undirectedGraph[N]) Degree(node N) int {
+	return u.AdjacentNodes(node).Len()
 }
 
-func (g *undirectedGraph[N]) InDegree(node N) int {
-	return g.Degree(node)
+func (u *undirectedGraph[N]) InDegree(node N) int {
+	return u.Degree(node)
 }
 
-func (g *undirectedGraph[N]) OutDegree(node N) int {
-	return g.Degree(node)
+func (u *undirectedGraph[N]) OutDegree(node N) int {
+	return u.Degree(node)
 }
 
-func (g *undirectedGraph[N]) HasEdgeConnecting(source, target N) bool {
-	return g.AdjacentNodes(source).Contains(target)
+func (u *undirectedGraph[N]) HasEdgeConnecting(source, target N) bool {
+	return u.AdjacentNodes(source).Contains(target)
 }
 
-func (g *undirectedGraph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
-	return g.HasEdgeConnecting(endpointPair.Source(), endpointPair.Target())
+func (u *undirectedGraph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
+	return u.HasEdgeConnecting(endpointPair.Source(), endpointPair.Target())
 }
 
-func (g *undirectedGraph[N]) String() string {
+func (u *undirectedGraph[N]) String() string {
 	return "isDirected: false, allowsSelfLoops: " +
-		strconv.FormatBool(g.allowsSelfLoops) +
+		strconv.FormatBool(u.allowsSelfLoops) +
 		", nodes: " +
-		g.Nodes().String() +
+		u.Nodes().String() +
 		", edges: " +
-		g.Edges().String()
+		u.Edges().String()
 }
 
-func (g *undirectedGraph[N]) AddNode(node N) bool {
-	if _, ok := g.nodeToAdjacentNodes[node]; ok {
+func (u *undirectedGraph[N]) AddNode(node N) bool {
+	if _, ok := u.nodeToAdjacentNodes[node]; ok {
 		return false
 	}
 
-	g.nodeToAdjacentNodes[node] = set.NewMutable[N]()
+	u.nodeToAdjacentNodes[node] = set.NewMutable[N]()
 	return true
 }
 
-func (g *undirectedGraph[N]) PutEdge(source, target N) bool {
-	if !g.AllowsSelfLoops() && source == target {
+func (u *undirectedGraph[N]) PutEdge(source, target N) bool {
+	if !u.AllowsSelfLoops() && source == target {
 		panic("self-loops are disallowed")
 	}
 
-	addedUToV := g.putEdge(source, target)
-	g.putEdge(target, source)
+	addedUToV := u.putEdge(source, target)
+	u.putEdge(target, source)
 
 	if addedUToV {
-		g.numEdges++
+		u.numEdges++
 		return true
 	}
 
 	return false
 }
 
-func (g *undirectedGraph[N]) putEdge(source, target N) bool {
+func (u *undirectedGraph[N]) putEdge(source, target N) bool {
 	added := false
-	adjacentNodes, ok := g.nodeToAdjacentNodes[source]
+	adjacentNodes, ok := u.nodeToAdjacentNodes[source]
 	if !ok {
 		adjacentNodes = set.NewMutable[N]()
-		g.nodeToAdjacentNodes[source] = adjacentNodes
+		u.nodeToAdjacentNodes[source] = adjacentNodes
 		added = true
 	}
 	if adjacentNodes.Add(target) {
@@ -195,34 +195,34 @@ func (g *undirectedGraph[N]) putEdge(source, target N) bool {
 	return added
 }
 
-func (g *undirectedGraph[N]) RemoveNode(node N) bool {
-	adjacentNodes, ok := g.nodeToAdjacentNodes[node]
+func (u *undirectedGraph[N]) RemoveNode(node N) bool {
+	adjacentNodes, ok := u.nodeToAdjacentNodes[node]
 	if !ok {
 		return false
 	}
 
-	delete(g.nodeToAdjacentNodes, node)
+	delete(u.nodeToAdjacentNodes, node)
 
-	for _, adjacentNodes := range g.nodeToAdjacentNodes {
+	for _, adjacentNodes := range u.nodeToAdjacentNodes {
 		adjacentNodes.Remove(node)
 	}
 
-	g.numEdges -= adjacentNodes.Len()
+	u.numEdges -= adjacentNodes.Len()
 
 	return true
 }
 
-func (g *undirectedGraph[N]) RemoveEdge(source, target N) bool {
-	removedUToV := g.removeEdge(source, target)
-	g.removeEdge(target, source)
+func (u *undirectedGraph[N]) RemoveEdge(source, target N) bool {
+	removedUToV := u.removeEdge(source, target)
+	u.removeEdge(target, source)
 
-	g.numEdges--
+	u.numEdges--
 
 	return removedUToV
 }
 
-func (g *undirectedGraph[N]) removeEdge(from, to N) bool {
-	adjacentNodes, ok := g.nodeToAdjacentNodes[from]
+func (u *undirectedGraph[N]) removeEdge(from, to N) bool {
+	adjacentNodes, ok := u.nodeToAdjacentNodes[from]
 	if !ok {
 		return false
 	}
