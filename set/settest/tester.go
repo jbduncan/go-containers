@@ -73,6 +73,9 @@ func Set(t TestingT, setBuilder func(elems []string) set.Set[string]) {
 	tt.setInitializedFromTwoOfSameElementHasLengthOfOne()
 	tt.emptySetPlusSameElementTwiceHasLengthOfOne()
 
+	tt.setInitializedFromTwoOfSameElementReturnsOneElementOnIteration()
+	tt.emptySetPlusSameElementTwiceReturnsOneElementOnIteration()
+
 	tt.emptySetPlusOneReturnsTrue()
 
 	tt.emptySetPlusSameElementTwiceReturnsFalse()
@@ -604,6 +607,34 @@ func (tt tester) emptySetPlusSameElementTwiceHasLengthOfOne() {
 			s.Add("link")
 
 			g.Expect(s).To(HaveLenOf(1))
+		})
+}
+
+func (tt tester) setInitializedFromTwoOfSameElementReturnsOneElementOnIteration() {
+	tt.t.Helper()
+
+	tt.t.Run("set initialized from two of same element: returns one element on iteration",
+		func(t *testing.T) {
+			g := NewWithT(t)
+			s := tt.setBuilder(twoSameElements())
+
+			g.Expect(s).To(HaveForEachThatConsistsOf[string]("link"))
+		})
+}
+
+func (tt tester) emptySetPlusSameElementTwiceReturnsOneElementOnIteration() {
+	tt.t.Helper()
+
+	tt.runEmptyIfMutable(
+		"empty set: add same element x2: returns one element on iteration",
+		func(t *testing.T, s set.MutableSet[string]) {
+			t.Helper()
+			g := NewWithT(t)
+
+			s.Add("link")
+			s.Add("link")
+
+			g.Expect(s).To(HaveForEachThatConsistsOf[string]("link"))
 		})
 }
 
