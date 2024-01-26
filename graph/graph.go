@@ -237,7 +237,7 @@ type directedGraph[N comparable] struct {
 }
 
 func (d *directedGraph[N]) Nodes() set.Set[N] {
-	return d.nodes
+	return set.Unmodifiable(d.nodes)
 }
 
 func (d *directedGraph[N]) Edges() set.Set[EndpointPair[N]] {
@@ -252,9 +252,8 @@ func (d *directedGraph[N]) AllowsSelfLoops() bool {
 	return false
 }
 
-//nolint:revive
 func (d *directedGraph[N]) AdjacentNodes(node N) set.Set[N] {
-	return set.Of[N]()
+	return set.Union[N](d.Predecessors(node), d.Successors(node))
 }
 
 func (d *directedGraph[N]) Predecessors(node N) set.Set[N] {

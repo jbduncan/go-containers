@@ -163,7 +163,7 @@ func graphTests(
 		})
 
 		Context("when putting one edge", func() {
-			It("reports that both nodes are adjacent to each other", func() {
+			FIt("reports that both nodes are adjacent to each other", func() {
 				grph = putEdge(grph, node1, node2)
 
 				testSet(grph.AdjacentNodes(node1), node2)
@@ -220,7 +220,7 @@ func graphTests(
 				testSet(grph.Successors(node1), node2, node3)
 			})
 
-			It("reports the two unique nodes as adjacent to the common one", func() {
+			FIt("reports the two unique nodes as adjacent to the common one", func() {
 				testSet(grph.AdjacentNodes(node1), node2, node3)
 			})
 		})
@@ -276,7 +276,7 @@ func graphTests(
 			})
 		})
 
-		It("has an unmodifiable nodes set view", func() {
+		FIt("has an unmodifiable nodes set view", func() {
 			nodes := grph.Nodes()
 			Expect(nodes).To(BeNonMutableSet[int]())
 
@@ -284,12 +284,13 @@ func graphTests(
 			testSet(nodes, node1)
 		})
 
-		It("has an unmodifiable adjacent nodes set view", func() {
+		FIt("has an unmodifiable adjacent nodes set view", func() {
 			adjacentNodes := grph.AdjacentNodes(node1)
 			Expect(adjacentNodes).To(BeNonMutableSet[int]())
 
 			grph = putEdge(grph, node1, node2)
-			testSet(adjacentNodes, node2)
+			grph = putEdge(grph, node3, node1)
+			testSet(adjacentNodes, node2, node3)
 		})
 
 		FIt("had an unmodifiable predecessors set view", func() {
@@ -759,7 +760,7 @@ func allowsSelfLoopsGraphTests(graphName string, createGraph func() graph.Graph[
 		})
 
 		Context("when putting one self-loop edge", func() {
-			It("sees the shared node as its own adjacent node", func() {
+			FIt("sees the shared node as its own adjacent node", func() {
 				grph = putEdge(grph, node1, node1)
 
 				testSet(grph.AdjacentNodes(node1), node1)
