@@ -712,6 +712,14 @@ func directedGraphTests(
 			It("has an incident edge connecting the first node to the second node", func() {
 				testSingleEdgeForDirectedGraph(grph.IncidentEdges(node1))
 			})
+
+			FIt("has an in degree of 0 for the first node", func() {
+				Expect(grph.InDegree(node1)).To(BeZero())
+			})
+
+			FIt("has an in degree of 1 for the second node", func() {
+				Expect(grph.InDegree(node2)).To(Equal(1))
+			})
 		})
 
 		Context("when putting two connected edges with the same source node", func() {
@@ -726,6 +734,19 @@ func directedGraphTests(
 
 			It("has two incident edges connected to the common node", func() {
 				testTwoEdgesForDirectedGraphs(grph.IncidentEdges(node1))
+			})
+
+			It("has an out degree of 2 for the common node", func() {
+				Expect(grph.OutDegree(node1)).To(Equal(2))
+			})
+		})
+
+		Context("when putting two connected edges with the same target node", func() {
+			FIt("has an in degree of 2 for the common node", func() {
+				grph = putEdge(grph, node1, node2)
+				grph = putEdge(grph, node3, node2)
+
+				Expect(grph.InDegree(node2)).To(Equal(2))
 			})
 		})
 

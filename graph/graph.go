@@ -280,8 +280,11 @@ func (d *directedGraph[N]) Degree(node N) int {
 	return 0
 }
 
-//nolint:revive
 func (d *directedGraph[N]) InDegree(node N) int {
+	if predecessors, ok := d.nodeToPredecessors[node]; ok {
+		return predecessors.Len()
+	}
+
 	return 0
 }
 
