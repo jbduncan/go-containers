@@ -29,7 +29,7 @@ func TestUnion(t *testing.T) {
 func TestUnionIsUnmodifiable(t *testing.T) {
 	g := NewWithT(t)
 
-	union := set.Union[int](set.Of[int](), set.Of[int]())
+	union := set.Union(set.Of[int](), set.Of[int]())
 
 	g.Expect(union).To(BeNonMutableSet[int]())
 }

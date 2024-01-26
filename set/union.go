@@ -1,7 +1,19 @@
 package set
 
-func Union[T comparable](a Set[T], b Set[T]) Set[T] {
-	return &union[T]{
+// Union returns the set union of sets a and b.
+//
+// The returned set is an unmodifiable view, so changes to a and b will be reflected in the returned set.
+//
+// Set.Len runs in O(b) time.
+//
+// Note: If passing in a MutableSet, Go will force the programmer to specify the generic type explicitly, like:
+//
+//	a := set.NewMutable(1)
+//	b := set.NewMutable(2)
+//	u := set.Union[int](a, b)
+//	              ^^^^^
+func Union[T comparable](a, b Set[T]) Set[T] {
+	return union[T]{
 		a: a,
 		b: b,
 	}
