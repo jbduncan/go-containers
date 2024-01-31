@@ -6,7 +6,7 @@ package set
 //
 // Set.Len runs in O(b) time.
 //
-// Note: If passing in a MutableSet, Go will force the programmer to specify the generic type explicitly, like:
+// Note: If passing in a MutableSet, Go needs the generic type to be defined explicitly, like:
 //
 //	a := set.NewMutable(1)
 //	b := set.NewMutable(2)

@@ -79,6 +79,11 @@ var (
 	_ MutableGraph[int] = (*directedGraph[int])(nil)
 )
 
+type graphWithEdgeCount[N comparable] interface {
+	Graph[N]
+	edgeCount() int
+}
+
 type undirectedGraph[N comparable] struct {
 	nodeToAdjacentNodes map[N]set.MutableSet[N]
 	allowsSelfLoops     bool
@@ -103,6 +108,10 @@ func (u *undirectedGraph[N]) Edges() set.Set[EndpointPair[N]] {
 	return edgeSet[N]{
 		delegate: u,
 	}
+}
+
+func (u *undirectedGraph[N]) edgeCount() int {
+	return u.numEdges
 }
 
 func (u *undirectedGraph[N]) AdjacentNodes(node N) set.Set[N] {
@@ -234,6 +243,7 @@ type directedGraph[N comparable] struct {
 	nodes              set.MutableSet[N]
 	nodeToPredecessors map[N]set.MutableSet[N]
 	nodeToSuccessors   map[N]set.MutableSet[N]
+	numEdges           int
 }
 
 func (d *directedGraph[N]) Nodes() set.Set[N] {
@@ -241,7 +251,13 @@ func (d *directedGraph[N]) Nodes() set.Set[N] {
 }
 
 func (d *directedGraph[N]) Edges() set.Set[EndpointPair[N]] {
-	return set.Of[EndpointPair[N]]()
+	return edgeSet[N]{
+		delegate: d,
+	}
+}
+
+func (d *directedGraph[N]) edgeCount() int {
+	return d.numEdges
 }
 
 func (d *directedGraph[N]) IsDirected() bool {
@@ -275,9 +291,8 @@ func (d *directedGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 	return set.Of[EndpointPair[N]]()
 }
 
-//nolint:revive
 func (d *directedGraph[N]) Degree(node N) int {
-	return 0
+	return d.InDegree(node) + d.OutDegree(node)
 }
 
 func (d *directedGraph[N]) InDegree(node N) int {
@@ -309,6 +324,9 @@ func (d *directedGraph[N]) AddNode(node N) bool {
 }
 
 func (d *directedGraph[N]) PutEdge(source, target N) bool {
+	d.nodes.Add(source)
+	d.nodes.Add(target)
+
 	predecessors, ok := d.nodeToPredecessors[target]
 	if !ok {
 		predecessors = set.NewMutable[N]()
@@ -322,6 +340,8 @@ func (d *directedGraph[N]) PutEdge(source, target N) bool {
 		d.nodeToSuccessors[source] = successors
 	}
 	successors.Add(target)
+
+	d.numEdges++
 
 	return false
 }

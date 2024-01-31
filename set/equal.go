@@ -11,7 +11,7 @@ package set
 //   - Consistent: for any potentially-nil sets a and b, multiple calls to Equal(a, b) consistently returns true or
 //     consistently returns false, as long as the sets do not change.
 //
-// Note: If passing in a MutableSet, Go will force the programmer to specify the generic type explicitly, like:
+// Note: If passing in a MutableSet, Go needs the generic type to be defined explicitly, like:
 //
 //	a := set.NewMutable(1)
 //	b := set.NewMutable(2)
