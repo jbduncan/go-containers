@@ -4,6 +4,11 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
+type graphWithEdgeCount[N comparable] interface {
+	Graph[N]
+	edgeCount() int
+}
+
 var _ set.Set[EndpointPair[int]] = (*edgeSet[int])(nil)
 
 type edgeSet[N comparable] struct {

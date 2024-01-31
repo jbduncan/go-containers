@@ -79,11 +79,6 @@ var (
 	_ MutableGraph[int] = (*directedGraph[int])(nil)
 )
 
-type graphWithEdgeCount[N comparable] interface {
-	Graph[N]
-	edgeCount() int
-}
-
 type undirectedGraph[N comparable] struct {
 	nodeToAdjacentNodes map[N]set.MutableSet[N]
 	allowsSelfLoops     bool
@@ -110,6 +105,7 @@ func (u *undirectedGraph[N]) Edges() set.Set[EndpointPair[N]] {
 	}
 }
 
+//nolint:unused // Used by edgeSet
 func (u *undirectedGraph[N]) edgeCount() int {
 	return u.numEdges
 }
@@ -256,6 +252,7 @@ func (d *directedGraph[N]) Edges() set.Set[EndpointPair[N]] {
 	}
 }
 
+//nolint:unused // Used by edgeSet
 func (d *directedGraph[N]) edgeCount() int {
 	return d.numEdges
 }
