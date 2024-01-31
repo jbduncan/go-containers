@@ -4,7 +4,7 @@ package set
 //
 // The returned set is an unmodifiable view, so changes to a and b will be reflected in the returned set.
 //
-// Set.Len runs in O(b) time.
+// Set.Len runs in O(b) time for the returned set.
 //
 // Note: If passing in a MutableSet, Go needs the generic type to be defined explicitly, like:
 //
