@@ -714,11 +714,11 @@ func directedGraphTests(
 			})
 
 			FIt("has just one edge", func() {
-				testSingleEdgeForDirectedGraph(grph.Edges())
+				testSingleEdgeForDirectedGraph(grph.Edges(), graph.EndpointPairOf(node1, node2))
 			})
 
 			FIt("has an incident edge connecting the first node to the second node", func() {
-				testSingleEdgeForDirectedGraph(grph.IncidentEdges(node1))
+				testSingleEdgeForDirectedGraph(grph.IncidentEdges(node1), graph.EndpointPairOf(node1, node2))
 			})
 
 			FIt("has an in degree of 0 for the first node", func() {
@@ -803,7 +803,7 @@ func directedGraphTests(
 			Expect(edges).To(BeNonMutableSet[graph.EndpointPair[int]]())
 
 			grph = putEdge(grph, node1, node2)
-			testSingleEdgeForDirectedGraph(edges)
+			testSingleEdgeForDirectedGraph(edges, graph.EndpointPairOf(node1, node2))
 		})
 
 		FIt("has an unmodifiable set view of incident edges", func() {
@@ -811,7 +811,7 @@ func directedGraphTests(
 			Expect(incidentEdges).To(BeNonMutableSet[graph.EndpointPair[int]]())
 
 			grph = putEdge(grph, node1, node2)
-			testSingleEdgeForDirectedGraph(incidentEdges)
+			testSingleEdgeForDirectedGraph(incidentEdges, graph.EndpointPairOf(node1, node2))
 		})
 	})
 }
@@ -960,10 +960,16 @@ func directedAllowsSelfLoopGraphTests(graphName string, createGraph func() graph
 		})
 
 		Context("when putting one self-loop edge", func() {
-			It("reports that the shared node has a degree of 1", func() {
+			BeforeEach(func() {
 				grph = putEdge(grph, node1, node1)
+			})
 
+			It("reports that the shared node has a degree of 1", func() {
 				Expect(grph.Degree(node1)).To(Equal(1))
+			})
+
+			FIt("reports that the shared node only has one incident edge with itself", func() {
+				testSingleEdgeForDirectedGraph(grph.IncidentEdges(node1), graph.EndpointPairOf(node1, node1))
 			})
 		})
 	})
@@ -1086,22 +1092,28 @@ func testSingleEdgeForUndirectedGraph(endpointPairs set.Set[graph.EndpointPair[i
 		HaveStringReprThatIsAnyOf("[<1 -> 2>]", "[<2 -> 1>]"))
 }
 
-func testSingleEdgeForDirectedGraph(endpointPairs set.Set[graph.EndpointPair[int]]) {
+func testSingleEdgeForDirectedGraph(
+	endpointPairs set.Set[graph.EndpointPair[int]],
+	expectedEndpointPair graph.EndpointPair[int],
+) {
 	// Set.Len()
 	Expect(endpointPairs).To(HaveLenOf(1))
 
 	// Set.ForEach()
 	Expect(ForEachToSlice(endpointPairs)).
-		To(HaveExactElements(graph.EndpointPairOf(node1, node2)))
+		To(HaveExactElements(expectedEndpointPair))
 
 	// Set.Contains()
-	Expect(endpointPairs).To(Contain(graph.EndpointPairOf(node1, node2)))
-	Expect(endpointPairs).ToNot(Contain(graph.EndpointPairOf(node2, node1)))
+	Expect(endpointPairs).To(Contain(expectedEndpointPair))
+	if expectedEndpointPair != reverseOf(expectedEndpointPair) {
+		Expect(endpointPairs).ToNot(Contain(reverseOf(expectedEndpointPair)))
+	}
 	Expect(endpointPairs).ToNot(
 		Contain(graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph)))
 
 	// Set.String()
-	Expect(endpointPairs).To(HaveStringRepr("[<1 -> 2>]"))
+	Expect(endpointPairs).To(
+		HaveStringRepr(fmt.Sprintf("[%v]", expectedEndpointPair)))
 }
 
 func testTwoEdgesForUndirectedGraphs(endpointPairs set.Set[graph.EndpointPair[int]]) {
