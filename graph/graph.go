@@ -62,6 +62,7 @@ func (b Builder[N]) Build() MutableGraph[N] {
 			nodes:              set.NewMutable[N](),
 			nodeToPredecessors: map[N]set.MutableSet[N]{},
 			nodeToSuccessors:   map[N]set.MutableSet[N]{},
+			numEdges:           0,
 		}
 	}
 
@@ -145,11 +146,11 @@ func (u *undirectedGraph[N]) OutDegree(node N) int {
 }
 
 func (u *undirectedGraph[N]) HasEdgeConnecting(source, target N) bool {
-	return u.AdjacentNodes(source).Contains(target)
+	return hasEdgeConnecting[N](u, source, target)
 }
 
 func (u *undirectedGraph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
-	return u.HasEdgeConnecting(endpointPair.Source(), endpointPair.Target())
+	return hasEdgeConnectingEndpoints[N](u, endpointPair)
 }
 
 func (u *undirectedGraph[N]) String() string {
@@ -300,14 +301,12 @@ func (d *directedGraph[N]) OutDegree(node N) int {
 	return d.Successors(node).Len()
 }
 
-//nolint:revive
 func (d *directedGraph[N]) HasEdgeConnecting(source N, target N) bool {
-	panic("implement me")
+	return hasEdgeConnecting[N](d, source, target)
 }
 
-//nolint:revive
 func (d *directedGraph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
-	panic("implement me")
+	return hasEdgeConnectingEndpoints[N](d, endpointPair)
 }
 
 func (d *directedGraph[N]) String() string {
@@ -351,4 +350,12 @@ func (d *directedGraph[N]) RemoveNode(node N) bool {
 //nolint:revive
 func (d *directedGraph[N]) RemoveEdge(source, target N) bool {
 	panic("implement me")
+}
+
+func hasEdgeConnecting[N comparable](g Graph[N], source N, target N) bool {
+	return g.Successors(source).Contains(target)
+}
+
+func hasEdgeConnectingEndpoints[N comparable](g Graph[N], endpointPair EndpointPair[N]) bool {
+	return hasEdgeConnecting(g, endpointPair.Source(), endpointPair.Target())
 }

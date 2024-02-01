@@ -163,21 +163,21 @@ func graphTests(
 		})
 
 		Context("when putting one edge", func() {
-			FIt("reports that both nodes are adjacent to each other", func() {
+			BeforeEach(func() {
 				grph = putEdge(grph, node1, node2)
+			})
 
+			FIt("reports that both nodes are adjacent to each other", func() {
 				testSet(grph.AdjacentNodes(node1), node2)
 				testSet(grph.AdjacentNodes(node2), node1)
 			})
 
 			FIt("reports that both nodes have a degree of 1", func() {
-				grph = putEdge(grph, node1, node2)
-
 				Expect(grph.Degree(node1)).To(Equal(1))
 				Expect(grph.Degree(node2)).To(Equal(1))
 			})
 
-			It("sees the first node as being connected to the second", func() {
+			FIt("sees the first node as being connected to the second", func() {
 				Expect(grph.HasEdgeConnecting(node1, node2)).
 					To(BeTrue())
 
@@ -185,7 +185,7 @@ func graphTests(
 					To(BeTrue())
 			})
 
-			It("does not see the first node as being connected to any other node", func() {
+			FIt("does not see the first node as being connected to any other node", func() {
 				Expect(grph.HasEdgeConnecting(node1, nodeNotInGraph)).
 					To(BeFalse())
 				Expect(grph.HasEdgeConnecting(nodeNotInGraph, node1)).
@@ -197,7 +197,7 @@ func graphTests(
 					To(BeFalse())
 			})
 
-			It("does not see the second node as being connected to any other node", func() {
+			FIt("does not see the second node as being connected to any other node", func() {
 				Expect(grph.HasEdgeConnecting(node2, nodeNotInGraph)).
 					To(BeFalse())
 
@@ -727,6 +727,14 @@ func directedGraphTests(
 
 			FIt("has an out degree of 0 for the second node", func() {
 				Expect(grph.OutDegree(node2)).To(BeZero())
+			})
+
+			FIt("does not see the second node as being connected to the first node", func() {
+				Expect(grph.HasEdgeConnecting(node2, node1)).
+					To(BeFalse())
+
+				Expect(grph.HasEdgeConnectingEndpoints(graph.EndpointPairOf(node2, node1))).
+					To(BeFalse())
 			})
 		})
 
