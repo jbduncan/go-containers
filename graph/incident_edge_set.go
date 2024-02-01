@@ -7,36 +7,21 @@ import (
 var _ set.Set[EndpointPair[int]] = (*incidentEdgeSet[int])(nil)
 
 type incidentEdgeSet[N comparable] struct {
-	node          N
-	adjacencyList map[N]set.MutableSet[N]
+	node     N
+	delegate Graph[N]
 }
 
 func (i incidentEdgeSet[N]) Contains(elem EndpointPair[N]) bool {
-	adjacentNodes, ok := i.adjacencyList[i.node]
-	if !ok {
-		return false
-	}
-
-	return i.node == elem.Source() && adjacentNodes.Contains(elem.Target()) ||
-		i.node == elem.Target() && adjacentNodes.Contains(elem.Source())
+	return i.node == elem.Source() && i.delegate.AdjacentNodes(i.node).Contains(elem.Target()) ||
+		i.node == elem.Target() && i.delegate.AdjacentNodes(i.node).Contains(elem.Source())
 }
 
 func (i incidentEdgeSet[N]) Len() int {
-	adjacentNodes, ok := i.adjacencyList[i.node]
-	if !ok {
-		return 0
-	}
-
-	return adjacentNodes.Len()
+	return i.delegate.AdjacentNodes(i.node).Len()
 }
 
 func (i incidentEdgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
-	adjacentNodes, ok := i.adjacencyList[i.node]
-	if !ok {
-		return
-	}
-
-	adjacentNodes.ForEach(
+	i.delegate.AdjacentNodes(i.node).ForEach(
 		func(adjNode N) {
 			fn(EndpointPairOf(i.node, adjNode))
 		})

@@ -102,13 +102,9 @@ func (u *undirectedGraph[N]) Nodes() set.Set[N] {
 
 func (u *undirectedGraph[N]) Edges() set.Set[EndpointPair[N]] {
 	return edgeSet[N]{
-		delegate: u,
+		delegate:  u,
+		edgeCount: func() int { return u.numEdges },
 	}
-}
-
-//nolint:unused // Used by edgeSet
-func (u *undirectedGraph[N]) edgeCount() int {
-	return u.numEdges
 }
 
 func (u *undirectedGraph[N]) AdjacentNodes(node N) set.Set[N] {
@@ -128,8 +124,8 @@ func (u *undirectedGraph[N]) Successors(node N) set.Set[N] {
 
 func (u *undirectedGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 	return incidentEdgeSet[N]{
-		node:          node,
-		adjacencyList: u.nodeToAdjacentNodes,
+		node:     node,
+		delegate: u,
 	}
 }
 
@@ -176,10 +172,10 @@ func (u *undirectedGraph[N]) PutEdge(source, target N) bool {
 		panic("self-loops are disallowed")
 	}
 
-	addedUToV := u.putEdge(source, target)
+	added := u.putEdge(source, target)
 	u.putEdge(target, source)
 
-	if addedUToV {
+	if added {
 		u.numEdges++
 		return true
 	}
@@ -228,12 +224,11 @@ func (u *undirectedGraph[N]) RemoveEdge(source, target N) bool {
 }
 
 func (u *undirectedGraph[N]) removeEdge(from, to N) bool {
-	adjacentNodes, ok := u.nodeToAdjacentNodes[from]
-	if !ok {
-		return false
+	if adjacentNodes, ok := u.nodeToAdjacentNodes[from]; ok {
+		return adjacentNodes.Remove(to)
 	}
 
-	return adjacentNodes.Remove(to)
+	return false
 }
 
 type directedGraph[N comparable] struct {
@@ -249,13 +244,9 @@ func (d *directedGraph[N]) Nodes() set.Set[N] {
 
 func (d *directedGraph[N]) Edges() set.Set[EndpointPair[N]] {
 	return edgeSet[N]{
-		delegate: d,
+		delegate:  d,
+		edgeCount: func() int { return d.numEdges },
 	}
-}
-
-//nolint:unused // Used by edgeSet
-func (d *directedGraph[N]) edgeCount() int {
-	return d.numEdges
 }
 
 func (d *directedGraph[N]) IsDirected() bool {

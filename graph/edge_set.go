@@ -4,15 +4,11 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
-type graphWithEdgeCount[N comparable] interface {
-	Graph[N]
-	edgeCount() int
-}
-
 var _ set.Set[EndpointPair[int]] = (*edgeSet[int])(nil)
 
 type edgeSet[N comparable] struct {
-	delegate graphWithEdgeCount[N]
+	delegate  Graph[N]
+	edgeCount func() int
 }
 
 func (e edgeSet[N]) Contains(elem EndpointPair[N]) bool {
@@ -21,7 +17,7 @@ func (e edgeSet[N]) Contains(elem EndpointPair[N]) bool {
 }
 
 func (e edgeSet[N]) Len() int {
-	return e.delegate.edgeCount()
+	return e.edgeCount()
 }
 
 func (e edgeSet[N]) ForEach(fn func(elem EndpointPair[N])) {
