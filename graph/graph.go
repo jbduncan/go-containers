@@ -272,9 +272,11 @@ func (d *directedGraph[N]) Successors(node N) set.Set[N] {
 	}
 }
 
-//nolint:revive
 func (d *directedGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
-	return set.Of[EndpointPair[N]]()
+	return incidentEdgeSet[N]{
+		node:     node,
+		delegate: d,
+	}
 }
 
 func (d *directedGraph[N]) Degree(node N) int {
