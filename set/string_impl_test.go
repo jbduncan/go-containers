@@ -1,9 +1,12 @@
 package set_test
 
 import (
+	"fmt"
 	"testing"
 
+	slices2 "github.com/jbduncan/go-containers/internal/slices"
 	"github.com/jbduncan/go-containers/set"
+	. "github.com/onsi/gomega"
 	"golang.org/x/exp/slices"
 )
 
@@ -37,4 +40,32 @@ func TestStringImpl(t *testing.T) {
 			}
 		})
 	}
+}
+
+func FuzzStringImpl(f *testing.F) {
+	f.Add([]byte{})
+	f.Add([]byte{0})
+	f.Add([]byte{1, 2, 3})
+	f.Add([]byte{7, 1})
+	f.Add([]byte{255, 123, 4})
+	f.Add([]byte{0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100})
+	f.Add(slices2.Repeat(byte(0), 10_000))
+	f.Add([]byte("x829"))
+	f.Add([]byte("0127"))
+	f.Add([]byte("78091"))
+	f.Add([]byte("0028C17YZ \x10\xda&+\xa8xzyA\x12\xe3a\xfc\xe9\x974c\xffB'8\x90\x90\xd3\x13"))
+	f.Add([]byte("\xffy\x000"))
+
+	f.Fuzz(func(t *testing.T, bytes []byte) {
+		g := NewWithT(t)
+		s := set.Of(bytes...)
+
+		got := set.StringImpl(s)
+
+		g.Expect(got).To(HavePrefix("["))
+		g.Expect(got).To(HaveSuffix("]"))
+		s.ForEach(func(elem byte) {
+			g.Expect(got).To(ContainSubstring(fmt.Sprintf("%v", elem)))
+		})
+	})
 }
