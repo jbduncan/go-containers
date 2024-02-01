@@ -62,6 +62,7 @@ func (b Builder[N]) Build() MutableGraph[N] {
 			nodes:              set.NewMutable[N](),
 			nodeToPredecessors: map[N]set.MutableSet[N]{},
 			nodeToSuccessors:   map[N]set.MutableSet[N]{},
+			allowsSelfLoops:    b.allowsSelfLoops,
 			numEdges:           0,
 		}
 	}
@@ -150,12 +151,7 @@ func (u *undirectedGraph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPai
 }
 
 func (u *undirectedGraph[N]) String() string {
-	return "isDirected: false, allowsSelfLoops: " +
-		strconv.FormatBool(u.allowsSelfLoops) +
-		", nodes: " +
-		u.Nodes().String() +
-		", edges: " +
-		u.Edges().String()
+	return stringOf[N](u)
 }
 
 func (u *undirectedGraph[N]) AddNode(node N) bool {
@@ -235,6 +231,7 @@ type directedGraph[N comparable] struct {
 	nodes              set.MutableSet[N]
 	nodeToPredecessors map[N]set.MutableSet[N]
 	nodeToSuccessors   map[N]set.MutableSet[N]
+	allowsSelfLoops    bool
 	numEdges           int
 }
 
@@ -254,7 +251,7 @@ func (d *directedGraph[N]) IsDirected() bool {
 }
 
 func (d *directedGraph[N]) AllowsSelfLoops() bool {
-	return false
+	return d.allowsSelfLoops
 }
 
 func (d *directedGraph[N]) AdjacentNodes(node N) set.Set[N] {
@@ -301,7 +298,7 @@ func (d *directedGraph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[
 }
 
 func (d *directedGraph[N]) String() string {
-	panic("implement me")
+	return stringOf[N](d)
 }
 
 func (d *directedGraph[N]) AddNode(node N) bool {
@@ -349,4 +346,15 @@ func hasEdgeConnecting[N comparable](g Graph[N], source N, target N) bool {
 
 func hasEdgeConnectingEndpoints[N comparable](g Graph[N], endpointPair EndpointPair[N]) bool {
 	return hasEdgeConnecting(g, endpointPair.Source(), endpointPair.Target())
+}
+
+func stringOf[N comparable](g Graph[N]) string {
+	return "isDirected: " +
+		strconv.FormatBool(g.IsDirected()) +
+		", allowsSelfLoops: " +
+		strconv.FormatBool(g.AllowsSelfLoops()) +
+		", nodes: " +
+		g.Nodes().String() +
+		", edges: " +
+		g.Edges().String()
 }

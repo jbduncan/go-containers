@@ -23,7 +23,7 @@ var _ = Describe("Graphs", func() {
 		Undirected,
 		DisallowsSelfLoops)
 	graphTests(
-		"graph.Undirected[int]().AllowsSelfLoops().Build()",
+		"graph.Undirected[int]().AllowsSelfLoops(true).Build()",
 		func() graph.Graph[int] {
 			return graph.Undirected[int]().AllowsSelfLoops(true).Build()
 		},
@@ -38,6 +38,14 @@ var _ = Describe("Graphs", func() {
 		Mutable,
 		Directed,
 		DisallowsSelfLoops)
+	graphTests(
+		"graph.Directed[int]().AllowsSelfLoops(true).Build()",
+		func() graph.Graph[int] {
+			return graph.Directed[int]().AllowsSelfLoops(true).Build()
+		},
+		Mutable,
+		Directed,
+		AllowsSelfLoops)
 })
 
 const (
@@ -543,7 +551,7 @@ func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 }
 
 func immutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
-	Context(fmt.Sprintf("%s: given an immutable graph", graphName), func() {
+	FContext(fmt.Sprintf("%s: given an immutable graph", graphName), func() {
 		var _ graph.Graph[int]
 
 		createGraphAsImmutable := func() graph.Graph[int] {
@@ -794,7 +802,7 @@ func directedGraphTests(
 }
 
 func allowsSelfLoopsGraphTests(graphName string, createGraph func() graph.Graph[int]) {
-	Context(fmt.Sprintf("%s: given a graph that allows self loops", graphName), func() {
+	FContext(fmt.Sprintf("%s: given a graph that allows self loops", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
@@ -806,7 +814,7 @@ func allowsSelfLoopsGraphTests(graphName string, createGraph func() graph.Graph[
 		})
 
 		Context("when putting one self-loop edge", func() {
-			FIt("sees the shared node as its own adjacent node", func() {
+			It("sees the shared node as its own adjacent node", func() {
 				grph = putEdge(grph, node1, node1)
 
 				testSet(grph.AdjacentNodes(node1), node1)
@@ -837,7 +845,7 @@ func disallowsSelfLoopsGraphTests(graphName string, createGraph func() graph.Gra
 }
 
 func undirectedAllowsSelfLoopGraphTests(graphName string, createGraph func() graph.Graph[int]) {
-	Context(fmt.Sprintf("%s: given an undirected graph that allows self loops", graphName), func() {
+	FContext(fmt.Sprintf("%s: given an undirected graph that allows self loops", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
@@ -884,7 +892,7 @@ func undirectedAllowsSelfLoopGraphTests(graphName string, createGraph func() gra
 }
 
 func undirectedDisallowsSelfLoopGraphTests(graphName string, createGraph func() graph.Graph[int]) {
-	Context(fmt.Sprintf("%s: given an undirected graph that disallows self loops", graphName), func() {
+	FContext(fmt.Sprintf("%s: given an undirected graph that disallows self loops", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
@@ -930,7 +938,7 @@ func directedAllowsSelfLoopGraphTests(graphName string, createGraph func() graph
 			grph = createGraph()
 		})
 
-		It("has an appropriate string representation", func() {
+		FIt("has an appropriate string representation", func() {
 			Expect(grph).To(
 				HaveStringRepr(
 					"isDirected: true, allowsSelfLoops: true, nodes: [], edges: []"))
@@ -947,13 +955,40 @@ func directedAllowsSelfLoopGraphTests(graphName string, createGraph func() graph
 }
 
 func directedDisallowsSelfLoopGraphTests(graphName string, createGraph func() graph.Graph[int]) {
-	Context(fmt.Sprintf("%s: given a directed graph that disallows self loops", graphName), func() {
-		It("has an appropriate string representation", func() {
-			grph := createGraph()
+	FContext(fmt.Sprintf("%s: given a directed graph that disallows self loops", graphName), func() {
+		var grph graph.Graph[int]
 
+		BeforeEach(func() {
+			grph = createGraph()
+		})
+
+		It("has an appropriate string representation", func() {
 			Expect(grph).To(
 				HaveStringRepr(
 					"isDirected: true, allowsSelfLoops: false, nodes: [], edges: []"))
+		})
+
+		Context("when adding one node", func() {
+			It("has an appropriate string representation", func() {
+				grph = addNode(grph, node1)
+
+				Expect(grph).To(
+					HaveStringRepr(
+						"isDirected: true, allowsSelfLoops: false, nodes: [1], edges: []"))
+			})
+		})
+
+		Context("when putting one edge", func() {
+			It("has an appropriate string representation", func() {
+				grph = putEdge(grph, node1, node2)
+
+				Expect(grph).To(
+					HaveStringReprThatIsAnyOf(
+						"isDirected: true, allowsSelfLoops: false, nodes: [1, 2], edges: [<1 -> 2>]",
+						"isDirected: true, allowsSelfLoops: false, nodes: [2, 1], edges: [<1 -> 2>]",
+						"isDirected: true, allowsSelfLoops: false, nodes: [1, 2], edges: [<2 -> 1>]",
+						"isDirected: true, allowsSelfLoops: false, nodes: [2, 1], edges: [<2 -> 1>]"))
+			})
 		})
 	})
 }
