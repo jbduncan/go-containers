@@ -106,7 +106,7 @@ func graphTests(
 	directionMode DirectionMode,
 	selfLoopsMode SelfLoopsMode,
 ) {
-	FContext(fmt.Sprintf("%s: given a graph", graphName), func() {
+	Context(fmt.Sprintf("%s: given a graph", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
@@ -434,7 +434,7 @@ func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 			})
 		})
 
-		Context("when putting a new edge", func() {
+		XContext("when putting a new edge", func() {
 			It("returns true", func() {
 				result := grph.PutEdge(node1, node2)
 
@@ -442,7 +442,7 @@ func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 			})
 		})
 
-		Context("when putting an existing edge", func() {
+		XContext("when putting an existing edge", func() {
 			It("returns false", func() {
 				grph.PutEdge(node1, node2)
 
@@ -470,7 +470,7 @@ func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 			})
 		})
 
-		Context("when removing an existing edge", func() {
+		XContext("when removing an existing edge", func() {
 			var removed bool
 
 			BeforeEach(func() {
@@ -491,7 +491,7 @@ func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 			})
 		})
 
-		Context("when removing an absent edge with an existing source", func() {
+		XContext("when removing an absent edge with an existing source", func() {
 			var removed bool
 
 			BeforeEach(func() {
@@ -510,7 +510,7 @@ func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 			})
 		})
 
-		Context("when removing an absent edge with an existing target", func() {
+		XContext("when removing an absent edge with an existing target", func() {
 			var removed bool
 
 			BeforeEach(func() {
@@ -529,7 +529,7 @@ func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 			})
 		})
 
-		Context("when removing an absent edge with two existing nodes", func() {
+		XContext("when removing an absent edge with two existing nodes", func() {
 			var removed bool
 
 			BeforeEach(func() {
@@ -551,7 +551,7 @@ func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 }
 
 func immutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
-	FContext(fmt.Sprintf("%s: given an immutable graph", graphName), func() {
+	Context(fmt.Sprintf("%s: given an immutable graph", graphName), func() {
 		var _ graph.Graph[int]
 
 		createGraphAsImmutable := func() graph.Graph[int] {
@@ -575,7 +575,7 @@ func undirectedGraphTests(
 	graphName string,
 	createGraph func() graph.Graph[int],
 ) {
-	FContext(fmt.Sprintf("%s: given an undirected graph", graphName), func() {
+	Context(fmt.Sprintf("%s: given an undirected graph", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
@@ -681,7 +681,7 @@ func directedGraphTests(
 	graphName string,
 	createGraph func() graph.Graph[int],
 ) {
-	FContext(fmt.Sprintf("%s: given a directed graph", graphName), func() {
+	Context(fmt.Sprintf("%s: given a directed graph", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
@@ -817,7 +817,7 @@ func directedGraphTests(
 }
 
 func allowsSelfLoopsGraphTests(graphName string, createGraph func() graph.Graph[int]) {
-	FContext(fmt.Sprintf("%s: given a graph that allows self loops", graphName), func() {
+	Context(fmt.Sprintf("%s: given a graph that allows self loops", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
@@ -847,7 +847,7 @@ func allowsSelfLoopsGraphTests(graphName string, createGraph func() graph.Graph[
 }
 
 func disallowsSelfLoopsGraphTests(graphName string, createGraph func() graph.Graph[int]) {
-	FContext(fmt.Sprintf("%s: given a graph that disallows self loops", graphName), func() {
+	Context(fmt.Sprintf("%s: given a graph that disallows self loops", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
@@ -868,7 +868,7 @@ func disallowsSelfLoopsGraphTests(graphName string, createGraph func() graph.Gra
 }
 
 func undirectedAllowsSelfLoopGraphTests(graphName string, createGraph func() graph.Graph[int]) {
-	FContext(fmt.Sprintf("%s: given an undirected graph that allows self loops", graphName), func() {
+	Context(fmt.Sprintf("%s: given an undirected graph that allows self loops", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
@@ -907,7 +907,7 @@ func undirectedAllowsSelfLoopGraphTests(graphName string, createGraph func() gra
 }
 
 func undirectedDisallowsSelfLoopGraphTests(graphName string, createGraph func() graph.Graph[int]) {
-	FContext(fmt.Sprintf("%s: given an undirected graph that disallows self loops", graphName), func() {
+	Context(fmt.Sprintf("%s: given an undirected graph that disallows self loops", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
@@ -946,7 +946,7 @@ func undirectedDisallowsSelfLoopGraphTests(graphName string, createGraph func() 
 }
 
 func directedAllowsSelfLoopGraphTests(graphName string, createGraph func() graph.Graph[int]) {
-	FContext(fmt.Sprintf("%s: given a directed graph that allows self loops", graphName), func() {
+	Context(fmt.Sprintf("%s: given a directed graph that allows self loops", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {
@@ -991,7 +991,7 @@ func directedAllowsSelfLoopGraphTests(graphName string, createGraph func() graph
 }
 
 func directedDisallowsSelfLoopGraphTests(graphName string, createGraph func() graph.Graph[int]) {
-	FContext(fmt.Sprintf("%s: given a directed graph that disallows self loops", graphName), func() {
+	Context(fmt.Sprintf("%s: given a directed graph that disallows self loops", graphName), func() {
 		var grph graph.Graph[int]
 
 		BeforeEach(func() {

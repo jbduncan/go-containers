@@ -313,9 +313,7 @@ func (d *directedGraph[N]) String() string {
 }
 
 func (d *directedGraph[N]) AddNode(node N) bool {
-	d.nodes.Add(node)
-
-	return false
+	return d.nodes.Add(node)
 }
 
 func (d *directedGraph[N]) PutEdge(source, target N) bool {
@@ -345,9 +343,30 @@ func (d *directedGraph[N]) PutEdge(source, target N) bool {
 	return false
 }
 
-//nolint:revive
 func (d *directedGraph[N]) RemoveNode(node N) bool {
-	panic("implement me")
+	edgesToRemove := d.AdjacentNodes(node).Len()
+
+	removed := d.nodes.Remove(node)
+
+	delete(d.nodeToPredecessors, node)
+	for key, predecessors := range d.nodeToPredecessors {
+		predecessors.Remove(node)
+		if predecessors.Len() == 0 {
+			delete(d.nodeToPredecessors, key)
+		}
+	}
+
+	delete(d.nodeToSuccessors, node)
+	for key, successors := range d.nodeToSuccessors {
+		successors.Remove(node)
+		if successors.Len() == 0 {
+			delete(d.nodeToSuccessors, key)
+		}
+	}
+
+	d.numEdges -= edgesToRemove
+
+	return removed
 }
 
 //nolint:revive
