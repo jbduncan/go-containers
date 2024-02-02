@@ -109,9 +109,9 @@ func (u *undirectedGraph[N]) Edges() set.Set[EndpointPair[N]] {
 }
 
 func (u *undirectedGraph[N]) AdjacentNodes(node N) set.Set[N] {
-	return adjacentNodeSet[N]{
-		node:                node,
-		nodeToAdjacentNodes: u.nodeToAdjacentNodes,
+	return neighborSet[N]{
+		node:            node,
+		nodeToNeighbors: u.nodeToAdjacentNodes,
 	}
 }
 
@@ -255,20 +255,23 @@ func (d *directedGraph[N]) AllowsSelfLoops() bool {
 }
 
 func (d *directedGraph[N]) AdjacentNodes(node N) set.Set[N] {
-	return set.Union[N](d.Predecessors(node), d.Successors(node))
+	return directedGraphAdjacentNodeSet[N]{
+		node:     node,
+		delegate: d,
+	}
 }
 
 func (d *directedGraph[N]) Predecessors(node N) set.Set[N] {
-	return adjacentNodeSet[N]{
-		node:                node,
-		nodeToAdjacentNodes: d.nodeToPredecessors,
+	return neighborSet[N]{
+		node:            node,
+		nodeToNeighbors: d.nodeToPredecessors,
 	}
 }
 
 func (d *directedGraph[N]) Successors(node N) set.Set[N] {
-	return adjacentNodeSet[N]{
-		node:                node,
-		nodeToAdjacentNodes: d.nodeToSuccessors,
+	return neighborSet[N]{
+		node:            node,
+		nodeToNeighbors: d.nodeToSuccessors,
 	}
 }
 
