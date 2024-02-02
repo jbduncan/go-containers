@@ -131,7 +131,13 @@ func (u *undirectedGraph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 }
 
 func (u *undirectedGraph[N]) Degree(node N) int {
-	return u.AdjacentNodes(node).Len()
+	selfLoop := u.AdjacentNodes(node).Contains(node)
+	selfLoopCorrection := 0
+	if selfLoop {
+		selfLoopCorrection = 1
+	}
+
+	return u.AdjacentNodes(node).Len() + selfLoopCorrection
 }
 
 func (u *undirectedGraph[N]) InDegree(node N) int {
@@ -313,6 +319,10 @@ func (d *directedGraph[N]) AddNode(node N) bool {
 }
 
 func (d *directedGraph[N]) PutEdge(source, target N) bool {
+	if !d.AllowsSelfLoops() && source == target {
+		panic("self-loops are disallowed")
+	}
+
 	d.nodes.Add(source)
 	d.nodes.Add(target)
 
