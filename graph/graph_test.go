@@ -434,7 +434,7 @@ func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 			})
 		})
 
-		XContext("when putting a new edge", func() {
+		Context("when putting a new edge", func() {
 			It("returns true", func() {
 				result := grph.PutEdge(node1, node2)
 
@@ -442,7 +442,7 @@ func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 			})
 		})
 
-		XContext("when putting an existing edge", func() {
+		Context("when putting an existing edge", func() {
 			It("returns false", func() {
 				grph.PutEdge(node1, node2)
 
@@ -470,28 +470,37 @@ func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 			})
 		})
 
-		XContext("when removing an existing edge", func() {
-			var removed bool
-
-			BeforeEach(func() {
+		Context("when removing an existing edge", func() {
+			It("returns true", func() {
 				grph.PutEdge(node1, node2)
 				grph.PutEdge(node1, node3)
 
-				removed = grph.RemoveEdge(node1, node2)
-			})
+				removed := grph.RemoveEdge(node1, node2)
 
-			It("returns true", func() {
 				Expect(removed).To(BeTrue())
 			})
 
 			It("removes the connection between its nodes", func() {
+				grph.PutEdge(node1, node2)
+				grph.PutEdge(node1, node3)
+
+				grph.RemoveEdge(node1, node2)
+
 				testSet(grph.Successors(node1), node3)
 				testSet(grph.Predecessors(node3), node1)
 				testSet(grph.Predecessors(node2))
 			})
+
+			It("removes the edge", func() {
+				grph.PutEdge(node1, node2)
+
+				grph.RemoveEdge(node1, node2)
+
+				testEmptyEdges(grph.Edges())
+			})
 		})
 
-		XContext("when removing an absent edge with an existing source", func() {
+		Context("when removing an absent edge with an existing source", func() {
 			var removed bool
 
 			BeforeEach(func() {
@@ -510,7 +519,7 @@ func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 			})
 		})
 
-		XContext("when removing an absent edge with an existing target", func() {
+		Context("when removing an absent edge with an existing target", func() {
 			var removed bool
 
 			BeforeEach(func() {
@@ -529,7 +538,7 @@ func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 			})
 		})
 
-		XContext("when removing an absent edge with two existing nodes", func() {
+		Context("when removing an absent edge with two existing nodes", func() {
 			var removed bool
 
 			BeforeEach(func() {
@@ -644,6 +653,15 @@ func undirectedGraphTests(
 			})
 		})
 
+		Context("when putting the same edge twice", func() {
+			It("has only one edge", func() {
+				grph = putEdge(grph, node1, node2)
+				grph = putEdge(grph, node1, node2)
+
+				testSingleEdgeForUndirectedGraph(grph.Edges())
+			})
+		})
+
 		Context("when putting two connected edges with the same source node", func() {
 			BeforeEach(func() {
 				grph = putEdge(grph, node1, node2)
@@ -746,6 +764,15 @@ func directedGraphTests(
 			})
 		})
 
+		Context("when putting the same edge twice", func() {
+			It("has only one edge", func() {
+				grph = putEdge(grph, node1, node2)
+				grph = putEdge(grph, node1, node2)
+
+				testSingleEdgeForDirectedGraph(grph.Edges(), graph.EndpointPairOf(node1, node2))
+			})
+		})
+
 		Context("when putting two connected edges with the same source node", func() {
 			BeforeEach(func() {
 				grph = putEdge(grph, node1, node2)
@@ -829,17 +856,17 @@ func allowsSelfLoopsGraphTests(graphName string, createGraph func() graph.Graph[
 		})
 
 		Context("when putting one self-loop edge", func() {
-			It("sees the shared node as its own adjacent node", func() {
+			BeforeEach(func() {
 				grph = putEdge(grph, node1, node1)
+			})
 
+			It("sees the shared node as its own adjacent node", func() {
 				testSet(grph.AdjacentNodes(node1), node1)
 			})
 
 			It(
 				"reports that the shared node has a degree of 2 because the edge touches the node twice",
 				func() {
-					grph = putEdge(grph, node1, node1)
-
 					Expect(grph.Degree(node1)).To(Equal(2))
 				})
 		})
