@@ -190,11 +190,7 @@ func (u *undirectedGraph[N]) RemoveNode(node N) bool {
 	u.numEdges -= u.AdjacentNodes(node).Len()
 
 	u.AdjacentNodes(node).ForEach(func(adjacentNode N) {
-		reversedAdjacentNodes := u.nodeToAdjacentNodes[adjacentNode]
-		reversedAdjacentNodes.Remove(node)
-		if reversedAdjacentNodes.Len() == 0 {
-			delete(u.nodeToAdjacentNodes, adjacentNode)
-		}
+		removeConnection(u.nodeToAdjacentNodes, adjacentNode, node)
 	})
 
 	delete(u.nodeToAdjacentNodes, node)
@@ -322,18 +318,12 @@ func (d *directedGraph[N]) RemoveNode(node N) bool {
 	predecessors := copyOf(d.Predecessors(node))
 
 	successors.ForEach(func(successor N) {
-		d.nodeToPredecessors[successor].Remove(node)
-		if d.nodeToPredecessors[successor].Len() == 0 {
-			delete(d.nodeToPredecessors, successor)
-		}
+		removeConnection(d.nodeToPredecessors, successor, node)
 	})
 	delete(d.nodeToPredecessors, node)
 
 	predecessors.ForEach(func(predecessor N) {
-		d.nodeToSuccessors[predecessor].Remove(node)
-		if d.nodeToSuccessors[predecessor].Len() == 0 {
-			delete(d.nodeToSuccessors, predecessor)
-		}
+		removeConnection(d.nodeToSuccessors, predecessor, node)
 	})
 	delete(d.nodeToSuccessors, node)
 
