@@ -10,7 +10,7 @@ import (
 )
 
 // TestingT is an interface for the parts of *testing.T that settest.Set needs
-// to run. Whenever you see this interface being used, pass in an instance of
+// to run. Whenever you see an argument of this type, pass in an instance of
 // *testing.T or your unit testing framework's equivalent.
 type TestingT interface {
 	Helper()

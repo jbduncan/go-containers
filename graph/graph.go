@@ -68,6 +68,7 @@ func (b Builder[N]) Build() MutableGraph[N] {
 	}
 
 	return &undirectedGraph[N]{
+		nodes:               set.NewMutable[N](),
 		nodeToAdjacentNodes: map[N]set.MutableSet[N]{},
 		allowsSelfLoops:     b.allowsSelfLoops,
 		numEdges:            0,
@@ -82,6 +83,7 @@ var (
 )
 
 type undirectedGraph[N comparable] struct {
+	nodes               set.MutableSet[N]
 	nodeToAdjacentNodes map[N]set.MutableSet[N]
 	allowsSelfLoops     bool
 	numEdges            int
@@ -96,9 +98,7 @@ func (u *undirectedGraph[N]) AllowsSelfLoops() bool {
 }
 
 func (u *undirectedGraph[N]) Nodes() set.Set[N] {
-	return keySet[N]{
-		delegate: u.nodeToAdjacentNodes,
-	}
+	return set.Unmodifiable(u.nodes)
 }
 
 func (u *undirectedGraph[N]) Edges() set.Set[EndpointPair[N]] {
@@ -161,16 +161,14 @@ func (u *undirectedGraph[N]) String() string {
 }
 
 func (u *undirectedGraph[N]) AddNode(node N) bool {
-	if _, ok := u.nodeToAdjacentNodes[node]; ok {
-		return false
-	}
-
-	u.nodeToAdjacentNodes[node] = set.NewMutable[N]()
-	return true
+	return u.nodes.Add(node)
 }
 
 func (u *undirectedGraph[N]) PutEdge(source, target N) bool {
 	checkSelfLoop[N](u, source, target)
+
+	u.AddNode(source)
+	u.AddNode(target)
 
 	put := putConnection(u.nodeToAdjacentNodes, source, target)
 	putConnection(u.nodeToAdjacentNodes, target, source)
@@ -184,37 +182,33 @@ func (u *undirectedGraph[N]) PutEdge(source, target N) bool {
 }
 
 func (u *undirectedGraph[N]) RemoveNode(node N) bool {
-	adjacentNodes, ok := u.nodeToAdjacentNodes[node]
-	if !ok {
+	if !u.Nodes().Contains(node) {
 		return false
 	}
 
+	u.nodes.Remove(node)
+	u.numEdges -= u.AdjacentNodes(node).Len()
+
+	u.AdjacentNodes(node).ForEach(func(adjacentNode N) {
+		reversedAdjacentNodes := u.nodeToAdjacentNodes[adjacentNode]
+		reversedAdjacentNodes.Remove(node)
+		if reversedAdjacentNodes.Len() == 0 {
+			delete(u.nodeToAdjacentNodes, adjacentNode)
+		}
+	})
+
 	delete(u.nodeToAdjacentNodes, node)
-
-	for _, adjacentNodes := range u.nodeToAdjacentNodes {
-		adjacentNodes.Remove(node)
-	}
-
-	u.numEdges -= adjacentNodes.Len()
 
 	return true
 }
 
 func (u *undirectedGraph[N]) RemoveEdge(source, target N) bool {
-	removed := u.removeUndirectedConnection(source, target)
-	u.removeUndirectedConnection(target, source)
+	removed := removeConnection(u.nodeToAdjacentNodes, source, target)
+	removeConnection(u.nodeToAdjacentNodes, target, source)
 
 	u.numEdges--
 
 	return removed
-}
-
-func (u *undirectedGraph[N]) removeUndirectedConnection(source, target N) bool {
-	if adjacentNodes, ok := u.nodeToAdjacentNodes[source]; ok {
-		return adjacentNodes.Remove(target)
-	}
-
-	return false
 }
 
 type directedGraph[N comparable] struct {
@@ -317,46 +311,45 @@ func (d *directedGraph[N]) PutEdge(source, target N) bool {
 }
 
 func (d *directedGraph[N]) RemoveNode(node N) bool {
-	edgesToRemove := d.AdjacentNodes(node).Len()
-	removed := d.nodes.Remove(node)
-
-	removeConnectionsFrom(d.nodeToPredecessors, node)
-	removeConnectionsFrom(d.nodeToSuccessors, node)
-
-	d.numEdges -= edgesToRemove
-
-	return removed
-}
-
-func removeConnectionsFrom[N comparable](nodeToNeighbors map[N]set.MutableSet[N], node N) {
-	delete(nodeToNeighbors, node)
-	for otherNode, neighbors := range nodeToNeighbors {
-		neighbors.Remove(node)
-		if neighbors.Len() == 0 {
-			delete(nodeToNeighbors, otherNode)
-		}
-	}
-}
-
-func (d *directedGraph[N]) RemoveEdge(source, target N) bool {
-	removed := removeDirectedConnection(d.nodeToPredecessors, target, source)
-	removeDirectedConnection(d.nodeToSuccessors, source, target)
-
-	d.numEdges--
-
-	return removed
-}
-
-func removeDirectedConnection[N comparable](nodeToNeighbors map[N]set.MutableSet[N], from, to N) bool {
-	neighbors, ok := nodeToNeighbors[from]
-	if !ok {
+	if !d.Nodes().Contains(node) {
 		return false
 	}
 
-	removed := neighbors.Remove(to)
-	if neighbors.Len() == 0 {
-		delete(nodeToNeighbors, from)
-	}
+	d.nodes.Remove(node)
+	d.numEdges -= d.AdjacentNodes(node).Len()
+
+	successors := d.Successors(node)
+	predecessors := copyOf(d.Predecessors(node))
+
+	successors.ForEach(func(successor N) {
+		d.nodeToPredecessors[successor].Remove(node)
+		if d.nodeToPredecessors[successor].Len() == 0 {
+			delete(d.nodeToPredecessors, successor)
+		}
+	})
+	delete(d.nodeToPredecessors, node)
+
+	predecessors.ForEach(func(predecessor N) {
+		d.nodeToSuccessors[predecessor].Remove(node)
+		if d.nodeToSuccessors[predecessor].Len() == 0 {
+			delete(d.nodeToSuccessors, predecessor)
+		}
+	})
+	delete(d.nodeToSuccessors, node)
+
+	return true
+}
+
+func copyOf[T comparable](s set.Set[T]) set.Set[T] {
+	return set.Of[T](set.ToSlice(s)...)
+}
+
+func (d *directedGraph[N]) RemoveEdge(source, target N) bool {
+	removed := removeConnection(d.nodeToPredecessors, target, source)
+	removeConnection(d.nodeToSuccessors, source, target)
+
+	d.numEdges--
+
 	return removed
 }
 
@@ -392,4 +385,17 @@ func putConnection[N comparable](nodeToNeighbors map[N]set.MutableSet[N], from, 
 		nodeToNeighbors[from] = neighbors
 	}
 	return neighbors.Add(to)
+}
+
+func removeConnection[N comparable](nodeToNeighbors map[N]set.MutableSet[N], from, to N) bool {
+	neighbors, ok := nodeToNeighbors[from]
+	if !ok {
+		return false
+	}
+
+	removed := neighbors.Remove(to)
+	if neighbors.Len() == 0 {
+		delete(nodeToNeighbors, from)
+	}
+	return removed
 }

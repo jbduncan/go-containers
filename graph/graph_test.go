@@ -180,9 +180,46 @@ func graphTests(
 				testSet(grph.AdjacentNodes(node2), node1)
 			})
 
+			It("sees that the second node has the first node as a predecessor", func() {
+				testSet(grph.Predecessors(node2), node1)
+			})
+
+			It("sees that the first node has the second node as a successor", func() {
+				testSet(grph.Successors(node1), node2)
+			})
+
 			It("reports that both nodes have a degree of 1", func() {
 				Expect(grph.Degree(node1)).To(Equal(1))
 				Expect(grph.Degree(node2)).To(Equal(1))
+			})
+
+			It("has an in degree of 1 for the second node", func() {
+				Expect(grph.InDegree(node2)).To(Equal(1))
+			})
+
+			It("has an out degree of 1 for the first node", func() {
+				Expect(grph.OutDegree(node1)).To(Equal(1))
+			})
+
+			It("has an incident edge connecting the first node to the second node", func() {
+				testSingleEdge(
+					grph,
+					grph.IncidentEdges(node1),
+					graph.EndpointPairOf(node1, node2))
+			})
+
+			It("has an incident edge connecting the second node to the first node", func() {
+				testSingleEdge(
+					grph,
+					grph.IncidentEdges(node2),
+					graph.EndpointPairOf(node1, node2))
+			})
+
+			It("has just one edge", func() {
+				testSingleEdge(
+					grph,
+					grph.Edges(),
+					graph.EndpointPairOf(node1, node2))
 			})
 
 			It("sees the first node as being connected to the second", func() {
@@ -214,6 +251,18 @@ func graphTests(
 			})
 		})
 
+		Context("when putting the same edge twice", func() {
+			It("has only one edge", func() {
+				grph = putEdge(grph, node1, node2)
+				grph = putEdge(grph, node1, node2)
+
+				testSingleEdge(
+					grph,
+					grph.Edges(),
+					graph.EndpointPairOf(node1, node2))
+			})
+		})
+
 		Context("when putting two connected edges with the same source node", func() {
 			BeforeEach(func() {
 				grph = putEdge(grph, node1, node2)
@@ -231,14 +280,48 @@ func graphTests(
 			It("reports the two unique nodes as adjacent to the common one", func() {
 				testSet(grph.AdjacentNodes(node1), node2, node3)
 			})
+
+			It("has two edges sharing a common node", func() {
+				testTwoEdges(
+					grph,
+					grph.Edges(),
+					graph.EndpointPairOf(node1, node2),
+					graph.EndpointPairOf(node1, node3))
+			})
+
+			It("has two incident edges connected to the common node", func() {
+				testTwoEdges(
+					grph,
+					grph.IncidentEdges(node1),
+					graph.EndpointPairOf(node1, node2),
+					graph.EndpointPairOf(node1, node3))
+			})
+
+			It("reports that the common node has an out degree of 2", func() {
+				Expect(grph.OutDegree(node1)).To(Equal(2))
+			})
 		})
 
 		Context("when putting two connected edges with the same target node", func() {
-			It("reports that the common node has two predecessors", func() {
+			BeforeEach(func() {
 				grph = putEdge(grph, node1, node2)
 				grph = putEdge(grph, node3, node2)
+			})
 
+			It("reports that the common node has two predecessors", func() {
 				testSet(grph.Predecessors(node2), node1, node3)
+			})
+
+			It("reports that the common node has an in degree of 2", func() {
+				Expect(grph.InDegree(node2)).To(Equal(2))
+			})
+
+			It("has two incident edges connected to the common node", func() {
+				testTwoEdges(
+					grph,
+					grph.IncidentEdges(node2),
+					graph.EndpointPairOf(node1, node2),
+					graph.EndpointPairOf(node3, node2))
 			})
 		})
 
@@ -316,6 +399,28 @@ func graphTests(
 			grph = putEdge(grph, node1, node2)
 			testSet(successors, node2)
 		})
+
+		It("has an unmodifiable set view of edges", func() {
+			edges := grph.Edges()
+			Expect(edges).To(BeNonMutableSet[graph.EndpointPair[int]]())
+
+			grph = putEdge(grph, node1, node2)
+			testSingleEdge(
+				grph,
+				grph.Edges(),
+				graph.EndpointPairOf(node1, node2))
+		})
+
+		It("has an unmodifiable set view of incident edges", func() {
+			incidentEdges := grph.IncidentEdges(node1)
+			Expect(incidentEdges).To(BeNonMutableSet[graph.EndpointPair[int]]())
+
+			grph = putEdge(grph, node1, node2)
+			testSingleEdge(
+				grph,
+				grph.IncidentEdges(node1),
+				graph.EndpointPairOf(node1, node2))
+		})
 	})
 
 	if mutability == Mutable {
@@ -327,6 +432,10 @@ func graphTests(
 
 	if selfLoopsMode == AllowsSelfLoops {
 		allowsSelfLoopsGraphTests(graphName, createGraph)
+
+		if mutability == Mutable {
+			allowsSelfLoopsMutableGraphTests(graphName, createGraph)
+		}
 	}
 	if selfLoopsMode == DisallowsSelfLoops {
 		disallowsSelfLoopsGraphTests(graphName, createGraph)
@@ -394,6 +503,7 @@ func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 			BeforeEach(func() {
 				grph.PutEdge(node1, node2)
 				grph.PutEdge(node3, node1)
+				grph.PutEdge(node2, node3)
 
 				removed = grph.RemoveNode(node1)
 			})
@@ -407,12 +517,15 @@ func mutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
 			})
 
 			It("removes its connections to its adjacent nodes", func() {
-				testSet(grph.AdjacentNodes(node2))
-				testSet(grph.AdjacentNodes(node3))
+				testSet(grph.AdjacentNodes(node2), node3)
+				testSet(grph.AdjacentNodes(node3), node2)
 			})
 
 			It("removes the connected edges", func() {
-				testEmptyEdges(grph.Edges())
+				testSingleEdge(
+					grph,
+					grph.Edges(),
+					graph.EndpointPairOf(node2, node3))
 			})
 		})
 
@@ -600,22 +713,6 @@ func undirectedGraphTests(
 				grph = putEdge(grph, node1, node2)
 			})
 
-			It("has just one edge", func() {
-				testSingleEdgeForUndirectedGraph(grph.Edges())
-			})
-
-			It("has an incident edge connecting the first node to the second node", func() {
-				testSingleEdgeForUndirectedGraph(grph.IncidentEdges(node1))
-			})
-
-			It("has an incident edge connecting the second node to the first node", func() {
-				testSingleEdgeForUndirectedGraph(grph.IncidentEdges(node2))
-			})
-
-			It("sees that the second node has the first node as a predecessor", func() {
-				testSet(grph.Predecessors(node2), node1)
-			})
-
 			It("sees that the first node has the second node as a predecessor", func() {
 				testSet(grph.Predecessors(node1), node2)
 			})
@@ -624,20 +721,8 @@ func undirectedGraphTests(
 				testSet(grph.Successors(node2), node1)
 			})
 
-			It("sees that the first node has the second node as a successor", func() {
-				testSet(grph.Successors(node1), node2)
-			})
-
 			It("has an in degree of 1 for the first node", func() {
 				Expect(grph.InDegree(node1)).To(Equal(1))
-			})
-
-			It("has an in degree of 1 for the second node", func() {
-				Expect(grph.InDegree(node2)).To(Equal(1))
-			})
-
-			It("has an out degree of 1 for the first node", func() {
-				Expect(grph.OutDegree(node1)).To(Equal(1))
 			})
 
 			It("has an out degree of 1 for the second node", func() {
@@ -651,46 +736,6 @@ func undirectedGraphTests(
 				Expect(grph.HasEdgeConnectingEndpoints(graph.EndpointPairOf(node2, node1))).
 					To(BeTrue())
 			})
-		})
-
-		Context("when putting the same edge twice", func() {
-			It("has only one edge", func() {
-				grph = putEdge(grph, node1, node2)
-				grph = putEdge(grph, node1, node2)
-
-				testSingleEdgeForUndirectedGraph(grph.Edges())
-			})
-		})
-
-		Context("when putting two connected edges with the same source node", func() {
-			BeforeEach(func() {
-				grph = putEdge(grph, node1, node2)
-				grph = putEdge(grph, node1, node3)
-			})
-
-			It("has two edges sharing a common node", func() {
-				testTwoEdgesForUndirectedGraphs(grph.Edges())
-			})
-
-			It("has two incident edges connected to the common node", func() {
-				testTwoEdgesForUndirectedGraphs(grph.IncidentEdges(node1))
-			})
-		})
-
-		It("has an unmodifiable set view of edges", func() {
-			edges := grph.Edges()
-			Expect(edges).To(BeNonMutableSet[graph.EndpointPair[int]]())
-
-			grph = putEdge(grph, node1, node2)
-			testSingleEdgeForUndirectedGraph(edges)
-		})
-
-		It("has an unmodifiable set view of incident edges", func() {
-			incidentEdges := grph.IncidentEdges(node1)
-			Expect(incidentEdges).To(BeNonMutableSet[graph.EndpointPair[int]]())
-
-			grph = putEdge(grph, node1, node2)
-			testSingleEdgeForUndirectedGraph(incidentEdges)
 		})
 	})
 }
@@ -715,40 +760,16 @@ func directedGraphTests(
 				grph = putEdge(grph, node1, node2)
 			})
 
-			It("sees that the second node has the first node as a predecessor", func() {
-				testSet(grph.Predecessors(node2), node1)
-			})
-
 			It("sees that the first node has no predecessors", func() {
 				testSet(grph.Predecessors(node1))
-			})
-
-			It("sees that the first node has the second node as a successor", func() {
-				testSet(grph.Successors(node1), node2)
 			})
 
 			It("sees that the second node has no successors", func() {
 				testSet(grph.Successors(node2))
 			})
 
-			It("has just one edge", func() {
-				testSingleEdgeForDirectedGraph(grph.Edges(), graph.EndpointPairOf(node1, node2))
-			})
-
-			It("has an incident edge connecting the first node to the second node", func() {
-				testSingleEdgeForDirectedGraph(grph.IncidentEdges(node1), graph.EndpointPairOf(node1, node2))
-			})
-
 			It("has an in degree of 0 for the first node", func() {
 				Expect(grph.InDegree(node1)).To(BeZero())
-			})
-
-			It("has an in degree of 1 for the second node", func() {
-				Expect(grph.InDegree(node2)).To(Equal(1))
-			})
-
-			It("has an out degree of 1 for the first node", func() {
-				Expect(grph.OutDegree(node1)).To(Equal(1))
 			})
 
 			It("has an out degree of 0 for the second node", func() {
@@ -764,58 +785,6 @@ func directedGraphTests(
 			})
 		})
 
-		Context("when putting the same edge twice", func() {
-			It("has only one edge", func() {
-				grph = putEdge(grph, node1, node2)
-				grph = putEdge(grph, node1, node2)
-
-				testSingleEdgeForDirectedGraph(grph.Edges(), graph.EndpointPairOf(node1, node2))
-			})
-		})
-
-		Context("when putting two connected edges with the same source node", func() {
-			BeforeEach(func() {
-				grph = putEdge(grph, node1, node2)
-				grph = putEdge(grph, node1, node3)
-			})
-
-			It("has two edges sharing a common node", func() {
-				testTwoEdgesForDirectedGraphs(
-					grph.Edges(),
-					graph.EndpointPairOf(node1, node2),
-					graph.EndpointPairOf(node1, node3))
-			})
-
-			It("has two incident edges connected to the common node", func() {
-				testTwoEdgesForDirectedGraphs(
-					grph.IncidentEdges(node1),
-					graph.EndpointPairOf(node1, node2),
-					graph.EndpointPairOf(node1, node3))
-			})
-
-			It("reports that the common node has an out degree of 2", func() {
-				Expect(grph.OutDegree(node1)).To(Equal(2))
-			})
-		})
-
-		Context("when putting two connected edges with the same target node", func() {
-			BeforeEach(func() {
-				grph = putEdge(grph, node1, node2)
-				grph = putEdge(grph, node3, node2)
-			})
-
-			It("reports that the common node has an in degree of 2", func() {
-				Expect(grph.InDegree(node2)).To(Equal(2))
-			})
-
-			It("has two incident edges connected to the common node", func() {
-				testTwoEdgesForDirectedGraphs(
-					grph.IncidentEdges(node2),
-					graph.EndpointPairOf(node1, node2),
-					graph.EndpointPairOf(node3, node2))
-			})
-		})
-
 		Context("when putting two connected edges that form a line graph", func() {
 			It("reports that the common node has a degree of 2", func() {
 				grph = putEdge(grph, node1, node2)
@@ -823,22 +792,6 @@ func directedGraphTests(
 
 				Expect(grph.Degree(node2)).To(Equal(2))
 			})
-		})
-
-		It("has an unmodifiable set view of edges", func() {
-			edges := grph.Edges()
-			Expect(edges).To(BeNonMutableSet[graph.EndpointPair[int]]())
-
-			grph = putEdge(grph, node1, node2)
-			testSingleEdgeForDirectedGraph(edges, graph.EndpointPairOf(node1, node2))
-		})
-
-		It("has an unmodifiable set view of incident edges", func() {
-			incidentEdges := grph.IncidentEdges(node1)
-			Expect(incidentEdges).To(BeNonMutableSet[graph.EndpointPair[int]]())
-
-			grph = putEdge(grph, node1, node2)
-			testSingleEdgeForDirectedGraph(incidentEdges, graph.EndpointPairOf(node1, node2))
 		})
 	})
 }
@@ -869,6 +822,37 @@ func allowsSelfLoopsGraphTests(graphName string, createGraph func() graph.Graph[
 				func() {
 					Expect(grph.Degree(node1)).To(Equal(2))
 				})
+		})
+	})
+}
+
+func allowsSelfLoopsMutableGraphTests(graphName string, createGraph func() graph.Graph[int]) {
+	Context(fmt.Sprintf("%s: given a mutable graph that allows self loops", graphName), func() {
+		var grph graph.MutableGraph[int]
+
+		createGraphAsMutable := func() graph.MutableGraph[int] {
+			g := createGraph()
+
+			mutG, ok := g.(graph.MutableGraph[int])
+			if !ok {
+				panic("g is expected to implement graph.MutableGraph, but it doesn't")
+			}
+
+			return mutG
+		}
+
+		BeforeEach(func() {
+			grph = createGraphAsMutable()
+		})
+
+		Context("when removing a self-looping node", func() {
+			It("reports that the self-loop edge is gone", func() {
+				grph.PutEdge(node1, node1)
+
+				grph.RemoveNode(node1)
+
+				testEmptyEdges(grph.Edges())
+			})
 		})
 	})
 }
@@ -1011,7 +995,10 @@ func directedAllowsSelfLoopGraphTests(graphName string, createGraph func() graph
 			It("reports that the shared node only has one incident edge with itself", func() {
 				grph = putEdge(grph, node1, node1)
 
-				testSingleEdgeForDirectedGraph(grph.IncidentEdges(node1), graph.EndpointPairOf(node1, node1))
+				testSingleEdge(
+					grph,
+					grph.IncidentEdges(node1),
+					graph.EndpointPairOf(node1, node1))
 			})
 		})
 	})
@@ -1111,28 +1098,8 @@ func testEmptyEdges(edges set.Set[graph.EndpointPair[int]]) {
 	Expect(edges).To(HaveStringRepr("[]"))
 }
 
-func testSingleEdgeForUndirectedGraph(endpointPairs set.Set[graph.EndpointPair[int]]) {
-	// Set.Len()
-	Expect(endpointPairs).To(HaveLenOf(1))
-
-	// Set.ForEach()
-	Expect(ForEachToSlice(endpointPairs)).
-		To(Or(
-			HaveExactElements(graph.EndpointPairOf(node1, node2)),
-			HaveExactElements(graph.EndpointPairOf(node2, node1))))
-
-	// Set.Contains()
-	Expect(endpointPairs).To(Contain(graph.EndpointPairOf(node1, node2)))
-	Expect(endpointPairs).To(Contain(graph.EndpointPairOf(node2, node1)))
-	Expect(endpointPairs).ToNot(
-		Contain(graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph)))
-
-	// Set.String()
-	Expect(endpointPairs).To(
-		HaveStringReprThatIsAnyOf("[<1 -> 2>]", "[<2 -> 1>]"))
-}
-
-func testSingleEdgeForDirectedGraph(
+func testSingleEdge(
+	g graph.Graph[int],
 	endpointPairs set.Set[graph.EndpointPair[int]],
 	expectedEndpointPair graph.EndpointPair[int],
 ) {
@@ -1140,62 +1107,42 @@ func testSingleEdgeForDirectedGraph(
 	Expect(endpointPairs).To(HaveLenOf(1))
 
 	// Set.ForEach()
-	Expect(ForEachToSlice(endpointPairs)).
-		To(HaveExactElements(expectedEndpointPair))
+	if g.IsDirected() {
+		Expect(ForEachToSlice(endpointPairs)).
+			To(HaveExactElements(expectedEndpointPair))
+	} else {
+		Expect(ForEachToSlice(endpointPairs)).
+			To(Or(
+				HaveExactElements(expectedEndpointPair),
+				HaveExactElements(reverseOf(expectedEndpointPair))))
+	}
 
 	// Set.Contains()
 	Expect(endpointPairs).To(Contain(expectedEndpointPair))
 	if expectedEndpointPair != reverseOf(expectedEndpointPair) {
-		Expect(endpointPairs).ToNot(Contain(reverseOf(expectedEndpointPair)))
+		if g.IsDirected() {
+			Expect(endpointPairs).ToNot(Contain(reverseOf(expectedEndpointPair)))
+		} else {
+			Expect(endpointPairs).To(Contain(reverseOf(expectedEndpointPair)))
+		}
 	}
 	Expect(endpointPairs).ToNot(
 		Contain(graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph)))
 
 	// Set.String()
-	Expect(endpointPairs).To(
-		HaveStringRepr(fmt.Sprintf("[%v]", expectedEndpointPair)))
+	if g.IsDirected() {
+		Expect(endpointPairs).To(
+			HaveStringRepr(fmt.Sprintf("[%v]", expectedEndpointPair)))
+	} else {
+		Expect(endpointPairs).To(
+			HaveStringReprThatIsAnyOf(
+				fmt.Sprintf("[%v]", expectedEndpointPair),
+				fmt.Sprintf("[%v]", reverseOf(expectedEndpointPair))))
+	}
 }
 
-func testTwoEdgesForUndirectedGraphs(endpointPairs set.Set[graph.EndpointPair[int]]) {
-	// Set.Len()
-	Expect(endpointPairs).To(HaveLenOf(2))
-
-	// Set.ForEach()
-	Expect(ForEachToSlice(endpointPairs)).
-		To(
-			ConsistOf(
-				Or(
-					Equal(graph.EndpointPairOf(node1, node2)),
-					Equal(graph.EndpointPairOf(node2, node1)),
-				),
-				Or(
-					Equal(graph.EndpointPairOf(node1, node3)),
-					Equal(graph.EndpointPairOf(node3, node1)),
-				),
-			))
-
-	// Set.Contains()
-	Expect(endpointPairs).To(Contain(graph.EndpointPairOf(node1, node2)))
-	Expect(endpointPairs).To(Contain(graph.EndpointPairOf(node1, node3)))
-	Expect(endpointPairs).To(Contain(graph.EndpointPairOf(node2, node1)))
-	Expect(endpointPairs).To(Contain(graph.EndpointPairOf(node3, node1)))
-	Expect(endpointPairs).ToNot(
-		Contain(graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph)))
-
-	// Set.String()
-	Expect(endpointPairs).To(
-		HaveStringReprThatIsAnyOf(
-			"[<1 -> 2>, <1 -> 3>]",
-			"[<1 -> 2>, <3 -> 1>]",
-			"[<2 -> 1>, <1 -> 3>]",
-			"[<2 -> 1>, <3 -> 1>]",
-			"[<1 -> 3>, <1 -> 2>]",
-			"[<1 -> 3>, <2 -> 1>]",
-			"[<3 -> 1>, <1 -> 2>]",
-			"[<3 -> 1>, <2 -> 1>]"))
-}
-
-func testTwoEdgesForDirectedGraphs(
+func testTwoEdges(
+	g graph.Graph[int],
 	endpointPairs set.Set[graph.EndpointPair[int]],
 	firstExpectedPair graph.EndpointPair[int],
 	secondExpectedPair graph.EndpointPair[int],
@@ -1204,26 +1151,59 @@ func testTwoEdgesForDirectedGraphs(
 	Expect(endpointPairs).To(HaveLenOf(2))
 
 	// Set.ForEach()
-	Expect(ForEachToSlice(endpointPairs)).
-		To(
-			ConsistOf(
-				Equal(firstExpectedPair),
-				Equal(secondExpectedPair),
-			))
+	if g.IsDirected() {
+		Expect(ForEachToSlice(endpointPairs)).
+			To(
+				ConsistOf(
+					Equal(firstExpectedPair),
+					Equal(secondExpectedPair),
+				))
+	} else {
+		Expect(ForEachToSlice(endpointPairs)).
+			To(
+				ConsistOf(
+					Or(
+						Equal(firstExpectedPair),
+						Equal(reverseOf(firstExpectedPair)),
+					),
+					Or(
+						Equal(secondExpectedPair),
+						Equal(reverseOf(secondExpectedPair)),
+					),
+				))
+	}
 
 	// Set.Contains()
 	Expect(endpointPairs).To(Contain(firstExpectedPair))
 	Expect(endpointPairs).To(Contain(secondExpectedPair))
-	Expect(endpointPairs).ToNot(Contain(reverseOf(firstExpectedPair)))
-	Expect(endpointPairs).ToNot(Contain(reverseOf(secondExpectedPair)))
+	if g.IsDirected() {
+		Expect(endpointPairs).ToNot(Contain(reverseOf(firstExpectedPair)))
+		Expect(endpointPairs).ToNot(Contain(reverseOf(secondExpectedPair)))
+	} else {
+		Expect(endpointPairs).To(Contain(reverseOf(firstExpectedPair)))
+		Expect(endpointPairs).To(Contain(reverseOf(secondExpectedPair)))
+	}
 	Expect(endpointPairs).ToNot(
 		Contain(graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph)))
 
 	// Set.String()
-	Expect(endpointPairs).To(
-		HaveStringReprThatIsAnyOf(
-			fmt.Sprintf("[%v, %v]", firstExpectedPair, secondExpectedPair),
-			fmt.Sprintf("[%v, %v]", secondExpectedPair, firstExpectedPair)))
+	if g.IsDirected() {
+		Expect(endpointPairs).To(
+			HaveStringReprThatIsAnyOf(
+				fmt.Sprintf("[%v, %v]", firstExpectedPair, secondExpectedPair),
+				fmt.Sprintf("[%v, %v]", secondExpectedPair, firstExpectedPair)))
+	} else {
+		Expect(endpointPairs).To(
+			HaveStringReprThatIsAnyOf(
+				fmt.Sprintf("[%v, %v]", firstExpectedPair, secondExpectedPair),
+				fmt.Sprintf("[%v, %v]", firstExpectedPair, reverseOf(secondExpectedPair)),
+				fmt.Sprintf("[%v, %v]", reverseOf(firstExpectedPair), secondExpectedPair),
+				fmt.Sprintf("[%v, %v]", reverseOf(firstExpectedPair), reverseOf(secondExpectedPair)),
+				fmt.Sprintf("[%v, %v]", secondExpectedPair, firstExpectedPair),
+				fmt.Sprintf("[%v, %v]", secondExpectedPair, reverseOf(firstExpectedPair)),
+				fmt.Sprintf("[%v, %v]", reverseOf(secondExpectedPair), firstExpectedPair),
+				fmt.Sprintf("[%v, %v]", reverseOf(secondExpectedPair), reverseOf(firstExpectedPair))))
+	}
 }
 
 func reverseOf(endpointPair graph.EndpointPair[int]) graph.EndpointPair[int] {

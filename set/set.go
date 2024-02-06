@@ -49,7 +49,7 @@ var (
 // Of returns a new non-nil, empty, immutable Set. Its implementation is based on a Go map, with
 // similar performance characteristics.
 func Of[T comparable](elems ...T) Set[T] {
-	delegate := map[T]struct{}{}
+	delegate := make(map[T]struct{}, len(elems))
 	for _, elem := range elems {
 		delegate[elem] = struct{}{}
 	}
