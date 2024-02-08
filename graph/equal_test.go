@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/jbduncan/go-containers/graph"
-	"github.com/jbduncan/go-containers/set"
 	. "github.com/onsi/gomega"
 )
 
@@ -95,69 +94,11 @@ func undirectedAllowsSelfLoopsGraphOf(nodesAndEndpointPairs ...any) graph.Graph[
 }
 
 func directedGraphOf(nodes ...string) graph.Graph[string] {
-	return minimalDirectedGraph{
-		nodes: nodes,
+	result := graph.Directed[string]().Build()
+	for _, elem := range nodes {
+		result.AddNode(elem)
 	}
-}
-
-type minimalDirectedGraph struct {
-	nodes []string
-}
-
-func (d minimalDirectedGraph) Nodes() set.Set[string] {
-	return set.Of(d.nodes...)
-}
-
-func (d minimalDirectedGraph) Edges() set.Set[graph.EndpointPair[string]] {
-	return set.Of[graph.EndpointPair[string]]()
-}
-
-func (d minimalDirectedGraph) IsDirected() bool {
-	return true
-}
-
-func (d minimalDirectedGraph) AllowsSelfLoops() bool {
-	return true
-}
-
-func (d minimalDirectedGraph) AdjacentNodes(_ string) set.Set[string] {
-	panic("this is a minimal graph, so this method is purposefully not implemented")
-}
-
-func (d minimalDirectedGraph) Predecessors(_ string) set.Set[string] {
-	panic("this is a minimal graph, so this method is purposefully not implemented")
-}
-
-func (d minimalDirectedGraph) Successors(_ string) set.Set[string] {
-	panic("this is a minimal graph, so this method is purposefully not implemented")
-}
-
-func (d minimalDirectedGraph) IncidentEdges(_ string) set.Set[graph.EndpointPair[string]] {
-	panic("this is a minimal graph, so this method is purposefully not implemented")
-}
-
-func (d minimalDirectedGraph) Degree(_ string) int {
-	panic("this is a minimal graph, so this method is purposefully not implemented")
-}
-
-func (d minimalDirectedGraph) InDegree(_ string) int {
-	panic("this is a minimal graph, so this method is purposefully not implemented")
-}
-
-func (d minimalDirectedGraph) OutDegree(_ string) int {
-	panic("this is a minimal graph, so this method is purposefully not implemented")
-}
-
-func (d minimalDirectedGraph) HasEdgeConnecting(_ string, _ string) bool {
-	panic("this is a minimal graph, so this method is purposefully not implemented")
-}
-
-func (d minimalDirectedGraph) HasEdgeConnectingEndpoints(_ graph.EndpointPair[string]) bool {
-	panic("this is a minimal graph, so this method is purposefully not implemented")
-}
-
-func (d minimalDirectedGraph) String() string {
-	panic("this is a minimal graph, so this method is purposefully not implemented")
+	return result
 }
 
 func edge(source string, target string) graph.EndpointPair[string] {
