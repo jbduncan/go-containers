@@ -10,7 +10,7 @@ linters:
     - errname
     - ginkgolinter
     - gofmt
-    - gofumpt
+    - goimports
     - gosec
     - gosimple
     - govet
