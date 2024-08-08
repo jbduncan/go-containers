@@ -27,30 +27,37 @@ func TestCartesianProduct(t *testing.T) {
 		{
 			name: "one list with one element",
 			args: args[int]{
-				values: oneListWithOneElement(),
+				values: [][]int{{1}},
 			},
-			want: oneListWithOneElementCartesianProduct(),
+			want: [][]int{{1}},
 		},
 		{
 			name: "one list with three elements",
 			args: args[int]{
-				values: oneListWithThreeElements(),
+				values: [][]int{{1, 2, 3}},
 			},
-			want: oneListWithThreeElementsCartesianProduct(),
+			want: [][]int{{1}, {2}, {3}},
 		},
 		{
 			name: "two lists with one element each",
 			args: args[int]{
-				values: twoListsWithOneElementEach(),
+				values: [][]int{{1}, {2}},
 			},
-			want: twoListsWithOneElementEachCartesianProduct(),
+			want: [][]int{{1, 2}},
 		},
 		{
 			name: "two lists with different number elements",
 			args: args[int]{
-				values: twoListsWithDifferentNumberElements(),
+				values: [][]int{{1, 2, 3}, {8, 9}},
 			},
-			want: twoListsWithDifferentNumberElementsCartesianProduct(),
+			want: [][]int{
+				{1, 8},
+				{1, 9},
+				{2, 8},
+				{2, 9},
+				{3, 8},
+				{3, 9},
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -91,16 +98,16 @@ func TestCopyToNonNilSlice(t *testing.T) {
 		{
 			name: "one element",
 			args: args{
-				values: oneElement(),
+				values: []int{1},
 			},
-			want: oneElement(),
+			want: []int{1},
 		},
 		{
 			name: "three elements",
 			args: args{
-				values: threeElements(),
+				values: []int{1, 2, 3},
 			},
-			want: threeElements(),
+			want: []int{1, 2, 3},
 		},
 	}
 	for _, tt := range tests {
@@ -244,103 +251,4 @@ func TestRepeatAndCartesianProduct(t *testing.T) {
 			g.Expect(got).To(Equal(tt.want))
 		})
 	}
-}
-
-func oneListWithOneElement() [][]int {
-	return [][]int{
-		{
-			1,
-		},
-	}
-}
-
-func oneListWithOneElementCartesianProduct() [][]int {
-	return [][]int{
-		{
-			1,
-		},
-	}
-}
-
-func oneListWithThreeElements() [][]int {
-	return [][]int{
-		{
-			1, 2, 3,
-		},
-	}
-}
-
-func oneListWithThreeElementsCartesianProduct() [][]int {
-	return [][]int{
-		{
-			1,
-		},
-		{
-			2,
-		},
-		{
-			3,
-		},
-	}
-}
-
-func twoListsWithDifferentNumberElements() [][]int {
-	return [][]int{
-		{
-			1, 2, 3,
-		},
-		{
-			8, 9,
-		},
-	}
-}
-
-func twoListsWithDifferentNumberElementsCartesianProduct() [][]int {
-	return [][]int{
-		{
-			1, 8,
-		},
-		{
-			1, 9,
-		},
-		{
-			2, 8,
-		},
-		{
-			2, 9,
-		},
-		{
-			3, 8,
-		},
-		{
-			3, 9,
-		},
-	}
-}
-
-func twoListsWithOneElementEach() [][]int {
-	return [][]int{
-		{
-			1,
-		},
-		{
-			2,
-		},
-	}
-}
-
-func twoListsWithOneElementEachCartesianProduct() [][]int {
-	return [][]int{
-		{
-			1, 2,
-		},
-	}
-}
-
-func oneElement() []int {
-	return []int{1}
-}
-
-func threeElements() []int {
-	return []int{1, 2, 3}
 }
