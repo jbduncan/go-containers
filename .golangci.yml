@@ -26,6 +26,7 @@ linters:
 
 linters-settings:
   gofmt:
+    simplify: true
     rewrite-rules:
       - pattern: 'interface{}'
         replacement: 'any'
@@ -62,6 +63,7 @@ linters-settings:
       - loopclosure
       - lostcancel
       - nilfunc
+      - nilness
       - printf
       - reflectvaluecompare
       - shadow
@@ -79,6 +81,7 @@ linters-settings:
       - unreachable
       - unsafeptr
       - unusedresult
+      - unusedwrite
   revive:
     enable-all-rules: false
     rules:
