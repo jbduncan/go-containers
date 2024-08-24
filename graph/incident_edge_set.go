@@ -57,10 +57,11 @@ func (i incidentEdgeSet[N]) allUndirected() func(yield func(EndpointPair[N]) boo
 			}
 		}
 		for successor := range i.delegate.Successors(i.node).All() {
-			if !i.delegate.Predecessors(i.node).Contains(successor) {
-				if !yield(EndpointPairOf(i.node, successor)) {
-					return
-				}
+			if i.delegate.Predecessors(i.node).Contains(successor) {
+				continue
+			}
+			if !yield(EndpointPairOf(i.node, successor)) {
+				return
 			}
 		}
 	}

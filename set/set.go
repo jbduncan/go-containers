@@ -1,6 +1,9 @@
 package set
 
-import "iter"
+import (
+	"iter"
+	"maps"
+)
 
 // Set is a generic, unordered collection of unique elements.
 //
@@ -86,13 +89,7 @@ func (m *mapSet[T]) Len() int {
 }
 
 func (m *mapSet[T]) All() iter.Seq[T] {
-	return func(yield func(T) bool) {
-		for elem := range m.delegate {
-			if !yield(elem) {
-				return
-			}
-		}
-	}
+	return maps.Keys(m.delegate)
 }
 
 func (m *mapSet[T]) String() string {
@@ -149,13 +146,7 @@ func (m *mutableMapSet[T]) ForEach(fn func(elem T)) {
 }
 
 func (m *mutableMapSet[T]) All() iter.Seq[T] {
-	return func(yield func(T) bool) {
-		for elem := range m.delegate {
-			if !yield(elem) {
-				return
-			}
-		}
-	}
+	return maps.Keys(m.delegate)
 }
 
 func (m *mutableMapSet[T]) String() string {

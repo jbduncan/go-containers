@@ -2,6 +2,7 @@ package graph
 
 import (
 	"iter"
+	"maps"
 
 	"github.com/jbduncan/go-containers/set"
 )
@@ -22,13 +23,7 @@ func (k keySet[N]) Len() int {
 }
 
 func (k keySet[T]) All() iter.Seq[T] {
-	return func(yield func(T) bool) {
-		for key := range k.delegate {
-			if !yield(key) {
-				return
-			}
-		}
-	}
+	return maps.Keys(k.delegate)
 }
 
 func (k keySet[N]) String() string {

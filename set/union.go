@@ -49,10 +49,11 @@ func (u union[T]) All() iter.Seq[T] {
 		}
 
 		for elem := range u.b.All() {
-			if !u.a.Contains(elem) {
-				if !yield(elem) {
-					return
-				}
+			if u.a.Contains(elem) {
+				continue
+			}
+			if !yield(elem) {
+				return
 			}
 		}
 	}
