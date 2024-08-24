@@ -42,7 +42,6 @@ linters-settings:
       - pattern: '(a)'
         replacement: 'a'
   govet:
-    check-shadowing: true
     enable:
       - appends
       - asmdecl
@@ -65,6 +64,7 @@ linters-settings:
       - nilfunc
       - printf
       - reflectvaluecompare
+      - shadow
       - shift
       - sigchanyzer
       - slog

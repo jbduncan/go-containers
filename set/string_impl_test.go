@@ -2,12 +2,12 @@ package set_test
 
 import (
 	"fmt"
+	"slices"
 	"testing"
 
 	slices2 "github.com/jbduncan/go-containers/internal/slices"
 	"github.com/jbduncan/go-containers/set"
 	. "github.com/onsi/gomega"
-	"golang.org/x/exp/slices"
 )
 
 func TestStringImpl(t *testing.T) {

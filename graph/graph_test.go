@@ -2,6 +2,7 @@ package graph_test
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/jbduncan/go-containers/set"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"golang.org/x/exp/slices"
 )
 
 var _ = Describe("Graphs", func() {

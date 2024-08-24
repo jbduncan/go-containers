@@ -46,7 +46,6 @@ func (i incidentEdgeSet[N]) allDirected() func(yield func(EndpointPair[N]) bool)
 				return
 			}
 		}
-		return
 	}
 }
 

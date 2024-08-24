@@ -3,10 +3,10 @@ package iteratortest
 import (
 	"fmt"
 	"reflect"
+	"slices"
 
 	slices2 "github.com/jbduncan/go-containers/internal/slices"
 	"github.com/jbduncan/go-containers/iterator"
-	"golang.org/x/exp/slices"
 )
 
 type IteratorOrder int
@@ -159,15 +159,4 @@ func (t Tester[T]) doNextOpAndCheck(actualIter iterator.Iterator[T], remainingEx
 
 func (t Tester[T]) misbehavingIteratorError(opSequence []any) error {
 	return fmt.Errorf("iterator '%s' misbehaves when running operations %v", t.iteratorName, opSequence)
-}
-
-// At time of writing, we target Go 1.18 which doesn't have access to the
-// builtin "max", because it is only available in Go 1.21+.
-//
-//goland:noinspection GoReservedWordUsedAsName
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }

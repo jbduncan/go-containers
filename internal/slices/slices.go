@@ -1,6 +1,6 @@
 package slices
 
-import "golang.org/x/exp/slices"
+import "slices"
 
 func CartesianProduct[T any](values [][]T) [][]T {
 	result := [][]T{{}}
