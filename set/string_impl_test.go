@@ -5,7 +5,6 @@ import (
 	"slices"
 	"testing"
 
-	slices2 "github.com/jbduncan/go-containers/internal/slices"
 	"github.com/jbduncan/go-containers/set"
 	. "github.com/onsi/gomega"
 )
@@ -49,7 +48,7 @@ func FuzzStringImpl(f *testing.F) {
 	f.Add([]byte{7, 1})
 	f.Add([]byte{255, 123, 4})
 	f.Add([]byte{0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100})
-	f.Add(slices2.Repeat(byte(0), 10_000))
+	f.Add(slices.Repeat([]byte{byte(0)}, 10_000))
 	f.Add([]byte("x829"))
 	f.Add([]byte("0127"))
 	f.Add([]byte("78091"))
