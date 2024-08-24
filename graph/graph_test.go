@@ -1106,7 +1106,7 @@ func testSingleEdge(
 	// Set.Len()
 	Expect(endpointPairs).To(HaveLenOf(1))
 
-	// Set.ForEach()
+	// Set.All()
 	if g.IsDirected() {
 		Expect(AllToSlice(endpointPairs)).
 			To(HaveExactElements(expectedEndpointPair))
@@ -1150,7 +1150,7 @@ func testTwoEdges(
 	// Set.Len()
 	Expect(endpointPairs).To(HaveLenOf(2))
 
-	// Set.ForEach()
+	// Set.All()
 	if g.IsDirected() {
 		Expect(AllToSlice(endpointPairs)).
 			To(

@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"slices"
 	"strconv"
 
 	"github.com/jbduncan/go-containers/set"
@@ -331,7 +332,7 @@ func (d *directedGraph[N]) RemoveNode(node N) bool {
 }
 
 func copyOf[T comparable](s set.Set[T]) set.Set[T] {
-	return set.Of[T](set.ToSlice(s)...)
+	return set.Of[T](slices.Collect(s.All())...)
 }
 
 func (d *directedGraph[N]) RemoveEdge(source, target N) bool {

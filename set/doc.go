@@ -12,7 +12,5 @@
 // Two sets can be compared for "equality" with Equal, returning true if they have the same elements in any order,
 // otherwise false.
 //
-// The contents of a set can be copied into a slice with ToSlice.
-//
 // Third-party set implementations can be tested with settest.Set.
 package set

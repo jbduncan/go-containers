@@ -139,12 +139,6 @@ func (m *mutableMapSet[T]) Len() int {
 	return len(m.delegate)
 }
 
-func (m *mutableMapSet[T]) ForEach(fn func(elem T)) {
-	for elem := range m.delegate {
-		fn(elem)
-	}
-}
-
 func (m *mutableMapSet[T]) All() iter.Seq[T] {
 	return maps.Keys(m.delegate)
 }
