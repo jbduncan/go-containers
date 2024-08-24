@@ -63,34 +63,34 @@ func ContainAtLeast[T comparable](first T, others ...T) types.GomegaMatcher {
 		WithTemplateData(elements)
 }
 
-func HaveForEachThatEmitsNothing[T comparable]() types.GomegaMatcher {
+func HaveAllThatEmitsNothing[T comparable]() types.GomegaMatcher {
 	return gcustom.MakeMatcher(
 		func(s set.Set[T]) (bool, error) {
-			actual := ForEachToSlice(s)
+			actual := AllToSlice(s)
 			return len(actual) == 0, nil
 		}).
-		WithTemplate("Expected ForEach() of\n{{.FormattedActual}}\n{{.To}} emit nothing")
+		WithTemplate("Expected All() of\n{{.FormattedActual}}\n{{.To}} emit nothing")
 }
 
-func HaveForEachThatConsistsOf[T comparable](first any, others ...any) types.GomegaMatcher {
+func HaveAllThatConsistsOf[T comparable](first any, others ...any) types.GomegaMatcher {
 	elements := allOf(first, others)
 
 	return gcustom.MakeMatcher(
 		func(s set.Set[T]) (bool, error) {
-			actual := ForEachToSlice(s)
+			actual := AllToSlice(s)
 			return ConsistOf(elements).Match(actual)
 		}).
-		WithTemplate("Expected ForEach() of\n{{.FormattedActual}}\n{{.To}} emit elements consisting of\n{{format .Data 1}}").
+		WithTemplate("Expected All() of\n{{.FormattedActual}}\n{{.To}} emit elements consisting of\n{{format .Data 1}}").
 		WithTemplateData(elements)
 }
 
-func HaveForEachThatConsistsOfElementsInSlice[T comparable](elements []T) types.GomegaMatcher {
+func HaveAllThatConsistsOfElementsInSlice[T comparable](elements []T) types.GomegaMatcher {
 	return gcustom.MakeMatcher(
 		func(s set.Set[T]) (bool, error) {
-			actual := ForEachToSlice(s)
+			actual := AllToSlice(s)
 			return ConsistOf(elements).Match(actual)
 		}).
-		WithTemplate("Expected ForEach() of\n{{.FormattedActual}}\n{{.To}} emit elements consisting of\n{{format .Data 1}}").
+		WithTemplate("Expected All() of\n{{.FormattedActual}}\n{{.To}} emit elements consisting of\n{{format .Data 1}}").
 		WithTemplateData(elements)
 }
 
@@ -103,12 +103,12 @@ func BeNonMutableSet[T comparable]() types.GomegaMatcher {
 		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} implement set.Set but not set.MutableSet")
 }
 
-func ForEachToSlice[T comparable](s set.Set[T]) []T {
+func AllToSlice[T comparable](s set.Set[T]) []T {
 	var result []T
 
-	s.ForEach(func(elem T) {
+	for elem := range s.All() {
 		result = append(result, elem)
-	})
+	}
 
 	return result
 }

@@ -1,6 +1,10 @@
 package graph
 
-import "github.com/jbduncan/go-containers/set"
+import (
+	"iter"
+
+	"github.com/jbduncan/go-containers/set"
+)
 
 type directedGraphAdjacentNodeSet[N comparable] struct {
 	node     N
@@ -23,8 +27,8 @@ func (p directedGraphAdjacentNodeSet[N]) Len() int {
 		selfLoopCorrection
 }
 
-func (p directedGraphAdjacentNodeSet[N]) ForEach(fn func(node N)) {
-	p.union().ForEach(fn)
+func (p directedGraphAdjacentNodeSet[N]) All() iter.Seq[N] {
+	return p.union().All()
 }
 
 func (p directedGraphAdjacentNodeSet[N]) String() string {

@@ -1,6 +1,10 @@
 package graph
 
-import "github.com/jbduncan/go-containers/set"
+import (
+	"iter"
+
+	"github.com/jbduncan/go-containers/set"
+)
 
 var _ set.Set[int] = (*neighborSet[int])(nil)
 
@@ -25,9 +29,18 @@ func (a neighborSet[N]) Len() int {
 	return 0
 }
 
-func (a neighborSet[N]) ForEach(fn func(elem N)) {
-	if neighbors, ok := a.nodeToNeighbors[a.node]; ok {
-		neighbors.ForEach(fn)
+func (a neighborSet[N]) All() iter.Seq[N] {
+	return func(yield func(N) bool) {
+		neighbors, ok := a.nodeToNeighbors[a.node]
+		if !ok {
+			return
+		}
+
+		for neighbor := range neighbors.All() {
+			if !yield(neighbor) {
+				return
+			}
+		}
 	}
 }
 

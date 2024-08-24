@@ -1,5 +1,7 @@
 package set
 
+import "iter"
+
 // Union returns the set union of sets a and b.
 //
 // The returned set is an unmodifiable view, so changes to a and b will be reflected in the returned set.
@@ -30,21 +32,30 @@ func (u union[T]) Contains(elem T) bool {
 
 func (u union[T]) Len() int {
 	bLen := 0
-	u.b.ForEach(func(elem T) {
+	for elem := range u.b.All() {
 		if !u.a.Contains(elem) {
 			bLen++
 		}
-	})
+	}
 	return u.a.Len() + bLen
 }
 
-func (u union[T]) ForEach(fn func(elem T)) {
-	u.a.ForEach(fn)
-	u.b.ForEach(func(elem T) {
-		if !u.a.Contains(elem) {
-			fn(elem)
+func (u union[T]) All() iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for elem := range u.a.All() {
+			if !yield(elem) {
+				return
+			}
 		}
-	})
+
+		for elem := range u.b.All() {
+			if !u.a.Contains(elem) {
+				if !yield(elem) {
+					return
+				}
+			}
+		}
+	}
 }
 
 func (u union[T]) String() string {

@@ -1045,11 +1045,11 @@ func testSet(s set.Set[int], expectedValues ...int) {
 	// Set.Len()
 	Expect(s).To(HaveLenOf(len(expectedValues)))
 
-	// Set.ForEach()
+	// Set.All()
 	if len(expectedValues) == 0 {
-		Expect(s).To(HaveForEachThatEmitsNothing[int]())
+		Expect(s).To(HaveAllThatEmitsNothing[int]())
 	} else {
-		Expect(s).To(HaveForEachThatConsistsOfElementsInSlice(expectedValues))
+		Expect(s).To(HaveAllThatConsistsOfElementsInSlice(expectedValues))
 	}
 
 	// Set.Contains()
@@ -1084,9 +1084,9 @@ func testEmptyEdges(edges set.Set[graph.EndpointPair[int]]) {
 	// Set.Len()
 	Expect(edges).To(HaveLenOfZero())
 
-	// Set.ForEach()
+	// Set.All()
 	Expect(edges).To(
-		HaveForEachThatEmitsNothing[graph.EndpointPair[int]]())
+		HaveAllThatEmitsNothing[graph.EndpointPair[int]]())
 
 	// Set.Contains()
 	Expect(edges).ToNot(
@@ -1108,10 +1108,10 @@ func testSingleEdge(
 
 	// Set.ForEach()
 	if g.IsDirected() {
-		Expect(ForEachToSlice(endpointPairs)).
+		Expect(AllToSlice(endpointPairs)).
 			To(HaveExactElements(expectedEndpointPair))
 	} else {
-		Expect(ForEachToSlice(endpointPairs)).
+		Expect(AllToSlice(endpointPairs)).
 			To(Or(
 				HaveExactElements(expectedEndpointPair),
 				HaveExactElements(reverseOf(expectedEndpointPair))))
@@ -1152,14 +1152,14 @@ func testTwoEdges(
 
 	// Set.ForEach()
 	if g.IsDirected() {
-		Expect(ForEachToSlice(endpointPairs)).
+		Expect(AllToSlice(endpointPairs)).
 			To(
 				ConsistOf(
 					Equal(firstExpectedPair),
 					Equal(secondExpectedPair),
 				))
 	} else {
-		Expect(ForEachToSlice(endpointPairs)).
+		Expect(AllToSlice(endpointPairs)).
 			To(
 				ConsistOf(
 					Or(

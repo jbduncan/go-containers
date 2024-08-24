@@ -53,7 +53,7 @@ func TestSetUnmodifiable(t *testing.T) {
 
 			s.Add("link")
 
-			g.Expect(unmodSet).To(HaveForEachThatConsistsOf[string]("link"))
+			g.Expect(unmodSet).To(HaveAllThatConsistsOf[string]("link"))
 		})
 
 	t.Run(
