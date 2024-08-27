@@ -39,7 +39,7 @@ func (i incidentEdgeSet[N]) All() iter.Seq[EndpointPair[N]] {
 	return i.allUndirected()
 }
 
-func (i incidentEdgeSet[N]) allDirected() func(yield func(EndpointPair[N]) bool) {
+func (i incidentEdgeSet[N]) allDirected() iter.Seq[EndpointPair[N]] {
 	return func(yield func(EndpointPair[N]) bool) {
 		for adjNode := range i.delegate.AdjacentNodes(i.node).All() {
 			if !yield(EndpointPairOf(i.node, adjNode)) {
@@ -49,7 +49,7 @@ func (i incidentEdgeSet[N]) allDirected() func(yield func(EndpointPair[N]) bool)
 	}
 }
 
-func (i incidentEdgeSet[N]) allUndirected() func(yield func(EndpointPair[N]) bool) {
+func (i incidentEdgeSet[N]) allUndirected() iter.Seq[EndpointPair[N]] {
 	return func(yield func(EndpointPair[N]) bool) {
 		for predecessor := range i.delegate.Predecessors(i.node).All() {
 			if !yield(EndpointPairOf(predecessor, i.node)) {

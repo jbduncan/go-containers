@@ -104,8 +104,8 @@ func (u *undirectedGraph[N]) Nodes() set.Set[N] {
 
 func (u *undirectedGraph[N]) Edges() set.Set[EndpointPair[N]] {
 	return edgeSet[N]{
-		delegate:  u,
-		edgeCount: func() int { return u.numEdges },
+		delegate: u,
+		len:      func() int { return u.numEdges },
 	}
 }
 
@@ -222,8 +222,8 @@ func (d *directedGraph[N]) Nodes() set.Set[N] {
 
 func (d *directedGraph[N]) Edges() set.Set[EndpointPair[N]] {
 	return edgeSet[N]{
-		delegate:  d,
-		edgeCount: func() int { return d.numEdges },
+		delegate: d,
+		len:      func() int { return d.numEdges },
 	}
 }
 

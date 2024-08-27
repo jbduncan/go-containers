@@ -9,8 +9,8 @@ import (
 var _ set.Set[EndpointPair[int]] = (*edgeSet[int])(nil)
 
 type edgeSet[N comparable] struct {
-	delegate  Graph[N]
-	edgeCount func() int
+	delegate Graph[N]
+	len      func() int
 }
 
 func (e edgeSet[N]) Contains(elem EndpointPair[N]) bool {
@@ -19,7 +19,7 @@ func (e edgeSet[N]) Contains(elem EndpointPair[N]) bool {
 }
 
 func (e edgeSet[N]) Len() int {
-	return e.edgeCount()
+	return e.len()
 }
 
 func (e edgeSet[N]) All() iter.Seq[EndpointPair[N]] {

@@ -1108,10 +1108,10 @@ func testSingleEdge(
 
 	// Set.All()
 	if g.IsDirected() {
-		Expect(AllToSlice(endpointPairs)).
+		Expect(slices.Collect(endpointPairs.All())).
 			To(HaveExactElements(expectedEndpointPair))
 	} else {
-		Expect(AllToSlice(endpointPairs)).
+		Expect(slices.Collect(endpointPairs.All())).
 			To(Or(
 				HaveExactElements(expectedEndpointPair),
 				HaveExactElements(reverseOf(expectedEndpointPair))))
@@ -1152,14 +1152,10 @@ func testTwoEdges(
 
 	// Set.All()
 	if g.IsDirected() {
-		Expect(AllToSlice(endpointPairs)).
-			To(
-				ConsistOf(
-					Equal(firstExpectedPair),
-					Equal(secondExpectedPair),
-				))
+		Expect(slices.Collect(endpointPairs.All())).
+			To(ConsistOf(firstExpectedPair, secondExpectedPair))
 	} else {
-		Expect(AllToSlice(endpointPairs)).
+		Expect(slices.Collect(endpointPairs.All())).
 			To(
 				ConsistOf(
 					Or(
