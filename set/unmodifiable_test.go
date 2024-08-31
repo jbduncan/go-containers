@@ -11,7 +11,7 @@ import (
 
 func TestSetUnmodifiable(t *testing.T) {
 	settest.Set(t, func(elements []string) set.Set[string] {
-		s := set.NewMutable[string]()
+		s := set.Of[string]()
 		for _, element := range elements {
 			s.Add(element)
 		}
@@ -22,7 +22,7 @@ func TestSetUnmodifiable(t *testing.T) {
 		"empty unmodifiable set: add to underlying set: has length of 1",
 		func(t *testing.T) {
 			g := NewWithT(t)
-			s := set.NewMutable[string]()
+			s := set.Of[string]()
 			unmodSet := set.Unmodifiable[string](s)
 
 			s.Add("link")
@@ -34,7 +34,7 @@ func TestSetUnmodifiable(t *testing.T) {
 		"empty unmodifiable set: add to underlying set: contains element",
 		func(t *testing.T) {
 			g := NewWithT(t)
-			s := set.NewMutable[string]()
+			s := set.Of[string]()
 			unmodSet := set.Unmodifiable[string](s)
 
 			s.Add("link")
@@ -48,7 +48,7 @@ func TestSetUnmodifiable(t *testing.T) {
 			"returns element on iteration",
 		func(t *testing.T) {
 			g := NewWithT(t)
-			s := set.NewMutable[string]()
+			s := set.Of[string]()
 			unmodSet := set.Unmodifiable[string](s)
 
 			s.Add("link")
@@ -62,7 +62,7 @@ func TestSetUnmodifiable(t *testing.T) {
 			"has one-element string representation",
 		func(t *testing.T) {
 			g := NewWithT(t)
-			s := set.NewMutable[string]()
+			s := set.Of[string]()
 			unmodSet := set.Unmodifiable[string](s)
 
 			s.Add("link")
@@ -76,7 +76,7 @@ func TestSetUnmodifiable(t *testing.T) {
 			"has two-element string representation",
 		func(t *testing.T) {
 			g := NewWithT(t)
-			s := set.NewMutable[string]()
+			s := set.Of[string]()
 			unmodSet := set.Unmodifiable[string](s)
 
 			s.Add("link")

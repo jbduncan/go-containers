@@ -4,34 +4,32 @@ import "iter"
 
 var _ Set[int] = (*UnmodifiableSet[int])(nil)
 
-// Unmodifiable wraps a given MutableSet as a read-only Set view. This allows for sets that can be mutated by your own
-// code but not your clients' code.
+// Unmodifiable wraps a given set as a read-only Set view. This prevents users from casting the given set into a
+// MutableSet and allows for sets that can be mutated by your own code but not your users' code.
 //
-// If the original MutableSet is ever mutated, then the returned Set will reflect those mutations.
-//
-// This set cannot be cast back into a MutableSet.
-func Unmodifiable[T comparable](set MutableSet[T]) UnmodifiableSet[T] {
+// If the given set is ever mutated, then the returned set will reflect those mutations.
+func Unmodifiable[T comparable](s Set[T]) UnmodifiableSet[T] {
 	return UnmodifiableSet[T]{
-		set: set,
+		s: s,
 	}
 }
 
 type UnmodifiableSet[T comparable] struct {
-	set MutableSet[T]
+	s Set[T]
 }
 
 func (u UnmodifiableSet[T]) Contains(elem T) bool {
-	return u.set.Contains(elem)
+	return u.s.Contains(elem)
 }
 
 func (u UnmodifiableSet[T]) Len() int {
-	return u.set.Len()
+	return u.s.Len()
 }
 
 func (u UnmodifiableSet[T]) All() iter.Seq[T] {
-	return u.set.All()
+	return u.s.All()
 }
 
 func (u UnmodifiableSet[T]) String() string {
-	return u.set.String()
+	return u.s.String()
 }

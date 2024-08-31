@@ -11,8 +11,8 @@ import (
 
 func TestUnion(t *testing.T) {
 	settest.Set(t, func(elems []string) set.Set[string] {
-		a := set.NewMutable[string]()
-		b := set.NewMutable[string]()
+		a := set.Of[string]()
+		b := set.Of[string]()
 
 		for i, elem := range elems {
 			if i%2 == 0 {
@@ -29,15 +29,15 @@ func TestUnion(t *testing.T) {
 func TestUnionIsUnmodifiable(t *testing.T) {
 	g := NewWithT(t)
 
-	union := set.Union(set.Of[int](), set.Of[int]())
+	union := set.Union[int](set.Of[int](), set.Of[int]())
 
 	g.Expect(union).To(BeNonMutableSet[int]())
 }
 
 func TestUnionIsView(t *testing.T) {
 	g := NewWithT(t)
-	a := set.NewMutable[int]()
-	b := set.NewMutable[int]()
+	a := set.Of[int]()
+	b := set.Of[int]()
 	union := set.Union[int](a, b)
 
 	a.Add(1)
@@ -56,7 +56,7 @@ func FuzzUnion(f *testing.F) {
 		setA := set.Of(a...)
 		setB := set.Of(b...)
 
-		got := set.Union(setA, setB)
+		got := set.Union[byte](setA, setB)
 
 		g.Expect(got.Len()).To(BeNumerically(">=", 0))
 		g.Expect(got.Len()).To(BeNumerically("<=", len(a)+len(b)))
@@ -77,7 +77,7 @@ func FuzzUnionHasCommutativeProperty(f *testing.F) {
 		setA := set.Of(a...)
 		setB := set.Of(b...)
 
-		g.Expect(set.Equal(set.Union(setA, setB), set.Union(setB, setA))).
+		g.Expect(set.Equal(set.Union[byte](setA, setB), set.Union[byte](setB, setA))).
 			To(BeTrue(), "have commutative property")
 	})
 }
@@ -94,14 +94,13 @@ func FuzzUnionHasIdentityProperty(f *testing.F) {
 		g := NewWithT(t)
 		s := set.Of(bytes...)
 
+		var union set.UnionSet[byte]
 		if identityFirst {
-			union := set.Union(set.Of[byte](), s)
-			g.Expect(set.Equal(union, s)).
-				To(BeTrue(), "have identity property")
-			return
+			union = set.Union[byte](set.Of[byte](), s)
+		} else {
+			union = set.Union[byte](s, set.Of[byte]())
 		}
 
-		union := set.Union(s, set.Of[byte]())
 		g.Expect(set.Equal(union, s)).
 			To(BeTrue(), "have identity property")
 	})
@@ -116,7 +115,7 @@ func FuzzUnionHasIdempotentProperty(f *testing.F) {
 		g := NewWithT(t)
 		s := set.Of(bytes...)
 
-		union := set.Union(s, s)
+		union := set.Union[byte](s, s)
 		g.Expect(set.Equal(union, s)).
 			To(BeTrue(), "have idempotent property")
 	})

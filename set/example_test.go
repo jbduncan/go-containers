@@ -6,9 +6,9 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
-func ExampleNewMutable() {
-	// Create a new mutable set and put some strings in it.
-	exampleSet := set.NewMutable[string]()
+func ExampleOf() {
+	// Create a new set and put some strings in it.
+	exampleSet := set.Of[string]()
 	added := exampleSet.Add("link")
 	fmt.Println(added) // true
 	addedAgain := exampleSet.Add("link")
@@ -48,17 +48,8 @@ func ExampleNewMutable() {
 	// link
 }
 
-func ExampleOf() {
-	// Create a new immutable set with some strings.
-	// Note that it doesn't implement set.MutableSet, so new elements cannot be added.
-	exampleSet := set.Of("link", "zelda")
-
-	fmt.Println(exampleSet.Contains("link"))      // true
-	fmt.Println(exampleSet.Contains("ganondorf")) // false
-}
-
 func ExampleUnmodifiable() {
-	underlyingSet := set.NewMutable[string]()
+	underlyingSet := set.Of[string]()
 	underlyingSet.Add("link")
 
 	// Make an unmodifiable set that wraps underlyingSet.
@@ -81,9 +72,8 @@ func ExampleUnmodifiable() {
 
 func ExampleEqual() {
 	// Check if these two sets have the same elements in any order.
-	a := set.NewMutable[string]()
+	a := set.Of[string]()
 	a.Add("link")
-
 	b := set.Of("link")
 	fmt.Println(set.Equal[string](a, b)) // true
 

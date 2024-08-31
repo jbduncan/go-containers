@@ -24,7 +24,7 @@ func (e edgeSet[N]) Len() int {
 
 func (e edgeSet[N]) All() iter.Seq[EndpointPair[N]] {
 	return func(yield func(EndpointPair[N]) bool) {
-		seen := set.NewMutable[EndpointPair[N]]()
+		seen := set.Of[EndpointPair[N]]()
 
 		for source := range e.delegate.Nodes().All() {
 			for target := range e.delegate.Successors(source).All() {

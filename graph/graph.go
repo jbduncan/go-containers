@@ -60,7 +60,7 @@ func (b Builder[N]) AllowsSelfLoops(allowsSelfLoops bool) Builder[N] {
 func (b Builder[N]) Build() MutableGraph[N] {
 	if b.directed {
 		return &directedGraph[N]{
-			nodes:              set.NewMutable[N](),
+			nodes:              set.Of[N](),
 			nodeToPredecessors: map[N]set.MutableSet[N]{},
 			nodeToSuccessors:   map[N]set.MutableSet[N]{},
 			allowsSelfLoops:    b.allowsSelfLoops,
@@ -69,7 +69,7 @@ func (b Builder[N]) Build() MutableGraph[N] {
 	}
 
 	return &undirectedGraph[N]{
-		nodes:               set.NewMutable[N](),
+		nodes:               set.Of[N](),
 		nodeToAdjacentNodes: map[N]set.MutableSet[N]{},
 		allowsSelfLoops:     b.allowsSelfLoops,
 		numEdges:            0,
@@ -372,7 +372,7 @@ func checkSelfLoop[N comparable](g Graph[N], source, target N) {
 func putConnection[N comparable](nodeToNeighbors map[N]set.MutableSet[N], from, to N) bool {
 	neighbors, ok := nodeToNeighbors[from]
 	if !ok {
-		neighbors = set.NewMutable[N]()
+		neighbors = set.Of[N]()
 		nodeToNeighbors[from] = neighbors
 	}
 	return neighbors.Add(to)

@@ -13,18 +13,12 @@ func TestSetOf(t *testing.T) {
 	})
 }
 
-func TestSetNewMutableInitializedWithAdd(t *testing.T) {
+func TestSetInitializedWithAdd(t *testing.T) {
 	settest.Set(t, func(elems []string) set.Set[string] {
-		s := set.NewMutable[string]()
+		s := set.Of[string]()
 		for _, elem := range elems {
 			s.Add(elem)
 		}
 		return s
-	})
-}
-
-func TestSetNewMutableInitializedWithInit(t *testing.T) {
-	settest.Set(t, func(elems []string) set.Set[string] {
-		return set.NewMutable[string](elems...)
 	})
 }
