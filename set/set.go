@@ -50,8 +50,8 @@ var (
 	_ MutableSet[int] = (*MapSet[int])(nil)
 )
 
-// Of returns a new non-nil, empty MapSet, which implements MutableSet. Its implementation is based on a Go map, with
-// similar performance characteristics.
+// Of returns a new non-nil, empty MapSet, which implements Set and MutableSet. Its implementation is based on a Go map,
+// with similar performance characteristics.
 func Of[T comparable](elems ...T) *MapSet[T] {
 	delegate := make(map[T]struct{}, len(elems))
 	for _, elem := range elems {

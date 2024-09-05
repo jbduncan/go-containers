@@ -1,62 +1,65 @@
 package graph_test
 
 import (
+	"testing"
+
 	"github.com/jbduncan/go-containers/graph"
 	. "github.com/jbduncan/go-containers/internal/matchers"
-	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gcustom"
 	"github.com/onsi/gomega/types"
 )
 
-var _ = Describe("EndpointPair", func() {
-	Describe("given a new endpoint pair", func() {
-		var endpointPair graph.EndpointPair[string]
-
-		BeforeEach(func() {
-			endpointPair = graph.EndpointPairOf("link", "zelda")
-		})
-
-		Context("when calling .Source()", func() {
-			It("returns the first node", func() {
-				Expect(endpointPair).To(haveSource("link"))
-			})
-		})
-
-		Context("when calling .Target()", func() {
-			It("returns the second node", func() {
-				Expect(endpointPair).To(haveTarget("zelda"))
-			})
-		})
-
-		Context("when calling .AdjacentNode() with Source", func() {
-			It("returns Target", func() {
-				Expect(endpointPair.AdjacentNode(endpointPair.Source())).
-					To(Equal(endpointPair.Target()))
-			})
-		})
-
-		Context("when calling .AdjacentNode() with Target", func() {
-			It("returns Source", func() {
-				Expect(endpointPair.AdjacentNode(endpointPair.Target())).
-					To(Equal(endpointPair.Source()))
-			})
-		})
-
-		Context("when calling .AdjacentNode() with a non-adjacent node", func() {
-			It("panics", func() {
-				Expect(func() { endpointPair.AdjacentNode("ganondorf") }).
-					To(PanicWith("EndpointPair <link -> zelda> does not contain node ganondorf"))
-			})
-		})
-
-		Context("when calling .String()", func() {
-			It("returns a string representation", func() {
-				Expect(endpointPair).To(HaveStringRepr("<link -> zelda>"))
-			})
-		})
+func TestEndpointPair(t *testing.T) {
+	t.Run("EndpointPair.Source() returns the first node", func(t *testing.T) {
+		g := NewWithT(t)
+		g.Expect(endpointPair()).To(haveSource("link"))
 	})
-})
+
+	t.Run("EndpointPair.Target() returns the second node", func(t *testing.T) {
+		g := NewWithT(t)
+		g.Expect(endpointPair()).To(haveTarget("zelda"))
+	})
+
+	t.Run(
+		"EndpointPair.AdjacentNode(EndpointPair.Source()) returns the target",
+		func(t *testing.T) {
+			g := NewWithT(t)
+			g.Expect(endpointPair().AdjacentNode(endpointPair().Source())).
+				To(Equal(endpointPair().Target()))
+		},
+	)
+
+	t.Run(
+		"EndpointPair.AdjacentNode(EndpointPair.Target()) returns the source",
+		func(t *testing.T) {
+			g := NewWithT(t)
+			g.Expect(endpointPair().AdjacentNode(endpointPair().Target())).
+				To(Equal(endpointPair().Source()))
+		},
+	)
+
+	t.Run(
+		"EndpointPair.AdjacentNode(nonAdjacentNode) panics",
+		func(t *testing.T) {
+			g := NewWithT(t)
+			g.Expect(func() { endpointPair().AdjacentNode("ganondorf") }).
+				To(PanicWith("EndpointPair <link -> zelda> does not contain node ganondorf"))
+		},
+	)
+
+	t.Run(
+		"EndpointPair.String() returns a string representation",
+		func(t *testing.T) {
+			g := NewWithT(t)
+			g.Expect(endpointPair()).To(HaveStringRepr("<link -> zelda>"))
+		},
+	)
+}
+
+func endpointPair() graph.EndpointPair[string] {
+	return graph.EndpointPairOf("link", "zelda")
+}
 
 func haveSource(source string) types.GomegaMatcher {
 	return gcustom.MakeMatcher(
