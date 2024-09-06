@@ -17,8 +17,8 @@ lint:
 	@echo "Linting 'go mod verify'..."
 	@go mod verify
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.3 run
-	# go run go.uber.org/nilaway/cmd/nilaway@v0.0.0-20240821220108-c91e71c080b7 \
-	#	-include-pkgs github.com/jbduncan/go-containers ./...
+	go run go.uber.org/nilaway/cmd/nilaway@v0.0.0-20240821220108-c91e71c080b7 \
+		-include-pkgs github.com/jbduncan/go-containers ./...
 	./scripts/eg_lint.sh
 
 .PHONY: lint_fix
@@ -39,5 +39,5 @@ check: build lint test
 
 .PHONY: update_versions
 update_versions:
-	go get -u ./... && go get -u -t ./... && go mod tidy && go mod verify && go mod download
-	@echo "Make sure to update golangci-lint, eg and nilaway in the Makefile, too."
+	go get -u -t ./... && go mod tidy && go mod verify && go mod download
+	@echo "Make sure to update golangci-lint, eg and nilaway in the Makefile and scripts, too."
