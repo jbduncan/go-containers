@@ -2,15 +2,16 @@ package graphtest
 
 import (
 	"cmp"
-	gocmp "github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/jbduncan/go-containers/set"
+	"fmt"
 	"slices"
 	"strconv"
 	"strings"
 	"testing"
 
+	gocmp "github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/jbduncan/go-containers/graph"
+	"github.com/jbduncan/go-containers/set"
 )
 
 // TestingT is an interface for the parts of *testing.T that graphtest.Graph
@@ -18,6 +19,7 @@ import (
 // of *testing.T or your unit testing framework's equivalent.
 type TestingT interface {
 	Helper()
+	Fatalf(format string, args ...any)
 	Run(name string, f func(t *testing.T)) bool
 }
 
@@ -63,15 +65,33 @@ func Graph(
 	directedOrUndirected DirectionMode,
 	allowsOrDisallowsSelfLoops SelfLoopsMode,
 ) {
-	tt := newTester(
+	if mutableOrImmutable != Mutable && mutableOrImmutable != Immutable {
+		t.Fatalf(
+			"mutableOrImmutable expected to be Mutable or Immutable but was %v",
+			mutableOrImmutable,
+		)
+	}
+	if directedOrUndirected != Directed && directedOrUndirected != Undirected {
+		t.Fatalf(
+			"directedOrUndirected expected to be Directed or Undirected but was %v",
+			directedOrUndirected,
+		)
+	}
+	if allowsOrDisallowsSelfLoops != AllowsSelfLoops &&
+		allowsOrDisallowsSelfLoops != DisallowsSelfLoops {
+		t.Fatalf(
+			"allowsOrDisallowsSelfLoops expected to be AllowsSelfLoops or DisallowsSelfLoops but was %v",
+			allowsOrDisallowsSelfLoops,
+		)
+	}
+
+	newTester(
 		t,
 		graphBuilder,
 		mutableOrImmutable,
 		directedOrUndirected,
 		allowsOrDisallowsSelfLoops,
-	)
-
-	tt.emptyGraphHasNoNodes()
+	).test()
 }
 
 func newTester(
@@ -98,7 +118,7 @@ type tester struct {
 	allowsOrDisallowsSelfLoops SelfLoopsMode
 }
 
-func (tt tester) emptyGraphHasNoNodes() {
+func (tt tester) test() {
 	tt.t.Helper()
 
 	const graphNodesName = "Graph.Nodes"
@@ -107,11 +127,14 @@ func (tt tester) emptyGraphHasNoNodes() {
 	const graphPredecessorsName = "Graph.Predecessors"
 	const graphSuccessorsName = "Graph.Successors"
 	const graphIncidentEdgesName = "Graph.IncidentEdges"
+	const graphDegreeName = "Graph.Degree"
+	const graphInDegreeName = "Graph.InDegree"
+	const graphOutDegreeName = "Graph.OutDegree"
 
 	tt.t.Run("empty graph", func(t *testing.T) {
 		t.Run("has no nodes", func(t *testing.T) {
 			g := tt.graphBuilder()
-			testSet(t, graphNodesName, g.Nodes())
+			testNodeSet(t, graphNodesName, g.Nodes())
 		})
 
 		t.Run("has no edges", func(t *testing.T) {
@@ -127,19 +150,19 @@ func (tt tester) emptyGraphHasNoNodes() {
 			return g
 		}
 		t.Run("has just that node", func(t *testing.T) {
-			testSet(t, graphNodesName, g().Nodes(), node1)
+			testNodeSet(t, graphNodesName, g().Nodes(), node1)
 		})
 
 		t.Run("the node has no adjacent nodes", func(t *testing.T) {
-			testSet(t, graphAdjacentNodesName, g().AdjacentNodes(node1))
+			testNodeSet(t, graphAdjacentNodesName, g().AdjacentNodes(node1))
 		})
 
 		t.Run("the node has no predecessors", func(t *testing.T) {
-			testSet(t, graphPredecessorsName, g().Predecessors(node1))
+			testNodeSet(t, graphPredecessorsName, g().Predecessors(node1))
 		})
 
 		t.Run("the node has no successors", func(t *testing.T) {
-			testSet(t, graphSuccessorsName, g().Successors(node1))
+			testNodeSet(t, graphSuccessorsName, g().Successors(node1))
 		})
 
 		t.Run("the node has no incident edges", func(t *testing.T) {
@@ -147,34 +170,123 @@ func (tt tester) emptyGraphHasNoNodes() {
 		})
 
 		t.Run("the node has a degree of 0", func(t *testing.T) {
-			g := g()
-			degree := g.Degree(node1)
-			if degree != 0 {
-				t.Errorf("graph.Degree: got degree of %d, want 0", degree)
-			}
+			testDegree(t, graphDegreeName, g().Degree(node1), 0)
 		})
 
 		t.Run("the node has an in-degree of 0", func(t *testing.T) {
-			g := g()
-			inDegree := g.InDegree(node1)
-			if inDegree != 0 {
-				t.Errorf(
-					"graph.InDegree: got in-degree of %d, want 0",
-					inDegree,
-				)
-			}
+			testDegree(t, graphInDegreeName, g().InDegree(node1), 0)
 		})
 
 		t.Run("the node has an out-degree of 0", func(t *testing.T) {
-			g := g()
-			outDegree := g.OutDegree(node1)
-			if outDegree != 0 {
-				t.Errorf(
-					"graph.OutDegree: got out-degree of %d, want 0",
-					outDegree,
-				)
-			}
+			testDegree(t, graphOutDegreeName, g().OutDegree(node1), 0)
 		})
+	})
+
+	tt.t.Run("graph with two nodes", func(t *testing.T) {
+		t.Run("has both nodes", func(t *testing.T) {
+			g := tt.graphBuilder()
+			g = addNode(g, node1)
+			g = addNode(g, node2)
+
+			testNodeSet(t, graphNodesName, g.Nodes(), node1, node2)
+		})
+	})
+
+	tt.t.Run("graph with one edge", func(t *testing.T) {
+		g := func() graph.Graph[int] {
+			g := tt.graphBuilder()
+			g = putEdge(g, node1, node2)
+			return g
+		}
+
+		t.Run(
+			"the source node is adjacent to the target node",
+			func(t *testing.T) {
+				testNodeSet(
+					t,
+					graphAdjacentNodesName,
+					g().AdjacentNodes(node1),
+					node2,
+				)
+			},
+		)
+
+		t.Run(
+			"the target node is adjacent to the source node",
+			func(t *testing.T) {
+				testNodeSet(
+					t,
+					graphAdjacentNodesName,
+					g().AdjacentNodes(node2),
+					node1,
+				)
+			},
+		)
+
+		t.Run(
+			"the source node is the predecessor of the target node",
+			func(t *testing.T) {
+				testNodeSet(
+					t,
+					graphPredecessorsName,
+					g().Predecessors(node2),
+					node1,
+				)
+			},
+		)
+
+		t.Run(
+			"the target node is the successor of the source node",
+			func(t *testing.T) {
+				testNodeSet(
+					t,
+					graphSuccessorsName,
+					g().Successors(node1),
+					node2,
+				)
+			},
+		)
+
+		t.Run("the source node has a degree of 1", func(t *testing.T) {
+			testDegree(t, graphDegreeName, g().Degree(node1), 1)
+		})
+
+		t.Run("the target node has a degree of 1", func(t *testing.T) {
+			testDegree(t, graphDegreeName, g().Degree(node2), 1)
+		})
+
+		t.Run("the target node has an in-degree of 1", func(t *testing.T) {
+			testDegree(t, graphInDegreeName, g().InDegree(node2), 1)
+		})
+
+		t.Run("the source node has an out-degree of 1", func(t *testing.T) {
+			testDegree(t, graphOutDegreeName, g().OutDegree(node1), 1)
+		})
+
+		t.Run(
+			"has an incident edge connecting the first node to the second node",
+			func(t *testing.T) {
+				g := g()
+				if tt.directedOrUndirected == Directed {
+					testSingleDirectedEdge(
+						t,
+						graphIncidentEdgesName,
+						g.IncidentEdges(node1),
+						graph.EndpointPairOf(node1, node2),
+					)
+				} else {
+					testSingleUndirectedEdge(
+						t,
+						graphIncidentEdgesName,
+						g.IncidentEdges(node1),
+						graph.EndpointPairOf(node1, node2),
+					)
+				}
+			},
+		)
+
+		// TODO: refactor the common bits between test(NodeSet|EmptyEdges|SingleDirectedEdge|SingleUndirectedEdge)
+		// TODO: continue from graph_test.go, line 218, "has just one edge"
 	})
 }
 
@@ -186,7 +298,15 @@ func addNode(g graph.Graph[int], node int) graph.Graph[int] {
 	return g
 }
 
-func testSet(
+func putEdge(g graph.Graph[int], source int, target int) graph.Graph[int] {
+	if gAsMutable, ok := g.(graph.MutableGraph[int]); ok {
+		gAsMutable.PutEdge(source, target)
+	}
+
+	return g
+}
+
+func testNodeSet(
 	t *testing.T,
 	setName string,
 	s set.Set[int],
@@ -194,12 +314,7 @@ func testSet(
 ) {
 	t.Helper()
 
-	t.Run("Set.Len", func(t *testing.T) {
-		setLen := s.Len()
-		if setLen != len(expectedValues) {
-			t.Errorf("%s: got Set.Len of %d, want %d", setName, setLen, len(expectedValues))
-		}
-	})
+	testSetLen(t, setName, s, len(expectedValues))
 
 	t.Run("Set.All", func(t *testing.T) {
 		all := slices.Collect(s.All())
@@ -209,21 +324,32 @@ func testSet(
 		}
 	})
 
-	// Set.Contains()
 	t.Run("Set.Contains", func(t *testing.T) {
 		for _, value := range []int{node1, node2, node3} {
 			if slices.Contains(expectedValues, value) {
 				if !s.Contains(value) {
-					t.Errorf("%s: got Set.Contains(%d) == false, want true", setName, value)
+					t.Errorf(
+						"%s: got Set.Contains(%d) == false, want true",
+						setName,
+						value,
+					)
 				}
 			} else {
 				if s.Contains(value) {
-					t.Errorf("%s: got Set.Contains(%d) == true, want false", setName, value)
+					t.Errorf(
+						"%s: got Set.Contains(%d) == true, want false",
+						setName,
+						value,
+					)
 				}
 			}
 		}
 		if s.Contains(nodeNotInGraph) {
-			t.Errorf("%s: got Set.Contains(%d) == true, want false", setName, nodeNotInGraph)
+			t.Errorf(
+				"%s: got Set.Contains(%d) == true, want false",
+				setName,
+				nodeNotInGraph,
+			)
 		}
 	})
 
@@ -270,17 +396,14 @@ func testEmptyEdges(
 	setName string,
 	edges set.Set[graph.EndpointPair[int]],
 ) {
-	t.Run("Set.Len", func(t *testing.T) {
-		setLen := edges.Len()
-		if setLen != 0 {
-			t.Errorf("%s: got Set.Len of %d, want 0", setName, setLen)
-		}
-	})
+	t.Helper()
+
+	testSetLen(t, setName, edges, 0)
 
 	t.Run("Set.All", func(t *testing.T) {
 		all := slices.Collect(edges.All())
 		if len(all) != 0 {
-			t.Errorf("%s: got Set.All len of %d, want 0", setName, len(all))
+			t.Errorf("%s: got Set.All of %v, want empty", setName, all)
 		}
 	})
 
@@ -289,8 +412,9 @@ func testEmptyEdges(
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
 		) {
 			t.Errorf(
-				"%s: got Set.Contains(graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph)) == true, want false",
+				"%s: got Set.Contains(%s) == true, want false",
 				setName,
+				graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
 			)
 		}
 	})
@@ -303,10 +427,188 @@ func testEmptyEdges(
 	})
 }
 
-func orderAgnosticDiff[T cmp.Ordered](actual []T, expected []T) string {
+func testSingleDirectedEdge(
+	t *testing.T,
+	setName string,
+	edges set.Set[graph.EndpointPair[int]],
+	expectedEdge graph.EndpointPair[int],
+) {
+	t.Helper()
+
+	testSetLen(t, setName, edges, 1)
+
+	t.Run("Set.All", func(t *testing.T) {
+		all := slices.Collect(edges.All())
+		if !slices.Equal(all, []graph.EndpointPair[int]{expectedEdge}) {
+			t.Errorf(
+				"%s: got Set.All of %v, want %v",
+				setName,
+				all,
+				[]graph.EndpointPair[int]{expectedEdge},
+			)
+		}
+	})
+
+	t.Run("Set.Contains", func(t *testing.T) {
+		if !edges.Contains(expectedEdge) {
+			t.Errorf(
+				"%s: got Set.Contains(%s) == false, want true",
+				setName,
+				expectedEdge,
+			)
+		}
+
+		if expectedEdge != reverseOf(expectedEdge) {
+			if edges.Contains(reverseOf(expectedEdge)) {
+				t.Errorf(
+					"%s: got Set.Contains(%s) == true, want false",
+					setName,
+					reverseOf(expectedEdge),
+				)
+			}
+		}
+
+		if edges.Contains(
+			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
+		) {
+			t.Errorf(
+				"%s: got Set.Contains(%s) == true, want false",
+				setName,
+				graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
+			)
+		}
+	})
+
+	t.Run("Set.String", func(t *testing.T) {
+		setString := edges.String()
+		if setString != fmt.Sprintf("[%s]", expectedEdge) {
+			t.Fatalf(
+				"%s: got Set.String of %q, want %q",
+				setName,
+				setString,
+				fmt.Sprintf("[%s]", expectedEdge),
+			)
+		}
+	})
+}
+
+func testSingleUndirectedEdge(
+	t *testing.T,
+	setName string,
+	edges set.Set[graph.EndpointPair[int]],
+	expectedEdge graph.EndpointPair[int],
+) {
+	t.Helper()
+
+	testSetLen(t, setName, edges, 1)
+
+	t.Run("Set.All", func(t *testing.T) {
+		all := slices.Collect(edges.All())
+		if !slices.Equal(all, []graph.EndpointPair[int]{expectedEdge}) &&
+			!slices.Equal(
+				all,
+				[]graph.EndpointPair[int]{reverseOf(expectedEdge)},
+			) {
+			t.Errorf(
+				"%s: got Set.All of %v, want %v or %v",
+				setName,
+				all,
+				[]graph.EndpointPair[int]{expectedEdge},
+				[]graph.EndpointPair[int]{reverseOf(expectedEdge)},
+			)
+		}
+	})
+
+	t.Run("Set.Contains", func(t *testing.T) {
+		if !edges.Contains(expectedEdge) {
+			t.Errorf(
+				"%s: got Set.Contains(%s) == false, want true",
+				setName,
+				expectedEdge,
+			)
+		}
+
+		if expectedEdge != reverseOf(expectedEdge) {
+			if !edges.Contains(reverseOf(expectedEdge)) {
+				t.Errorf(
+					"%s: got Set.Contains(%s) == false, want true",
+					setName,
+					reverseOf(expectedEdge),
+				)
+			}
+		}
+
+		if edges.Contains(
+			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
+		) {
+			t.Errorf(
+				"%s: got Set.Contains(%s) == true, want false",
+				setName,
+				graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
+			)
+		}
+	})
+
+	t.Run("Set.String", func(t *testing.T) {
+		setString := edges.String()
+		if setString != fmt.Sprintf("[%s]", expectedEdge) &&
+			setString != fmt.Sprintf("[%s]", reverseOf(expectedEdge)) {
+			t.Fatalf(
+				"%s: got Set.String of %q, want %q or %q",
+				setName,
+				setString,
+				fmt.Sprintf("[%s]", expectedEdge),
+				fmt.Sprintf("[%s]", reverseOf(expectedEdge)),
+			)
+		}
+	})
+}
+
+func testSetLen[T comparable](
+	t *testing.T,
+	setName string,
+	s set.Set[T],
+	expectedLen int,
+) {
+	t.Helper()
+
+	t.Run("Set.Len", func(t *testing.T) {
+		setLen := s.Len()
+		if setLen != expectedLen {
+			t.Errorf(
+				"%s: got Set.Len of %d, want %d",
+				setName,
+				setLen,
+				expectedLen,
+			)
+		}
+	})
+}
+
+func testDegree(
+	t *testing.T,
+	degreeName string,
+	actualDegree int,
+	expectedDegree int,
+) {
+	if actualDegree != expectedDegree {
+		t.Errorf(
+			"%s: got degree of %d, want %d",
+			degreeName,
+			actualDegree,
+			expectedDegree,
+		)
+	}
+}
+
+func reverseOf(endpointPair graph.EndpointPair[int]) graph.EndpointPair[int] {
+	return graph.EndpointPairOf(endpointPair.Target(), endpointPair.Source())
+}
+
+func orderAgnosticDiff[T cmp.Ordered](got []T, want []T) string {
 	return gocmp.Diff(
-		actual,
-		expected,
+		want,
+		got,
 		cmpopts.SortSlices(func(a, b T) bool {
 			return a < b
 		}),
