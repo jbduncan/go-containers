@@ -1,15 +1,13 @@
 package graphtest
 
 import (
-	"cmp"
 	"fmt"
+	"maps"
 	"slices"
-	"strconv"
 	"strings"
 	"testing"
 
 	gocmp "github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/jbduncan/go-containers/graph"
 	"github.com/jbduncan/go-containers/set"
 )
@@ -315,14 +313,7 @@ func testNodeSet(
 	t.Helper()
 
 	testSetLen(t, setName, s, len(expectedValues))
-
-	t.Run("Set.All", func(t *testing.T) {
-		all := slices.Collect(s.All())
-		diff := orderAgnosticDiff(all, expectedValues)
-		if diff != "" {
-			t.Errorf("%s: Set.All mismatch (-want +got):\n%s", setName, diff)
-		}
-	})
+	testSetAll(t, setName, s, expectedValues)
 
 	t.Run("Set.Contains", func(t *testing.T) {
 		for _, value := range []int{node1, node2, node3} {
@@ -353,42 +344,7 @@ func testNodeSet(
 		}
 	})
 
-	t.Run("Set.String", func(t *testing.T) {
-		str := s.String()
-		trimmed, prefixFound := strings.CutPrefix(str, "[")
-		if !prefixFound {
-			t.Fatalf(
-				`%s: got Set.String of %s, want to have prefix "["`,
-				setName,
-				str,
-			)
-		}
-		trimmed, suffixFound := strings.CutSuffix(trimmed, "]")
-		if !suffixFound {
-			t.Fatalf(
-				`%s: got Set.String of %s, want to have suffix "]"`,
-				setName,
-				str,
-			)
-		}
-
-		var expectedValueStrs []string
-		for _, v := range expectedValues {
-			expectedValueStrs = append(expectedValueStrs, strconv.Itoa(v))
-		}
-
-		actualValueStrs := strings.SplitN(trimmed, ", ", len(expectedValues))
-		diff := orderAgnosticDiff(actualValueStrs, expectedValueStrs)
-		if diff != "" {
-			t.Fatalf(
-				"%s: got Set.String of %s, want elements to be %v in any order: (-want +got):\n%s",
-				setName,
-				str,
-				expectedValueStrs,
-				diff,
-			)
-		}
-	})
+	testSetString(t, setName, s, expectedValues)
 }
 
 func testEmptyEdges(
@@ -399,13 +355,7 @@ func testEmptyEdges(
 	t.Helper()
 
 	testSetLen(t, setName, edges, 0)
-
-	t.Run("Set.All", func(t *testing.T) {
-		all := slices.Collect(edges.All())
-		if len(all) != 0 {
-			t.Errorf("%s: got Set.All of %v, want empty", setName, all)
-		}
-	})
+	testSetAll(t, setName, edges, make([]graph.EndpointPair[int], 0))
 
 	t.Run("Set.Contains", func(t *testing.T) {
 		if edges.Contains(
@@ -419,12 +369,7 @@ func testEmptyEdges(
 		}
 	})
 
-	t.Run("Set.String", func(t *testing.T) {
-		setString := edges.String()
-		if setString != "[]" {
-			t.Fatalf(`%s: got Set.String of %q, want "[]"`, setName, setString)
-		}
-	})
+	testSetString(t, setName, edges, make([]graph.EndpointPair[int], 0))
 }
 
 func testSingleDirectedEdge(
@@ -436,18 +381,7 @@ func testSingleDirectedEdge(
 	t.Helper()
 
 	testSetLen(t, setName, edges, 1)
-
-	t.Run("Set.All", func(t *testing.T) {
-		all := slices.Collect(edges.All())
-		if !slices.Equal(all, []graph.EndpointPair[int]{expectedEdge}) {
-			t.Errorf(
-				"%s: got Set.All of %v, want %v",
-				setName,
-				all,
-				[]graph.EndpointPair[int]{expectedEdge},
-			)
-		}
-	})
+	testSetAll(t, setName, edges, []graph.EndpointPair[int]{expectedEdge})
 
 	t.Run("Set.Contains", func(t *testing.T) {
 		if !edges.Contains(expectedEdge) {
@@ -479,17 +413,7 @@ func testSingleDirectedEdge(
 		}
 	})
 
-	t.Run("Set.String", func(t *testing.T) {
-		setString := edges.String()
-		if setString != fmt.Sprintf("[%s]", expectedEdge) {
-			t.Fatalf(
-				"%s: got Set.String of %q, want %q",
-				setName,
-				setString,
-				fmt.Sprintf("[%s]", expectedEdge),
-			)
-		}
-	})
+	testSetString(t, setName, edges, []graph.EndpointPair[int]{expectedEdge})
 }
 
 func testSingleUndirectedEdge(
@@ -501,23 +425,13 @@ func testSingleUndirectedEdge(
 	t.Helper()
 
 	testSetLen(t, setName, edges, 1)
-
-	t.Run("Set.All", func(t *testing.T) {
-		all := slices.Collect(edges.All())
-		if !slices.Equal(all, []graph.EndpointPair[int]{expectedEdge}) &&
-			!slices.Equal(
-				all,
-				[]graph.EndpointPair[int]{reverseOf(expectedEdge)},
-			) {
-			t.Errorf(
-				"%s: got Set.All of %v, want %v or %v",
-				setName,
-				all,
-				[]graph.EndpointPair[int]{expectedEdge},
-				[]graph.EndpointPair[int]{reverseOf(expectedEdge)},
-			)
-		}
-	})
+	testSetAll(
+		t,
+		setName,
+		edges,
+		[]graph.EndpointPair[int]{expectedEdge},
+		orderAgnosticEndpointPairComparer(),
+	)
 
 	t.Run("Set.Contains", func(t *testing.T) {
 		if !edges.Contains(expectedEdge) {
@@ -549,19 +463,13 @@ func testSingleUndirectedEdge(
 		}
 	})
 
-	t.Run("Set.String", func(t *testing.T) {
-		setString := edges.String()
-		if setString != fmt.Sprintf("[%s]", expectedEdge) &&
-			setString != fmt.Sprintf("[%s]", reverseOf(expectedEdge)) {
-			t.Fatalf(
-				"%s: got Set.String of %q, want %q or %q",
-				setName,
-				setString,
-				fmt.Sprintf("[%s]", expectedEdge),
-				fmt.Sprintf("[%s]", reverseOf(expectedEdge)),
-			)
-		}
-	})
+	testSetString(
+		t,
+		setName,
+		edges,
+		[]graph.EndpointPair[int]{expectedEdge},
+		orderAgnosticEndpointPairComparer(),
+	)
 }
 
 func testSetLen[T comparable](
@@ -580,6 +488,70 @@ func testSetLen[T comparable](
 				setName,
 				setLen,
 				expectedLen,
+			)
+		}
+	})
+}
+
+func testSetAll[T comparable](
+	t *testing.T,
+	setName string,
+	s set.Set[T],
+	expectedValues []T,
+	extraOptions ...gocmp.Option,
+) {
+	t.Helper()
+
+	t.Run("Set.All", func(t *testing.T) {
+		all := slices.Collect(s.All())
+		diff := orderAgnosticDiff(all, expectedValues, extraOptions...)
+		if diff != "" {
+			t.Errorf("%s: Set.All mismatch (-want +got):\n%s", setName, diff)
+		}
+	})
+}
+
+func testSetString[T comparable](
+	t *testing.T,
+	setName string,
+	s set.Set[T],
+	expectedValues []T,
+	extraOptions ...gocmp.Option,
+) {
+	t.Helper()
+
+	t.Run("Set.String", func(t *testing.T) {
+		str := s.String()
+		trimmed, prefixFound := strings.CutPrefix(str, "[")
+		if !prefixFound {
+			t.Fatalf(
+				`%s: got Set.String of %q, want to have prefix "["`,
+				setName,
+				str,
+			)
+		}
+		trimmed, suffixFound := strings.CutSuffix(trimmed, "]")
+		if !suffixFound {
+			t.Fatalf(
+				`%s: got Set.String of %q, want to have suffix "]"`,
+				setName,
+				str,
+			)
+		}
+
+		var expectedValueStrs []string
+		for _, v := range expectedValues {
+			expectedValueStrs = append(expectedValueStrs, fmt.Sprintf("%v", v))
+		}
+		actualValueStrs := strings.SplitN(trimmed, ", ", len(expectedValues))
+
+		diff := orderAgnosticDiff(actualValueStrs, expectedValueStrs, extraOptions...)
+		if diff != "" {
+			t.Fatalf(
+				"%s: Set.String of %q: elements mismatch: (-want +got):\n%s",
+				setName,
+				str,
+				diff,
 			)
 		}
 	})
@@ -605,12 +577,41 @@ func reverseOf(endpointPair graph.EndpointPair[int]) graph.EndpointPair[int] {
 	return graph.EndpointPairOf(endpointPair.Target(), endpointPair.Source())
 }
 
-func orderAgnosticDiff[T cmp.Ordered](got []T, want []T) string {
+func orderAgnosticDiff[T comparable](
+	got []T,
+	want []T,
+	extraOptions ...gocmp.Option,
+) string {
+	sliceComparer := gocmp.Comparer(func(a, b []T) bool {
+		x := make(map[T]int)
+		for _, value := range a {
+			x[value]++
+		}
+		y := make(map[T]int)
+		for _, value := range b {
+			y[value]++
+		}
+		return maps.Equal(x, y)
+	})
+	allOptions := allOf(
+		sliceComparer,
+		extraOptions,
+	)
 	return gocmp.Diff(
 		want,
 		got,
-		cmpopts.SortSlices(func(a, b T) bool {
-			return a < b
-		}),
+		allOptions...,
 	)
+}
+
+func orderAgnosticEndpointPairComparer() gocmp.Option {
+	// TODO(jbduncan): consider reintroducing EndpointPair.Equal so this
+	//                 comparer can be removed.
+	return gocmp.Comparer(func(a, b graph.EndpointPair[int]) bool {
+		return a == b || a == reverseOf(b)
+	})
+}
+
+func allOf[T any](first T, rest []T) []T {
+	return slices.Concat([]T{first}, rest)
 }
