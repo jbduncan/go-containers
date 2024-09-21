@@ -304,6 +304,16 @@ func putEdge(g graph.Graph[int], source int, target int) graph.Graph[int] {
 	return g
 }
 
+var allNodesToConsider = []int{node1, node2, node3, nodeNotInGraph}
+
+func complement(nodes []int) []int {
+	result := slices.Clone(allNodesToConsider)
+	result = slices.DeleteFunc(result, func(value int) bool {
+		return slices.Contains(nodes, value)
+	})
+	return result
+}
+
 func testNodeSet(
 	t *testing.T,
 	setName string,
@@ -314,36 +324,13 @@ func testNodeSet(
 
 	testSetLen(t, setName, s, len(expectedValues))
 	testSetAll(t, setName, s, expectedValues)
-
-	t.Run("Set.Contains", func(t *testing.T) {
-		for _, value := range []int{node1, node2, node3} {
-			if slices.Contains(expectedValues, value) {
-				if !s.Contains(value) {
-					t.Errorf(
-						"%s: got Set.Contains(%d) == false, want true",
-						setName,
-						value,
-					)
-				}
-			} else {
-				if s.Contains(value) {
-					t.Errorf(
-						"%s: got Set.Contains(%d) == true, want false",
-						setName,
-						value,
-					)
-				}
-			}
-		}
-		if s.Contains(nodeNotInGraph) {
-			t.Errorf(
-				"%s: got Set.Contains(%d) == true, want false",
-				setName,
-				nodeNotInGraph,
-			)
-		}
-	})
-
+	testSetContains(
+		t,
+		setName,
+		s,
+		expectedValues,
+		complement(expectedValues),
+	)
 	testSetString(t, setName, s, expectedValues)
 }
 
@@ -356,19 +343,15 @@ func testEmptyEdges(
 
 	testSetLen(t, setName, edges, 0)
 	testSetAll(t, setName, edges, make([]graph.EndpointPair[int], 0))
-
-	t.Run("Set.Contains", func(t *testing.T) {
-		if edges.Contains(
+	testSetContains(
+		t,
+		setName,
+		edges,
+		make([]graph.EndpointPair[int], 0),
+		[]graph.EndpointPair[int]{
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
-		) {
-			t.Errorf(
-				"%s: got Set.Contains(%s) == true, want false",
-				setName,
-				graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
-			)
-		}
-	})
-
+		},
+	)
 	testSetString(t, setName, edges, make([]graph.EndpointPair[int], 0))
 }
 
@@ -382,37 +365,16 @@ func testSingleDirectedEdge(
 
 	testSetLen(t, setName, edges, 1)
 	testSetAll(t, setName, edges, []graph.EndpointPair[int]{expectedEdge})
-
-	t.Run("Set.Contains", func(t *testing.T) {
-		if !edges.Contains(expectedEdge) {
-			t.Errorf(
-				"%s: got Set.Contains(%s) == false, want true",
-				setName,
-				expectedEdge,
-			)
-		}
-
-		if expectedEdge != reverseOf(expectedEdge) {
-			if edges.Contains(reverseOf(expectedEdge)) {
-				t.Errorf(
-					"%s: got Set.Contains(%s) == true, want false",
-					setName,
-					reverseOf(expectedEdge),
-				)
-			}
-		}
-
-		if edges.Contains(
+	testSetContains(
+		t,
+		setName,
+		edges,
+		[]graph.EndpointPair[int]{expectedEdge},
+		[]graph.EndpointPair[int]{
+			reverseOf(expectedEdge),
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
-		) {
-			t.Errorf(
-				"%s: got Set.Contains(%s) == true, want false",
-				setName,
-				graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
-			)
-		}
-	})
-
+		},
+	)
 	testSetString(t, setName, edges, []graph.EndpointPair[int]{expectedEdge})
 }
 
@@ -430,45 +392,35 @@ func testSingleUndirectedEdge(
 		setName,
 		edges,
 		[]graph.EndpointPair[int]{expectedEdge},
-		orderAgnosticEndpointPairComparer(),
+		undirectedEndpointPairComparer(),
 	)
-
-	t.Run("Set.Contains", func(t *testing.T) {
-		if !edges.Contains(expectedEdge) {
-			t.Errorf(
-				"%s: got Set.Contains(%s) == false, want true",
-				setName,
-				expectedEdge,
-			)
-		}
-
-		if expectedEdge != reverseOf(expectedEdge) {
-			if !edges.Contains(reverseOf(expectedEdge)) {
-				t.Errorf(
-					"%s: got Set.Contains(%s) == false, want true",
-					setName,
-					reverseOf(expectedEdge),
-				)
-			}
-		}
-
-		if edges.Contains(
+	testSetContains(
+		t,
+		setName,
+		edges,
+		// Even though there is only one edge in the graph,
+		// test that the set contains both the edge and its
+		// reverse to check that the set contains an
+		// undirected edge.
+		//
+		// TODO(jbduncan): this is potentially confusing for
+		//  users of graphtest, so consider reintroducing
+		//  EndpointPair.Equal, graph.DirectedEndpointPairOf
+		//  and graph.UndirectedEndpointPairOf.
+		[]graph.EndpointPair[int]{
+			expectedEdge,
+			reverseOf(expectedEdge),
+		},
+		[]graph.EndpointPair[int]{
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
-		) {
-			t.Errorf(
-				"%s: got Set.Contains(%s) == true, want false",
-				setName,
-				graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
-			)
-		}
-	})
-
+		},
+	)
 	testSetString(
 		t,
 		setName,
 		edges,
 		[]graph.EndpointPair[int]{expectedEdge},
-		orderAgnosticEndpointPairComparer(),
+		undirectedEndpointPairComparer(),
 	)
 }
 
@@ -507,6 +459,37 @@ func testSetAll[T comparable](
 		diff := orderAgnosticDiff(all, expectedValues, extraOptions...)
 		if diff != "" {
 			t.Errorf("%s: Set.All mismatch (-want +got):\n%s", setName, diff)
+		}
+	})
+}
+
+func testSetContains[T comparable](
+	t *testing.T,
+	setName string,
+	s set.Set[T],
+	contains []T,
+	doesNotContain []T,
+) {
+	t.Helper()
+
+	t.Run("Set.Contains", func(t *testing.T) {
+		for _, value := range contains {
+			if !s.Contains(value) {
+				t.Errorf(
+					"%s: got Set.Contains(%v) == false, want true",
+					setName,
+					value,
+				)
+			}
+		}
+		for _, value := range doesNotContain {
+			if s.Contains(value) {
+				t.Errorf(
+					"%s: got Set.Contains(%v) == true, want false",
+					setName,
+					value,
+				)
+			}
 		}
 	})
 }
@@ -604,7 +587,7 @@ func orderAgnosticDiff[T comparable](
 	)
 }
 
-func orderAgnosticEndpointPairComparer() gocmp.Option {
+func undirectedEndpointPairComparer() gocmp.Option {
 	// TODO(jbduncan): consider reintroducing EndpointPair.Equal so this
 	//                 comparer can be removed.
 	return gocmp.Comparer(func(a, b graph.EndpointPair[int]) bool {
