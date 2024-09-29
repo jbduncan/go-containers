@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ex
+set -eo pipefail
 
 if ! test -z "$(go run golang.org/x/tools/cmd/eg@v0.24.0 -t eg/fmt_errorf_to_errors_new.template ./...)"; then
 		echo "eg found at least one non-conforming file."

@@ -1,4 +1,5 @@
-cover.profile
-/.idea/
 .DS_Store
+/.idea/
+/x/x
+cover.profile
 testdata/
