@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"flag"
@@ -68,54 +69,96 @@ func doBuild() {
 	mustRun(cmd("go", "build", "./..."))
 }
 
-func doFix() {
-	fmt.Println("Running 'go mod tidy'...")
-	mustRun(cmd("go", "mod", "tidy"))
-	fmt.Println("Running 'go mod download'...")
-	mustRun(cmd("go", "mod", "download"))
-	runEgFix()
-	runGolangciLintFix()
-	runDepawareFix()
-}
+func doDepaware(ctx context.Context, group *errgroup.Group) {
+	depawareFileDirs := make(chan string)
+	group.Go(func() error {
+		defer close(depawareFileDirs)
+		return filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if !d.Type().IsRegular() {
+				return nil
+			}
+			if filepath.Base(path) != "depaware.txt" {
+				return nil
+			}
 
-func doLint() {
-	fmt.Println("Linting 'go mod tidy' results...")
-	mustRun(cmd("go", "mod", "tidy"))
-	mustRun(cmd("git", "diff", "--exit-code", "--", "go.mod", "go.sum"), func() {
-		fmt.Println("'go mod tidy' changed files")
+			select {
+			case depawareFileDirs <- "./" + filepath.Dir(path):
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+			return nil
+		})
 	})
 
-	fmt.Println("Linting with 'go mod verify'...")
-	mustRun(cmd("go", "mod", "verify"))
+	for dir := range depawareFileDirs {
+		group.Go(func() error {
+			fmt.Printf("Linting with depaware concurrently on directory %s...\n", dir)
+			return cmd(
+				"go",
+				"run",
+				"github.com/tailscale/depaware",
+				"--check",
+				dir,
+			).Run()
+		})
+	}
+}
 
+func doDepawareFix() {
 	group, ctx := errgroup.WithContext(context.Background())
 	group.SetLimit(max(1, runtime.NumCPU()/2))
 
-	runGolangciLint(group)
-	runNilaway(group)
-	runEg(ctx, group)
-	runDepaware(ctx, group)
+	depawareFiles := make(chan string)
+	group.Go(func() error {
+		defer close(depawareFiles)
+		return filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if !d.Type().IsRegular() {
+				return nil
+			}
+			if filepath.Base(path) != "depaware.txt" {
+				return nil
+			}
+
+			select {
+			case depawareFiles <- "./" + path:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+			return nil
+		})
+	})
+
+	for file := range depawareFiles {
+		group.Go(func() error {
+			dir := "./" + filepath.Dir(file)
+			fmt.Printf("Fixing with depaware concurrently on directory %s...\n", dir)
+			c := cmd(
+				"go",
+				"run",
+				"github.com/tailscale/depaware",
+				dir,
+			)
+			var b bytes.Buffer
+			c.Stdout = &b
+			err1 := c.Run()
+			var err2 error
+			if err1 == nil {
+				err2 = os.WriteFile(file, b.Bytes(), 0o666)
+			}
+			return errors.Join(err1, err2)
+		})
+	}
 
 	mustNotError(group.Wait())
 }
 
-func doTest() {
-	fmt.Println("Testing...")
-	mustRun(cmd("go", "test", "-shuffle=on", "-race", "./..."))
-}
-
-func doUpdateVersions() {
-	fmt.Println("Updating versions...")
-	mustRun(cmd("go", "get", "-u", "-t", "./..."))
-	fmt.Println("Running 'go mod tidy'...")
-	mustRun(cmd("go", "mod", "tidy"))
-	fmt.Println("Running 'go mod verify'...")
-	mustRun(cmd("go", "mod", "verify"))
-	fmt.Println("Running 'go mod download'...")
-	mustRun(cmd("go", "mod", "download"))
-}
-
-func runEg(ctx context.Context, group *errgroup.Group) {
+func doEg(ctx context.Context, group *errgroup.Group) {
 	egTemplateFiles := make(chan string)
 	group.Go(func() error {
 		defer close(egTemplateFiles)
@@ -151,7 +194,7 @@ func runEg(ctx context.Context, group *errgroup.Group) {
 	}
 }
 
-func runEgFix() {
+func doEgFix() {
 	egTemplateFiles, err := filepath.Glob("eg/*.template")
 	mustNotError(err)
 
@@ -169,88 +212,30 @@ func runEgFix() {
 	}
 }
 
-func runDepaware(ctx context.Context, group *errgroup.Group) {
-	depawareFileDirs := make(chan string)
-	group.Go(func() error {
-		defer close(depawareFileDirs)
-		return filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-			if !d.Type().IsRegular() {
-				return nil
-			}
-			if filepath.Base(path) != "depaware.txt" {
-				return nil
-			}
-
-			select {
-			case depawareFileDirs <- "./" + filepath.Dir(path):
-			case <-ctx.Done():
-				return ctx.Err()
-			}
-			return nil
-		})
-	})
-
-	for dir := range depawareFileDirs {
-		group.Go(func() error {
-			fmt.Printf("Linting with depaware concurrently on directory %s...\n", dir)
-			return cmd(
-				"go",
-				"run",
-				"github.com/tailscale/depaware",
-				"--check",
-				dir,
-			).Run()
-		})
-	}
+func doFix() {
+	doGoModTidy()
+	doGoModDownload()
+	doEgFix()
+	doGolangciLintFix()
+	doDepawareFix()
 }
 
-func runDepawareFix() {
-	group, ctx := errgroup.WithContext(context.Background())
-	group.SetLimit(max(1, runtime.NumCPU()/2))
-
-	depawareFileDirs := make(chan string)
-	group.Go(func() error {
-		defer close(depawareFileDirs)
-		return filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-			if !d.Type().IsRegular() {
-				return nil
-			}
-			if filepath.Base(path) != "depaware.txt" {
-				return nil
-			}
-
-			select {
-			case depawareFileDirs <- "./" + filepath.Dir(path):
-			case <-ctx.Done():
-				return ctx.Err()
-			}
-			return nil
-		})
-	})
-
-	for dir := range depawareFileDirs {
-		group.Go(func() error {
-			fmt.Printf("Linting with depaware concurrently on directory %s...\n", dir)
-			return cmd(
-				"go",
-				"run",
-				"github.com/tailscale/depaware",
-				"--check",
-				dir,
-			).Run()
-		})
-	}
-
-	mustNotError(group.Wait())
+func doGoModTidy() {
+	fmt.Println("Running 'go mod tidy'...")
+	mustRun(cmd("go", "mod", "tidy"))
 }
 
-func runGolangciLint(group *errgroup.Group) {
+func doGoModVerify() {
+	fmt.Println("Running 'go mod verify'...")
+	mustRun(cmd("go", "mod", "verify"))
+}
+
+func doGoModDownload() {
+	fmt.Println("Running 'go mod download'...")
+	mustRun(cmd("go", "mod", "download"))
+}
+
+func doGolangciLint(group *errgroup.Group) {
 	group.Go(func() error {
 		fmt.Println("Linting with golangci-lint concurrently...")
 		return cmd(
@@ -262,7 +247,7 @@ func runGolangciLint(group *errgroup.Group) {
 	})
 }
 
-func runGolangciLintFix() {
+func doGolangciLintFix() {
 	fmt.Println("Fixing with golangci-lint...")
 	mustRun(cmd(
 		"go",
@@ -273,7 +258,25 @@ func runGolangciLintFix() {
 	))
 }
 
-func runNilaway(group *errgroup.Group) {
+func doLint() {
+	doGoModTidy()
+	mustRun(cmd("git", "diff", "--exit-code", "--", "go.mod", "go.sum"), func() {
+		fmt.Println("'go mod tidy' changed files")
+	})
+	doGoModVerify()
+
+	group, ctx := errgroup.WithContext(context.Background())
+	group.SetLimit(max(1, runtime.NumCPU()/2))
+
+	doGolangciLint(group)
+	doNilaway(group)
+	doEg(ctx, group)
+	doDepaware(ctx, group)
+
+	mustNotError(group.Wait())
+}
+
+func doNilaway(group *errgroup.Group) {
 	group.Go(func() error {
 		fmt.Println("Linting with nilaway concurrently...")
 		return cmd(
@@ -285,6 +288,20 @@ func runNilaway(group *errgroup.Group) {
 			"./...",
 		).Run()
 	})
+}
+
+func doTest() {
+	fmt.Println("Testing...")
+	mustRun(cmd("go", "test", "-shuffle=on", "-race", "./..."))
+}
+
+func doUpdateVersions() {
+	fmt.Println("Updating versions...")
+	mustRun(cmd("go", "get", "-u", "-t", "./..."))
+	doGoModTidy()
+	doGoModVerify()
+	doGoModDownload()
+	doDepawareFix()
 }
 
 func cmd(name string, args ...string) *exec.Cmd {
