@@ -149,7 +149,7 @@ func doDepawareFix() {
 			err1 := c.Run()
 			var err2 error
 			if err1 == nil {
-				err2 = os.WriteFile(file, b.Bytes(), 0o666)
+				err2 = os.WriteFile(file, b.Bytes(), 0o600)
 			}
 			return errors.Join(err1, err2)
 		})
@@ -297,7 +297,7 @@ func doTest() {
 
 func doUpdateVersions() {
 	fmt.Println("Updating versions...")
-	mustRun(cmd("go", "get", "-u", "-t", "./..."))
+	mustRun(cmd("go", "get", "-u", "-t", "all"))
 	doGoModTidy()
 	doGoModVerify()
 	doGoModDownload()
