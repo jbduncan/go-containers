@@ -297,7 +297,7 @@ func doTest() {
 
 func doUpdateVersions() {
 	fmt.Println("Updating versions...")
-	mustRun(cmd("go", "get", "-u", "-t", "all"))
+	mustRun(cmd("go", "get", "-u", "-t", "./..."))
 	doGoModTidy()
 	doGoModVerify()
 	doGoModDownload()
