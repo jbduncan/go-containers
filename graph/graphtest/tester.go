@@ -141,7 +141,7 @@ func (tt tester) test() {
 
 		t.Run("has no edges", func(t *testing.T) {
 			g := tt.graphBuilder()
-			testDirectedEdgeSet(
+			tt.testEdgeSet(
 				t,
 				graphEdgesName,
 				g.Edges(),
@@ -173,7 +173,7 @@ func (tt tester) test() {
 		})
 
 		t.Run("the node has no incident edges", func(t *testing.T) {
-			testDirectedEdgeSet(
+			tt.testEdgeSet(
 				t,
 				graphIncidentEdgesName,
 				g().IncidentEdges(node1),
@@ -279,25 +279,14 @@ func (tt tester) test() {
 			"has an incident edge connecting the first node to the "+
 				"second node",
 			func(t *testing.T) {
-				if tt.directedOrUndirected == Directed {
-					testDirectedEdgeSet(
-						t,
-						graphIncidentEdgesName,
-						g().IncidentEdges(node1),
-						[]graph.EndpointPair[int]{
-							graph.EndpointPairOf(node1, node2),
-						},
-					)
-				} else {
-					testUndirectedEdgeSet(
-						t,
-						graphIncidentEdgesName,
-						g().IncidentEdges(node1),
-						[]graph.EndpointPair[int]{
-							graph.EndpointPairOf(node1, node2),
-						},
-					)
-				}
+				tt.testEdgeSet(
+					t,
+					graphIncidentEdgesName,
+					g().IncidentEdges(node1),
+					[]graph.EndpointPair[int]{
+						graph.EndpointPairOf(node1, node2),
+					},
+				)
 			},
 		)
 
@@ -351,7 +340,7 @@ func testNodeSet(
 	testSetString(t, setName, s, expectedValues)
 }
 
-func testDirectedEdgeSet(
+func (tt tester) testEdgeSet(
 	t *testing.T,
 	setName string,
 	edges set.Set[graph.EndpointPair[int]],
@@ -359,61 +348,33 @@ func testDirectedEdgeSet(
 ) {
 	t.Helper()
 
-	testSetLen(t, setName, edges, len(expectedEdges))
-	testSetAll(t, setName, edges, expectedEdges)
-	reverses := make([]graph.EndpointPair[int], len(expectedEdges))
-	for _, edge := range expectedEdges {
-		reverses = append(reverses, reverseOf(edge))
+	var extraOptions []gocmp.Option
+	if tt.directedOrUndirected == Undirected {
+		extraOptions = []gocmp.Option{undirectedEndpointPairComparer()}
 	}
-	testSetContains(
-		t,
-		setName,
-		edges,
-		expectedEdges,
-		allOf(
+	var containsEdges []graph.EndpointPair[int]
+	var doesNotContainEdges []graph.EndpointPair[int]
+	reverses := reversesOf(expectedEdges)
+	if tt.directedOrUndirected == Directed {
+		containsEdges = expectedEdges
+		doesNotContainEdges = allOf(
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
 			reverses,
-		),
-	)
-	testSetString(t, setName, edges, expectedEdges)
-}
-
-func testUndirectedEdgeSet(
-	t *testing.T,
-	setName string,
-	edges set.Set[graph.EndpointPair[int]],
-	expectedEdges []graph.EndpointPair[int],
-) {
-	t.Helper()
-
-	testSetLen(t, setName, edges, len(expectedEdges))
-	testSetAll(
-		t,
-		setName,
-		edges,
-		expectedEdges,
-		undirectedEndpointPairComparer(),
-	)
-	reverses := reversesOf(expectedEdges)
-	testSetContains(
-		t,
-		setName,
-		edges,
+		)
+	} else {
 		// Even though there are only len(expectedEdges) edges in the graph,
 		// test that the set contains both the edges and their reverses to
 		// make sure that the edges are undirected.
-		slices.Concat(expectedEdges, reverses),
-		[]graph.EndpointPair[int]{
+		containsEdges = slices.Concat(expectedEdges, reverses)
+		doesNotContainEdges = []graph.EndpointPair[int]{
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
-		},
-	)
-	testSetString(
-		t,
-		setName,
-		edges,
-		expectedEdges,
-		undirectedEndpointPairComparer(),
-	)
+		}
+	}
+
+	testSetLen(t, setName, edges, len(expectedEdges))
+	testSetAll(t, setName, edges, expectedEdges, extraOptions...)
+	testSetContains(t, setName, edges, containsEdges, doesNotContainEdges)
+	testSetString(t, setName, edges, expectedEdges, extraOptions...)
 }
 
 func reversesOf(edges []graph.EndpointPair[int]) []graph.EndpointPair[int] {
