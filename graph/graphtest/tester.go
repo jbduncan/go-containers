@@ -49,13 +49,14 @@ const (
 	DisallowsSelfLoops
 )
 
-// Graph produces a suite of test cases for testing implementations of the graph.Graph and
-// graph.MutableGraph interfaces. Graph instances created for testing are to have int nodes.
+// Graph produces a suite of test cases for testing implementations of the
+// graph.Graph and graph.MutableGraph interfaces. Graph instances created for
+// testing are to have int nodes.
 //
-// Test cases that should be handled similarly in any graph implementation are included in this
-// function; for example, testing that Nodes method returns the set of the nodes in the
-// graph. Details of specific implementations of the graph.Graph and graph.MutableGraph
-// interfaces are not tested.
+// Test cases that should be handled similarly in any graph implementation are
+// included in this function; for example, testing that Nodes method returns
+// the set of the nodes in the graph. Details of specific implementations of
+// the graph.Graph and graph.MutableGraph interfaces are not tested.
 func Graph(
 	t TestingT,
 	graphBuilder func() graph.Graph[int],
@@ -65,20 +66,23 @@ func Graph(
 ) {
 	if mutableOrImmutable != Mutable && mutableOrImmutable != Immutable {
 		t.Fatalf(
-			"mutableOrImmutable expected to be Mutable or Immutable but was %v",
+			"mutableOrImmutable expected to be Mutable or Immutable "+
+				"but was %v",
 			mutableOrImmutable,
 		)
 	}
 	if directedOrUndirected != Directed && directedOrUndirected != Undirected {
 		t.Fatalf(
-			"directedOrUndirected expected to be Directed or Undirected but was %v",
+			"directedOrUndirected expected to be Directed or Undirected "+
+				"but was %v",
 			directedOrUndirected,
 		)
 	}
 	if allowsOrDisallowsSelfLoops != AllowsSelfLoops &&
 		allowsOrDisallowsSelfLoops != DisallowsSelfLoops {
 		t.Fatalf(
-			"allowsOrDisallowsSelfLoops expected to be AllowsSelfLoops or DisallowsSelfLoops but was %v",
+			"allowsOrDisallowsSelfLoops expected to be AllowsSelfLoops or "+
+				"DisallowsSelfLoops but was %v",
 			allowsOrDisallowsSelfLoops,
 		)
 	}
@@ -137,7 +141,12 @@ func (tt tester) test() {
 
 		t.Run("has no edges", func(t *testing.T) {
 			g := tt.graphBuilder()
-			testEmptyEdges(t, graphEdgesName, g.Edges())
+			testDirectedEdgeSet(
+				t,
+				graphEdgesName,
+				g.Edges(),
+				make([]graph.EndpointPair[int], 0),
+			)
 		})
 	})
 
@@ -164,7 +173,12 @@ func (tt tester) test() {
 		})
 
 		t.Run("the node has no incident edges", func(t *testing.T) {
-			testEmptyEdges(t, graphIncidentEdgesName, g().IncidentEdges(node1))
+			testDirectedEdgeSet(
+				t,
+				graphIncidentEdgesName,
+				g().IncidentEdges(node1),
+				make([]graph.EndpointPair[int], 0),
+			)
 		})
 
 		t.Run("the node has a degree of 0", func(t *testing.T) {
@@ -262,28 +276,31 @@ func (tt tester) test() {
 		})
 
 		t.Run(
-			"has an incident edge connecting the first node to the second node",
+			"has an incident edge connecting the first node to the "+
+				"second node",
 			func(t *testing.T) {
-				g := g()
 				if tt.directedOrUndirected == Directed {
-					testSingleDirectedEdge(
+					testDirectedEdgeSet(
 						t,
 						graphIncidentEdgesName,
-						g.IncidentEdges(node1),
-						graph.EndpointPairOf(node1, node2),
+						g().IncidentEdges(node1),
+						[]graph.EndpointPair[int]{
+							graph.EndpointPairOf(node1, node2),
+						},
 					)
 				} else {
-					testSingleUndirectedEdge(
+					testUndirectedEdgeSet(
 						t,
 						graphIncidentEdgesName,
-						g.IncidentEdges(node1),
-						graph.EndpointPairOf(node1, node2),
+						g().IncidentEdges(node1),
+						[]graph.EndpointPair[int]{
+							graph.EndpointPairOf(node1, node2),
+						},
 					)
 				}
 			},
 		)
 
-		// TODO: refactor the common bits between test(NodeSet|EmptyEdges|SingleDirectedEdge|SingleUndirectedEdge)
 		// TODO: continue from graph_test.go, line 218, "has just one edge"
 	})
 }
@@ -334,83 +351,58 @@ func testNodeSet(
 	testSetString(t, setName, s, expectedValues)
 }
 
-func testEmptyEdges(
+func testDirectedEdgeSet(
 	t *testing.T,
 	setName string,
 	edges set.Set[graph.EndpointPair[int]],
+	expectedEdges []graph.EndpointPair[int],
 ) {
 	t.Helper()
 
-	testSetLen(t, setName, edges, 0)
-	testSetAll(t, setName, edges, make([]graph.EndpointPair[int], 0))
+	testSetLen(t, setName, edges, len(expectedEdges))
+	testSetAll(t, setName, edges, expectedEdges)
+	reverses := make([]graph.EndpointPair[int], len(expectedEdges))
+	for _, edge := range expectedEdges {
+		reverses = append(reverses, reverseOf(edge))
+	}
 	testSetContains(
 		t,
 		setName,
 		edges,
-		make([]graph.EndpointPair[int], 0),
-		[]graph.EndpointPair[int]{
+		expectedEdges,
+		allOf(
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
-		},
+			reverses,
+		),
 	)
-	testSetString(t, setName, edges, make([]graph.EndpointPair[int], 0))
+	testSetString(t, setName, edges, expectedEdges)
 }
 
-func testSingleDirectedEdge(
+func testUndirectedEdgeSet(
 	t *testing.T,
 	setName string,
 	edges set.Set[graph.EndpointPair[int]],
-	expectedEdge graph.EndpointPair[int],
+	expectedEdges []graph.EndpointPair[int],
 ) {
 	t.Helper()
 
-	testSetLen(t, setName, edges, 1)
-	testSetAll(t, setName, edges, []graph.EndpointPair[int]{expectedEdge})
-	testSetContains(
-		t,
-		setName,
-		edges,
-		[]graph.EndpointPair[int]{expectedEdge},
-		[]graph.EndpointPair[int]{
-			reverseOf(expectedEdge),
-			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
-		},
-	)
-	testSetString(t, setName, edges, []graph.EndpointPair[int]{expectedEdge})
-}
-
-func testSingleUndirectedEdge(
-	t *testing.T,
-	setName string,
-	edges set.Set[graph.EndpointPair[int]],
-	expectedEdge graph.EndpointPair[int],
-) {
-	t.Helper()
-
-	testSetLen(t, setName, edges, 1)
+	testSetLen(t, setName, edges, len(expectedEdges))
 	testSetAll(
 		t,
 		setName,
 		edges,
-		[]graph.EndpointPair[int]{expectedEdge},
+		expectedEdges,
 		undirectedEndpointPairComparer(),
 	)
+	reverses := reversesOf(expectedEdges)
 	testSetContains(
 		t,
 		setName,
 		edges,
-		// Even though there is only one edge in the graph,
-		// test that the set contains both the edge and its
-		// reverse to check that the set contains an
-		// undirected edge.
-		//
-		// TODO(jbduncan): this is potentially confusing for
-		//  users of graphtest, so consider reintroducing
-		//  EndpointPair.Equal, graph.DirectedEndpointPairOf
-		//  and graph.UndirectedEndpointPairOf.
-		[]graph.EndpointPair[int]{
-			expectedEdge,
-			reverseOf(expectedEdge),
-		},
+		// Even though there are only len(expectedEdges) edges in the graph,
+		// test that the set contains both the edges and their reverses to
+		// make sure that the edges are undirected.
+		slices.Concat(expectedEdges, reverses),
 		[]graph.EndpointPair[int]{
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
 		},
@@ -419,9 +411,17 @@ func testSingleUndirectedEdge(
 		t,
 		setName,
 		edges,
-		[]graph.EndpointPair[int]{expectedEdge},
+		expectedEdges,
 		undirectedEndpointPairComparer(),
 	)
+}
+
+func reversesOf(edges []graph.EndpointPair[int]) []graph.EndpointPair[int] {
+	reverses := make([]graph.EndpointPair[int], 0, len(edges))
+	for _, edge := range edges {
+		reverses = append(reverses, reverseOf(edge))
+	}
+	return reverses
 }
 
 func testSetLen[T comparable](
@@ -528,7 +528,11 @@ func testSetString[T comparable](
 		}
 		actualValueStrs := strings.SplitN(trimmed, ", ", len(expectedValues))
 
-		diff := orderAgnosticDiff(actualValueStrs, expectedValueStrs, extraOptions...)
+		diff := orderAgnosticDiff(
+			actualValueStrs,
+			expectedValueStrs,
+			extraOptions...,
+		)
 		if diff != "" {
 			t.Fatalf(
 				"%s: Set.String of %q: elements mismatch: (-want +got):\n%s",
@@ -588,8 +592,6 @@ func orderAgnosticDiff[T comparable](
 }
 
 func undirectedEndpointPairComparer() gocmp.Option {
-	// TODO(jbduncan): consider reintroducing EndpointPair.Equal so this
-	//                 comparer can be removed.
 	return gocmp.Comparer(func(a, b graph.EndpointPair[int]) bool {
 		return a == b || a == reverseOf(b)
 	})
