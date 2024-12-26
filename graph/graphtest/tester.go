@@ -352,12 +352,12 @@ func (tt tester) testEdgeSet(
 	if tt.directedOrUndirected == Undirected {
 		extraOptions = []gocmp.Option{undirectedEndpointPairComparer()}
 	}
-	var containsEdges []graph.EndpointPair[int]
-	var doesNotContainEdges []graph.EndpointPair[int]
+	var contains []graph.EndpointPair[int]
+	var doesNotContain []graph.EndpointPair[int]
 	reverses := reversesOf(expectedEdges)
 	if tt.directedOrUndirected == Directed {
-		containsEdges = expectedEdges
-		doesNotContainEdges = allOf(
+		contains = expectedEdges
+		doesNotContain = allOf(
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
 			reverses,
 		)
@@ -365,15 +365,15 @@ func (tt tester) testEdgeSet(
 		// Even though there are only len(expectedEdges) edges in the graph,
 		// test that the set contains both the edges and their reverses to
 		// make sure that the edges are undirected.
-		containsEdges = slices.Concat(expectedEdges, reverses)
-		doesNotContainEdges = []graph.EndpointPair[int]{
+		contains = slices.Concat(expectedEdges, reverses)
+		doesNotContain = []graph.EndpointPair[int]{
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
 		}
 	}
 
 	testSetLen(t, setName, edges, len(expectedEdges))
 	testSetAll(t, setName, edges, expectedEdges, extraOptions...)
-	testSetContains(t, setName, edges, containsEdges, doesNotContainEdges)
+	testSetContains(t, setName, edges, contains, doesNotContain)
 	testSetString(t, setName, edges, expectedEdges, extraOptions...)
 }
 
