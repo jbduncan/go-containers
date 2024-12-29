@@ -1,0 +1,35 @@
+[tools.cargo-binstall]
+version = "1.10.18"
+backend = "aqua:cargo-bins/cargo-binstall"
+
+[tools."cargo:ast-grep"]
+version = "0.32.2"
+backend = "cargo:ast-grep"
+
+[tools.cosign]
+version = "2.4.1"
+backend = "aqua:sigstore/cosign"
+
+[tools.go]
+version = "1.23.4"
+backend = "core:go"
+
+[tools."go:github.com/tailscale/depaware"]
+version = "v0.0.0-20241028160002-3d7f3b30ed0e"
+backend = "go:github.com/tailscale/depaware"
+
+[tools."go:go.uber.org/nilaway/cmd/nilaway"]
+version = "v0.0.0-20241010202415-ba14292918d8"
+backend = "go:go.uber.org/nilaway/cmd/nilaway"
+
+[tools."go:golang.org/x/tools/cmd/eg"]
+version = "0.28.0"
+backend = "go:golang.org/x/tools/cmd/eg"
+
+[tools.golangci-lint]
+version = "1.62.2"
+backend = "aqua:golangci/golangci-lint"
+
+[tools.slsa-verifier]
+version = "2.6.0"
+backend = "ubi:slsa-framework/slsa-verifier"

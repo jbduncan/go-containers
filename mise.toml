@@ -1,0 +1,16 @@
+[hooks]
+enter = "mise i -q"
+
+[settings]
+experimental = true
+lockfile = true
+
+[tools]
+cargo-binstall = "latest"
+cosign = "latest"
+go = "latest"
+"go:github.com/tailscale/depaware" = "v0.0.0-20241028160002-3d7f3b30ed0e"
+"go:go.uber.org/nilaway/cmd/nilaway" = "v0.0.0-20241010202415-ba14292918d8"
+"go:golang.org/x/tools/cmd/eg" = "latest"
+golangci-lint = "latest"
+slsa-verifier = "latest"

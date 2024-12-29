@@ -6,10 +6,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -96,13 +98,7 @@ func doDepaware(ctx context.Context, group *errgroup.Group) {
 	for dir := range depawareFileDirs {
 		group.Go(func() error {
 			fmt.Printf("Linting with depaware concurrently on directory %s...\n", dir)
-			return cmd(
-				"go",
-				"run",
-				"github.com/tailscale/depaware",
-				"--check",
-				dir,
-			).Run()
+			return cmd("depaware", "--check", dir).Run()
 		})
 	}
 }
@@ -138,12 +134,7 @@ func doDepawareFix() {
 		group.Go(func() error {
 			dir := "./" + filepath.Dir(file)
 			fmt.Printf("Fixing with depaware concurrently on directory %s...\n", dir)
-			c := cmd(
-				"go",
-				"run",
-				"github.com/tailscale/depaware",
-				dir,
-			)
+			c := cmd("depaware", dir)
 			var b bytes.Buffer
 			c.Stdout = &b
 			err1 := c.Run()
@@ -182,14 +173,18 @@ func doEg(ctx context.Context, group *errgroup.Group) {
 	for file := range egTemplateFiles {
 		group.Go(func() error {
 			fmt.Printf("Linting with eg template %s concurrently...\n", file)
-			return cmd(
-				"go",
-				"run",
-				"golang.org/x/tools/cmd/eg",
-				"-t",
-				file,
-				"./...",
-			).Run()
+			c := exec.Command("eg", "-t", file, "./...")
+			c.Stdout = io.Discard
+			buf := new(strings.Builder)
+			c.Stderr = buf
+			err := c.Run()
+			if err != nil {
+				return err
+			}
+			if buf.Len() > 0 {
+				return fmt.Errorf("eg rule %s: %s", file, buf.String())
+			}
+			return nil
 		})
 	}
 }
@@ -201,9 +196,7 @@ func doEgFix() {
 	for _, file := range egTemplateFiles {
 		fmt.Printf("Fixing with eg template %s...\n", file)
 		mustRun(cmd(
-			"go",
-			"run",
-			"golang.org/x/tools/cmd/eg",
+			"eg",
 			"-t",
 			file,
 			"-w",
@@ -238,24 +231,13 @@ func doGoModDownload() {
 func doGolangciLint(group *errgroup.Group) {
 	group.Go(func() error {
 		fmt.Println("Linting with golangci-lint concurrently...")
-		return cmd(
-			"go",
-			"run",
-			"github.com/golangci/golangci-lint/cmd/golangci-lint",
-			"run",
-		).Run()
+		return cmd("golangci-lint", "run").Run()
 	})
 }
 
 func doGolangciLintFix() {
 	fmt.Println("Fixing with golangci-lint...")
-	mustRun(cmd(
-		"go",
-		"run",
-		"github.com/golangci/golangci-lint/cmd/golangci-lint",
-		"run",
-		"--fix",
-	))
+	mustRun(cmd("golangci-lint", "run", "--fix"))
 }
 
 func doLint() {
@@ -280,9 +262,7 @@ func doNilaway(group *errgroup.Group) {
 	group.Go(func() error {
 		fmt.Println("Linting with nilaway concurrently...")
 		return cmd(
-			"go",
-			"run",
-			"go.uber.org/nilaway/cmd/nilaway",
+			"nilaway",
 			"-include-pkgs",
 			"github.com/jbduncan/go-containers",
 			"./...",
@@ -297,6 +277,7 @@ func doTest() {
 
 func doUpdateVersions() {
 	fmt.Println("Updating versions...")
+	mustRun(cmd("mise", "up", "--bump"))
 	mustRun(cmd("go", "get", "-u", "-t", "./..."))
 	doGoModTidy()
 	doGoModVerify()
