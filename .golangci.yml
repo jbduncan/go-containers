@@ -8,21 +8,26 @@ linters:
     - bidichk
     - errcheck
     - errname
+    - exptostd
     - ginkgolinter
     - gofmt
     - goimports
     - gosec
     - gosimple
     - govet
+    - iface
     - misspell
+    - nilnesserr
     - nolintlint
     - predeclared
+    - recvcheck
     - revive
     - staticcheck
     - stylecheck
     - testpackage
     - unused
     - usestdlibvars
+    - usetesting
 
 linters-settings:
   gofmt:
@@ -53,9 +58,9 @@ linters-settings:
       - cgocall
       - composites
       - copylocks
+      - deepequalerrors
       - defers
       - directive
-      - deepequalerrors
       - errorsas
       - framepointer
       - httpresponse
@@ -63,7 +68,6 @@ linters-settings:
       - loopclosure
       - lostcancel
       - nilfunc
-      - nilness
       - printf
       - reflectvaluecompare
       - shadow
@@ -72,6 +76,7 @@ linters-settings:
       - slog
       - sortslice
       - stdmethods
+      - stdversion
       - stringintconv
       - structtag
       - testinggoroutine
@@ -82,12 +87,16 @@ linters-settings:
       - unsafeptr
       - unusedresult
       - unusedwrite
+      - waitgroup
   revive:
     enable-all-rules: false
     rules:
       - name: atomic
+      - name: blank-imports
       - name: bool-literal-in-expr
       - name: call-to-gc
+      - name: comment-spacings
+      - name: confusing-naming
       - name: confusing-results
       - name: constant-logical-expr
       - name: context-as-argument
@@ -106,25 +115,32 @@ linters-settings:
       - name: error-strings
       - name: errorf
       - name: exported
+      - name: filename-format
       - name: flag-parameter
       - name: get-return
+      - name: identical-branches
       - name: if-return
       - name: import-alias-naming
         arguments:
-          # Ensure aliases like foobar are allowed and dot imports are let through (dot imports are caught by
-          # stylecheck), but aliases with underscores like foo_bar are disallowed.
+          # Ensure aliases like "foobar" are allowed and that dot imports are
+          # let through (dot imports are caught by "stylecheck").
+          # However, ensure that aliases with underscores like "foo_bar" are
+          # disallowed.
           - "^[a-z\\.][a-z0-9]{0,}$"
+      - name: import-shadowing
       - name: increment-decrement
       - name: indent-error-flow
         arguments:
           # Do not suggest refactorings that would increase variable scope
           - "preserveScope"
+      - name: modifies-value-receiver
       - name: package-comments
       - name: range
       - name: receiver-naming
       - name: redefines-builtin-id
       - name: redundant-import-alias
       - name: string-of-int
+      - name: struct-tag
       - name: superfluous-else
         arguments:
           # Do not suggest refactorings that would increase variable scope

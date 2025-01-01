@@ -145,7 +145,7 @@ func (tt tester) test() {
 				t,
 				graphEdgesName,
 				g.Edges(),
-				make([]graph.EndpointPair[int], 0),
+				nil,
 			)
 		})
 	})
@@ -177,7 +177,7 @@ func (tt tester) test() {
 				t,
 				graphIncidentEdgesName,
 				g().IncidentEdges(node1),
-				make([]graph.EndpointPair[int], 0),
+				nil,
 			)
 		})
 

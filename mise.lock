@@ -15,11 +15,11 @@ version = "1.23.4"
 backend = "core:go"
 
 [tools."go:github.com/tailscale/depaware"]
-version = "v0.0.0-20241028160002-3d7f3b30ed0e"
+version = "latest"
 backend = "go:github.com/tailscale/depaware"
 
 [tools."go:go.uber.org/nilaway/cmd/nilaway"]
-version = "v0.0.0-20241010202415-ba14292918d8"
+version = "latest"
 backend = "go:go.uber.org/nilaway/cmd/nilaway"
 
 [tools."go:golang.org/x/tools/cmd/eg"]
@@ -27,7 +27,7 @@ version = "0.28.0"
 backend = "go:golang.org/x/tools/cmd/eg"
 
 [tools.golangci-lint]
-version = "1.62.2"
+version = "1.63.0"
 backend = "aqua:golangci/golangci-lint"
 
 [tools.slsa-verifier]

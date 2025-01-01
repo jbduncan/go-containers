@@ -61,8 +61,8 @@ func (b Builder[N]) Build() MutableGraph[N] {
 	if b.directed {
 		return &directedGraph[N]{
 			nodes:              set.Of[N](),
-			nodeToPredecessors: map[N]set.MutableSet[N]{},
-			nodeToSuccessors:   map[N]set.MutableSet[N]{},
+			nodeToPredecessors: make(map[N]set.MutableSet[N]),
+			nodeToSuccessors:   make(map[N]set.MutableSet[N]),
 			allowsSelfLoops:    b.allowsSelfLoops,
 			numEdges:           0,
 		}
@@ -70,7 +70,7 @@ func (b Builder[N]) Build() MutableGraph[N] {
 
 	return &undirectedGraph[N]{
 		nodes:               set.Of[N](),
-		nodeToAdjacentNodes: map[N]set.MutableSet[N]{},
+		nodeToAdjacentNodes: make(map[N]set.MutableSet[N]),
 		allowsSelfLoops:     b.allowsSelfLoops,
 		numEdges:            0,
 	}

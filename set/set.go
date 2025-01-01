@@ -67,30 +67,30 @@ type MapSet[T comparable] struct {
 }
 
 func (m *MapSet[T]) Add(elem T, others ...T) bool {
-	result := m.add(elem)
+	result := m.addInternal(elem)
 	for _, other := range others {
-		added := m.add(other)
+		added := m.addInternal(other)
 		result = result || added
 	}
 	return result
 }
 
-func (m *MapSet[T]) add(elem T) bool {
+func (m *MapSet[T]) addInternal(elem T) bool {
 	_, ok := m.delegate[elem]
 	m.delegate[elem] = struct{}{}
 	return !ok
 }
 
 func (m *MapSet[T]) Remove(elem T, others ...T) bool {
-	result := m.remove(elem)
+	result := m.removeInternal(elem)
 	for _, other := range others {
-		removed := m.remove(other)
+		removed := m.removeInternal(other)
 		result = result || removed
 	}
 	return result
 }
 
-func (m *MapSet[T]) remove(elem T) bool {
+func (m *MapSet[T]) removeInternal(elem T) bool {
 	_, ok := m.delegate[elem]
 	delete(m.delegate, elem)
 	return ok

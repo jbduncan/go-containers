@@ -767,7 +767,7 @@ func (tt tester) emptySetPlusOneMinusVarargsReturnsTrue() {
 }
 
 func empty() []string {
-	return make([]string, 0)
+	return nil
 }
 
 func oneElement() []string {
