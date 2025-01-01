@@ -5,7 +5,6 @@ import (
 
 	"github.com/jbduncan/go-containers/graph"
 	"github.com/jbduncan/go-containers/graph/graphtest"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

@@ -6,11 +6,17 @@ linters:
   disable-all: true
   enable:
     - bidichk
+    - dupl
+    - dupword
     - errcheck
     - errname
+    - errorlint
+    - exhaustive
     - exptostd
+    - gci
     - ginkgolinter
     - gofmt
+    - gofumpt
     - goimports
     - gosec
     - gosimple
@@ -30,6 +36,10 @@ linters:
     - usetesting
 
 linters-settings:
+  exhaustive:
+    check:
+      - switch
+      - map
   gofmt:
     simplify: true
     rewrite-rules:

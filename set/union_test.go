@@ -122,6 +122,8 @@ func FuzzUnionHasIdempotentProperty(f *testing.F) {
 }
 
 func addUnionFuzzSeedCorpuses(f *testing.F) {
+	f.Helper()
+
 	f.Add([]byte{}, []byte{})
 	f.Add([]byte{1}, []byte{})
 	f.Add([]byte{}, []byte{2})

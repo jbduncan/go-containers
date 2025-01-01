@@ -361,7 +361,7 @@ func graphTests(
 			})
 		})
 
-		Context("when finding the out degree of of an absent node", func() {
+		Context("when finding the out degree of an absent node", func() {
 			It("returns zero", func() {
 				Expect(grph.OutDegree(nodeNotInGraph)).To(BeZero())
 			})
