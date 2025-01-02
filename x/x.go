@@ -137,12 +137,10 @@ func doDepawareFix() {
 			c := cmd("depaware", dir)
 			var b bytes.Buffer
 			c.Stdout = &b
-			err1 := c.Run()
-			var err2 error
-			if err1 == nil {
-				err2 = os.WriteFile(file, b.Bytes(), 0o600)
+			if err := c.Run(); err != nil {
+				return err
 			}
-			return errors.Join(err1, err2)
+			return os.WriteFile(file, b.Bytes(), 0o600)
 		})
 	}
 
@@ -174,15 +172,19 @@ func doEg(ctx context.Context, group *errgroup.Group) {
 		group.Go(func() error {
 			fmt.Printf("Linting with eg template %s concurrently...\n", file)
 			c := exec.Command("eg", "-t", file, "./...")
+
+			// On a match, eg prints the whole contents of the matching file
+			// which is too noisy, so stop it from being printed.
 			c.Stdout = io.Discard
+
 			buf := new(strings.Builder)
 			c.Stderr = buf
 			err := c.Run()
 			if err != nil {
-				return err
+				return fmt.Errorf("%s: %s: %w", file, strings.TrimRight(buf.String(), "\n"), err)
 			}
 			if buf.Len() > 0 {
-				return fmt.Errorf("eg rule %s: %s", file, buf.String())
+				return fmt.Errorf("%s: %s", file, strings.TrimRight(buf.String(), "\n"))
 			}
 			return nil
 		})
@@ -304,7 +306,8 @@ func mustRun(cmd *exec.Cmd, onError ...func()) {
 func mustNotError(err error) {
 	var exitErr *exec.ExitError
 	if errors.As(err, &exitErr) {
-		must(exitErr, exitErr.ExitCode())
+		// Report the whole error
+		must(err, exitErr.ExitCode())
 	} else {
 		must(err, otherErrorExitCode)
 	}
