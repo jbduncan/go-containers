@@ -20,6 +20,8 @@ const (
 	usageExitCode              = 2
 	cdToRootProjectDirExitCode = 3
 	otherErrorExitCode         = 4
+
+	astGrepBinary = "ast-grep"
 )
 
 func main() {
@@ -64,6 +66,21 @@ func main() {
 
 func cdToRootProjectDir() {
 	must(os.Chdir(".."), cdToRootProjectDirExitCode)
+}
+
+func doAstGrep(group *errgroup.Group) {
+	group.Go(func() error {
+		fmt.Println("Linting with ast-grep concurrently...")
+		if err := cmd(astGrepBinary, "test").Run(); err != nil {
+			return err
+		}
+		return cmd(astGrepBinary, "scan").Run()
+	})
+}
+
+func doAstGrepFix() {
+	fmt.Println("Fixing with ast-grep...")
+	mustRun(cmd(astGrepBinary, "scan", "--update-all"))
 }
 
 func doBuild() {
@@ -212,6 +229,7 @@ func doEgFix() {
 func doFix() {
 	doGoModTidy()
 	doGoModDownload()
+	doAstGrepFix()
 	doEgFix()
 	doGolangciLintFix()
 	doDepawareFix()
@@ -256,6 +274,7 @@ func doLint() {
 
 	doGolangciLint(group)
 	doNilaway(group)
+	doAstGrep(group)
 	doEg(ctx, group)
 	doDepaware(ctx, group)
 
