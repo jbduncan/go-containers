@@ -27,11 +27,11 @@ version = "0.28.0"
 backend = "go:golang.org/x/tools/cmd/eg"
 
 [tools.golangci-lint]
-version = "1.63.1"
+version = "1.63.2"
 backend = "aqua:golangci/golangci-lint"
 
 [tools.golangci-lint.checksums]
-"golangci-lint-1.63.1-linux-amd64.tar.gz" = "sha256:e4c97855cd7016303887da2621d95c013ede2157aa42f4151d673902de6a4070"
+"golangci-lint-1.63.2-linux-amd64.tar.gz" = "sha256:410dcf7a946a06f9d23602cf7e982d6bb5130ab0e0795057949965eb3e9c470a"
 
 [tools.slsa-verifier]
 version = "2.6.0"
