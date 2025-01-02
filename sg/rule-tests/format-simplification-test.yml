@@ -1,0 +1,52 @@
+id: fmt.Errorf("%s", "...") to errors.New("...")
+valid:
+  - errors.New("foo")
+  - errors.New("bar")
+  - errors.New("widget")
+  - errors.New("error " + msg)
+invalid:
+  - fmt.Errorf("%s", "foo")
+  - fmt.Errorf ( "%s"  , "foo"   )
+  - fmt.Errorf("%s", "bar")
+  - fmt.Errorf("%s", "widget")
+  - fmt.Errorf("%s", "error " + msg)
+
+---
+
+id: fmt.Sprintf("%s", "...") to "..."
+valid:
+  - '"foo"'
+  - '"bar"'
+  - '"widget"'
+  - '"error " + msg'
+  - errors.New("foo")
+invalid:
+  - fmt.Sprintf("%s", "foo")
+  - fmt.Sprintf( "%s"  , "foo"  )
+  - fmt.Sprintf("%s", "bar")
+  - fmt.Sprintf("%s", "widget")
+  - fmt.Sprintf("%s", "error " + msg)
+
+---
+
+id: errors.New(fmt.Sprintf(...)) to fmt.Errorf(...)
+valid:
+  - |
+    fmt.Errorf("%s: %s", "foo", "bar")
+  - |
+    fmt.Errorf("%s: %d", "foo", 1)
+  - |
+    _ = fmt.Errorf("%s: %d", "foo", 1)
+  - |
+    fmt.Errorf("%s: %d: %t", "widget", 1, true)
+invalid:
+  - |
+    errors.New(fmt.Sprintf("%s: %s", "foo", "bar"))
+  - |
+    errors.New( fmt.Sprintf  ( "%s: %s","foo",   "bar") )
+  - |
+    errors.New(fmt.Sprintf("%s: %d", "foo", 1))
+  - |
+    _ = errors.New(fmt.Sprintf("%s: %d", "foo", 1))
+  - |
+    errors.New(fmt.Sprintf("%s: %d: %t", "widget", 1, true))

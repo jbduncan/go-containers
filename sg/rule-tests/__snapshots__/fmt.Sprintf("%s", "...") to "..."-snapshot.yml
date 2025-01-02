@@ -1,0 +1,37 @@
+id: fmt.Sprintf("%s", "...") to "..."
+snapshots:
+  fmt.Sprintf( "%s"  , "foo"  ):
+    fixed: '"foo"'
+    labels:
+    - source: fmt.Sprintf( "%s"  , "foo"  )
+      style: primary
+      start: 0
+      end: 29
+  fmt.Sprintf("%s", "bar"):
+    fixed: '"bar"'
+    labels:
+    - source: fmt.Sprintf("%s", "bar")
+      style: primary
+      start: 0
+      end: 24
+  fmt.Sprintf("%s", "error " + msg):
+    fixed: '"error " + msg'
+    labels:
+    - source: fmt.Sprintf("%s", "error " + msg)
+      style: primary
+      start: 0
+      end: 33
+  fmt.Sprintf("%s", "foo"):
+    fixed: '"foo"'
+    labels:
+    - source: fmt.Sprintf("%s", "foo")
+      style: primary
+      start: 0
+      end: 24
+  fmt.Sprintf("%s", "widget"):
+    fixed: '"widget"'
+    labels:
+    - source: fmt.Sprintf("%s", "widget")
+      style: primary
+      start: 0
+      end: 27

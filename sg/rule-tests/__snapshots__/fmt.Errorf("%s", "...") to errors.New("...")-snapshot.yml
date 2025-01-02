@@ -1,0 +1,37 @@
+id: fmt.Errorf("%s", "...") to errors.New("...")
+snapshots:
+  fmt.Errorf ( "%s"  , "foo"   ):
+    fixed: errors.New("foo")
+    labels:
+    - source: fmt.Errorf ( "%s"  , "foo"   )
+      style: primary
+      start: 0
+      end: 30
+  fmt.Errorf("%s", "bar"):
+    fixed: errors.New("bar")
+    labels:
+    - source: fmt.Errorf("%s", "bar")
+      style: primary
+      start: 0
+      end: 23
+  fmt.Errorf("%s", "error " + msg):
+    fixed: errors.New("error " + msg)
+    labels:
+    - source: fmt.Errorf("%s", "error " + msg)
+      style: primary
+      start: 0
+      end: 32
+  fmt.Errorf("%s", "foo"):
+    fixed: errors.New("foo")
+    labels:
+    - source: fmt.Errorf("%s", "foo")
+      style: primary
+      start: 0
+      end: 23
+  fmt.Errorf("%s", "widget"):
+    fixed: errors.New("widget")
+    labels:
+    - source: fmt.Errorf("%s", "widget")
+      style: primary
+      start: 0
+      end: 26

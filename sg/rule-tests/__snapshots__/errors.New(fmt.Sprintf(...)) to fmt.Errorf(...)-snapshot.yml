@@ -1,0 +1,147 @@
+id: errors.New(fmt.Sprintf(...)) to fmt.Errorf(...)
+snapshots:
+  ? |
+    _ = errors.New(fmt.Sprintf("%s: %d", "foo", 1))
+  : fixed: |
+      _ = fmt.Errorf("%s: %d", "foo", 1)
+    labels:
+    - source: 'errors.New(fmt.Sprintf("%s: %d", "foo", 1))'
+      style: primary
+      start: 4
+      end: 47
+    - source: errors.New
+      style: secondary
+      start: 4
+      end: 14
+    - source: fmt.Sprintf
+      style: secondary
+      start: 15
+      end: 26
+    - source: '("%s: %d", "foo", 1)'
+      style: secondary
+      start: 26
+      end: 46
+    - source: 'fmt.Sprintf("%s: %d", "foo", 1)'
+      style: secondary
+      start: 15
+      end: 46
+    - source: '(fmt.Sprintf("%s: %d", "foo", 1))'
+      style: secondary
+      start: 14
+      end: 47
+  ? |
+    errors.New( fmt.Sprintf  ( "%s: %s","foo",   "bar") )
+  : fixed: |
+      fmt.Errorf( "%s: %s","foo",   "bar")
+    labels:
+    - source: 'errors.New( fmt.Sprintf  ( "%s: %s","foo",   "bar") )'
+      style: primary
+      start: 0
+      end: 53
+    - source: errors.New
+      style: secondary
+      start: 0
+      end: 10
+    - source: fmt.Sprintf
+      style: secondary
+      start: 12
+      end: 23
+    - source: '( "%s: %s","foo",   "bar")'
+      style: secondary
+      start: 25
+      end: 51
+    - source: 'fmt.Sprintf  ( "%s: %s","foo",   "bar")'
+      style: secondary
+      start: 12
+      end: 51
+    - source: '( fmt.Sprintf  ( "%s: %s","foo",   "bar") )'
+      style: secondary
+      start: 10
+      end: 53
+  ? |
+    errors.New(fmt.Sprintf("%s: %d", "foo", 1))
+  : fixed: |
+      fmt.Errorf("%s: %d", "foo", 1)
+    labels:
+    - source: 'errors.New(fmt.Sprintf("%s: %d", "foo", 1))'
+      style: primary
+      start: 0
+      end: 43
+    - source: errors.New
+      style: secondary
+      start: 0
+      end: 10
+    - source: fmt.Sprintf
+      style: secondary
+      start: 11
+      end: 22
+    - source: '("%s: %d", "foo", 1)'
+      style: secondary
+      start: 22
+      end: 42
+    - source: 'fmt.Sprintf("%s: %d", "foo", 1)'
+      style: secondary
+      start: 11
+      end: 42
+    - source: '(fmt.Sprintf("%s: %d", "foo", 1))'
+      style: secondary
+      start: 10
+      end: 43
+  ? |
+    errors.New(fmt.Sprintf("%s: %d: %t", "widget", 1, true))
+  : fixed: |
+      fmt.Errorf("%s: %d: %t", "widget", 1, true)
+    labels:
+    - source: 'errors.New(fmt.Sprintf("%s: %d: %t", "widget", 1, true))'
+      style: primary
+      start: 0
+      end: 56
+    - source: errors.New
+      style: secondary
+      start: 0
+      end: 10
+    - source: fmt.Sprintf
+      style: secondary
+      start: 11
+      end: 22
+    - source: '("%s: %d: %t", "widget", 1, true)'
+      style: secondary
+      start: 22
+      end: 55
+    - source: 'fmt.Sprintf("%s: %d: %t", "widget", 1, true)'
+      style: secondary
+      start: 11
+      end: 55
+    - source: '(fmt.Sprintf("%s: %d: %t", "widget", 1, true))'
+      style: secondary
+      start: 10
+      end: 56
+  ? |
+    errors.New(fmt.Sprintf("%s: %s", "foo", "bar"))
+  : fixed: |
+      fmt.Errorf("%s: %s", "foo", "bar")
+    labels:
+    - source: 'errors.New(fmt.Sprintf("%s: %s", "foo", "bar"))'
+      style: primary
+      start: 0
+      end: 47
+    - source: errors.New
+      style: secondary
+      start: 0
+      end: 10
+    - source: fmt.Sprintf
+      style: secondary
+      start: 11
+      end: 22
+    - source: '("%s: %s", "foo", "bar")'
+      style: secondary
+      start: 22
+      end: 46
+    - source: 'fmt.Sprintf("%s: %s", "foo", "bar")'
+      style: secondary
+      start: 11
+      end: 46
+    - source: '(fmt.Sprintf("%s: %s", "foo", "bar"))'
+      style: secondary
+      start: 10
+      end: 47

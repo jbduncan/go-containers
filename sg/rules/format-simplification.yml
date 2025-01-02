@@ -1,0 +1,50 @@
+# $schema: https://raw.githubusercontent.com/ast-grep/ast-grep/main/schemas/rule.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ast-grep/ast-grep/main/schemas/rule.json
+id: fmt.Errorf("%s", "...") to errors.New("...")
+severity: error
+message: fmt.Errorf("%s", $A) can be simplified as errors.New($A)
+note: Replace with errors.New
+language: go
+rule:
+  pattern: fmt.Errorf("%s", $A)
+fix:
+  errors.New($A)
+
+---
+
+id: fmt.Sprintf("%s", "...") to "..."
+severity: error
+message: fmt.Sprintf("%s", $A) can be simplified as $A
+note: Remove the redundant fmt.Sprintf
+language: go
+rule:
+  pattern: fmt.Sprintf("%s", $A)
+fix:
+  $A
+
+---
+
+id: errors.New(fmt.Sprintf(...)) to fmt.Errorf(...)
+severity: error
+message: errors.New(fmt.Sprintf$ARG_LIST) can be simplified as fmt.Errorf$ARG_LIST
+note: Replace with fmt.Errorf
+language: go
+rule:
+  kind: call_expression
+  all:
+    - has:
+        kind: selector_expression
+        regex: errors\.New
+    - has:
+        kind: argument_list
+        has:
+          kind: call_expression
+          all:
+            - has:
+                kind: selector_expression
+                regex: fmt\.Sprintf
+            - has:
+                kind: argument_list
+                pattern: $ARG_LIST
+fix:
+  fmt.Errorf$ARG_LIST

@@ -1,0 +1,51 @@
+id: '!(a > b) to a <= b'
+snapshots:
+  '! (   a  >     b  )':
+    fixed: a <= b
+    labels:
+    - source: '! (   a  >     b  )'
+      style: primary
+      start: 0
+      end: 19
+  '!(a > b)':
+    fixed: a <= b
+    labels:
+    - source: '!(a > b)'
+      style: primary
+      start: 0
+      end: 8
+  '!(a>b)':
+    fixed: a <= b
+    labels:
+    - source: '!(a>b)'
+      style: primary
+      start: 0
+      end: 6
+  '!(foo > bar)':
+    fixed: foo <= bar
+    labels:
+    - source: '!(foo > bar)'
+      style: primary
+      start: 0
+      end: 12
+  '!(len(a(b("c", "d"))) > len(a(b("c", "d"))))':
+    fixed: len(a(b("c", "d"))) <= len(a(b("c", "d")))
+    labels:
+    - source: '!(len(a(b("c", "d"))) > len(a(b("c", "d"))))'
+      style: primary
+      start: 0
+      end: 44
+  '!(len(foo) > len(bar))':
+    fixed: len(foo) <= len(bar)
+    labels:
+    - source: '!(len(foo) > len(bar))'
+      style: primary
+      start: 0
+      end: 22
+  '!(one() > two())':
+    fixed: one() <= two()
+    labels:
+    - source: '!(one() > two())'
+      style: primary
+      start: 0
+      end: 16

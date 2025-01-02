@@ -3,7 +3,7 @@ version = "1.10.18"
 backend = "aqua:cargo-bins/cargo-binstall"
 
 [tools."cargo:ast-grep"]
-version = "0.32.2"
+version = "0.32.3"
 backend = "cargo:ast-grep"
 
 [tools.cosign]
