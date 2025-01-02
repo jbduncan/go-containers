@@ -181,10 +181,12 @@ func doEg(ctx context.Context, group *errgroup.Group) {
 			c.Stderr = buf
 			err := c.Run()
 			if err != nil {
-				return fmt.Errorf("%s: %s: %w", file, strings.TrimRight(buf.String(), "\n"), err)
+				fmt.Printf("%s: %s: %v\n", file, strings.TrimRight(buf.String(), "\n"), err)
+				return err
 			}
 			if buf.Len() > 0 {
-				return fmt.Errorf("%s: %s", file, strings.TrimRight(buf.String(), "\n"))
+				fmt.Printf("%s: %s\n", file, strings.TrimRight(buf.String(), "\n"))
+				return errors.New("eg found a problem (see above)")
 			}
 			return nil
 		})
