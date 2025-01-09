@@ -1,18 +1,16 @@
-[tools.cargo-binstall]
-version = "1.10.18"
-backend = "aqua:cargo-bins/cargo-binstall"
-
-[tools."cargo:ast-grep"]
-version = "0.32.3"
-backend = "cargo:ast-grep"
-
 [tools.cosign]
 version = "2.4.1"
 backend = "aqua:sigstore/cosign"
 
+[tools.cosign.checksums]
+cosign-darwin-arm64 = "sha256:13343856b69f70388c4fe0b986a31dde5958e444b41be22d785d3dc5e1a9cc62"
+
 [tools.go]
 version = "1.23.4"
 backend = "core:go"
+
+[tools.go.checksums]
+"go1.23.4.darwin-arm64.tar.gz" = "sha256:87d2bb0ad4fe24d2a0685a55df321e0efe4296419a9b3de03369dbe60b8acd3a"
 
 [tools."go:github.com/tailscale/depaware"]
 version = "latest"
@@ -23,16 +21,26 @@ version = "latest"
 backend = "go:go.uber.org/nilaway/cmd/nilaway"
 
 [tools."go:golang.org/x/tools/cmd/eg"]
-version = "0.28.0"
+version = "0.29.0"
 backend = "go:golang.org/x/tools/cmd/eg"
 
 [tools.golangci-lint]
-version = "1.63.2"
+version = "1.63.4"
 backend = "aqua:golangci/golangci-lint"
 
 [tools.golangci-lint.checksums]
-"golangci-lint-1.63.2-linux-amd64.tar.gz" = "sha256:410dcf7a946a06f9d23602cf7e982d6bb5130ab0e0795057949965eb3e9c470a"
+"golangci-lint-1.63.4-darwin-arm64.tar.gz" = "sha256:a2b630c2ac8466393f0ccbbede4462387b6c190697a70bc2298c6d2123f21bbf"
 
 [tools.slsa-verifier]
 version = "2.6.0"
 backend = "ubi:slsa-framework/slsa-verifier"
+
+[tools.slsa-verifier.checksums]
+slsa-verifier-macos-aarch64 = "sha256:8740e66832fd48bbaa479acd5310986b876ff545460add0cb4a087aec056189c"
+
+[tools."ubi:ast-grep/ast-grep"]
+version = "0.33.0"
+backend = "ubi:ast-grep/ast-grep"
+
+[tools."ubi:ast-grep/ast-grep".checksums]
+ast-grep-macos-aarch64 = "sha256:c653ea08f36d0b7db02abec0b416d823b10890e6269be5e1a8c5ba0520036c40"

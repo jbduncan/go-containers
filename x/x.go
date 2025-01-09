@@ -21,7 +21,10 @@ const (
 	cdToRootProjectDirExitCode = 3
 	otherErrorExitCode         = 4
 
-	astGrepBinary = "ast-grep"
+	astGrepBinary      = "ast-grep"
+	egBinary           = "eg"
+	goBinary           = "go"
+	golangciLintBinary = "golangci-lint"
 )
 
 func main() {
@@ -70,7 +73,7 @@ func cdToRootProjectDir() {
 
 func doAstGrep(group *errgroup.Group) {
 	group.Go(func() error {
-		fmt.Println("Linting with ast-grep concurrently...")
+		fmt.Printf("Linting with %s concurrently...\n", astGrepBinary)
 		if err := cmd(astGrepBinary, "test").Run(); err != nil {
 			return err
 		}
@@ -79,13 +82,13 @@ func doAstGrep(group *errgroup.Group) {
 }
 
 func doAstGrepFix() {
-	fmt.Println("Fixing with ast-grep...")
+	fmt.Printf("Fixing with %s...\n", astGrepBinary)
 	mustRun(cmd(astGrepBinary, "scan", "--update-all"))
 }
 
 func doBuild() {
 	fmt.Println("Building...")
-	mustRun(cmd("go", "build", "./..."))
+	mustRun(cmd(goBinary, "build", "./..."))
 }
 
 func doDepaware(ctx context.Context, group *errgroup.Group) {
@@ -187,8 +190,8 @@ func doEg(ctx context.Context, group *errgroup.Group) {
 
 	for file := range egTemplateFiles {
 		group.Go(func() error {
-			fmt.Printf("Linting with eg template %s concurrently...\n", file)
-			c := exec.Command("eg", "-t", file, "./...")
+			fmt.Printf("Linting with %s template %s concurrently...\n", egBinary, file)
+			c := exec.Command(egBinary, "-t", file, "./...")
 
 			// On a match, eg prints the whole contents of the matching file
 			// which is too noisy, so stop it from being printed.
@@ -203,7 +206,7 @@ func doEg(ctx context.Context, group *errgroup.Group) {
 			}
 			if buf.Len() > 0 {
 				fmt.Printf("%s: %s\n", file, strings.TrimRight(buf.String(), "\n"))
-				return errors.New("eg found a problem (see above)")
+				return fmt.Errorf("%s found a problem (see above)", egBinary)
 			}
 			return nil
 		})
@@ -215,9 +218,9 @@ func doEgFix() {
 	mustNotError(err)
 
 	for _, file := range egTemplateFiles {
-		fmt.Printf("Fixing with eg template %s...\n", file)
+		fmt.Printf("Fixing with %s template %s...\n", egBinary, file)
 		mustRun(cmd(
-			"eg",
+			egBinary,
 			"-t",
 			file,
 			"-w",
@@ -236,36 +239,36 @@ func doFix() {
 }
 
 func doGoModTidy() {
-	fmt.Println("Running 'go mod tidy'...")
-	mustRun(cmd("go", "mod", "tidy"))
+	fmt.Printf("Running '%s mod tidy'...\n", goBinary)
+	mustRun(cmd(goBinary, "mod", "tidy"))
 }
 
 func doGoModVerify() {
-	fmt.Println("Running 'go mod verify'...")
-	mustRun(cmd("go", "mod", "verify"))
+	fmt.Printf("Running '%s mod verify'...\n", goBinary)
+	mustRun(cmd(goBinary, "mod", "verify"))
 }
 
 func doGoModDownload() {
-	fmt.Println("Running 'go mod download'...")
-	mustRun(cmd("go", "mod", "download"))
+	fmt.Printf("Running '%s mod download'...\n", goBinary)
+	mustRun(cmd(goBinary, "mod", "download"))
 }
 
 func doGolangciLint(group *errgroup.Group) {
 	group.Go(func() error {
-		fmt.Println("Linting with golangci-lint concurrently...")
-		return cmd("golangci-lint", "run").Run()
+		fmt.Printf("Linting with %s concurrently...\n", golangciLintBinary)
+		return cmd(golangciLintBinary, "run").Run()
 	})
 }
 
 func doGolangciLintFix() {
-	fmt.Println("Fixing with golangci-lint...")
-	mustRun(cmd("golangci-lint", "run", "--fix"))
+	fmt.Printf("Fixing with %s...\n", golangciLintBinary)
+	mustRun(cmd(golangciLintBinary, "run", "--fix"))
 }
 
 func doLint() {
 	doGoModTidy()
 	mustRun(cmd("git", "diff", "--exit-code", "--", "go.mod", "go.sum"), func() {
-		fmt.Println("'go mod tidy' changed files")
+		fmt.Printf("'%s mod tidy' changed files\n", goBinary)
 	})
 	doGoModVerify()
 
@@ -295,13 +298,13 @@ func doNilaway(group *errgroup.Group) {
 
 func doTest() {
 	fmt.Println("Testing...")
-	mustRun(cmd("go", "test", "-shuffle=on", "-race", "./..."))
+	mustRun(cmd(goBinary, "test", "-shuffle=on", "-race", "./..."))
 }
 
 func doUpdateVersions() {
 	fmt.Println("Updating versions...")
 	mustRun(cmd("mise", "up", "--bump"))
-	mustRun(cmd("go", "get", "-u", "-t", "./..."))
+	mustRun(cmd(goBinary, "get", "-u", "-t", "./..."))
 	doGoModTidy()
 	doGoModVerify()
 	doGoModDownload()
