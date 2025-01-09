@@ -303,7 +303,7 @@ func doTest() {
 
 func doUpdateVersions() {
 	fmt.Println("Updating versions...")
-	mustRun(cmd("mise", "up", "--bump"))
+	mustRun(cmd("mise", "up"))
 	mustRun(cmd(goBinary, "get", "-u", "-t", "./..."))
 	doGoModTidy()
 	doGoModVerify()
