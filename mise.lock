@@ -30,6 +30,7 @@ backend = "aqua:golangci/golangci-lint"
 
 [tools.golangci-lint.checksums]
 "golangci-lint-1.63.4-darwin-arm64.tar.gz" = "sha256:a2b630c2ac8466393f0ccbbede4462387b6c190697a70bc2298c6d2123f21bbf"
+"golangci-lint-1.63.4-linux-amd64.tar.gz" = "sha256:01abb14a4df47b5ca585eff3c34b105023cba92ec34ff17212dbb83855581690"
 
 [tools.slsa-verifier]
 version = "2.6.0"
@@ -43,4 +44,5 @@ version = "0.33.0"
 backend = "ubi:ast-grep/ast-grep"
 
 [tools."ubi:ast-grep/ast-grep".checksums]
+ast-grep-linux-x86_64 = "sha256:22cc627a628456f770586ee0082cfc76bb432cf9523cfa259175fdc35cd7dea8"
 ast-grep-macos-aarch64 = "sha256:c653ea08f36d0b7db02abec0b416d823b10890e6269be5e1a8c5ba0520036c40"
