@@ -1,0 +1,11 @@
+id: "time.Now().Sub(t) to time.Since(t)"
+valid:
+  - time.Since(t)
+  - time.  Since   ( t   )
+  - time.Since(time.Now())
+  - time.Since(a(b(c(d(e())))))
+invalid:
+  - time.Now().Sub(t)
+  - time.  Now ( ).   Sub   ( t   )
+  - time.Now().Sub(time.Now())
+  - time.Now().Sub(a(b(c(d(e())))))

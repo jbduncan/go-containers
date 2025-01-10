@@ -1,0 +1,11 @@
+# $schema: https://raw.githubusercontent.com/ast-grep/ast-grep/main/schemas/rule.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ast-grep/ast-grep/main/schemas/rule.json
+id: "time.Now().Sub(t) to time.Since(t)"
+severity: error
+message: "time.Now().Sub($T) can be simplified as time.Since($T)"
+note: Replace with time.Since(t)
+language: go
+rule:
+  pattern: time.Now().Sub($T)
+fix:
+  time.Since($T)

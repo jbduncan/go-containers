@@ -1,0 +1,30 @@
+id: time.Now().Sub(t) to time.Since(t)
+snapshots:
+  time.  Now ( ).   Sub   ( t   ):
+    fixed: time.Since(t)
+    labels:
+    - source: time.  Now ( ).   Sub   ( t   )
+      style: primary
+      start: 0
+      end: 31
+  time.Now().Sub(a(b(c(d(e()))))):
+    fixed: time.Since(a(b(c(d(e())))))
+    labels:
+    - source: time.Now().Sub(a(b(c(d(e())))))
+      style: primary
+      start: 0
+      end: 31
+  time.Now().Sub(t):
+    fixed: time.Since(t)
+    labels:
+    - source: time.Now().Sub(t)
+      style: primary
+      start: 0
+      end: 17
+  time.Now().Sub(time.Now()):
+    fixed: time.Since(time.Now())
+    labels:
+    - source: time.Now().Sub(time.Now())
+      style: primary
+      start: 0
+      end: 26
