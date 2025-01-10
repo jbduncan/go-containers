@@ -69,3 +69,15 @@ rule:
   pattern: "!($A != $B)"
 fix:
   $A == $B
+
+---
+
+id: "!!a to a"
+severity: error
+message: "!!$A can be simplified as $A"
+note: Remove the redundant !!
+language: go
+rule:
+  pattern: "!!$A"
+fix:
+  $A

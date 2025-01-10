@@ -115,3 +115,15 @@ invalid:
   - '!(one() != two())'
   - '!(len(foo) != len(bar))'
   - '!(len(a(b("c", "d"))) != len(a(b("c", "d"))))'
+
+---
+
+id: "!!a to a"
+valid:
+  - a
+  - foo()
+  - a(b("c", "d"))
+invalid:
+  - '!!a'
+  - '!!foo()'
+  - '!!a(b("c", "d"))'

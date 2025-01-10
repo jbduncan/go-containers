@@ -1,0 +1,23 @@
+id: '!!a to a'
+snapshots:
+  '!!a':
+    fixed: a
+    labels:
+    - source: '!!a'
+      style: primary
+      start: 0
+      end: 3
+  '!!a(b("c", "d"))':
+    fixed: a(b("c", "d"))
+    labels:
+    - source: '!!a(b("c", "d"))'
+      style: primary
+      start: 0
+      end: 16
+  '!!foo()':
+    fixed: foo()
+    labels:
+    - source: '!!foo()'
+      style: primary
+      start: 0
+      end: 7
