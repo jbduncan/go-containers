@@ -45,3 +45,27 @@ rule:
   pattern: "!($A > $B)"
 fix:
   $A <= $B
+
+---
+
+id: "!(a == b) to a != b"
+severity: error
+message: "!($A == $B) can be simplified as $A != $B"
+note: Replace with a != b
+language: go
+rule:
+  pattern: "!($A == $B)"
+fix:
+  $A != $B
+
+---
+
+id: "!(a != b) to a == b"
+severity: error
+message: "!($A != $B) can be simplified as $A == $B"
+note: Replace with a == b
+language: go
+rule:
+  pattern: "!($A != $B)"
+fix:
+  $A == $B

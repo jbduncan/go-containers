@@ -75,3 +75,43 @@ invalid:
   - '!(one() > two())'
   - '!(len(foo) > len(bar))'
   - '!(len(a(b("c", "d"))) > len(a(b("c", "d"))))'
+
+---
+
+id: "!(a == b) to a != b"
+valid:
+  - a != b
+  - a!=b
+  - a   !=      b
+  - foo != bar
+  - one() != two()
+  - len(foo) != len(bar)
+  - len(a(b("c", "d"))) != len(a(b("c", "d")))
+invalid:
+  - '!(a == b)'
+  - '!(a==b)'
+  - '! (   a  ==     b  )'
+  - '!(foo == bar)'
+  - '!(one() == two())'
+  - '!(len(foo) == len(bar))'
+  - '!(len(a(b("c", "d"))) == len(a(b("c", "d"))))'
+
+---
+
+id: "!(a != b) to a == b"
+valid:
+  - a == b
+  - a==b
+  - a   ==      b
+  - foo == bar
+  - one() == two()
+  - len(foo) == len(bar)
+  - len(a(b("c", "d"))) == len(a(b("c", "d")))
+invalid:
+  - '!(a != b)'
+  - '!(a!=b)'
+  - '! (   a  !=     b  )'
+  - '!(foo != bar)'
+  - '!(one() != two())'
+  - '!(len(foo) != len(bar))'
+  - '!(len(a(b("c", "d"))) != len(a(b("c", "d"))))'
