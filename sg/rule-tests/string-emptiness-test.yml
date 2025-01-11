@@ -4,10 +4,30 @@ valid:
   - len  ( s   )    ==  0
   - len(s)==0
   - len("some-string") == 0
+  - len(`this string has "quotes"`) == 0
   - len(a(b(c(d(e()))))) == 0
 invalid:
   - s == ""
   - s    ==  ""
   - s==""
   - '"some-string" == ""'
+  - '`this string has "quotes"` == ""'
   - a(b(c(d(e())))) == ""
+
+---
+
+id: "s == `` to len(s) == 0"
+valid:
+  - len(s) == 0
+  - len  ( s   )    ==  0
+  - len(s)==0
+  - len("some-string") == 0
+  - len(`this string has "quotes"`) == 0
+  - len(a(b(c(d(e()))))) == 0
+invalid:
+  - s == ``
+  - s    ==  ``
+  - s==``
+  - '"some-string" == ``'
+  - '`this string has "quotes"` == ``'
+  - a(b(c(d(e())))) == ``

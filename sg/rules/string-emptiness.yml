@@ -9,3 +9,15 @@ rule:
   pattern: '$S == ""'
 fix:
   len($S) == 0
+
+---
+
+id: "s == `` to len(s) == 0"
+severity: error
+message: "$S == `` should be replaced with len($S) == 0"
+note: Replace with len(s) == 0
+language: go
+rule:
+  pattern: "$S == ``"
+fix:
+  len($S) == 0
