@@ -1,0 +1,11 @@
+# $schema: https://raw.githubusercontent.com/ast-grep/ast-grep/main/schemas/rule.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ast-grep/ast-grep/main/schemas/rule.json
+id: 's == "" to len(s) == 0'
+severity: error
+message: '$S == "" should be replaced with len($S) == 0'
+note: Replace with len(s) == 0
+language: go
+rule:
+  pattern: '$S == ""'
+fix:
+  len($S) == 0

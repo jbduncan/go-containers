@@ -1,0 +1,37 @@
+id: s == "" to len(s) == 0
+snapshots:
+  '"some-string" == ""':
+    fixed: len("some-string") == 0
+    labels:
+    - source: '"some-string" == ""'
+      style: primary
+      start: 0
+      end: 19
+  a(b(c(d(e())))) == "":
+    fixed: len(a(b(c(d(e()))))) == 0
+    labels:
+    - source: a(b(c(d(e())))) == ""
+      style: primary
+      start: 0
+      end: 21
+  s    ==  "":
+    fixed: len(s) == 0
+    labels:
+    - source: s    ==  ""
+      style: primary
+      start: 0
+      end: 11
+  s == "":
+    fixed: len(s) == 0
+    labels:
+    - source: s == ""
+      style: primary
+      start: 0
+      end: 7
+  s=="":
+    fixed: len(s) == 0
+    labels:
+    - source: s==""
+      style: primary
+      start: 0
+      end: 5
