@@ -49,3 +49,10 @@ snapshots:
       style: primary
       start: 0
       end: 17
+  '!(some().function().chain() <= some().function().chain())':
+    fixed: some().function().chain() > some().function().chain()
+    labels:
+    - source: '!(some().function().chain() <= some().function().chain())'
+      style: primary
+      start: 0
+      end: 57

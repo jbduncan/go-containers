@@ -4,12 +4,16 @@ valid:
   - errors.New("bar")
   - errors.New("widget")
   - errors.New("error " + msg)
+  - errors.New(a(b("c", "d")))
+  - errors.New(some().function().chain())
 invalid:
   - fmt.Errorf("%s", "foo")
   - fmt.Errorf ( "%s"  , "foo"   )
   - fmt.Errorf("%s", "bar")
   - fmt.Errorf("%s", "widget")
   - fmt.Errorf("%s", "error " + msg)
+  - fmt.Errorf("%s", a(b("c", "d")))
+  - fmt.Errorf("%s", some().function().chain())
 
 ---
 
@@ -19,6 +23,8 @@ valid:
   - '"bar"'
   - '"widget"'
   - '"error " + msg'
+  - a(b("c", "d"))
+  - some().function().chain()
   - errors.New("foo")
 invalid:
   - fmt.Sprintf("%s", "foo")
@@ -26,6 +32,8 @@ invalid:
   - fmt.Sprintf("%s", "bar")
   - fmt.Sprintf("%s", "widget")
   - fmt.Sprintf("%s", "error " + msg)
+  - fmt.Sprintf("%s", a(b("c", "d")))
+  - fmt.Sprintf("%s", some().function().chain())
 
 ---
 
@@ -39,6 +47,10 @@ valid:
     _ = fmt.Errorf("%s: %d", "foo", 1)
   - |
     fmt.Errorf("%s: %d: %t", "widget", 1, true)
+  - |
+    fmt.Errorf("%s: %s", "foo", a(b("c", "d"))
+  - |
+    fmt.Errorf("%s: %s", "foo", some().function().chain())
 invalid:
   - |
     errors.New(fmt.Sprintf("%s: %s", "foo", "bar"))
@@ -50,3 +62,7 @@ invalid:
     _ = errors.New(fmt.Sprintf("%s: %d", "foo", 1))
   - |
     errors.New(fmt.Sprintf("%s: %d: %t", "widget", 1, true))
+  - |
+    errors.New(fmt.Sprintf("%s: %s", "foo", a(b("c", "d"))))
+  - |
+    errors.New(fmt.Sprintf("%s: %s", "foo", some().function().chain()))

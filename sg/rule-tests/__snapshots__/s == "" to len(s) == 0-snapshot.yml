@@ -42,3 +42,10 @@ snapshots:
       style: primary
       start: 0
       end: 5
+  some().function().chain() == "":
+    fixed: len(some().function().chain()) == 0
+    labels:
+    - source: some().function().chain() == ""
+      style: primary
+      start: 0
+      end: 31

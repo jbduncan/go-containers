@@ -145,3 +145,61 @@ snapshots:
       style: secondary
       start: 10
       end: 47
+  ? |
+    errors.New(fmt.Sprintf("%s: %s", "foo", a(b("c", "d"))))
+  : fixed: |
+      fmt.Errorf("%s: %s", "foo", a(b("c", "d")))
+    labels:
+    - source: 'errors.New(fmt.Sprintf("%s: %s", "foo", a(b("c", "d"))))'
+      style: primary
+      start: 0
+      end: 56
+    - source: errors.New
+      style: secondary
+      start: 0
+      end: 10
+    - source: fmt.Sprintf
+      style: secondary
+      start: 11
+      end: 22
+    - source: '("%s: %s", "foo", a(b("c", "d")))'
+      style: secondary
+      start: 22
+      end: 55
+    - source: 'fmt.Sprintf("%s: %s", "foo", a(b("c", "d")))'
+      style: secondary
+      start: 11
+      end: 55
+    - source: '(fmt.Sprintf("%s: %s", "foo", a(b("c", "d"))))'
+      style: secondary
+      start: 10
+      end: 56
+  ? |
+    errors.New(fmt.Sprintf("%s: %s", "foo", some().function().chain()))
+  : fixed: |
+      fmt.Errorf("%s: %s", "foo", some().function().chain())
+    labels:
+    - source: 'errors.New(fmt.Sprintf("%s: %s", "foo", some().function().chain()))'
+      style: primary
+      start: 0
+      end: 67
+    - source: errors.New
+      style: secondary
+      start: 0
+      end: 10
+    - source: fmt.Sprintf
+      style: secondary
+      start: 11
+      end: 22
+    - source: '("%s: %s", "foo", some().function().chain())'
+      style: secondary
+      start: 22
+      end: 66
+    - source: 'fmt.Sprintf("%s: %s", "foo", some().function().chain())'
+      style: secondary
+      start: 11
+      end: 66
+    - source: '(fmt.Sprintf("%s: %s", "foo", some().function().chain()))'
+      style: secondary
+      start: 10
+      end: 67

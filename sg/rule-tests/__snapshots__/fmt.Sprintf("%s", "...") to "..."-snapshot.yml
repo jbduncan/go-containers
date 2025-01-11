@@ -35,3 +35,17 @@ snapshots:
       style: primary
       start: 0
       end: 27
+  fmt.Sprintf("%s", a(b("c", "d"))):
+    fixed: a(b("c", "d"))
+    labels:
+    - source: fmt.Sprintf("%s", a(b("c", "d")))
+      style: primary
+      start: 0
+      end: 33
+  fmt.Sprintf("%s", some().function().chain()):
+    fixed: some().function().chain()
+    labels:
+    - source: fmt.Sprintf("%s", some().function().chain())
+      style: primary
+      start: 0
+      end: 44

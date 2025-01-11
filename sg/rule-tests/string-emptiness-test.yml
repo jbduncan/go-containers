@@ -6,6 +6,7 @@ valid:
   - len("some-string") == 0
   - len(`this string has "quotes"`) == 0
   - len(a(b(c(d(e()))))) == 0
+  - len(some().function().chain()) == 0
 invalid:
   - s == ""
   - s    ==  ""
@@ -13,6 +14,7 @@ invalid:
   - '"some-string" == ""'
   - '`this string has "quotes"` == ""'
   - a(b(c(d(e())))) == ""
+  - some().function().chain() == ""
 
 ---
 
@@ -24,6 +26,7 @@ valid:
   - len("some-string") == 0
   - len(`this string has "quotes"`) == 0
   - len(a(b(c(d(e()))))) == 0
+  - len(some().function().chain()) == 0
 invalid:
   - s == ``
   - s    ==  ``
@@ -31,3 +34,4 @@ invalid:
   - '"some-string" == ``'
   - '`this string has "quotes"` == ``'
   - a(b(c(d(e())))) == ``
+  - some().function().chain() == ``

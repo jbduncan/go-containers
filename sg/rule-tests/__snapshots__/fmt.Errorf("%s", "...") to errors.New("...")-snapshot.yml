@@ -35,3 +35,17 @@ snapshots:
       style: primary
       start: 0
       end: 26
+  fmt.Errorf("%s", a(b("c", "d"))):
+    fixed: errors.New(a(b("c", "d")))
+    labels:
+    - source: fmt.Errorf("%s", a(b("c", "d")))
+      style: primary
+      start: 0
+      end: 32
+  fmt.Errorf("%s", some().function().chain()):
+    fixed: errors.New(some().function().chain())
+    labels:
+    - source: fmt.Errorf("%s", some().function().chain())
+      style: primary
+      start: 0
+      end: 43

@@ -4,8 +4,10 @@ valid:
   - time.  Since   ( t   )
   - time.Since(time.Now())
   - time.Since(a(b(c(d(e())))))
+  - time.Since(some().function().chain())
 invalid:
   - time.Now().Sub(t)
   - time.  Now ( ).   Sub   ( t   )
   - time.Now().Sub(time.Now())
   - time.Now().Sub(a(b(c(d(e())))))
+  - time.Now().Sub(some().function().chain())
