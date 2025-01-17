@@ -2,13 +2,14 @@ package graphtest
 
 import (
 	"fmt"
-	"maps"
 	"slices"
 	"strings"
 	"testing"
 
 	gocmp "github.com/google/go-cmp/cmp"
 	"github.com/jbduncan/go-containers/graph"
+	"github.com/jbduncan/go-containers/internal/orderagnostic"
+	"github.com/jbduncan/go-containers/internal/slicesx"
 	"github.com/jbduncan/go-containers/set"
 )
 
@@ -350,22 +351,21 @@ func (tt tester) testEdgeSet(
 
 	var extraOptions []gocmp.Option
 	if tt.directedOrUndirected == Undirected {
-		extraOptions = []gocmp.Option{undirectedEndpointPairComparer()}
+		extraOptions = []gocmp.Option{gocmp.Comparer(undirectedEndpointPairsEqual)}
 	}
 	var contains []graph.EndpointPair[int]
 	var doesNotContain []graph.EndpointPair[int]
-	reverses := reversesOf(expectedEdges)
 	if tt.directedOrUndirected == Directed {
 		contains = expectedEdges
-		doesNotContain = allOf(
+		doesNotContain = slicesx.AllOf(
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
-			reverses,
+			reversesOf(expectedEdges),
 		)
 	} else {
 		// Even though there are only len(expectedEdges) edges in the graph,
 		// test that the set contains both the edges and their reverses to
 		// make sure that the edges are undirected.
-		contains = slices.Concat(expectedEdges, reverses)
+		contains = slices.Concat(expectedEdges, reversesOf(expectedEdges))
 		doesNotContain = []graph.EndpointPair[int]{
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
 		}
@@ -394,13 +394,12 @@ func testSetLen[T comparable](
 	t.Helper()
 
 	t.Run("Set.Len", func(t *testing.T) {
-		setLen := s.Len()
-		if setLen != expectedLen {
+		if got, want := s.Len(), expectedLen; got != want {
 			t.Errorf(
 				"%s: got Set.Len of %d, want %d",
 				setName,
-				setLen,
-				expectedLen,
+				got,
+				want,
 			)
 		}
 	})
@@ -416,9 +415,8 @@ func testSetAll[T comparable](
 	t.Helper()
 
 	t.Run("Set.All", func(t *testing.T) {
-		all := slices.Collect(s.All())
-		diff := orderAgnosticDiff(all, expectedValues, extraOptions...)
-		if diff != "" {
+		got, want := slices.Collect(s.All()), expectedValues
+		if diff := orderagnostic.Diff(got, want, extraOptions...); diff != "" {
 			t.Errorf("%s: Set.All mismatch (-want +got):\n%s", setName, diff)
 		}
 	})
@@ -483,18 +481,13 @@ func testSetString[T comparable](
 			)
 		}
 
-		var expectedValueStrs []string
+		var want []string
 		for _, v := range expectedValues {
-			expectedValueStrs = append(expectedValueStrs, fmt.Sprintf("%v", v))
+			want = append(want, fmt.Sprintf("%v", v))
 		}
-		actualValueStrs := strings.SplitN(trimmed, ", ", len(expectedValues))
+		got := strings.SplitN(trimmed, ", ", len(expectedValues))
 
-		diff := orderAgnosticDiff(
-			actualValueStrs,
-			expectedValueStrs,
-			extraOptions...,
-		)
-		if diff != "" {
+		if diff := orderagnostic.Diff(got, want, extraOptions...); diff != "" {
 			t.Fatalf(
 				"%s: Set.String of %q: elements mismatch: (-want +got):\n%s",
 				setName,
@@ -511,12 +504,12 @@ func testDegree(
 	actualDegree int,
 	expectedDegree int,
 ) {
-	if actualDegree != expectedDegree {
+	if got, want := actualDegree, expectedDegree; got != want {
 		t.Errorf(
 			"%s: got degree of %d, want %d",
 			degreeName,
-			actualDegree,
-			expectedDegree,
+			got,
+			want,
 		)
 	}
 }
@@ -525,39 +518,6 @@ func reverseOf(endpointPair graph.EndpointPair[int]) graph.EndpointPair[int] {
 	return graph.EndpointPairOf(endpointPair.Target(), endpointPair.Source())
 }
 
-func orderAgnosticDiff[T comparable](
-	got []T,
-	want []T,
-	extraOptions ...gocmp.Option,
-) string {
-	sliceComparer := gocmp.Comparer(func(a, b []T) bool {
-		x := make(map[T]int)
-		for _, value := range a {
-			x[value]++
-		}
-		y := make(map[T]int)
-		for _, value := range b {
-			y[value]++
-		}
-		return maps.Equal(x, y)
-	})
-	allOptions := allOf(
-		sliceComparer,
-		extraOptions,
-	)
-	return gocmp.Diff(
-		want,
-		got,
-		allOptions...,
-	)
-}
-
-func undirectedEndpointPairComparer() gocmp.Option {
-	return gocmp.Comparer(func(a, b graph.EndpointPair[int]) bool {
-		return a == b || a == reverseOf(b)
-	})
-}
-
-func allOf[T any](first T, rest []T) []T {
-	return slices.Concat([]T{first}, rest)
+func undirectedEndpointPairsEqual(a graph.EndpointPair[int], b graph.EndpointPair[int]) bool {
+	return a == b || a == reverseOf(b)
 }
