@@ -1,12 +1,12 @@
 package settest
 
 import (
+	"fmt"
+	"slices"
 	"testing"
 
-	// dot importing gomega matchers is best practice and this package is used by test code only
-	. "github.com/jbduncan/go-containers/internal/matchers" //nolint:stylecheck
+	"github.com/jbduncan/go-containers/internal/orderagnostic"
 	"github.com/jbduncan/go-containers/set"
-	. "github.com/onsi/gomega" //nolint:stylecheck
 )
 
 // TestingT is an interface for the parts of *testing.T that settest.Set needs
@@ -99,7 +99,10 @@ type tester struct {
 	mutable    bool
 }
 
-func newTester(t TestingT, setBuilder func(elems []string) set.Set[string]) *tester {
+func newTester(
+	t TestingT,
+	setBuilder func(elems []string) set.Set[string],
+) *tester {
 	_, mutable := setBuilder(empty()).(set.MutableSet[string])
 	return &tester{
 		t:          t,
@@ -108,7 +111,10 @@ func newTester(t TestingT, setBuilder func(elems []string) set.Set[string]) *tes
 	}
 }
 
-func (tt tester) runEmptyIfMutable(name string, f func(t *testing.T, s set.MutableSet[string])) {
+func (tt tester) runEmptyIfMutable(
+	name string,
+	f func(t *testing.T, s set.MutableSet[string]),
+) {
 	tt.t.Helper()
 
 	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
@@ -125,10 +131,11 @@ func (tt tester) emptySetHasLengthOfZero() {
 		"empty set: has length of 0",
 		func(t *testing.T) {
 			t.Helper()
-			g := NewWithT(t)
 			s := tt.setBuilder(empty())
 
-			g.Expect(s).To(HaveLenOfZero())
+			if got, want := s.Len(), 0; got != want {
+				t.Fatalf("got Set.Len of %d, want %d", got, want)
+			}
 		})
 }
 
@@ -138,10 +145,11 @@ func (tt tester) emptySetContainsNothing() {
 	tt.t.Run(
 		"empty set: contains nothing",
 		func(t *testing.T) {
-			g := NewWithT(t)
 			s := tt.setBuilder(empty())
 
-			g.Expect(s).ToNot(Contain("link"))
+			if s.Contains(a) {
+				t.Fatalf("got Set.Contains(%q) == true, want false", a)
+			}
 		})
 }
 
@@ -151,10 +159,12 @@ func (tt tester) emptySetIterationDoesNothing() {
 	tt.t.Run(
 		"empty set: iteration does nothing",
 		func(t *testing.T) {
-			g := NewWithT(t)
 			s := tt.setBuilder(empty())
 
-			g.Expect(s).To(HaveAllThatEmitsNothing[string]())
+			if got, want := slices.Collect(s.All()), empty();
+				!slices.Equal(got, want) {
+				t.Fatalf("got Set.All of %q, want empty", got)
+			}
 		})
 }
 
@@ -164,10 +174,11 @@ func (tt tester) emptySetHasEmptyStringRepr() {
 	tt.t.Run(
 		"empty set: has empty string representation",
 		func(t *testing.T) {
-			g := NewWithT(t)
 			s := tt.setBuilder(empty())
 
-			g.Expect(s).To(HaveStringRepr("[]"))
+			if got, want := s.String(), "[]"; got != want {
+				t.Fatalf("got Set.String of %q, want %q", got, want)
+			}
 		})
 }
 
@@ -178,11 +189,12 @@ func (tt tester) emptySetRemoveDoesNothing() {
 		"empty set: remove does nothing",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Remove("link")
+			s.Remove(a)
 
-			g.Expect(s).To(HaveLenOfZero())
+			if got, want := s.Len(), 0; got != want {
+				t.Fatalf("got Set.Len of %v, want %v", got, want)
+			}
 		})
 }
 
@@ -192,10 +204,11 @@ func (tt tester) oneElementSetHasLengthOfOne() {
 	tt.t.Run(
 		"one element set: has length of 1",
 		func(t *testing.T) {
-			g := NewWithT(t)
 			s := tt.setBuilder(oneElement())
 
-			g.Expect(s).To(HaveLenOf(1))
+			if got, want := s.Len(), 1; got != want {
+				t.Fatalf("got Set.Len of %v, want %v", got, want)
+			}
 		})
 }
 
@@ -206,11 +219,12 @@ func (tt tester) emptySetPlusOneHasLengthOfOne() {
 		"empty set: add: has length of 1",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
+			s.Add(a)
 
-			g.Expect(s).To(HaveLenOf(1))
+			if got, want := s.Len(), 1; got != want {
+				t.Fatalf("got Set.Len of %v, want %v", got, want)
+			}
 		})
 }
 
@@ -220,10 +234,11 @@ func (tt tester) oneElementSetContainsPresentElement() {
 	tt.t.Run(
 		"one element set: contains present element",
 		func(t *testing.T) {
-			g := NewWithT(t)
 			s := tt.setBuilder(oneElement())
 
-			g.Expect(s).To(Contain("link"))
+			if !s.Contains(a) {
+				t.Fatalf("got Set.Contains(%q) == false, want true", a)
+			}
 		})
 }
 
@@ -234,11 +249,12 @@ func (tt tester) emptySetPlusOneContainsPresentElement() {
 		"empty set: add: contains present element",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
+			s.Add(a)
 
-			g.Expect(s).To(Contain("link"))
+			if !s.Contains(a) {
+				t.Fatalf("got Set.Contains(%q) == false, want true", a)
+			}
 		})
 }
 
@@ -248,10 +264,11 @@ func (tt tester) oneElementSetDoesNotContainAbsentElement() {
 	tt.t.Run(
 		"one element set: does not contain absent element",
 		func(t *testing.T) {
-			g := NewWithT(t)
 			s := tt.setBuilder(oneElement())
 
-			g.Expect(s).ToNot(Contain("zelda"))
+			if s.Contains(b) {
+				t.Fatalf("got Set.Contains(%q) == true, want false", b)
+			}
 		})
 }
 
@@ -262,11 +279,12 @@ func (tt tester) emptySetPlusOneDoesNotContainAbsentElement() {
 		"empty set: add: does not contain absent element",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
+			s.Add(a)
 
-			g.Expect(s).ToNot(Contain("zelda"))
+			if s.Contains(b) {
+				t.Fatalf("got Set.Contains(%q) == true, want false", b)
+			}
 		})
 }
 
@@ -276,10 +294,12 @@ func (tt tester) oneElementSetReturnsElementOnIteration() {
 	tt.t.Run(
 		"one element set: returns element on iteration",
 		func(t *testing.T) {
-			g := NewWithT(t)
 			s := tt.setBuilder(oneElement())
 
-			g.Expect(s).To(HaveAllThatConsistsOf[string]("link"))
+			if got, want := slices.Collect(s.All()), oneElement();
+				!slices.Equal(got, want) {
+				t.Fatalf("got Set.All of %q, want %q", got, want)
+			}
 		})
 }
 
@@ -290,11 +310,13 @@ func (tt tester) emptySetPlusOneReturnsElementOnIteration() {
 		"empty set: add: returns element on iteration",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
+			s.Add(a)
 
-			g.Expect(s).To(HaveAllThatConsistsOf[string]("link"))
+			if got, want := slices.Collect(s.All()), oneElement();
+				!slices.Equal(got, want) {
+				t.Fatalf("got Set.All of %q, want %q", got, want)
+			}
 		})
 }
 
@@ -304,10 +326,11 @@ func (tt tester) oneElementSetHasOneElementStringRepr() {
 	tt.t.Run(
 		"one element set: has one-element string representation",
 		func(t *testing.T) {
-			g := NewWithT(t)
 			s := tt.setBuilder(oneElement())
 
-			g.Expect(s).To(HaveStringRepr("[link]"))
+			if got, want := s.String(), aString(); got != want {
+				t.Fatalf("got Set.String of %q, want %q", got, want)
+			}
 		})
 }
 
@@ -318,11 +341,12 @@ func (tt tester) emptySetPlusOneHasOneElementStringRepr() {
 		"empty set: add: has one-element string representation",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
+			s.Add(a)
 
-			g.Expect(s).To(HaveStringRepr("[link]"))
+			if got, want := s.String(), aString(); got != want {
+				t.Fatalf("got Set.String of %q, want %q", got, want)
+			}
 		})
 }
 
@@ -333,12 +357,13 @@ func (tt tester) emptySetPlusOneMinusOneDoesNotContainAnything() {
 		"empty set: add: remove: does not contain anything",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			s.Remove("link")
+			s.Add(a)
+			s.Remove(a)
 
-			g.Expect(s).ToNot(Contain("link"))
+			if s.Contains(a) {
+				t.Fatalf("got Set.Contains(%q) == true, want false", a)
+			}
 		})
 }
 
@@ -348,10 +373,11 @@ func (tt tester) twoElementSetHasLengthOfTwo() {
 	tt.t.Run(
 		"two element set: has length of 2",
 		func(t *testing.T) {
-			g := NewWithT(t)
 			s := tt.setBuilder(twoElements())
 
-			g.Expect(s).To(HaveLenOf(2))
+			if got, want := s.Len(), 2; got != want {
+				t.Fatalf("got Set.Len of %v, want %v", got, want)
+			}
 		})
 }
 
@@ -362,12 +388,13 @@ func (tt tester) emptySetPlusTwoHasLengthOfTwo() {
 		"empty set: add x2: has length of 2",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			s.Add("zelda")
+			s.Add(a)
+			s.Add(b)
 
-			g.Expect(s).To(HaveLenOf(2))
+			if got, want := s.Len(), 2; got != want {
+				t.Fatalf("got Set.Len of %v, want %v", got, want)
+			}
 		})
 }
 
@@ -377,10 +404,16 @@ func (tt tester) twoElementSetContainsBothElements() {
 	tt.t.Run(
 		"two element set: contains both elements",
 		func(t *testing.T) {
-			g := NewWithT(t)
 			s := tt.setBuilder(twoElements())
 
-			g.Expect(s).To(ContainAtLeast("link", "zelda"))
+			for _, element := range twoElements() {
+				if !s.Contains(element) {
+					t.Fatalf(
+						"got Set.Contains(%q) == false, want true",
+						element,
+					)
+				}
+			}
 		})
 }
 
@@ -391,12 +424,18 @@ func (tt tester) emptySetPlusTwoContainsBothElements() {
 		"empty set: add x2: contains both elements",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			s.Add("zelda")
+			s.Add(a)
+			s.Add(b)
 
-			g.Expect(s).To(ContainAtLeast("link", "zelda"))
+			for _, element := range twoElements() {
+				if !s.Contains(element) {
+					t.Fatalf(
+						"got Set.Contains(%q) == false, want true",
+						element,
+					)
+				}
+			}
 		})
 }
 
@@ -406,10 +445,12 @@ func (tt tester) twoElementSetReturnsBothElementsOnIteration() {
 	tt.t.Run(
 		"two element set: returns both elements on iteration",
 		func(t *testing.T) {
-			g := NewWithT(t)
 			s := tt.setBuilder(twoElements())
 
-			g.Expect(s).To(HaveAllThatConsistsOf[string]("link", "zelda"))
+			got, want := slices.Collect(s.All()), twoElements()
+			if diff := orderagnostic.Diff(got, want); diff != "" {
+				t.Errorf("Set.All mismatch (-want +got):\n%s", diff)
+			}
 		})
 }
 
@@ -420,13 +461,14 @@ func (tt tester) emptySetPlusTwoReturnsBothElementsOnIteration() {
 		"empty set: add x2: returns both elements on iteration",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			s.Add("zelda")
+			s.Add(a)
+			s.Add(b)
 
-			g.Expect(s).To(
-				HaveAllThatConsistsOf[string]("link", "zelda"))
+			got, want := slices.Collect(s.All()), twoElements()
+			if diff := orderagnostic.Diff(got, want); diff != "" {
+				t.Errorf("Set.All mismatch (-want +got):\n%s", diff)
+			}
 		})
 }
 
@@ -435,12 +477,13 @@ func (tt tester) emptySetPlusVarargsReturnsBothElementsOnIteration() {
 		"empty set: add varargs: returns all elements on iteration",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link", "zelda")
+			s.Add(a, b)
 
-			g.Expect(s).To(
-				HaveAllThatConsistsOf[string]("link", "zelda"))
+			got, want := slices.Collect(s.All()), twoElements()
+			if diff := orderagnostic.Diff(got, want); diff != "" {
+				t.Errorf("Set.All mismatch (-want +got):\n%s", diff)
+			}
 		})
 }
 
@@ -450,11 +493,12 @@ func (tt tester) twoElementSetHasTwoElementStringRepr() {
 	tt.t.Run(
 		"two element set: has two-element string representation",
 		func(t *testing.T) {
-			g := NewWithT(t)
 			s := tt.setBuilder(twoElements())
 
-			g.Expect(s).To(
-				HaveStringReprThatIsAnyOf("[link, zelda]", "[zelda, link]"))
+			if got, wantAny := s.String(), abStringCombinations();
+				!slices.Contains(wantAny, s.String()) {
+				t.Fatalf("got Set.String of %v, want any of %q", got, wantAny)
+			}
 		})
 }
 
@@ -465,13 +509,14 @@ func (tt tester) emptySetPlusTwoReturnsTwoElementStringRepr() {
 		"empty set: add x2: has two-element string representation",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			s.Add("zelda")
+			s.Add(a)
+			s.Add(b)
 
-			g.Expect(s).To(
-				HaveStringReprThatIsAnyOf("[link, zelda]", "[zelda, link]"))
+			if got, wantAny := s.String(), abStringCombinations();
+				!slices.Contains(wantAny, s.String()) {
+				t.Fatalf("got Set.String of %v, want any of %q", got, wantAny)
+			}
 		})
 }
 
@@ -482,13 +527,14 @@ func (tt tester) emptySetPlusTwoMinusOneHasLengthOfOne() {
 		"empty set: add x2: remove x1: has length of 1",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			s.Add("zelda")
-			s.Remove("link")
+			s.Add(a)
+			s.Add(b)
+			s.Remove(a)
 
-			g.Expect(s).To(HaveLenOf(1))
+			if got, want := s.Len(), 1; got != want {
+				t.Fatalf("got Set.Len of %v, want %v", got, want)
+			}
 		})
 }
 
@@ -499,13 +545,14 @@ func (tt tester) emptySetPlusTwoMinusVarargsHasLengthOfZero() {
 		"empty set: add x2: remove varargs: has length of 0",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			s.Add("zelda")
-			s.Remove("link", "zelda")
+			s.Add(a)
+			s.Add(b)
+			s.Remove(a, b)
 
-			g.Expect(s).To(HaveLenOf(0))
+			if got, want := s.Len(), 0; got != want {
+				t.Fatalf("got Set.Len of %v, want %v", got, want)
+			}
 		})
 }
 
@@ -516,27 +563,37 @@ func (tt tester) emptySetPlusThreeContainsAllThreeElements() {
 		"empty set: add x3: contains all three elements",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			s.Add("zelda")
-			s.Add("ganondorf")
+			s.Add(a)
+			s.Add(b)
+			s.Add(c)
 
-			g.Expect(s).To(
-				ContainAtLeast("link", "zelda", "ganondorf"))
+			for _, element := range threeElements() {
+				if !s.Contains(element) {
+					t.Fatalf(
+						"got Set.Contains(%q) == false, want true",
+						element,
+					)
+				}
+			}
 		})
 }
 
 func (tt tester) threeElementSetContainsAllThreeElements() {
 	tt.t.Helper()
 
-	tt.t.Run("three element set: contains all three elements", func(t *testing.T) {
-		g := NewWithT(t)
-		s := tt.setBuilder(threeElements())
+	tt.t.Run(
+		"three element set: contains all three elements",
+		func(t *testing.T) {
+			s := tt.setBuilder(threeElements())
 
-		g.Expect(s).To(
-			ContainAtLeast("link", "zelda", "ganondorf"))
-	})
+			for _, element := range threeElements() {
+				if !s.Contains(element) {
+					t.Fatalf("got Set.Contains(%q) == false, want true", element)
+				}
+			}
+		},
+	)
 }
 
 func (tt tester) emptySetPlusThreeHasThreeElementStringRepr() {
@@ -546,20 +603,19 @@ func (tt tester) emptySetPlusThreeHasThreeElementStringRepr() {
 		"empty set: add x3: has three-element string representation",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			s.Add("zelda")
-			s.Add("ganondorf")
+			s.Add(a)
+			s.Add(b)
+			s.Add(c)
 
-			g.Expect(s).To(
-				HaveStringReprThatIsAnyOf(
-					"[link, zelda, ganondorf]",
-					"[link, ganondorf, zelda]",
-					"[zelda, link, ganondorf]",
-					"[zelda, ganondorf, link]",
-					"[ganondorf, link, zelda]",
-					"[ganondorf, zelda, link]"))
+			if got, wantAny := s.String(), abcStringCombinations();
+				!slices.Contains(wantAny, s.String()) {
+				t.Fatalf(
+					"got Set.String of %v, want any of %q",
+					got,
+					wantAny,
+				)
+			}
 		})
 }
 
@@ -568,17 +624,12 @@ func (tt tester) threeElementSetHasThreeElementStringRepr() {
 
 	tt.t.Run("three element set: has three-element string representation",
 		func(t *testing.T) {
-			g := NewWithT(t)
 			s := tt.setBuilder(threeElements())
 
-			g.Expect(s).To(
-				HaveStringReprThatIsAnyOf(
-					"[link, zelda, ganondorf]",
-					"[link, ganondorf, zelda]",
-					"[zelda, link, ganondorf]",
-					"[zelda, ganondorf, link]",
-					"[ganondorf, link, zelda]",
-					"[ganondorf, zelda, link]"))
+			if got, wantAny := s.String(), abcStringCombinations();
+				!slices.Contains(wantAny, s.String()) {
+				t.Fatalf("got Set.String of %v, want any of %q", got, wantAny)
+			}
 		})
 }
 
@@ -587,10 +638,11 @@ func (tt tester) setInitializedFromTwoOfSameElementHasLengthOfOne() {
 
 	tt.t.Run("set initialized from two of same element: has length of 1",
 		func(t *testing.T) {
-			g := NewWithT(t)
 			s := tt.setBuilder(twoSameElements())
 
-			g.Expect(s).To(HaveLenOf(1))
+			if got, want := s.Len(), 1; got != want {
+				t.Fatalf("got Set.Len of %v, want %v", got, want)
+			}
 		})
 }
 
@@ -601,12 +653,13 @@ func (tt tester) emptySetPlusSameElementTwiceHasLengthOfOne() {
 		"empty set: add same element x2: has length of 1",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			s.Add("link")
+			s.Add(a)
+			s.Add(a)
 
-			g.Expect(s).To(HaveLenOf(1))
+			if got, want := s.Len(), 1; got != want {
+				t.Fatalf("got Set.Len of %v, want %v", got, want)
+			}
 		})
 }
 
@@ -615,10 +668,12 @@ func (tt tester) setInitializedFromTwoOfSameElementReturnsOneElementOnIteration(
 
 	tt.t.Run("set initialized from two of same element: returns one element on iteration",
 		func(t *testing.T) {
-			g := NewWithT(t)
 			s := tt.setBuilder(twoSameElements())
 
-			g.Expect(s).To(HaveAllThatConsistsOf[string]("link"))
+			if got, want := slices.Collect(s.All()), oneElement();
+				!slices.Equal(got, want) {
+				t.Fatalf("got Set.All of %q, want %q", got, want)
+			}
 		})
 }
 
@@ -629,12 +684,14 @@ func (tt tester) emptySetPlusSameElementTwiceReturnsOneElementOnIteration() {
 		"empty set: add same element x2: returns one element on iteration",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			s.Add("link")
+			s.Add(a)
+			s.Add(a)
 
-			g.Expect(s).To(HaveAllThatConsistsOf[string]("link"))
+			if got, want := slices.Collect(s.All()), oneElement();
+				!slices.Equal(got, want) {
+				t.Fatalf("got Set.All of %q, want %q", got, want)
+			}
 		})
 }
 
@@ -645,11 +702,12 @@ func (tt tester) emptySetPlusOneReturnsTrue() {
 		"empty set: add: returns true",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			result := s.Add("link")
+			got := s.Add(a)
 
-			g.Expect(result).To(BeTrue())
+			if !got {
+				t.Fatalf("got Set.Add(%q) == false, want true", a)
+			}
 		})
 }
 
@@ -660,12 +718,13 @@ func (tt tester) emptySetPlusSameElementTwiceReturnsFalse() {
 		"empty set: add same element x2: returns true",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			result := s.Add("link")
+			s.Add(a)
+			got := s.Add(a)
 
-			g.Expect(result).To(BeFalse())
+			if got {
+				t.Fatalf("got Set.Add(%q) == true, want false", a)
+			}
 		})
 }
 
@@ -676,13 +735,14 @@ func (tt tester) emptySetPlusSameElementTwiceThenDifferentOnceReturnsTrue() {
 		"empty set: add same element x2: add different element: returns true",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			s.Add("link")
-			result := s.Add("zelda")
+			s.Add(a)
+			s.Add(a)
+			got := s.Add(b)
 
-			g.Expect(result).To(BeTrue())
+			if !got {
+				t.Fatalf("got Set.Add(%q) == false, want true", b)
+			}
 		})
 }
 
@@ -693,12 +753,13 @@ func (tt tester) emptySetPlusOnePlusVarargsReturnsTrue() {
 		"empty set: add x1: add varargs: returns true",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			result := s.Add("zelda", "link")
+			s.Add(a)
+			got := s.Add(b, a)
 
-			g.Expect(result).To(BeTrue())
+			if !got {
+				t.Fatalf("got Set.Add(%q, %q) == false, want true", b, a)
+			}
 		})
 }
 
@@ -709,11 +770,15 @@ func (tt tester) emptySetMinusOneReturnsFalse() {
 		"empty set: remove: returns false",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			result := s.Remove("link")
+			got := s.Remove(a)
 
-			g.Expect(result).To(BeFalse())
+			if got {
+				t.Fatalf(
+					"got Set.Remove(%q) == true, want false",
+					a,
+				)
+			}
 		})
 }
 
@@ -724,12 +789,13 @@ func (tt tester) emptySetPlusOneMinusSameElementReturnsTrue() {
 		"empty set: add: remove same element: returns true",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			result := s.Remove("link")
+			s.Add(a)
+			got := s.Remove(a)
 
-			g.Expect(result).To(BeTrue())
+			if !got {
+				t.Fatalf("got Set.Remove(%q) == false, want true", a)
+			}
 		})
 }
 
@@ -740,13 +806,14 @@ func (tt tester) emptySetPlusOneMinusSameElementTwiceReturnsFalse() {
 		"empty set: add: remove same element x2: returns false",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			s.Remove("link")
-			result := s.Remove("link")
+			s.Add(a)
+			s.Remove(a)
+			got := s.Remove(a)
 
-			g.Expect(result).To(BeFalse())
+			if got {
+				t.Fatalf("got Set.Remove(%q) == true, want false", a)
+			}
 		})
 }
 
@@ -757,31 +824,61 @@ func (tt tester) emptySetPlusOneMinusVarargsReturnsTrue() {
 		"empty set: add: remove varargs: returns true",
 		func(t *testing.T, s set.MutableSet[string]) {
 			t.Helper()
-			g := NewWithT(t)
 
-			s.Add("link")
-			result := s.Remove("zelda", "link")
+			s.Add(a)
+			got := s.Remove(b, a)
 
-			g.Expect(result).To(BeTrue())
+			if !got {
+				t.Fatalf("got Set.Remove(%q) == false, want true", a)
+			}
 		})
 }
+
+const (
+	a = "link"
+	b = "zelda"
+	c = "ganondorf"
+)
 
 func empty() []string {
 	return nil
 }
 
 func oneElement() []string {
-	return []string{"link"}
+	return []string{a}
 }
 
 func twoElements() []string {
-	return []string{"link", "zelda"}
+	return []string{a, b}
 }
 
 func threeElements() []string {
-	return []string{"link", "zelda", "ganondorf"}
+	return []string{a, b, c}
 }
 
 func twoSameElements() []string {
-	return []string{"link", "link"}
+	return []string{a, a}
+}
+
+func aString() string {
+	return fmt.Sprintf("[%s]", a)
+}
+
+func abStringCombinations() []string {
+	return []string{
+		fmt.Sprintf("[%s, %s]", a, b),
+		fmt.Sprintf("[%s, %s]", b, a),
+	}
+}
+
+func abcStringCombinations() []string {
+	template := "[%s, %s, %s]"
+	return []string{
+		fmt.Sprintf(template, a, b, c),
+		fmt.Sprintf(template, a, c, b),
+		fmt.Sprintf(template, b, a, c),
+		fmt.Sprintf(template, b, c, a),
+		fmt.Sprintf(template, c, a, b),
+		fmt.Sprintf(template, c, b, a),
+	}
 }

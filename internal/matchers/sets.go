@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/jbduncan/go-containers/internal/slicesx"
 	"github.com/jbduncan/go-containers/set"
 	// dot importing gomega matchers is best practice and this package is used by test code only
 	. "github.com/onsi/gomega" //nolint:stylecheck
@@ -48,22 +49,6 @@ func Contain[T comparable](elem T) types.GomegaMatcher {
 		WithTemplateData(elem)
 }
 
-func ContainAtLeast[T comparable](first T, others ...T) types.GomegaMatcher {
-	elements := allOf(first, others)
-
-	return gcustom.MakeMatcher(
-		func(s set.Set[T]) (bool, error) {
-			for _, element := range elements {
-				if !s.Contains(element) {
-					return false, nil
-				}
-			}
-			return true, nil
-		}).
-		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} contain at least\n{{format .Data 1}}").
-		WithTemplateData(elements)
-}
-
 func HaveAllThatEmitsNothing[T comparable]() types.GomegaMatcher {
 	return gcustom.MakeMatcher(
 		func(s set.Set[T]) (bool, error) {
@@ -73,8 +58,8 @@ func HaveAllThatEmitsNothing[T comparable]() types.GomegaMatcher {
 		WithTemplate("Expected All() of\n{{.FormattedActual}}\n{{.To}} emit nothing")
 }
 
-func HaveAllThatConsistsOf[T comparable](first any, others ...any) types.GomegaMatcher {
-	elements := allOf(first, others)
+func HaveAllThatConsistsOf[T comparable](first any, rest ...any) types.GomegaMatcher {
+	elements := slicesx.AllOf(first, rest)
 
 	return gcustom.MakeMatcher(
 		func(s set.Set[T]) (bool, error) {
@@ -102,11 +87,4 @@ func BeNonMutableSet[T comparable]() types.GomegaMatcher {
 			return !mutable, nil
 		}).
 		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} implement set.Set but not set.MutableSet")
-}
-
-func allOf[T any](first T, others []T) []T {
-	all := make([]T, 0, len(others)+1)
-	all = append(all, first)
-	all = append(all, others...)
-	return all
 }
