@@ -15,6 +15,8 @@ depends = "build"
 description = "Run the tests for the ast-grep rules."
 hide = true
 run = "ast-grep test"
+sources = ["sgconfig.yml", "sg/**"]
+outputs = { auto = true }
 
 [tasks.build]
 description = "Build the library source code."
@@ -24,9 +26,31 @@ outputs = { auto = true }
 alias = "b"
 
 [tasks.check]
-description = "Run all lints and tests against the library source code."
+description = "Run all linters and tests against the library source code."
 depends = ["lint", "test"]
 alias = "c"
+
+[tasks.depaware]
+description = "Check that no Go package dependencies changed unexpectedly."
+hide = true
+run = "go run internal/tasks/tasks.go depaware"
+depends = ["build"]
+sources = ["go.mod", "go.sum", "**/*.go", "**/depaware.txt"]
+outputs = { auto = true }
+
+[tasks.eg]
+description = "Check that the library source code is already refactored according to the eg templates."
+hide = true
+run = "go run internal/tasks/tasks.go eg"
+depends = ["build"]
+sources = ["go.mod", "go.sum", "**/*.go", "eg/*.template"]
+outputs = { auto = true }
+
+[tasks.fix]
+description = "Automatically fix as many lint errors as possible."
+run = "go run internal/tasks/tasks.go fix"
+depends = ["build"]
+alias = "f"
 
 [tasks.go-mod-tidy]
 description = "Tidy up 'go.mod' and 'go.sum'."
@@ -49,9 +73,12 @@ description = "Check that no problems are found when running the linters defined
 hide = true
 run = "golangci-lint run"
 depends = "build"
+sources = ["go.mod", "go.sum", "**/*.go"]
+outputs = { auto = true }
 
 [tasks.lint]
 description = "Check the library source code for problems."
+hide = true
 depends = [
   "ast-grep",
   "ast-grep-test",
@@ -60,27 +87,16 @@ depends = [
   "go-mod-tidy-check",
   "go-mod-verify",
   "golangci-lint",
-  "mise-fmt-check",
   "nilaway",
 ]
-
-# TODO: Call mise-fmt from 'fix'
-[tasks.mise-fmt]
-description = "Reformat 'mise.toml'"
-hide = true
-run = "mise fmt"
-
-[tasks.mise-fmt-check]
-description = "Check if 'mise.toml' is formatted"
-hide = true
-run = "git diff --exit-code -- mise.toml mise.lock"
-depends = "mise-fmt"
 
 [tasks.nilaway]
 description = "Check that no common sources of nil pointer dereferences can occur in the library source code."
 hide = true
 run = "nilaway -include-pkgs github.com/jbduncan/go-containers ./..."
 depends = "build"
+sources = ["go.mod", "go.sum", "**/*.go"]
+outputs = { auto = true }
 
 [tasks.test]
 description = "Run tests for the library source code."
@@ -90,10 +106,10 @@ sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
 alias = "t"
 
-[tasks.test-force]
-description = "Run tests for the library source code, even if no source code has changed. Useful for re-running tests in a randomly shuffled order and flushing out non-determinism between tests."
-run = "go test -shuffle=on -race ./..."
-depends = "build"
+[tasks.update-versions]
+description = "Update the versions of all tools and dependencies"
+run = "go run internal/tasks/tasks.go update-versions"
+alias = "u"
 
 [tools]
 # cosign is used by mise itself to download tools more securely

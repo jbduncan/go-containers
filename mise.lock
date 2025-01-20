@@ -6,12 +6,11 @@ backend = "aqua:sigstore/cosign"
 cosign-darwin-arm64 = "sha256:13343856b69f70388c4fe0b986a31dde5958e444b41be22d785d3dc5e1a9cc62"
 
 [tools.go]
-version = "1.23.4"
+version = "1.23.5"
 backend = "core:go"
 
 [tools.go.checksums]
-"go1.23.4.darwin-arm64.tar.gz" = "sha256:87d2bb0ad4fe24d2a0685a55df321e0efe4296419a9b3de03369dbe60b8acd3a"
-"go1.23.4.linux-amd64.tar.gz" = "sha256:6924efde5de86fe277676e929dc9917d466efa02fb934197bc2eba35d5680971"
+"go1.23.5.darwin-arm64.tar.gz" = "sha256:047bfce4fbd0da6426bd30cd19716b35a466b1c15a45525ce65b9824acb33285"
 
 [tools."go:github.com/tailscale/depaware"]
 version = "latest"
@@ -41,9 +40,8 @@ backend = "ubi:slsa-framework/slsa-verifier"
 slsa-verifier-macos-aarch64 = "sha256:8740e66832fd48bbaa479acd5310986b876ff545460add0cb4a087aec056189c"
 
 [tools."ubi:ast-grep/ast-grep"]
-version = "0.33.0"
+version = "0.33.1"
 backend = "ubi:ast-grep/ast-grep"
 
 [tools."ubi:ast-grep/ast-grep".checksums]
-ast-grep-linux-x86_64 = "sha256:22cc627a628456f770586ee0082cfc76bb432cf9523cfa259175fdc35cd7dea8"
-ast-grep-macos-aarch64 = "sha256:c653ea08f36d0b7db02abec0b416d823b10890e6269be5e1a8c5ba0520036c40"
+ast-grep-macos-aarch64 = "sha256:015848f35115ccd4d071e226009af8f0875f4ece7ce8b23710353ebfa44954a1"
