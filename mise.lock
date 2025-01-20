@@ -11,6 +11,7 @@ backend = "core:go"
 
 [tools.go.checksums]
 "go1.23.5.darwin-arm64.tar.gz" = "sha256:047bfce4fbd0da6426bd30cd19716b35a466b1c15a45525ce65b9824acb33285"
+"go1.23.5.linux-amd64.tar.gz" = "sha256:cbcad4a6482107c7c7926df1608106c189417163428200ce357695cc7e01d091"
 
 [tools."go:github.com/tailscale/depaware"]
 version = "latest"
@@ -44,4 +45,5 @@ version = "0.33.1"
 backend = "ubi:ast-grep/ast-grep"
 
 [tools."ubi:ast-grep/ast-grep".checksums]
+ast-grep-linux-x86_64 = "sha256:0a34e85a82c487c0324642ed85b92e2c314da4596c80c7012369b4c4ad9ccdd9"
 ast-grep-macos-aarch64 = "sha256:015848f35115ccd4d071e226009af8f0875f4ece7ce8b23710353ebfa44954a1"
