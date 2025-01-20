@@ -96,11 +96,13 @@ run = "go test -shuffle=on -race ./..."
 depends = "build"
 
 [tools]
+# cosign is used by mise itself to download tools more securely
 cosign = "latest"
 go = "latest"
 "go:github.com/tailscale/depaware" = "latest"
 "go:go.uber.org/nilaway/cmd/nilaway" = "latest"
 "go:golang.org/x/tools/cmd/eg" = "latest"
 golangci-lint = "latest"
+# slsa-verifier is used by mise itself to download tools more securely
 slsa-verifier = "latest"
 "ubi:ast-grep/ast-grep" = "latest"
