@@ -5,4 +5,4 @@ import (
 )
 
 func before(t, u time.Time) bool { return t == u }
-func after(t, u time.Time) bool  { return time.Equal(t, u) }
+func after(t, u time.Time) bool  { return t.Equal(u) }
