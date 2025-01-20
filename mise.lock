@@ -11,6 +11,7 @@ backend = "core:go"
 
 [tools.go.checksums]
 "go1.23.4.darwin-arm64.tar.gz" = "sha256:87d2bb0ad4fe24d2a0685a55df321e0efe4296419a9b3de03369dbe60b8acd3a"
+"go1.23.4.linux-amd64.tar.gz" = "sha256:6924efde5de86fe277676e929dc9917d466efa02fb934197bc2eba35d5680971"
 
 [tools."go:github.com/tailscale/depaware"]
 version = "latest"

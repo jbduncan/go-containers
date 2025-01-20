@@ -5,6 +5,96 @@ enter = "mise i -q"
 experimental = true
 lockfile = true
 
+[tasks.ast-grep]
+description = "Run ast-grep rules against the library source code."
+hide = true
+run = "ast-grep scan"
+depends = "build"
+
+[tasks.ast-grep-test]
+description = "Run the tests for the ast-grep rules."
+hide = true
+run = "ast-grep test"
+
+[tasks.build]
+description = "Build the library source code."
+run = "go build ./..."
+sources = ["go.mod", "go.sum", "**/*.go"]
+outputs = { auto = true }
+alias = "b"
+
+[tasks.check]
+description = "Run all lints and tests against the library source code."
+depends = ["lint", "test"]
+alias = "c"
+
+[tasks.go-mod-tidy]
+description = "Tidy up 'go.mod' and 'go.sum'."
+hide = true
+run = "go mod tidy"
+
+[tasks.go-mod-tidy-check]
+description = "Check that 'go mod tidy' changed no files."
+hide = true
+run = "git diff --exit-code -- go.mod go.sum"
+depends = "go-mod-tidy"
+
+[tasks.go-mod-verify]
+description = "Check that the dependencies of the library source code have not been modified since being downloaded."
+hide = true
+run = "go mod verify"
+
+[tasks.golangci-lint]
+description = "Check that no problems are found when running the linters defined in .golangci.yml against the library source code."
+hide = true
+run = "golangci-lint run"
+depends = "build"
+
+[tasks.lint]
+description = "Check the library source code for problems."
+depends = [
+  "ast-grep",
+  "ast-grep-test",
+  "depaware",
+  "eg",
+  "go-mod-tidy-check",
+  "go-mod-verify",
+  "golangci-lint",
+  "mise-fmt-check",
+  "nilaway",
+]
+
+# TODO: Call mise-fmt from 'fix'
+[tasks.mise-fmt]
+description = "Reformat 'mise.toml'"
+hide = true
+run = "mise fmt"
+
+[tasks.mise-fmt-check]
+description = "Check if 'mise.toml' is formatted"
+hide = true
+run = "git diff --exit-code -- mise.toml mise.lock"
+depends = "mise-fmt"
+
+[tasks.nilaway]
+description = "Check that no common sources of nil pointer dereferences can occur in the library source code."
+hide = true
+run = "nilaway -include-pkgs github.com/jbduncan/go-containers ./..."
+depends = "build"
+
+[tasks.test]
+description = "Run tests for the library source code."
+run = "go test -shuffle=on -race ./..."
+depends = "build"
+sources = ["go.mod", "go.sum", "**/*.go"]
+outputs = { auto = true }
+alias = "t"
+
+[tasks.test-force]
+description = "Run tests for the library source code, even if no source code has changed. Useful for re-running tests in a randomly shuffled order and flushing out non-determinism between tests."
+run = "go test -shuffle=on -race ./..."
+depends = "build"
+
 [tools]
 cosign = "latest"
 go = "latest"
