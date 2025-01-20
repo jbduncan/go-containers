@@ -161,8 +161,7 @@ func (tt tester) emptySetIterationDoesNothing() {
 		func(t *testing.T) {
 			s := tt.setBuilder(empty())
 
-			if got, want := slices.Collect(s.All()), empty();
-				!slices.Equal(got, want) {
+			if got, want := slices.Collect(s.All()), empty(); !slices.Equal(got, want) {
 				t.Fatalf("got Set.All of %q, want empty", got)
 			}
 		})
@@ -296,8 +295,7 @@ func (tt tester) oneElementSetReturnsElementOnIteration() {
 		func(t *testing.T) {
 			s := tt.setBuilder(oneElement())
 
-			if got, want := slices.Collect(s.All()), oneElement();
-				!slices.Equal(got, want) {
+			if got, want := slices.Collect(s.All()), oneElement(); !slices.Equal(got, want) {
 				t.Fatalf("got Set.All of %q, want %q", got, want)
 			}
 		})
@@ -313,8 +311,7 @@ func (tt tester) emptySetPlusOneReturnsElementOnIteration() {
 
 			s.Add(a)
 
-			if got, want := slices.Collect(s.All()), oneElement();
-				!slices.Equal(got, want) {
+			if got, want := slices.Collect(s.All()), oneElement(); !slices.Equal(got, want) {
 				t.Fatalf("got Set.All of %q, want %q", got, want)
 			}
 		})
@@ -495,8 +492,7 @@ func (tt tester) twoElementSetHasTwoElementStringRepr() {
 		func(t *testing.T) {
 			s := tt.setBuilder(twoElements())
 
-			if got, wantAny := s.String(), abStringCombinations();
-				!slices.Contains(wantAny, s.String()) {
+			if got, wantAny := s.String(), abStringCombinations(); !slices.Contains(wantAny, s.String()) {
 				t.Fatalf("got Set.String of %v, want any of %q", got, wantAny)
 			}
 		})
@@ -513,8 +509,7 @@ func (tt tester) emptySetPlusTwoReturnsTwoElementStringRepr() {
 			s.Add(a)
 			s.Add(b)
 
-			if got, wantAny := s.String(), abStringCombinations();
-				!slices.Contains(wantAny, s.String()) {
+			if got, wantAny := s.String(), abStringCombinations(); !slices.Contains(wantAny, s.String()) {
 				t.Fatalf("got Set.String of %v, want any of %q", got, wantAny)
 			}
 		})
@@ -608,8 +603,7 @@ func (tt tester) emptySetPlusThreeHasThreeElementStringRepr() {
 			s.Add(b)
 			s.Add(c)
 
-			if got, wantAny := s.String(), abcStringCombinations();
-				!slices.Contains(wantAny, s.String()) {
+			if got, wantAny := s.String(), abcStringCombinations(); !slices.Contains(wantAny, s.String()) {
 				t.Fatalf(
 					"got Set.String of %v, want any of %q",
 					got,
@@ -626,8 +620,7 @@ func (tt tester) threeElementSetHasThreeElementStringRepr() {
 		func(t *testing.T) {
 			s := tt.setBuilder(threeElements())
 
-			if got, wantAny := s.String(), abcStringCombinations();
-				!slices.Contains(wantAny, s.String()) {
+			if got, wantAny := s.String(), abcStringCombinations(); !slices.Contains(wantAny, s.String()) {
 				t.Fatalf("got Set.String of %v, want any of %q", got, wantAny)
 			}
 		})
@@ -670,8 +663,7 @@ func (tt tester) setInitializedFromTwoOfSameElementReturnsOneElementOnIteration(
 		func(t *testing.T) {
 			s := tt.setBuilder(twoSameElements())
 
-			if got, want := slices.Collect(s.All()), oneElement();
-				!slices.Equal(got, want) {
+			if got, want := slices.Collect(s.All()), oneElement(); !slices.Equal(got, want) {
 				t.Fatalf("got Set.All of %q, want %q", got, want)
 			}
 		})
@@ -688,8 +680,7 @@ func (tt tester) emptySetPlusSameElementTwiceReturnsOneElementOnIteration() {
 			s.Add(a)
 			s.Add(a)
 
-			if got, want := slices.Collect(s.All()), oneElement();
-				!slices.Equal(got, want) {
+			if got, want := slices.Collect(s.All()), oneElement(); !slices.Equal(got, want) {
 				t.Fatalf("got Set.All of %q, want %q", got, want)
 			}
 		})
