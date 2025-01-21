@@ -213,6 +213,8 @@ func doUpdateVersions() error {
 	if err := cmd("mise", "up").Run(); err != nil {
 		return err
 	}
+	// Run go via "mise x" to work around an issue where "mise up" may have
+	// replaced the current version of go with a newer one.
 	return cmd("mise", "x", "--", "go", "get", "-u", "-t", "./...").Run()
 }
 
