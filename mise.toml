@@ -10,6 +10,7 @@ description = "Run ast-grep rules against the library source code."
 hide = true
 run = "ast-grep scan"
 depends = "build"
+wait_for = ["test"]
 
 [tasks.ast-grep-test]
 description = "Run the tests for the ast-grep rules."
@@ -17,12 +18,14 @@ hide = true
 run = "ast-grep test"
 sources = ["sgconfig.yml", "sg/**"]
 outputs = { auto = true }
+wait_for = ["test"]
 
 [tasks.build]
 description = "Build the library source code."
 run = "go build ./..."
 sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
+wait_for = ["go-mod-tidy", "go-mod-verify"]
 alias = "b"
 
 [tasks.check]
@@ -37,6 +40,7 @@ run = "go run internal/tasks/tasks.go depaware"
 depends = ["build"]
 sources = ["go.mod", "go.sum", "**/*.go", "**/depaware.txt"]
 outputs = { auto = true }
+wait_for = ["test"]
 
 [tasks.eg]
 description = "Check that the library source code is already refactored according to the eg templates."
@@ -45,6 +49,7 @@ run = "go run internal/tasks/tasks.go eg"
 depends = ["build"]
 sources = ["go.mod", "go.sum", "**/*.go", "eg/*.template"]
 outputs = { auto = true }
+wait_for = ["test"]
 
 [tasks.fix]
 description = "Automatically fix as many lint errors as possible."
@@ -56,6 +61,7 @@ alias = "f"
 description = "Tidy up 'go.mod' and 'go.sum'."
 hide = true
 run = "go mod tidy"
+wait_for = ["go-mod-verify"]
 
 [tasks.go-mod-tidy-check]
 description = "Check that 'go mod tidy' changed no files."
@@ -75,6 +81,7 @@ run = "golangci-lint run"
 depends = "build"
 sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
+wait_for = ["test"]
 
 [tasks.lint]
 description = "Check the library source code for problems."
@@ -97,6 +104,7 @@ run = "nilaway -include-pkgs github.com/jbduncan/go-containers ./..."
 depends = "build"
 sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
+wait_for = ["test"]
 
 [tasks.test]
 description = "Run tests for the library source code."
