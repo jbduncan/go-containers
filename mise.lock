@@ -45,4 +45,5 @@ version = "0.34.1"
 backend = "ubi:ast-grep/ast-grep"
 
 [tools."ubi:ast-grep/ast-grep".checksums]
+ast-grep-linux-x86_64 = "sha256:d4d9f3964d19fee89c1b1a525734807a7681557bd9cdd49390649328cbea6dc1"
 ast-grep-macos-aarch64 = "sha256:cc74806d5fc307158dc7a8a8b182b8ae6880bf089d2552eaded788a60369fc26"

@@ -22,13 +22,14 @@ func main() {
 	case "depaware":
 		doDepaware(ctx, group)
 		os.Exit(must(group.Wait()))
+	case "depaware-fix":
+		doDepawareFix(ctx, group)
+		os.Exit(must(group.Wait()))
 	case "eg":
 		doEg(ctx, group)
 		os.Exit(must(group.Wait()))
-	case "fix":
-		os.Exit(must(doFix()))
-	case "update-versions":
-		os.Exit(must(doUpdateVersions()))
+	case "eg-fix":
+		os.Exit(must(doEgFix()))
 	default:
 		os.Exit(must(fmt.Errorf("invalid command: %s", os.Args[1])))
 	}
@@ -162,60 +163,6 @@ func doEgFix() error {
 		}
 	}
 	return nil
-}
-
-func doFix() error {
-	// Run the fixes sequentially (rather than using mise tasks to run them in
-	// parallel) to avoid race conditions where two or more fixes touch the
-	// same file at the same time.
-
-	fmt.Println("Running 'go mod tidy'...")
-	if err := doGoModTidy(); err != nil {
-		return err
-	}
-
-	fmt.Println("Running 'go mod download'...")
-	if err := doGoModDownload(); err != nil {
-		return err
-	}
-
-	fmt.Println("Fixing with ast-grep...")
-	if err := cmd("ast-grep", "scan", "--update-all").Run(); err != nil {
-		return err
-	}
-
-	if err := doEgFix(); err != nil {
-		return err
-	}
-
-	fmt.Println("Fixing with golangci-lint...")
-	if err := cmd("golangci-lint", "run", "--fix").Run(); err != nil {
-		return err
-	}
-
-	group, ctx := newErrorGroup()
-	doDepawareFix(ctx, group)
-	return group.Wait()
-}
-
-func doGoModDownload() error {
-	fmt.Println("Running 'go mod download'...")
-	return cmd("go", "mod", "download").Run()
-}
-
-func doGoModTidy() error {
-	fmt.Println("Running 'go mod tidy'...")
-	return cmd("go", "mod", "tidy").Run()
-}
-
-func doUpdateVersions() error {
-	fmt.Println("Updating versions...")
-	if err := cmd("mise", "up").Run(); err != nil {
-		return err
-	}
-	// Run go via "mise x" to work around an issue where "mise up" may have
-	// replaced the current version of go with a newer one.
-	return cmd("mise", "x", "--", "go", "get", "-u", "-t", "./...").Run()
 }
 
 func newErrorGroup() (*errgroup.Group, context.Context) {

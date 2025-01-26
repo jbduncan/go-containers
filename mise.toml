@@ -10,7 +10,15 @@ description = "Run ast-grep rules against the library source code."
 hide = true
 run = "ast-grep scan"
 depends = "build"
+# If this task and test run at the same time, force eg to run last to improve
+# diagnostics in case of test compilation failures.
 wait_for = ["test"]
+
+[tasks.ast-grep-fix]
+description = "Fix ast-grep violations in the library source code."
+hide = true
+run = "ast-grep scan --update-all"
+depends = ["go-mod-verify"]
 
 [tasks.ast-grep-test]
 description = "Run the tests for the ast-grep rules."
@@ -18,6 +26,8 @@ hide = true
 run = "ast-grep test"
 sources = ["sgconfig.yml", "sg/**"]
 outputs = { auto = true }
+# If this task and test run at the same time, force it to run last to improve
+# diagnostics in case of test compilation failures.
 wait_for = ["test"]
 
 [tasks.build]
@@ -25,7 +35,7 @@ description = "Build the library source code."
 run = "go build ./..."
 sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
-wait_for = ["go-mod-tidy", "go-mod-verify"]
+depends = ["go-mod-verify"]
 alias = "b"
 
 [tasks.check]
@@ -40,7 +50,14 @@ run = "go run internal/tasks/tasks.go depaware"
 depends = ["build"]
 sources = ["go.mod", "go.sum", "**/*.go", "**/depaware.txt"]
 outputs = { auto = true }
-wait_for = ["test"]
+
+[tasks.depaware-fix]
+description = "Update the depaware.txt files to reflect the current Go package dependencies. Runs sequentially after 'golangci-lint-fix' to avoid race conditions."
+hide = true
+run = "go run internal/tasks/tasks.go depaware-fix"
+# Force fixer tasks to run sequentially to avoid race conditions with multiple
+# fixers touching the same file.
+depends = ["golangci-lint-fix"]
 
 [tasks.eg]
 description = "Check that the library source code is already refactored according to the eg templates."
@@ -49,19 +66,33 @@ run = "go run internal/tasks/tasks.go eg"
 depends = ["build"]
 sources = ["go.mod", "go.sum", "**/*.go", "eg/*.template"]
 outputs = { auto = true }
+# If this task and test run at the same time, force it to run last to improve
+# diagnostics in case of test compilation failures.
 wait_for = ["test"]
+
+[tasks.eg-fix]
+description = "Fix eg violations in the library source code. Runs sequentially after 'ast-grep-fix' to avoid race conditions."
+hide = true
+run = "go run internal/tasks/tasks.go eg-fix"
+# Force fixer tasks to run sequentially to avoid race conditions with multiple
+# fixers touching the same file.
+depends = ["ast-grep-fix"]
 
 [tasks.fix]
 description = "Automatically fix as many lint errors as possible."
-run = "go run internal/tasks/tasks.go fix"
-depends = ["build"]
+depends = ["ast-grep-fix", "depaware-fix", "eg-fix", "golangci-lint-fix"]
 alias = "f"
+
+[tasks.go-mod-download]
+description = "Download third-party Go dependencies"
+hide = true
+run = "go mod download"
+depends = "go-mod-tidy"
 
 [tasks.go-mod-tidy]
 description = "Tidy up 'go.mod' and 'go.sum'."
 hide = true
 run = "go mod tidy"
-wait_for = ["go-mod-verify"]
 
 [tasks.go-mod-tidy-check]
 description = "Check that 'go mod tidy' changed no files."
@@ -73,6 +104,7 @@ depends = "go-mod-tidy"
 description = "Check that the dependencies of the library source code have not been modified since being downloaded."
 hide = true
 run = "go mod verify"
+depends = ["go-mod-download", "go-mod-tidy-check"]
 
 [tasks.golangci-lint]
 description = "Check that no problems are found when running the linters defined in .golangci.yml against the library source code."
@@ -81,7 +113,17 @@ run = "golangci-lint run"
 depends = "build"
 sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
+# If this task and test run at the same time, force it to run last to improve
+# diagnostics in case of test compilation failures.
 wait_for = ["test"]
+
+[tasks.golangci-lint-fix]
+description = "Fix golangci-lint violations in the library source code. Runs sequentially after 'eg-fix' to avoid race conditions."
+hide = true
+run = "golangci-lint run --fix"
+# Force fixer tasks to run sequentially to avoid race conditions with multiple
+# fixers touching the same file.
+depends = ["eg-fix"]
 
 [tasks.lint]
 description = "Check the library source code for problems."
@@ -104,6 +146,8 @@ run = "nilaway -include-pkgs github.com/jbduncan/go-containers ./..."
 depends = "build"
 sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
+# If this task and test run at the same time, force it to run last to improve
+# diagnostics in case of test compilation failures.
 wait_for = ["test"]
 
 [tasks.test]
@@ -114,9 +158,20 @@ sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
 alias = "t"
 
+[tasks.update-dependencies]
+description = "Update the versions of all dependencies."
+hide = true
+run = "mise x -- go get -u -t ./..."
+depends = ["update-tools"] # just in case Go needs updating first
+
+[tasks.update-tools]
+description = "Update the versions of all tools."
+hide = true
+run = "mise up"
+
 [tasks.update-versions]
-description = "Update the versions of all tools and dependencies"
-run = "go run internal/tasks/tasks.go update-versions"
+description = "Update the versions of all tools and dependencies."
+depends = ["update-tools", "update-dependencies"]
 alias = "u"
 
 [tools]
