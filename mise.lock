@@ -41,9 +41,8 @@ backend = "ubi:slsa-framework/slsa-verifier"
 slsa-verifier-macos-aarch64 = "sha256:8740e66832fd48bbaa479acd5310986b876ff545460add0cb4a087aec056189c"
 
 [tools."ubi:ast-grep/ast-grep"]
-version = "0.33.1"
+version = "0.34.1"
 backend = "ubi:ast-grep/ast-grep"
 
 [tools."ubi:ast-grep/ast-grep".checksums]
-ast-grep-linux-x86_64 = "sha256:0a34e85a82c487c0324642ed85b92e2c314da4596c80c7012369b4c4ad9ccdd9"
-ast-grep-macos-aarch64 = "sha256:015848f35115ccd4d071e226009af8f0875f4ece7ce8b23710353ebfa44954a1"
+ast-grep-macos-aarch64 = "sha256:cc74806d5fc307158dc7a8a8b182b8ae6880bf089d2552eaded788a60369fc26"
