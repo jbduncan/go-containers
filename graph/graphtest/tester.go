@@ -518,6 +518,9 @@ func reverseOf(endpointPair graph.EndpointPair[int]) graph.EndpointPair[int] {
 	return graph.EndpointPairOf(endpointPair.Target(), endpointPair.Source())
 }
 
-func undirectedEndpointPairsEqual(a graph.EndpointPair[int], b graph.EndpointPair[int]) bool {
+func undirectedEndpointPairsEqual(
+	a graph.EndpointPair[int],
+	b graph.EndpointPair[int],
+) bool {
 	return a == b || a == reverseOf(b)
 }

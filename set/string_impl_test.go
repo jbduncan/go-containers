@@ -3,10 +3,10 @@ package set_test
 import (
 	"fmt"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/jbduncan/go-containers/set"
-	. "github.com/onsi/gomega"
 )
 
 func TestStringImpl(t *testing.T) {
@@ -56,15 +56,31 @@ func FuzzStringImpl(f *testing.F) {
 	f.Add([]byte("\xffy\x000"))
 
 	f.Fuzz(func(t *testing.T, bytes []byte) {
-		g := NewWithT(t)
 		s := set.Of(bytes...)
 
-		got := set.StringImpl(s)
-
-		g.Expect(got).To(HavePrefix("["))
-		g.Expect(got).To(HaveSuffix("]"))
+		got := s.String()
+		prefixFound := strings.HasPrefix(got, "[")
+		if !prefixFound {
+			t.Fatalf(
+				`got Set.String of %q, want to have prefix "["`,
+				got,
+			)
+		}
+		suffixFound := strings.HasSuffix(got, "]")
+		if !suffixFound {
+			t.Fatalf(
+				`got Set.String of %q, want to have suffix "]"`,
+				got,
+			)
+		}
 		for elem := range s.All() {
-			g.Expect(got).To(ContainSubstring(fmt.Sprintf("%v", elem)))
+			if !strings.Contains(got, fmt.Sprintf("%v", elem)) {
+				t.Fatalf(
+					`got Set.String of %q, want to contain %q`,
+					got,
+					fmt.Sprintf("%v", elem),
+				)
+			}
 		}
 	})
 }
