@@ -382,7 +382,9 @@ func (tt tester) testEdgeSet(
 
 	var extraOptions []gocmp.Option
 	if tt.directedOrUndirected == Undirected {
-		extraOptions = []gocmp.Option{gocmp.Comparer(undirectedEndpointPairsEqual)}
+		extraOptions = []gocmp.Option{
+			gocmp.Comparer(undirectedEndpointPairsEqual),
+		}
 	}
 	var contains []graph.EndpointPair[int]
 	var doesNotContain []graph.EndpointPair[int]
@@ -405,7 +407,53 @@ func (tt tester) testEdgeSet(
 	testSetLen(t, setName, edges, len(expectedEdges))
 	testSetAll(t, setName, edges, expectedEdges, extraOptions...)
 	testSetContains(t, setName, edges, contains, doesNotContain)
-	testSetString(t, setName, edges, expectedEdges, extraOptions...)
+	t.Run("Set.String", func(t *testing.T) {
+		str := edges.String()
+		trimmed, prefixFound := strings.CutPrefix(str, "[")
+		if !prefixFound {
+			t.Fatalf(
+				`%s: got Set.String of %q, want to have prefix "["`,
+				setName,
+				str,
+			)
+		}
+		trimmed, suffixFound := strings.CutSuffix(trimmed, "]")
+		if !suffixFound {
+			t.Fatalf(
+				`%s: got Set.String of %q, want to have suffix "]"`,
+				setName,
+				str,
+			)
+		}
+
+		// TODO: If T is graph.EndpointPair[int] and g is undirected, sort source and target of all endpoint pairs in
+		//       got and want to "normalise" them.
+		// TODO: For undirected graphs, produce error message:
+		//   got "[<2 -> 1>, <2 -> 3>]", want string value with edges:
+		//       <1 -> 2> or <2 -> 1>
+		//       <2 -> 3> or <3 -> 2>
+		//   in any order
+		// TODO: For directed graphs, produce error message:
+		//   got "[<2 -> 1>, <2 -> 3>]", want string value edges:
+		//       <2 -> 1>
+		//       <2 -> 3>
+		//   in any order
+
+		var want []string
+		for _, v := range expectedEdges {
+			want = append(want, fmt.Sprintf("%v", v))
+		}
+		got := strings.SplitN(trimmed, ", ", len(expectedEdges))
+
+		if diff := orderagnostic.Diff(got, want, extraOptions...); diff != "" {
+			t.Fatalf(
+				"%s: Set.String of %q: elements mismatch: (-want +got):\n%s",
+				setName,
+				str,
+				diff,
+			)
+		}
+	})
 }
 
 func reversesOf(edges []graph.EndpointPair[int]) []graph.EndpointPair[int] {
