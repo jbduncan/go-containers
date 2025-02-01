@@ -291,7 +291,38 @@ func (tt tester) test() {
 			},
 		)
 
-		// TODO: continue from graph_test.go, line 218, "has just one edge"
+		t.Run(
+			"has just one edge",
+			func(t *testing.T) {
+				tt.testEdgeSet(
+					t,
+					graphEdgesName,
+					g().Edges(),
+					[]graph.EndpointPair[int]{
+						graph.EndpointPairOf(node1, node2),
+					},
+				)
+			},
+		)
+
+		t.Run(
+			"sees the first node as being connected to the second",
+			func(t *testing.T) {
+				if got := g().HasEdgeConnecting(node1, node2); !got {
+					t.Errorf("Graph.HasEdgeConnecting: got false, want true")
+				}
+				if got := g().HasEdgeConnectingEndpoints(
+					graph.EndpointPairOf(node1, node2),
+				); !got {
+					t.Errorf(
+						"Graph.HasEdgeConnectingEndpoints: " +
+							"got false, want true",
+					)
+				}
+			},
+		)
+
+		// TODO: continue from graph_test.go, line 233, "does not see the first node as being connected to any other node"
 	})
 }
 
