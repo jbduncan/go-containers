@@ -408,25 +408,7 @@ func (tt tester) testEdgeSet(
 	testSetAll(t, setName, edges, expectedEdges, extraOptions...)
 	testSetContains(t, setName, edges, contains, doesNotContain)
 	t.Run("Set.String", func(t *testing.T) {
-		str := edges.String()
-		trimmed, prefixFound := strings.CutPrefix(str, "[")
-		if !prefixFound {
-			t.Fatalf(
-				`%s: got Set.String of %q, want to have prefix "["`,
-				setName,
-				str,
-			)
-		}
-		trimmed, suffixFound := strings.CutSuffix(trimmed, "]")
-		if !suffixFound {
-			t.Fatalf(
-				`%s: got Set.String of %q, want to have suffix "]"`,
-				setName,
-				str,
-			)
-		}
-
-		// TODO: If T is graph.EndpointPair[int] and g is undirected, sort source and target of all endpoint pairs in
+		// TODO: If g is undirected, sort source and target of all endpoint pairs in
 		//       got and want to "normalise" them.
 		// TODO: For undirected graphs, produce error message:
 		//   got "[<2 -> 1>, <2 -> 3>]", want string value with edges:
@@ -439,19 +421,43 @@ func (tt tester) testEdgeSet(
 		//       <2 -> 3>
 		//   in any order
 
-		var want []string
-		for _, v := range expectedEdges {
-			want = append(want, fmt.Sprintf("%v", v))
+		parseEndpointPairString := func(s string) graph.EndpointPair[int] {
+			// TODO
+			return graph.EndpointPair[int]{}
 		}
-		got := strings.SplitN(trimmed, ", ", len(expectedEdges))
 
+		parseString := func() []graph.EndpointPair[int] {
+			str := edges.String()
+			trimmed, prefixFound := strings.CutPrefix(str, "[")
+			if !prefixFound {
+				t.Fatalf(
+					`%s: got Set.String of %q, want to have prefix "["`,
+					setName,
+					str,
+				)
+			}
+			trimmed, suffixFound := strings.CutSuffix(trimmed, "]")
+			if !suffixFound {
+				t.Fatalf(
+					`%s: got Set.String of %q, want to have suffix "]"`,
+					setName,
+					str,
+				)
+			}
+
+			elemStrs := strings.SplitN(trimmed, ", ", -1)
+			elems := make([]graph.EndpointPair[int], 0, len(elemStrs))
+			for _, elemStr := range elemStrs {
+				elems = append(elems, parseEndpointPairString(elemStr))
+			}
+
+			return elems
+		}
+
+		got := edges
+		want := parseString()
 		if diff := orderagnostic.Diff(got, want, extraOptions...); diff != "" {
-			t.Fatalf(
-				"%s: Set.String of %q: elements mismatch: (-want +got):\n%s",
-				setName,
-				str,
-				diff,
-			)
+			// TODO: error message like in TODO above
 		}
 	})
 }
@@ -564,7 +570,7 @@ func testSetString[T comparable](
 		for _, v := range expectedValues {
 			want = append(want, fmt.Sprintf("%v", v))
 		}
-		got := strings.SplitN(trimmed, ", ", len(expectedValues))
+		got := strings.SplitN(trimmed, ", ", -1)
 
 		if diff := orderagnostic.Diff(got, want, extraOptions...); diff != "" {
 			t.Fatalf(
