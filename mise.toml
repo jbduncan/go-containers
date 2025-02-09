@@ -158,6 +158,13 @@ sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
 alias = "t"
 
+[tasks.test-force]
+description = "Run tests for the library source code, re-running even if no changes have been made."
+run = "go test -shuffle=on -race ./..."
+depends = "build"
+sources = ["go.mod", "go.sum", "**/*.go"]
+alias = "tf"
+
 [tasks.update-dependencies]
 description = "Update the versions of all dependencies."
 hide = true

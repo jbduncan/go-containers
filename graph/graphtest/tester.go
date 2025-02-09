@@ -2,11 +2,13 @@ package graphtest
 
 import (
 	"fmt"
+	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 
-	gocmp "github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp"
 	"github.com/jbduncan/go-containers/graph"
 	"github.com/jbduncan/go-containers/internal/orderagnostic"
 	"github.com/jbduncan/go-containers/internal/slicesx"
@@ -146,6 +148,7 @@ func (tt tester) test() {
 				t,
 				graphEdgesName,
 				g.Edges(),
+				g.IsDirected(),
 				nil,
 			)
 		})
@@ -174,10 +177,12 @@ func (tt tester) test() {
 		})
 
 		t.Run("the node has no incident edges", func(t *testing.T) {
+			g := g()
 			tt.testEdgeSet(
 				t,
 				graphIncidentEdgesName,
-				g().IncidentEdges(node1),
+				g.IncidentEdges(node1),
+				g.IsDirected(),
 				nil,
 			)
 		})
@@ -280,10 +285,12 @@ func (tt tester) test() {
 			"has an incident edge connecting the first node to the "+
 				"second node",
 			func(t *testing.T) {
+				g := g()
 				tt.testEdgeSet(
 					t,
 					graphIncidentEdgesName,
-					g().IncidentEdges(node1),
+					g.IncidentEdges(node1),
+					g.IsDirected(),
 					[]graph.EndpointPair[int]{
 						graph.EndpointPairOf(node1, node2),
 					},
@@ -294,10 +301,12 @@ func (tt tester) test() {
 		t.Run(
 			"has just one edge",
 			func(t *testing.T) {
+				g := g()
 				tt.testEdgeSet(
 					t,
 					graphEdgesName,
-					g().Edges(),
+					g.Edges(),
+					g.IsDirected(),
 					[]graph.EndpointPair[int]{
 						graph.EndpointPairOf(node1, node2),
 					},
@@ -372,20 +381,18 @@ func testNodeSet(
 	testSetString(t, setName, s, expectedValues)
 }
 
+// TODO: refactor 'graphIsDirected' control flag away
+//
+//nolint:revive
 func (tt tester) testEdgeSet(
 	t *testing.T,
 	setName string,
 	edges set.Set[graph.EndpointPair[int]],
+	graphIsDirected bool,
 	expectedEdges []graph.EndpointPair[int],
 ) {
 	t.Helper()
 
-	var extraOptions []gocmp.Option
-	if tt.directedOrUndirected == Undirected {
-		extraOptions = []gocmp.Option{
-			gocmp.Comparer(undirectedEndpointPairsEqual),
-		}
-	}
 	var contains []graph.EndpointPair[int]
 	var doesNotContain []graph.EndpointPair[int]
 	if tt.directedOrUndirected == Directed {
@@ -405,29 +412,79 @@ func (tt tester) testEdgeSet(
 	}
 
 	testSetLen(t, setName, edges, len(expectedEdges))
-	testSetAll(t, setName, edges, expectedEdges, extraOptions...)
+	// TODO: Extract into helper function
+	t.Run("Set.All", func(t *testing.T) {
+		got, want := slices.Collect(edges.All()), expectedEdges
+		if graphIsDirected {
+			if diff := orderagnostic.Diff(got, want); diff != "" {
+				t.Errorf(
+					"%s: Set.All mismatch (-want +got):\n%s",
+					setName,
+					diff,
+				)
+			}
+		} else {
+			if diff := undirectedEndpointPairsDiff(got, want); diff != "" {
+				t.Errorf(
+					"%s: Set.All mismatch (-want +got):\n%s",
+					setName,
+					diff,
+				)
+			}
+		}
+	})
 	testSetContains(t, setName, edges, contains, doesNotContain)
+	// TODO: Extract into helper function
 	t.Run("Set.String", func(t *testing.T) {
-		// TODO: If g is undirected, sort source and target of all endpoint pairs in
-		//       got and want to "normalise" them.
-		// TODO: For undirected graphs, produce error message:
-		//   got "[<2 -> 1>, <2 -> 3>]", want string value with edges:
-		//       <1 -> 2> or <2 -> 1>
-		//       <2 -> 3> or <3 -> 2>
-		//   in any order
-		// TODO: For directed graphs, produce error message:
-		//   got "[<2 -> 1>, <2 -> 3>]", want string value edges:
-		//       <2 -> 1>
-		//       <2 -> 3>
-		//   in any order
+		str := edges.String()
+
+		report := func() {
+			t.Helper()
+
+			var msg strings.Builder
+			if len(expectedEdges) == 0 {
+				msg.WriteString("%s: got Set.String of %q, want \"[]\"")
+			} else if graphIsDirected {
+				msg.WriteString("%s: got Set.String of %q, want to contain substrings:\n")
+				for _, edge := range expectedEdges {
+					msg.WriteString("    ")
+					msg.WriteString(edge.String())
+				}
+			} else {
+				msg.WriteString("%s: got Set.String of %q, want to contain substrings:\n")
+				for _, edge := range expectedEdges {
+					msg.WriteString("    ")
+					msg.WriteString(edge.String())
+					msg.WriteString(" or ")
+					msg.WriteString(reverseOf(edge).String())
+				}
+			}
+			t.Fatalf(msg.String(), setName, str)
+		}
 
 		parseEndpointPairString := func(s string) graph.EndpointPair[int] {
-			// TODO
-			return graph.EndpointPair[int]{}
+			t.Helper()
+
+			// TODO: Extract into global variable
+			endpointPairStringRegex := regexp.MustCompile(`<(\d+) -> (\d)+>`)
+			matches := endpointPairStringRegex.FindStringSubmatch(s)
+			if len(matches) != 3 {
+				report()
+			}
+			source, err := strconv.Atoi(matches[1])
+			if err != nil {
+				report()
+			}
+			target, err := strconv.Atoi(matches[2])
+			if err != nil {
+				report()
+			}
+			return graph.EndpointPairOf(source, target)
 		}
 
 		parseString := func() []graph.EndpointPair[int] {
-			str := edges.String()
+			t.Helper()
+
 			trimmed, prefixFound := strings.CutPrefix(str, "[")
 			if !prefixFound {
 				t.Fatalf(
@@ -445,29 +502,25 @@ func (tt tester) testEdgeSet(
 				)
 			}
 
-			elemStrs := strings.SplitN(trimmed, ", ", -1)
-			elems := make([]graph.EndpointPair[int], 0, len(elemStrs))
-			for _, elemStr := range elemStrs {
-				elems = append(elems, parseEndpointPairString(elemStr))
+			elems := splitByComma(trimmed)
+			result := make([]graph.EndpointPair[int], 0, len(elems))
+			for _, elemStr := range elems {
+				result = append(result, parseEndpointPairString(elemStr))
 			}
-
-			return elems
+			return result
 		}
 
-		got := edges
-		want := parseString()
-		if diff := orderagnostic.Diff(got, want, extraOptions...); diff != "" {
-			// TODO: error message like in TODO above
+		got, want := expectedEdges, parseString()
+		if graphIsDirected {
+			if diff := orderagnostic.Diff(got, want); diff != "" {
+				report()
+			}
+		} else {
+			if diff := undirectedEndpointPairsDiff(got, want); diff != "" {
+				report()
+			}
 		}
 	})
-}
-
-func reversesOf(edges []graph.EndpointPair[int]) []graph.EndpointPair[int] {
-	reverses := make([]graph.EndpointPair[int], 0, len(edges))
-	for _, edge := range edges {
-		reverses = append(reverses, reverseOf(edge))
-	}
-	return reverses
 }
 
 func testSetLen[T comparable](
@@ -495,13 +548,12 @@ func testSetAll[T comparable](
 	setName string,
 	s set.Set[T],
 	expectedValues []T,
-	extraOptions ...gocmp.Option,
 ) {
 	t.Helper()
 
 	t.Run("Set.All", func(t *testing.T) {
 		got, want := slices.Collect(s.All()), expectedValues
-		if diff := orderagnostic.Diff(got, want, extraOptions...); diff != "" {
+		if diff := orderagnostic.Diff(got, want); diff != "" {
 			t.Errorf("%s: Set.All mismatch (-want +got):\n%s", setName, diff)
 		}
 	})
@@ -543,7 +595,6 @@ func testSetString[T comparable](
 	setName string,
 	s set.Set[T],
 	expectedValues []T,
-	extraOptions ...gocmp.Option,
 ) {
 	t.Helper()
 
@@ -566,13 +617,13 @@ func testSetString[T comparable](
 			)
 		}
 
-		var want []string
+		want := make([]string, 0, len(expectedValues))
 		for _, v := range expectedValues {
 			want = append(want, fmt.Sprintf("%v", v))
 		}
-		got := strings.SplitN(trimmed, ", ", -1)
+		got := splitByComma(trimmed)
 
-		if diff := orderagnostic.Diff(got, want, extraOptions...); diff != "" {
+		if diff := orderagnostic.Diff(got, want); diff != "" {
 			t.Fatalf(
 				"%s: Set.String of %q: elements mismatch: (-want +got):\n%s",
 				setName,
@@ -599,13 +650,56 @@ func testDegree(
 	}
 }
 
+func splitByComma(s string) []string {
+	if len(s) == 0 {
+		return make([]string, 0)
+	}
+	return strings.Split(s, ", ")
+}
+
 func reverseOf(endpointPair graph.EndpointPair[int]) graph.EndpointPair[int] {
 	return graph.EndpointPairOf(endpointPair.Target(), endpointPair.Source())
 }
 
-func undirectedEndpointPairsEqual(
-	a graph.EndpointPair[int],
-	b graph.EndpointPair[int],
+func reversesOf(edges []graph.EndpointPair[int]) []graph.EndpointPair[int] {
+	result := make([]graph.EndpointPair[int], 0, len(edges))
+	for _, edge := range edges {
+		result = append(result, reverseOf(edge))
+	}
+	return result
+}
+
+func undirectedEndpointPairsDiff(
+	got []graph.EndpointPair[int],
+	want []graph.EndpointPair[int],
+) string {
+	return cmp.Diff(
+		want,
+		got,
+		cmp.Comparer(undirectedEndpointPairSlicesEqualInAnyOrder),
+	)
+}
+
+func undirectedEndpointPairSlicesEqualInAnyOrder(
+	a []graph.EndpointPair[int],
+	b []graph.EndpointPair[int],
 ) bool {
-	return a == b || a == reverseOf(b)
+	aCopy, bCopy := deepCopyAndNormalise(a), deepCopyAndNormalise(b)
+	return orderagnostic.SlicesEqual(aCopy, bCopy)
+}
+
+func deepCopyAndNormalise(
+	s []graph.EndpointPair[int],
+) []graph.EndpointPair[int] {
+	var result []graph.EndpointPair[int]
+	for _, edge := range s {
+		var newEdge graph.EndpointPair[int]
+		if edge.Source() < edge.Target() {
+			newEdge = graph.EndpointPairOf(edge.Source(), edge.Target())
+		} else {
+			newEdge = graph.EndpointPairOf(edge.Target(), edge.Source())
+		}
+		result = append(result, newEdge)
+	}
+	return result
 }
