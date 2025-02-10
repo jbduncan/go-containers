@@ -185,8 +185,8 @@ alias = "u"
 # cosign is used by mise itself to download tools more securely
 cosign = "latest"
 go = "latest"
-"go:github.com/tailscale/depaware" = "latest"
-"go:go.uber.org/nilaway/cmd/nilaway" = "latest"
+"go:github.com/tailscale/depaware" = "b748de0"
+"go:go.uber.org/nilaway/cmd/nilaway" = "ba14292"
 "go:golang.org/x/tools/cmd/eg" = "latest"
 golangci-lint = "latest"
 # slsa-verifier is used by mise itself to download tools more securely

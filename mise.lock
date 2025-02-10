@@ -1,24 +1,23 @@
 [tools.cosign]
-version = "2.4.1"
+version = "2.4.2"
 backend = "aqua:sigstore/cosign"
 
 [tools.cosign.checksums]
-cosign-darwin-arm64 = "sha256:13343856b69f70388c4fe0b986a31dde5958e444b41be22d785d3dc5e1a9cc62"
+cosign-darwin-arm64 = "sha256:f9a574c1ab208918a0d96ffca7a105dfb32792f6c33e0da2dbefb76e25600ab8"
 
 [tools.go]
-version = "1.23.5"
+version = "1.23.6"
 backend = "core:go"
 
 [tools.go.checksums]
-"go1.23.5.darwin-arm64.tar.gz" = "sha256:047bfce4fbd0da6426bd30cd19716b35a466b1c15a45525ce65b9824acb33285"
-"go1.23.5.linux-amd64.tar.gz" = "sha256:cbcad4a6482107c7c7926df1608106c189417163428200ce357695cc7e01d091"
+"go1.23.6.darwin-arm64.tar.gz" = "sha256:5cae2450a1708aeb0333237a155640d5562abaf195defebc4306054565536221"
 
 [tools."go:github.com/tailscale/depaware"]
-version = "latest"
+version = "b748de0"
 backend = "go:github.com/tailscale/depaware"
 
 [tools."go:go.uber.org/nilaway/cmd/nilaway"]
-version = "latest"
+version = "ba14292"
 backend = "go:go.uber.org/nilaway/cmd/nilaway"
 
 [tools."go:golang.org/x/tools/cmd/eg"]
@@ -34,16 +33,15 @@ backend = "aqua:golangci/golangci-lint"
 "golangci-lint-1.63.4-linux-amd64.tar.gz" = "sha256:01abb14a4df47b5ca585eff3c34b105023cba92ec34ff17212dbb83855581690"
 
 [tools.slsa-verifier]
-version = "2.6.0"
+version = "2.7.0"
 backend = "ubi:slsa-framework/slsa-verifier"
 
 [tools.slsa-verifier.checksums]
-slsa-verifier-macos-aarch64 = "sha256:8740e66832fd48bbaa479acd5310986b876ff545460add0cb4a087aec056189c"
+slsa-verifier-macos-aarch64 = "sha256:84d9122ce12e0c79080844285fd5c4976407ed3463e434a1b21b0979c46b1e55"
 
 [tools."ubi:ast-grep/ast-grep"]
-version = "0.34.1"
+version = "0.34.4"
 backend = "ubi:ast-grep/ast-grep"
 
 [tools."ubi:ast-grep/ast-grep".checksums]
-ast-grep-linux-x86_64 = "sha256:d4d9f3964d19fee89c1b1a525734807a7681557bd9cdd49390649328cbea6dc1"
-ast-grep-macos-aarch64 = "sha256:cc74806d5fc307158dc7a8a8b182b8ae6880bf089d2552eaded788a60369fc26"
+ast-grep-macos-aarch64 = "sha256:44bd0008b7976117443cc39b1cbf46d6fe59b4b1eb3abf245883710d8509765a"
