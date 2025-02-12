@@ -121,18 +121,20 @@ type tester struct {
 	allowsOrDisallowsSelfLoops SelfLoopsMode
 }
 
+const (
+	graphNodesName         = "Graph.Nodes"
+	graphEdgesName         = "Graph.Edges"
+	graphAdjacentNodesName = "Graph.AdjacentNodes"
+	graphPredecessorsName  = "Graph.Predecessors"
+	graphSuccessorsName    = "Graph.Successors"
+	graphIncidentEdgesName = "Graph.IncidentEdges"
+	graphDegreeName        = "Graph.Degree"
+	graphInDegreeName      = "Graph.InDegree"
+	graphOutDegreeName     = "Graph.OutDegree"
+)
+
 func (tt tester) test() {
 	tt.t.Helper()
-
-	const graphNodesName = "Graph.Nodes"
-	const graphEdgesName = "Graph.Edges"
-	const graphAdjacentNodesName = "Graph.AdjacentNodes"
-	const graphPredecessorsName = "Graph.Predecessors"
-	const graphSuccessorsName = "Graph.Successors"
-	const graphIncidentEdgesName = "Graph.IncidentEdges"
-	const graphDegreeName = "Graph.Degree"
-	const graphInDegreeName = "Graph.InDegree"
-	const graphOutDegreeName = "Graph.OutDegree"
 
 	tt.t.Run("empty graph", func(t *testing.T) {
 		t.Run("has no nodes", func(t *testing.T) {
@@ -142,14 +144,7 @@ func (tt tester) test() {
 
 		t.Run("has no edges", func(t *testing.T) {
 			g := tt.graphBuilder()
-			tt.testEdgeSet(
-				t,
-				graphEdgesName,
-				g.Edges(),
-				// TODO: refactor 'g.IsDirected()' control flag away
-				g.IsDirected(),
-				nil,
-			)
+			tt.testEdges(t, g)
 		})
 	})
 
@@ -176,14 +171,7 @@ func (tt tester) test() {
 		})
 
 		t.Run("the node has no incident edges", func(t *testing.T) {
-			g := g()
-			tt.testEdgeSet(
-				t,
-				graphIncidentEdgesName,
-				g.IncidentEdges(node1),
-				g.IsDirected(),
-				nil,
-			)
+			tt.testIncidentEdges(t, g(), node1)
 		})
 
 		t.Run("the node has a degree of 0", func(t *testing.T) {
@@ -284,15 +272,11 @@ func (tt tester) test() {
 			"has an incident edge connecting the first node to the "+
 				"second node",
 			func(t *testing.T) {
-				g := g()
-				tt.testEdgeSet(
+				tt.testIncidentEdges(
 					t,
-					graphIncidentEdgesName,
-					g.IncidentEdges(node1),
-					g.IsDirected(),
-					[]graph.EndpointPair[int]{
-						graph.EndpointPairOf(node1, node2),
-					},
+					g(),
+					node1,
+					graph.EndpointPairOf(node1, node2),
 				)
 			},
 		)
@@ -300,16 +284,7 @@ func (tt tester) test() {
 		t.Run(
 			"has just one edge",
 			func(t *testing.T) {
-				g := g()
-				tt.testEdgeSet(
-					t,
-					graphEdgesName,
-					g.Edges(),
-					g.IsDirected(),
-					[]graph.EndpointPair[int]{
-						graph.EndpointPairOf(node1, node2),
-					},
-				)
+				tt.testEdges(t, g(), graph.EndpointPairOf(node1, node2))
 			},
 		)
 
@@ -380,41 +355,66 @@ func testNodeSet(
 	testSetString(t, setName, s, expectedValues)
 }
 
-// TODO: refactor 'graphIsDirected' control flag away
+func (tt tester) testEdges(
+	t *testing.T,
+	g graph.Graph[int],
+	expectedEdges ...graph.EndpointPair[int],
+) {
+	tt.testEdgeSet(
+		t,
+		graphEdgesName,
+		g.Edges(),
+		expectedEdges,
+	)
+}
+
+func (tt tester) testIncidentEdges(
+	t *testing.T,
+	g graph.Graph[int],
+	node int,
+	expectedEdges ...graph.EndpointPair[int],
+) {
+	tt.testEdgeSet(
+		t,
+		graphIncidentEdgesName,
+		g.IncidentEdges(node),
+		expectedEdges,
+	)
+}
+
 func (tt tester) testEdgeSet(
 	t *testing.T,
 	setName string,
 	edges set.Set[graph.EndpointPair[int]],
-	graphIsDirected bool,
 	expectedEdges []graph.EndpointPair[int],
 ) {
 	t.Helper()
 
 	var contains []graph.EndpointPair[int]
 	var doesNotContain []graph.EndpointPair[int]
-	if tt.directedOrUndirected == Directed {
+	switch tt.directedOrUndirected {
+	case Directed:
 		contains = expectedEdges
 		doesNotContain = slicesx.AllOf(
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
 			reversesOf(expectedEdges),
 		)
-	} else {
-		// Even though there are only len(expectedEdges) edges in the graph,
-		// test that the set contains both the edges and their reverses to
-		// make sure that the edges are undirected.
+	case Undirected:
 		contains = slices.Concat(expectedEdges, reversesOf(expectedEdges))
 		doesNotContain = []graph.EndpointPair[int]{
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
 		}
+	default:
+		panic("unreachable")
 	}
 
 	testSetLen(t, setName, edges, len(expectedEdges))
-	testEdgeSetAll(t, setName, edges, graphIsDirected, expectedEdges)
+	tt.testEdgeSetAll(t, setName, edges, expectedEdges)
 	testSetContains(t, setName, edges, contains, doesNotContain)
 	newEdgeSetStringTester(
 		t,
 		setName,
-		graphIsDirected,
+		tt.directedOrUndirected,
 		edges,
 		expectedEdges,
 	).Test()
@@ -531,21 +531,18 @@ func testSetString[T comparable](
 	})
 }
 
-// TODO: refactor 'graphIsDirected' control flag away
-//
-//nolint:revive
-func testEdgeSetAll(
+func (tt tester) testEdgeSetAll(
 	t *testing.T,
 	setName string,
 	edges set.Set[graph.EndpointPair[int]],
-	graphIsDirected bool,
 	expectedEdges []graph.EndpointPair[int],
 ) {
 	t.Helper()
 
 	t.Run("Set.All", func(t *testing.T) {
 		got, want := slices.Collect(edges.All()), expectedEdges
-		if graphIsDirected {
+		switch tt.directedOrUndirected {
+		case Directed:
 			if diff := orderagnostic.Diff(got, want); diff != "" {
 				t.Errorf(
 					"%s: Set.All mismatch (-want +got):\n%s",
@@ -553,7 +550,7 @@ func testEdgeSetAll(
 					diff,
 				)
 			}
-		} else {
+		case Undirected:
 			if diff := undirectedEndpointPairsDiff(got, want); diff != "" {
 				t.Errorf(
 					"%s: Set.All mismatch (-want +got):\n%s",
@@ -561,6 +558,8 @@ func testEdgeSetAll(
 					diff,
 				)
 			}
+		default:
+			panic("unreachable")
 		}
 	})
 }

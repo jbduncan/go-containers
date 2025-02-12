@@ -12,26 +12,26 @@ import (
 )
 
 type edgeSetStringTester struct {
-	tt              *testing.T
-	setName         string
-	graphIsDirected bool
-	edges           string
-	expectedEdges   []graph.EndpointPair[int]
+	tt                   *testing.T
+	setName              string
+	directedOrUndirected DirectionMode
+	edges                string
+	expectedEdges        []graph.EndpointPair[int]
 }
 
 func newEdgeSetStringTester(
 	tt *testing.T,
 	setName string,
-	graphIsDirected bool,
+	directedOrUndirected DirectionMode,
 	edges set.Set[graph.EndpointPair[int]],
 	expectedEdges []graph.EndpointPair[int],
 ) *edgeSetStringTester {
 	return &edgeSetStringTester{
-		tt:              tt,
-		setName:         setName,
-		graphIsDirected: graphIsDirected,
-		edges:           edges.String(),
-		expectedEdges:   expectedEdges,
+		tt:                   tt,
+		setName:              setName,
+		directedOrUndirected: directedOrUndirected,
+		edges:                edges.String(),
+		expectedEdges:        expectedEdges,
 	}
 }
 
@@ -62,17 +62,20 @@ func (t *edgeSetStringTester) Test() {
 			want = append(want, t.toEndpointPair(ttt, elemStr))
 		}
 
-		if t.graphIsDirected {
+		switch t.directedOrUndirected {
+		case Directed:
 			if diff := orderagnostic.Diff(t.expectedEdges, want); diff != "" {
 				t.report(ttt)
 			}
-		} else {
+		case Undirected:
 			if diff := undirectedEndpointPairsDiff(
 				t.expectedEdges,
 				want,
 			); diff != "" {
 				t.report(ttt)
 			}
+		default:
+			panic("unreachable")
 		}
 	})
 }
@@ -107,14 +110,14 @@ func (t *edgeSetStringTester) report(ttt *testing.T) {
 	switch {
 	case len(t.expectedEdges) == 0:
 		msg.WriteString(`%s: got Set.String of %q, want "[]"`)
-	case t.graphIsDirected:
+	case t.directedOrUndirected == Directed:
 		msg.WriteString(
 			"%s: got Set.String of %q, want to contain substrings:\n")
 		for _, edge := range t.expectedEdges {
 			msg.WriteString("    ")
 			msg.WriteString(edge.String())
 		}
-	case !t.graphIsDirected:
+	case t.directedOrUndirected == Undirected:
 		msg.WriteString(
 			"%s: got Set.String of %q, want to contain substrings:\n")
 		for _, edge := range t.expectedEdges {
