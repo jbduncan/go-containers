@@ -29,15 +29,8 @@ func (e edgeSet[N]) All() iter.Seq[EndpointPair[N]] {
 		for source := range e.delegate.Nodes().All() {
 			for target := range e.delegate.Successors(source).All() {
 				edge := EndpointPairOf(source, target)
-				if e.delegate.IsDirected() {
-					if seen.Contains(edge) {
-						continue
-					}
-				} else {
-					reverse := EndpointPairOf(target, source)
-					if seen.Contains(edge) || seen.Contains(reverse) {
-						continue
-					}
+				if e.edgeSeen(edge, seen) {
+					continue
 				}
 
 				seen.Add(edge)
@@ -47,6 +40,22 @@ func (e edgeSet[N]) All() iter.Seq[EndpointPair[N]] {
 			}
 		}
 	}
+}
+
+func (e edgeSet[N]) edgeSeen(
+	edge EndpointPair[N],
+	seen set.Set[EndpointPair[N]],
+) bool {
+	if seen.Contains(edge) {
+		return true
+	}
+	if !e.delegate.IsDirected() {
+		reverse := EndpointPairOf(edge.Target(), edge.Source())
+		if seen.Contains(reverse) {
+			return true
+		}
+	}
+	return false
 }
 
 func (e edgeSet[N]) String() string {

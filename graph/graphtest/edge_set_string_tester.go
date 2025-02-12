@@ -38,10 +38,10 @@ func newEdgeSetStringTester(
 func (t *edgeSetStringTester) Test() {
 	t.tt.Helper()
 
-	t.tt.Run("Set.String", func(tt *testing.T) {
+	t.tt.Run("Set.String", func(ttt *testing.T) {
 		trimmed, prefixFound := strings.CutPrefix(t.edges, "[")
 		if !prefixFound {
-			tt.Fatalf(
+			ttt.Fatalf(
 				`%s: got Set.String of %q, want to have prefix "["`,
 				t.setName,
 				t.edges,
@@ -49,7 +49,7 @@ func (t *edgeSetStringTester) Test() {
 		}
 		trimmed, suffixFound := strings.CutSuffix(trimmed, "]")
 		if !suffixFound {
-			tt.Fatalf(
+			ttt.Fatalf(
 				`%s: got Set.String of %q, want to have suffix "]"`,
 				t.setName,
 				t.edges,
@@ -59,61 +59,62 @@ func (t *edgeSetStringTester) Test() {
 		elems := splitByComma(trimmed)
 		want := make([]graph.EndpointPair[int], 0, len(elems))
 		for _, elemStr := range elems {
-			want = append(want, t.toEndpointPair(tt, elemStr))
+			want = append(want, t.toEndpointPair(ttt, elemStr))
 		}
 
 		if t.graphIsDirected {
 			if diff := orderagnostic.Diff(t.expectedEdges, want); diff != "" {
-				t.report(tt)
+				t.report(ttt)
 			}
 		} else {
 			if diff := undirectedEndpointPairsDiff(
 				t.expectedEdges,
 				want,
 			); diff != "" {
-				t.report(tt)
+				t.report(ttt)
 			}
 		}
 	})
 }
 
+var endpointPairStringRegex = regexp.MustCompile(`<(\d+) -> (\d)+>`)
+
 func (t *edgeSetStringTester) toEndpointPair(
-	tt *testing.T,
+	ttt *testing.T,
 	s string,
 ) graph.EndpointPair[int] {
-	tt.Helper()
+	ttt.Helper()
 
-	// TODO: Extract into global variable
-	endpointPairStringRegex := regexp.MustCompile(`<(\d+) -> (\d)+>`)
 	matches := endpointPairStringRegex.FindStringSubmatch(s)
 	if len(matches) != 3 {
-		t.report(tt)
+		t.report(ttt)
 	}
 	source, err := strconv.Atoi(matches[1])
 	if err != nil {
-		t.report(tt)
+		t.report(ttt)
 	}
 	target, err := strconv.Atoi(matches[2])
 	if err != nil {
-		t.report(tt)
+		t.report(ttt)
 	}
 	return graph.EndpointPairOf(source, target)
 }
 
-func (t *edgeSetStringTester) report(tt *testing.T) {
-	tt.Helper()
+func (t *edgeSetStringTester) report(ttt *testing.T) {
+	ttt.Helper()
 
 	var msg strings.Builder
-	if len(t.expectedEdges) == 0 {
+	switch {
+	case len(t.expectedEdges) == 0:
 		msg.WriteString(`%s: got Set.String of %q, want "[]"`)
-	} else if t.graphIsDirected {
+	case t.graphIsDirected:
 		msg.WriteString(
 			"%s: got Set.String of %q, want to contain substrings:\n")
 		for _, edge := range t.expectedEdges {
 			msg.WriteString("    ")
 			msg.WriteString(edge.String())
 		}
-	} else {
+	case !t.graphIsDirected:
 		msg.WriteString(
 			"%s: got Set.String of %q, want to contain substrings:\n")
 		for _, edge := range t.expectedEdges {
@@ -122,6 +123,8 @@ func (t *edgeSetStringTester) report(tt *testing.T) {
 			msg.WriteString(" or ")
 			msg.WriteString(reverseOf(edge).String())
 		}
+	default:
+		panic("unreachable")
 	}
-	tt.Fatalf(msg.String(), t.setName, t.edges)
+	ttt.Fatalf(msg.String(), t.setName, t.edges)
 }
