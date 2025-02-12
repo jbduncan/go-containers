@@ -167,4 +167,3 @@ linters-settings:
       - name: useless-break
       - name: var-declaration
       - name: var-naming
-      - name: waitgroup-by-value
