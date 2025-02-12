@@ -46,14 +46,10 @@ func (e edgeSet[N]) edgeSeen(
 	edge EndpointPair[N],
 	seen set.Set[EndpointPair[N]],
 ) bool {
-	switch {
-	case seen.Contains(edge):
+	if seen.Contains(edge) {
 		return true
-	case !e.delegate.IsDirected() && seen.Contains(reverseOf(edge)):
-		return true
-	default:
-		return false
 	}
+	return !e.delegate.IsDirected() && seen.Contains(reverseOf(edge))
 }
 
 func reverseOf[N comparable](edge EndpointPair[N]) EndpointPair[N] {
