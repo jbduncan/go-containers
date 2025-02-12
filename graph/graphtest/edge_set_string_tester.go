@@ -12,26 +12,26 @@ import (
 )
 
 type edgeSetStringTester struct {
-	tt                   *testing.T
-	setName              string
-	directedOrUndirected DirectionMode
-	edges                string
-	expectedEdges        []graph.EndpointPair[int]
+	tt            *testing.T
+	setName       string
+	directionMode DirectionMode
+	edges         string
+	expectedEdges []graph.EndpointPair[int]
 }
 
 func newEdgeSetStringTester(
 	tt *testing.T,
 	setName string,
-	directedOrUndirected DirectionMode,
+	directionMode DirectionMode,
 	edges set.Set[graph.EndpointPair[int]],
 	expectedEdges []graph.EndpointPair[int],
 ) *edgeSetStringTester {
 	return &edgeSetStringTester{
-		tt:                   tt,
-		setName:              setName,
-		directedOrUndirected: directedOrUndirected,
-		edges:                edges.String(),
-		expectedEdges:        expectedEdges,
+		tt:            tt,
+		setName:       setName,
+		directionMode: directionMode,
+		edges:         edges.String(),
+		expectedEdges: expectedEdges,
 	}
 }
 
@@ -62,7 +62,7 @@ func (t *edgeSetStringTester) Test() {
 			want = append(want, t.toEndpointPair(ttt, elemStr))
 		}
 
-		switch t.directedOrUndirected {
+		switch t.directionMode {
 		case Directed:
 			if diff := orderagnostic.Diff(t.expectedEdges, want); diff != "" {
 				t.report(ttt)
@@ -110,14 +110,14 @@ func (t *edgeSetStringTester) report(ttt *testing.T) {
 	switch {
 	case len(t.expectedEdges) == 0:
 		msg.WriteString(`%s: got Set.String of %q, want "[]"`)
-	case t.directedOrUndirected == Directed:
+	case t.directionMode == Directed:
 		msg.WriteString(
 			"%s: got Set.String of %q, want to contain substrings:\n")
 		for _, edge := range t.expectedEdges {
 			msg.WriteString("    ")
 			msg.WriteString(edge.String())
 		}
-	case t.directedOrUndirected == Undirected:
+	case t.directionMode == Undirected:
 		msg.WriteString(
 			"%s: got Set.String of %q, want to contain substrings:\n")
 		for _, edge := range t.expectedEdges {

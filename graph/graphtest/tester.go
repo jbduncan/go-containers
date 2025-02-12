@@ -61,64 +61,64 @@ const (
 func Graph(
 	t TestingT,
 	graphBuilder func() graph.Graph[int],
-	mutableOrImmutable Mutability,
-	directedOrUndirected DirectionMode,
-	allowsOrDisallowsSelfLoops SelfLoopsMode,
+	mutability Mutability,
+	directionMode DirectionMode,
+	selfLoopsMode SelfLoopsMode,
 ) {
-	if mutableOrImmutable != Mutable && mutableOrImmutable != Immutable {
+	if mutability != Mutable && mutability != Immutable {
 		t.Fatalf(
-			"mutableOrImmutable expected to be Mutable or Immutable "+
+			"mutability expected to be Mutable or Immutable "+
 				"but was %v",
-			mutableOrImmutable,
+			mutability,
 		)
 	}
-	if directedOrUndirected != Directed && directedOrUndirected != Undirected {
+	if directionMode != Directed && directionMode != Undirected {
 		t.Fatalf(
-			"directedOrUndirected expected to be Directed or Undirected "+
+			"directionMode expected to be Directed or Undirected "+
 				"but was %v",
-			directedOrUndirected,
+			directionMode,
 		)
 	}
-	if allowsOrDisallowsSelfLoops != AllowsSelfLoops &&
-		allowsOrDisallowsSelfLoops != DisallowsSelfLoops {
+	if selfLoopsMode != AllowsSelfLoops &&
+		selfLoopsMode != DisallowsSelfLoops {
 		t.Fatalf(
-			"allowsOrDisallowsSelfLoops expected to be AllowsSelfLoops or "+
+			"selfLoopsMode expected to be AllowsSelfLoops or "+
 				"DisallowsSelfLoops but was %v",
-			allowsOrDisallowsSelfLoops,
+			selfLoopsMode,
 		)
 	}
 
 	newTester(
 		t,
 		graphBuilder,
-		mutableOrImmutable,
-		directedOrUndirected,
-		allowsOrDisallowsSelfLoops,
+		mutability,
+		directionMode,
+		selfLoopsMode,
 	).test()
 }
 
 func newTester(
 	t TestingT,
 	graphBuilder func() graph.Graph[int],
-	mutableOrImmutable Mutability,
-	directedOrUndirected DirectionMode,
-	allowsOrDisallowsSelfLoops SelfLoopsMode,
+	mutability Mutability,
+	directionMode DirectionMode,
+	selfLoopsMode SelfLoopsMode,
 ) *tester {
 	return &tester{
-		t:                          t,
-		graphBuilder:               graphBuilder,
-		mutableOrImmutable:         mutableOrImmutable,
-		directedOrUndirected:       directedOrUndirected,
-		allowsOrDisallowsSelfLoops: allowsOrDisallowsSelfLoops,
+		t:             t,
+		graphBuilder:  graphBuilder,
+		mutability:    mutability,
+		directionMode: directionMode,
+		selfLoopsMode: selfLoopsMode,
 	}
 }
 
 type tester struct {
-	t                          TestingT
-	graphBuilder               func() graph.Graph[int]
-	mutableOrImmutable         Mutability
-	directedOrUndirected       DirectionMode
-	allowsOrDisallowsSelfLoops SelfLoopsMode
+	t             TestingT
+	graphBuilder  func() graph.Graph[int]
+	mutability    Mutability
+	directionMode DirectionMode
+	selfLoopsMode SelfLoopsMode
 }
 
 const (
@@ -392,7 +392,7 @@ func (tt tester) testEdgeSet(
 
 	var contains []graph.EndpointPair[int]
 	var doesNotContain []graph.EndpointPair[int]
-	switch tt.directedOrUndirected {
+	switch tt.directionMode {
 	case Directed:
 		contains = expectedEdges
 		doesNotContain = slicesx.AllOf(
@@ -414,7 +414,7 @@ func (tt tester) testEdgeSet(
 	newEdgeSetStringTester(
 		t,
 		setName,
-		tt.directedOrUndirected,
+		tt.directionMode,
 		edges,
 		expectedEdges,
 	).Test()
@@ -541,7 +541,7 @@ func (tt tester) testEdgeSetAll(
 
 	t.Run("Set.All", func(t *testing.T) {
 		got, want := slices.Collect(edges.All()), expectedEdges
-		switch tt.directedOrUndirected {
+		switch tt.directionMode {
 		case Directed:
 			if diff := orderagnostic.Diff(got, want); diff != "" {
 				t.Errorf(
