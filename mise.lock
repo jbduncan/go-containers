@@ -11,6 +11,7 @@ backend = "core:go"
 
 [tools.go.checksums]
 "go1.24.0.darwin-arm64.tar.gz" = "sha256:fd9cfb5dd6c75a347cfc641a253f0db1cebaca16b0dd37965351c6184ba595e4"
+"go1.24.0.linux-amd64.tar.gz" = "sha256:dea9ca38a0b852a74e81c26134671af7c0fbe65d81b0dc1c5bfe22cf7d4c8858"
 
 [tools."go:github.com/tailscale/depaware"]
 version = "b748de0"
@@ -30,6 +31,7 @@ backend = "aqua:golangci/golangci-lint"
 
 [tools.golangci-lint.checksums]
 "golangci-lint-1.64.5-darwin-arm64.tar.gz" = "sha256:8c4f11ef3a22d610dd5836a09c98e944b405624f932f20c7e72ae78abc552311"
+"golangci-lint-1.64.5-linux-amd64.tar.gz" = "sha256:e6bd399a0479c5fd846dcf9f3990d20448b4f0d1e5027d82348eab9f80f7ac71"
 
 [tools.slsa-verifier]
 version = "2.7.0"
@@ -43,4 +45,5 @@ version = "0.34.4"
 backend = "ubi:ast-grep/ast-grep"
 
 [tools."ubi:ast-grep/ast-grep".checksums]
+ast-grep-linux-x86_64 = "sha256:ff679f3fe64e2a92c801553db2fc13403fde77971334e6852bb118e165a1d7e3"
 ast-grep-macos-aarch64 = "sha256:44bd0008b7976117443cc39b1cbf46d6fe59b4b1eb3abf245883710d8509765a"
