@@ -98,7 +98,6 @@ depends = [
   "eg",
   "go-sanity-check",
   "golangci-lint",
-  "nilaway",
 ]
 
 [tasks.nilaway]
