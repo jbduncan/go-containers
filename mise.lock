@@ -22,7 +22,7 @@ version = "ba14292"
 backend = "go:go.uber.org/nilaway/cmd/nilaway"
 
 [tools."go:golang.org/x/tools/cmd/eg"]
-version = "0.29.0"
+version = "0.30.0"
 backend = "go:golang.org/x/tools/cmd/eg"
 
 [tools.golangci-lint]
@@ -41,9 +41,8 @@ backend = "ubi:slsa-framework/slsa-verifier"
 slsa-verifier-macos-aarch64 = "sha256:84d9122ce12e0c79080844285fd5c4976407ed3463e434a1b21b0979c46b1e55"
 
 [tools."ubi:ast-grep/ast-grep"]
-version = "0.34.4"
+version = "0.35.0"
 backend = "ubi:ast-grep/ast-grep"
 
 [tools."ubi:ast-grep/ast-grep".checksums]
-ast-grep-linux-x86_64 = "sha256:ff679f3fe64e2a92c801553db2fc13403fde77971334e6852bb118e165a1d7e3"
-ast-grep-macos-aarch64 = "sha256:44bd0008b7976117443cc39b1cbf46d6fe59b4b1eb3abf245883710d8509765a"
+ast-grep-linux-x86_64 = "sha256:64a28fe76a664ff38c5717b967cc293f1238c21e488b580ff03ff5d4ba883cd9"
