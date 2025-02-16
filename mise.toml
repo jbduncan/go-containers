@@ -71,7 +71,7 @@ depends = ["build"]
 alias = "f"
 
 [tasks.generate]
-description = "Run go:generate instructions in the library source code"
+description = "Run go:generate instructions in the library source code."
 run = "go generate ./..."
 depends = ["go-sanity-check"]
 sources = ["go.mod", "go.sum", "**/*.go"]
