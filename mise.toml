@@ -37,6 +37,9 @@ description = "Run all linters and tests against the library source code."
 depends = ["lint", "test"]
 alias = "c"
 
+[tasks.default]
+depends = ["check"]
+
 [tasks.depaware]
 description = "Check that no Go package dependencies changed unexpectedly."
 hide = true
