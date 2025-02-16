@@ -1,30 +1,88 @@
 id: '!!a to a'
 snapshots:
-  '!!a':
-    fixed: a
-    labels:
-    - source: '!!a'
-      style: primary
-      start: 0
-      end: 3
-  '!!a(b("c", "d"))':
-    fixed: a(b("c", "d"))
+  ? |
+    func main() {
+        _ = !!a(b("c", "d"))
+    }
+  : fixed: |
+      func main() {
+          _ = a(b("c", "d"))
+      }
     labels:
     - source: '!!a(b("c", "d"))'
       style: primary
-      start: 0
-      end: 16
-  '!!foo()':
-    fixed: foo()
+      start: 22
+      end: 38
+    - source: a(b("c", "d"))
+      style: secondary
+      start: 24
+      end: 38
+    - source: '!a(b("c", "d"))'
+      style: secondary
+      start: 23
+      end: 38
+  ? |
+    func main() {
+        _ = !!foo()
+    }
+  : fixed: |
+      func main() {
+          _ = foo()
+      }
     labels:
     - source: '!!foo()'
       style: primary
-      start: 0
-      end: 7
-  '!!some().function().chain()':
-    fixed: some().function().chain()
+      start: 22
+      end: 29
+    - source: foo()
+      style: secondary
+      start: 24
+      end: 29
+    - source: '!foo()'
+      style: secondary
+      start: 23
+      end: 29
+  ? |
+    func main() {
+        _ = !!some().function().chain()
+    }
+  : fixed: |
+      func main() {
+          _ = some().function().chain()
+      }
     labels:
     - source: '!!some().function().chain()'
       style: primary
-      start: 0
-      end: 27
+      start: 22
+      end: 49
+    - source: some().function().chain()
+      style: secondary
+      start: 24
+      end: 49
+    - source: '!some().function().chain()'
+      style: secondary
+      start: 23
+      end: 49
+  ? |
+    func main() {
+        var a bool
+        _ = !!a
+    }
+  : fixed: |
+      func main() {
+          var a bool
+          _ = a
+      }
+    labels:
+    - source: '!!a'
+      style: primary
+      start: 37
+      end: 40
+    - source: a
+      style: secondary
+      start: 39
+      end: 40
+    - source: '!a'
+      style: secondary
+      start: 38
+      end: 40

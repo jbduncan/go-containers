@@ -78,6 +78,12 @@ message: "!!$A can be simplified as $A"
 note: Remove the redundant !!
 language: go
 rule:
-  pattern: "!!$A"
+  kind: unary_expression
+  regex: "!"
+  has:
+    kind: unary_expression
+    regex: "!"
+    has:
+      pattern: $A
 fix:
   $A

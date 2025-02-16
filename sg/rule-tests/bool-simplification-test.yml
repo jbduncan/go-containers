@@ -132,12 +132,53 @@ invalid:
 
 id: "!!a to a"
 valid:
-  - a
-  - foo()
-  - a(b("c", "d"))
-  - some().function().chain()
+  - |
+    func main() {
+        var a bool
+        _ = a
+    }
+  - |
+    func main() {
+        _ = foo()
+    }
+  - |
+    func main() {
+        _ = a(b("c", "d"))
+    }
+  - |
+    func main() {
+        _ = some().function().chain()
+    }
+  - |
+    func main() {
+        var a chan bool
+        _ = <-a
+    }
+  - |
+    func main() {
+        var a bool
+        _ = !a
+    }
+  - |
+    func main() {
+        var a int
+        _ = ++a
+    }
 invalid:
-  - '!!a'
-  - '!!foo()'
-  - '!!a(b("c", "d"))'
-  - '!!some().function().chain()'
+  - |
+    func main() {
+        var a bool
+        _ = !!a
+    }
+  - |
+    func main() {
+        _ = !!foo()
+    }
+  - |
+    func main() {
+        _ = !!a(b("c", "d"))
+    }
+  - |
+    func main() {
+        _ = !!some().function().chain()
+    }
