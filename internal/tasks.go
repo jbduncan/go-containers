@@ -16,27 +16,27 @@ import (
 )
 
 func main() {
-	group, ctx := newErrorGroup()
-
-	switch os.Args[1] {
-	case "depaware":
-		doDepaware(ctx, group)
-		os.Exit(must(group.Wait()))
-	case "depaware-fix":
-		doDepawareFix(ctx, group)
-		os.Exit(must(group.Wait()))
-	case "eg":
-		doEg(ctx, group)
-		os.Exit(must(group.Wait()))
-	case "eg-fix":
-		os.Exit(must(doEgFix()))
-	default:
-		os.Exit(must(fmt.Errorf("invalid command: %s", os.Args[1])))
+	doMain := func() error {
+		switch os.Args[1] {
+		case "depaware":
+			return doDepaware()
+		case "depaware-fix":
+			return doDepawareFix()
+		case "eg":
+			return doEg()
+		case "eg-fix":
+			return doEgFix()
+		default:
+			return fmt.Errorf("invalid command: %s", os.Args[1])
+		}
 	}
+
+	os.Exit(toExitCode(doMain()))
 }
 
-func doDepaware(ctx context.Context, group *errgroup.Group) {
+func doDepaware() error {
 	depawareFileDirs := make(chan string)
+	group, ctx := newErrorGroup()
 	group.Go(func() error {
 		defer close(depawareFileDirs)
 		return filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
@@ -65,10 +65,13 @@ func doDepaware(ctx context.Context, group *errgroup.Group) {
 			return cmd("depaware", "--check", dir).Run()
 		})
 	}
+
+	return group.Wait()
 }
 
-func doDepawareFix(ctx context.Context, group *errgroup.Group) {
+func doDepawareFix() error {
 	depawareFiles := make(chan string)
+	group, ctx := newErrorGroup()
 	group.Go(func() error {
 		defer close(depawareFiles)
 		return filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
@@ -104,10 +107,13 @@ func doDepawareFix(ctx context.Context, group *errgroup.Group) {
 			return os.WriteFile(file, b.Bytes(), 0o600)
 		})
 	}
+
+	return group.Wait()
 }
 
-func doEg(ctx context.Context, group *errgroup.Group) {
+func doEg() error {
 	egTemplateFiles := make(chan string)
+	group, ctx := newErrorGroup()
 	group.Go(func() error {
 		defer close(egTemplateFiles)
 		matches, err := filepath.Glob("eg/*.template")
@@ -149,6 +155,8 @@ func doEg(ctx context.Context, group *errgroup.Group) {
 			return nil
 		})
 	}
+
+	return group.Wait()
 }
 
 func doEgFix() error {
@@ -167,7 +175,7 @@ func doEgFix() error {
 
 func newErrorGroup() (*errgroup.Group, context.Context) {
 	group, ctx := errgroup.WithContext(context.Background())
-	group.SetLimit(max(1, runtime.NumCPU()/2))
+	group.SetLimit(max(1, runtime.NumCPU()-1))
 	return group, ctx
 }
 
@@ -178,7 +186,7 @@ func cmd(name string, args ...string) *exec.Cmd {
 	return result
 }
 
-func must(err error) int {
+func toExitCode(err error) int {
 	if err == nil {
 		return 0
 	}

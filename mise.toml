@@ -40,7 +40,7 @@ alias = "c"
 [tasks.depaware]
 description = "Check that no Go package dependencies changed unexpectedly."
 hide = true
-run = "go run internal/tasks/tasks.go depaware"
+run = "go run internal/tasks.go depaware"
 depends = ["build"]
 sources = ["go.mod", "go.sum", "**/*.go", "**/depaware.txt"]
 outputs = { auto = true }
@@ -48,7 +48,7 @@ outputs = { auto = true }
 [tasks.eg]
 description = "Check that the library source code is already refactored according to the eg templates."
 hide = true
-run = "go run internal/tasks/tasks.go eg"
+run = "go run internal/tasks.go eg"
 depends = ["build"]
 sources = ["go.mod", "go.sum", "**/*.go", "eg/*.template"]
 outputs = { auto = true }
@@ -61,9 +61,9 @@ description = "Automatically fix as many lint errors as possible."
 depends = ["build"]
 run = [
   "ast-grep scan --update-all",
-  "go run internal/tasks/tasks.go eg-fix",
+  "go run internal/tasks.go eg-fix",
   "golangci-lint run --fix",
-  "go run internal/tasks/tasks.go depaware-fix",
+  "go run internal/tasks.go depaware-fix",
 ]
 alias = "f"
 
