@@ -1,5 +1,6 @@
 .DS_Store
 /.idea/
-/x/x
 cover.profile
 testdata/
+module-graph.dot
+module-graph.svg

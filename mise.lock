@@ -21,6 +21,10 @@ backend = "go:github.com/tailscale/depaware"
 version = "ba14292"
 backend = "go:go.uber.org/nilaway/cmd/nilaway"
 
+[tools."go:golang.org/x/tools/cmd/digraph"]
+version = "0.30.0"
+backend = "go:golang.org/x/tools/cmd/digraph"
+
 [tools."go:golang.org/x/tools/cmd/eg"]
 version = "0.30.0"
 backend = "go:golang.org/x/tools/cmd/eg"

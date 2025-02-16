@@ -78,8 +78,16 @@ sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
 alias = "g"
 
+[tasks.go-mod-graph]
+description = "Generate a graph of this project's module dependencies. It will be written to file 'module-graph.dot' in the Graphviz DOT format. Install https://graphviz.org/ to turn it into a pretty picture."
+run = """
+#!/usr/bin/env bash
+go mod graph | digraph to dot > module-graph.dot
+printf "Install Graphviz https://graphviz.org/, run 'dot -Tsvg -o module-graph.svg module-graph.dot' and open module-graph.svg in your web browser.\n"
+"""
+
 [tasks.go-sanity-check]
-description = "Run various Go-related quick sanity checks against the project"
+description = "Run various quick Go-related sanity checks against the project"
 hide = true
 run = [
   "go mod verify",
@@ -151,6 +159,7 @@ cosign = "latest"
 go = "latest"
 "go:github.com/tailscale/depaware" = "b748de0"
 "go:go.uber.org/nilaway/cmd/nilaway" = "ba14292"
+"go:golang.org/x/tools/cmd/digraph" = "latest"
 "go:golang.org/x/tools/cmd/eg" = "latest"
 "go:golang.org/x/tools/cmd/stringer" = "latest"
 golangci-lint = "latest"
