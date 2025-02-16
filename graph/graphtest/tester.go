@@ -29,6 +29,7 @@ const (
 	nodeNotInGraph = 1_000
 )
 
+//go:generate stringer -type=Mutability
 type Mutability int
 
 const (
@@ -36,6 +37,7 @@ const (
 	Immutable
 )
 
+//go:generate stringer -type=DirectionMode
 type DirectionMode int
 
 const (
@@ -43,6 +45,7 @@ const (
 	Undirected
 )
 
+//go:generate stringer -type=SelfLoopsMode
 type SelfLoopsMode int
 
 const (

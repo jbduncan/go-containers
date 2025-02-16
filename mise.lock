@@ -25,6 +25,10 @@ backend = "go:go.uber.org/nilaway/cmd/nilaway"
 version = "0.30.0"
 backend = "go:golang.org/x/tools/cmd/eg"
 
+[tools."go:golang.org/x/tools/cmd/stringer"]
+version = "0.30.0"
+backend = "go:golang.org/x/tools/cmd/stringer"
+
 [tools.golangci-lint]
 version = "1.64.5"
 backend = "aqua:golangci/golangci-lint"

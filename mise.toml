@@ -29,7 +29,7 @@ description = "Build the library source code."
 run = "go build ./..."
 sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
-depends = ["go-sanity-check"]
+depends = ["generate"]
 alias = "b"
 
 [tasks.check]
@@ -61,14 +61,22 @@ wait_for = ["test"]
 
 [tasks.fix]
 description = "Automatically fix as many lint errors as possible."
-depends = ["build"]
 run = [
   "ast-grep scan --update-all",
   "go run internal/tasks.go eg-fix",
   "golangci-lint run --fix",
   "go run internal/tasks.go depaware-fix",
 ]
+depends = ["build"]
 alias = "f"
+
+[tasks.generate]
+description = "Run go:generate instructions in the library source code"
+run = "go generate ./..."
+depends = ["go-sanity-check"]
+sources = ["go.mod", "go.sum", "**/*.go"]
+outputs = { auto = true }
+alias = "g"
 
 [tasks.go-sanity-check]
 description = "Run various Go-related quick sanity checks against the project"
@@ -144,6 +152,7 @@ go = "latest"
 "go:github.com/tailscale/depaware" = "b748de0"
 "go:go.uber.org/nilaway/cmd/nilaway" = "ba14292"
 "go:golang.org/x/tools/cmd/eg" = "latest"
+"go:golang.org/x/tools/cmd/stringer" = "latest"
 golangci-lint = "latest"
 # slsa-verifier is used by mise itself to download tools more securely
 slsa-verifier = "latest"
