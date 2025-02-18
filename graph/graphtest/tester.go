@@ -308,8 +308,66 @@ func (tt tester) test() {
 			},
 		)
 
-		// TODO: continue from graph_test.go, line 233, "does not see the first node as being connected to any other node"
+		t.Run(
+			"sees the first node as being connected to no other node",
+			func(t *testing.T) {
+				if got := g().HasEdgeConnecting(node1, nodeNotInGraph); got {
+					t.Errorf("Graph.HasEdgeConnecting: got true, want false")
+				}
+				if got := g().HasEdgeConnecting(nodeNotInGraph, node1); got {
+					t.Errorf("Graph.HasEdgeConnecting: got true, want false")
+				}
+				if got := g().HasEdgeConnectingEndpoints(
+					graph.EndpointPairOf(node1, nodeNotInGraph),
+				); got {
+					t.Errorf("Graph.HasEdgeConnectingEndpoints: " +
+						"got true, want false",
+					)
+				}
+				if got := g().HasEdgeConnectingEndpoints(
+					graph.EndpointPairOf(nodeNotInGraph, node1),
+				); got {
+					t.Errorf("Graph.HasEdgeConnectingEndpoints: " +
+						"got true, want false",
+					)
+				}
+			},
+		)
+
+		t.Run(
+			"sees the second node as being connected to no other node",
+			func(t *testing.T) {
+				if got := g().HasEdgeConnecting(node2, nodeNotInGraph); got {
+					t.Errorf("Graph.HasEdgeConnecting: got true, want false")
+				}
+				if got := g().HasEdgeConnectingEndpoints(
+					graph.EndpointPairOf(node2, nodeNotInGraph),
+				); got {
+					t.Errorf("Graph.HasEdgeConnectingEndpoints: " +
+						"got true, want false",
+					)
+				}
+			},
+		)
 	})
+
+	tt.t.Run("graph with same edge put twice", func(t *testing.T) {
+		t.Run("has only one edge", func(t *testing.T) {
+			g := tt.graphBuilder()
+			g = putEdge(g, node1, node2)
+
+			tt.testEdges(t, g, graph.EndpointPairOf(node1, node2))
+		})
+	})
+
+	tt.t.Run(
+		"graph with two edges with the same source node",
+		func(t *testing.T) {
+			// TODO: Adapt from graph_test.go, line 272, test "reports that the
+			//       common node has a degree of 2"
+			_ = t
+		},
+	)
 }
 
 func addNode(g graph.Graph[int], node int) graph.Graph[int] {
