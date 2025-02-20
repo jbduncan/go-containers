@@ -64,6 +64,7 @@ wait_for = ["test"]
 [tasks.fix]
 description = "Automatically fix as many lint errors as possible."
 run = [
+  "go mod tidy",
   "ast-grep scan --update-all",
   "go run internal/tasks.go eg-fix",
   "golangci-lint run --fix",
@@ -88,14 +89,18 @@ go mod graph | digraph to dot > module-graph.dot
 printf "Install Graphviz https://graphviz.org/, run 'dot -Tsvg -o module-graph.svg module-graph.dot' and open module-graph.svg in your web browser.\n"
 """
 
+[tasks.go-mod-tidy-diff]
+description = "Check that 'go mod tidy' has been run"
+hide = true
+run = "go mod tidy -diff"
+depends = ["go-sanity-check"]
+
 [tasks.go-sanity-check]
 description = "Run various quick Go-related sanity checks against the project"
 hide = true
 run = [
   "go mod verify",
   "go mod download",
-  "go mod tidy",
-  "git diff --exit-code -- go.mod go.sum",
 ]
 
 [tasks.golangci-lint]
@@ -118,6 +123,7 @@ depends = [
   "depaware",
   "eg",
   "go-sanity-check",
+  "go-mod-tidy-diff",
   "golangci-lint",
 ]
 
