@@ -363,9 +363,29 @@ func (tt tester) test() {
 	tt.t.Run(
 		"graph with two edges with the same source node",
 		func(t *testing.T) {
-			// TODO: Adapt from graph_test.go, line 272, test "reports that the
-			//       common node has a degree of 2"
-			_ = t
+			g := func() graph.Graph[int] {
+				g := tt.graphBuilder()
+				g = putEdge(g, node1, node2)
+				g = putEdge(g, node1, node3)
+				return g
+			}
+
+			t.Run("has a common node with a degree of 2", func(t *testing.T) {
+				testDegree(t, graphDegreeName, g().Degree(node1), 2)
+			})
+
+			t.Run("has a common node with two successors", func(t *testing.T) {
+				testNodeSet(
+					t,
+					"Graph.Successors",
+					g().Successors(node1),
+					node2,
+					node3,
+				)
+			})
+
+			// TODO: Adapt from graph_test.go, line 280, test "reports the two
+			//       unique nodes as adjacent to the common one"
 		},
 	)
 }
