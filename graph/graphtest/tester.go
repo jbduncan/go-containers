@@ -1,15 +1,12 @@
 package graphtest
 
 import (
-	"fmt"
 	"slices"
-	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/jbduncan/go-containers/graph"
 	"github.com/jbduncan/go-containers/internal/orderagnostic"
-	"github.com/jbduncan/go-containers/internal/slicesx"
 	"github.com/jbduncan/go-containers/set"
 )
 
@@ -441,12 +438,13 @@ func (tt tester) testEdges(
 	g graph.Graph[int],
 	expectedEdges ...graph.EndpointPair[int],
 ) {
-	tt.testEdgeSet(
-		t,
-		graphEdgesName,
-		g.Edges(),
-		expectedEdges,
-	)
+	edgeSetTester{
+		t:             t,
+		setName:       graphEdgesName,
+		edges:         g.Edges(),
+		directionMode: tt.directionMode,
+		expectedEdges: expectedEdges,
+	}.test()
 }
 
 func (tt tester) testIncidentEdges(
@@ -455,188 +453,13 @@ func (tt tester) testIncidentEdges(
 	node int,
 	expectedEdges ...graph.EndpointPair[int],
 ) {
-	tt.testEdgeSet(
-		t,
-		graphIncidentEdgesName,
-		g.IncidentEdges(node),
-		expectedEdges,
-	)
-}
-
-func (tt tester) testEdgeSet(
-	t *testing.T,
-	setName string,
-	edges set.Set[graph.EndpointPair[int]],
-	expectedEdges []graph.EndpointPair[int],
-) {
-	t.Helper()
-
-	var contains []graph.EndpointPair[int]
-	var doesNotContain []graph.EndpointPair[int]
-	if tt.directionMode == Directed {
-		contains = expectedEdges
-		doesNotContain = slicesx.AllOf(
-			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
-			reversesOf(expectedEdges),
-		)
-	} else {
-		contains = slices.Concat(expectedEdges, reversesOf(expectedEdges))
-		doesNotContain = []graph.EndpointPair[int]{
-			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
-		}
-	}
-
-	testSetLen(t, setName, edges, len(expectedEdges))
-	tt.testEdgeSetAll(t, setName, edges, expectedEdges)
-	testSetContains(t, setName, edges, contains, doesNotContain)
-	newEdgeSetStringTester(
-		t,
-		setName,
-		tt.directionMode,
-		edges,
-		expectedEdges,
-	).Test()
-}
-
-func testSetLen[T comparable](
-	t *testing.T,
-	setName string,
-	s set.Set[T],
-	expectedLen int,
-) {
-	t.Helper()
-
-	t.Run("Set.Len", func(t *testing.T) {
-		if got, want := s.Len(), expectedLen; got != want {
-			t.Errorf(
-				"%s: got Set.Len of %d, want %d",
-				setName,
-				got,
-				want,
-			)
-		}
-	})
-}
-
-func testSetAll[T comparable](
-	t *testing.T,
-	setName string,
-	s set.Set[T],
-	expectedValues []T,
-) {
-	t.Helper()
-
-	t.Run("Set.All", func(t *testing.T) {
-		got, want := slices.Collect(s.All()), expectedValues
-		if diff := orderagnostic.Diff(got, want); diff != "" {
-			t.Errorf("%s: Set.All mismatch (-want +got):\n%s", setName, diff)
-		}
-	})
-}
-
-func testSetContains[T comparable](
-	t *testing.T,
-	setName string,
-	s set.Set[T],
-	contains []T,
-	doesNotContain []T,
-) {
-	t.Helper()
-
-	t.Run("Set.Contains", func(t *testing.T) {
-		for _, value := range contains {
-			if !s.Contains(value) {
-				t.Errorf(
-					"%s: got Set.Contains(%v) == false, want true",
-					setName,
-					value,
-				)
-			}
-		}
-		for _, value := range doesNotContain {
-			if s.Contains(value) {
-				t.Errorf(
-					"%s: got Set.Contains(%v) == true, want false",
-					setName,
-					value,
-				)
-			}
-		}
-	})
-}
-
-func testSetString[T comparable](
-	t *testing.T,
-	setName string,
-	s set.Set[T],
-	expectedValues []T,
-) {
-	t.Helper()
-
-	t.Run("Set.String", func(t *testing.T) {
-		str := s.String()
-		trimmed, prefixFound := strings.CutPrefix(str, "[")
-		if !prefixFound {
-			t.Fatalf(
-				`%s: got Set.String of %q, want to have prefix "["`,
-				setName,
-				str,
-			)
-		}
-		trimmed, suffixFound := strings.CutSuffix(trimmed, "]")
-		if !suffixFound {
-			t.Fatalf(
-				`%s: got Set.String of %q, want to have suffix "]"`,
-				setName,
-				str,
-			)
-		}
-
-		want := make([]string, 0, len(expectedValues))
-		for _, v := range expectedValues {
-			want = append(want, fmt.Sprintf("%v", v))
-		}
-		got := splitByComma(trimmed)
-
-		if diff := orderagnostic.Diff(got, want); diff != "" {
-			t.Fatalf(
-				"%s: Set.String of %q: elements mismatch: (-want +got):\n%s",
-				setName,
-				str,
-				diff,
-			)
-		}
-	})
-}
-
-func (tt tester) testEdgeSetAll(
-	t *testing.T,
-	setName string,
-	edges set.Set[graph.EndpointPair[int]],
-	expectedEdges []graph.EndpointPair[int],
-) {
-	t.Helper()
-
-	t.Run("Set.All", func(t *testing.T) {
-		got, want := slices.Collect(edges.All()), expectedEdges
-		if tt.directionMode == Directed {
-			if diff := orderagnostic.Diff(got, want); diff != "" {
-				t.Errorf(
-					"%s: Set.All mismatch (-want +got):\n%s",
-					setName,
-					diff,
-				)
-			}
-		} else {
-			if diff := undirectedEndpointPairsDiff(got, want); diff != "" {
-				t.Errorf(
-					"%s: Set.All mismatch (-want +got):\n%s",
-					setName,
-					diff,
-				)
-			}
-		}
-	})
+	edgeSetTester{
+		t:             t,
+		setName:       graphIncidentEdgesName,
+		edges:         g.IncidentEdges(node),
+		directionMode: tt.directionMode,
+		expectedEdges: expectedEdges,
+	}.test()
 }
 
 func testDegree(
