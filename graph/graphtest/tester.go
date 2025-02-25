@@ -138,13 +138,11 @@ func (tt tester) test() {
 
 	tt.t.Run("empty graph", func(t *testing.T) {
 		t.Run("has no nodes", func(t *testing.T) {
-			g := tt.graphBuilder()
-			testNodeSet(t, graphNodesName, g.Nodes())
+			testNodeSet(t, graphNodesName, tt.graphBuilder().Nodes())
 		})
 
 		t.Run("has no edges", func(t *testing.T) {
-			g := tt.graphBuilder()
-			tt.testEdges(t, g)
+			tt.testEdges(t, tt.graphBuilder())
 		})
 	})
 
@@ -154,6 +152,7 @@ func (tt tester) test() {
 			g = addNode(g, node1)
 			return g
 		}
+
 		t.Run("has just that node", func(t *testing.T) {
 			testNodeSet(t, graphNodesName, g().Nodes(), node1)
 		})
