@@ -473,20 +473,17 @@ func (tt tester) testEdgeSet(
 
 	var contains []graph.EndpointPair[int]
 	var doesNotContain []graph.EndpointPair[int]
-	switch tt.directionMode {
-	case Directed:
+	if tt.directionMode == Directed {
 		contains = expectedEdges
 		doesNotContain = slicesx.AllOf(
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
 			reversesOf(expectedEdges),
 		)
-	case Undirected:
+	} else {
 		contains = slices.Concat(expectedEdges, reversesOf(expectedEdges))
 		doesNotContain = []graph.EndpointPair[int]{
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
 		}
-	default:
-		panic("unreachable")
 	}
 
 	testSetLen(t, setName, edges, len(expectedEdges))
@@ -622,8 +619,7 @@ func (tt tester) testEdgeSetAll(
 
 	t.Run("Set.All", func(t *testing.T) {
 		got, want := slices.Collect(edges.All()), expectedEdges
-		switch tt.directionMode {
-		case Directed:
+		if tt.directionMode == Directed {
 			if diff := orderagnostic.Diff(got, want); diff != "" {
 				t.Errorf(
 					"%s: Set.All mismatch (-want +got):\n%s",
@@ -631,7 +627,7 @@ func (tt tester) testEdgeSetAll(
 					diff,
 				)
 			}
-		case Undirected:
+		} else {
 			if diff := undirectedEndpointPairsDiff(got, want); diff != "" {
 				t.Errorf(
 					"%s: Set.All mismatch (-want +got):\n%s",
@@ -639,8 +635,6 @@ func (tt tester) testEdgeSetAll(
 					diff,
 				)
 			}
-		default:
-			panic("unreachable")
 		}
 	})
 }

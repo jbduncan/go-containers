@@ -62,20 +62,14 @@ func (t *edgeSetStringTester) Test() {
 			want = append(want, t.toEndpointPair(ttt, elemStr))
 		}
 
-		switch t.directionMode {
-		case Directed:
-			if diff := orderagnostic.Diff(t.expectedEdges, want); diff != "" {
-				t.report(ttt)
-			}
-		case Undirected:
-			if diff := undirectedEndpointPairsDiff(
-				t.expectedEdges,
-				want,
-			); diff != "" {
-				t.report(ttt)
-			}
-		default:
-			panic("unreachable")
+		var diff string
+		if t.directionMode == Directed {
+			diff = orderagnostic.Diff(t.expectedEdges, want)
+		} else {
+			diff = undirectedEndpointPairsDiff(t.expectedEdges, want)
+		}
+		if diff != "" {
+			t.report(ttt)
 		}
 	})
 }
@@ -83,51 +77,38 @@ func (t *edgeSetStringTester) Test() {
 var endpointPairStringRegex = regexp.MustCompile(`<(\d+) -> (\d)+>`)
 
 func (t *edgeSetStringTester) toEndpointPair(
-	ttt *testing.T,
+	tt *testing.T,
 	s string,
 ) graph.EndpointPair[int] {
-	ttt.Helper()
+	tt.Helper()
 
 	matches := endpointPairStringRegex.FindStringSubmatch(s)
 	if len(matches) != 3 {
-		t.report(ttt)
+		t.report(tt)
 	}
-	source, err := strconv.Atoi(matches[1])
-	if err != nil {
-		t.report(ttt)
-	}
-	target, err := strconv.Atoi(matches[2])
-	if err != nil {
-		t.report(ttt)
-	}
+
+	// The regex guarantees that the matches are integers.
+	source, _ := strconv.Atoi(matches[1])
+	target, _ := strconv.Atoi(matches[2])
 	return graph.EndpointPairOf(source, target)
 }
 
-func (t *edgeSetStringTester) report(ttt *testing.T) {
-	ttt.Helper()
+func (t *edgeSetStringTester) report(tt *testing.T) {
+	tt.Helper()
+
+	if len(t.expectedEdges) == 0 {
+		tt.Fatalf(`%s: got Set.String of %q, want "[]"`, t.setName, t.edges)
+	}
 
 	var msg strings.Builder
-	switch {
-	case len(t.expectedEdges) == 0:
-		msg.WriteString(`%s: got Set.String of %q, want "[]"`)
-	case t.directionMode == Directed:
-		msg.WriteString(
-			"%s: got Set.String of %q, want to contain substrings:\n")
-		for _, edge := range t.expectedEdges {
-			msg.WriteString("    ")
-			msg.WriteString(edge.String())
-		}
-	case t.directionMode == Undirected:
-		msg.WriteString(
-			"%s: got Set.String of %q, want to contain substrings:\n")
-		for _, edge := range t.expectedEdges {
-			msg.WriteString("    ")
-			msg.WriteString(edge.String())
+	msg.WriteString("%s: got Set.String of %q, want to contain substrings:\n")
+	for _, edge := range t.expectedEdges {
+		msg.WriteString("    ")
+		msg.WriteString(edge.String())
+		if t.directionMode == Undirected {
 			msg.WriteString(" or ")
 			msg.WriteString(reverseOf(edge).String())
 		}
-	default:
-		panic("unreachable")
 	}
-	ttt.Fatalf(msg.String(), t.setName, t.edges)
+	tt.Fatalf(msg.String(), t.setName, t.edges)
 }
