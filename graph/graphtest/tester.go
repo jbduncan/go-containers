@@ -63,6 +63,23 @@ func Graph(
 	directionMode DirectionMode,
 	selfLoopsMode SelfLoopsMode,
 ) {
+	validate(t, mutability, directionMode, selfLoopsMode)
+
+	newTester(
+		t,
+		graphBuilder,
+		mutability,
+		directionMode,
+		selfLoopsMode,
+	).test()
+}
+
+func validate(
+	t TestingT,
+	mutability Mutability,
+	directionMode DirectionMode,
+	selfLoopsMode SelfLoopsMode,
+) {
 	if mutability != Mutable && mutability != Immutable {
 		t.Fatalf(
 			"mutability expected to be Mutable or Immutable "+
@@ -85,14 +102,6 @@ func Graph(
 			selfLoopsMode,
 		)
 	}
-
-	newTester(
-		t,
-		graphBuilder,
-		mutability,
-		directionMode,
-		selfLoopsMode,
-	).test()
 }
 
 func newTester(
@@ -384,29 +393,26 @@ func (tt tester) testGraphWithTwoEdgesWithSameSourceNode() {
 }
 
 func addNode(g graph.Graph[int], node int) graph.Graph[int] {
-	if gAsMutable, ok := g.(graph.MutableGraph[int]); ok {
-		gAsMutable.AddNode(node)
+	if m, ok := g.(graph.MutableGraph[int]); ok {
+		m.AddNode(node)
 	}
 
 	return g
 }
 
 func putEdge(g graph.Graph[int], source int, target int) graph.Graph[int] {
-	if gAsMutable, ok := g.(graph.MutableGraph[int]); ok {
-		gAsMutable.PutEdge(source, target)
+	if m, ok := g.(graph.MutableGraph[int]); ok {
+		m.PutEdge(source, target)
 	}
 
 	return g
 }
 
-var allNodesToConsider = []int{node1, node2, node3, nodeNotInGraph}
-
 func complement(nodes []int) []int {
-	result := slices.Clone(allNodesToConsider)
-	result = slices.DeleteFunc(result, func(value int) bool {
+	all := []int{node1, node2, node3, nodeNotInGraph}
+	return slices.DeleteFunc(all, func(value int) bool {
 		return slices.Contains(nodes, value)
 	})
-	return result
 }
 
 func testNodeSet(
