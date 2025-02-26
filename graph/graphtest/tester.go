@@ -130,14 +130,9 @@ type tester struct {
 
 const (
 	graphNodesName         = "Graph.Nodes"
-	graphEdgesName         = "Graph.Edges"
 	graphAdjacentNodesName = "Graph.AdjacentNodes"
 	graphPredecessorsName  = "Graph.Predecessors"
 	graphSuccessorsName    = "Graph.Successors"
-	graphIncidentEdgesName = "Graph.IncidentEdges"
-	graphDegreeName        = "Graph.Degree"
-	graphInDegreeName      = "Graph.InDegree"
-	graphOutDegreeName     = "Graph.OutDegree"
 )
 
 func (tt tester) test() {
@@ -201,15 +196,15 @@ func (tt tester) testGraphWithOneNode() {
 		})
 
 		t.Run("the node has a degree of 0", func(t *testing.T) {
-			testDegree(t, graphDegreeName, g().Degree(node1), 0)
+			testDegree(t, g(), node1, 0)
 		})
 
 		t.Run("the node has an in-degree of 0", func(t *testing.T) {
-			testDegree(t, graphInDegreeName, g().InDegree(node1), 0)
+			testInDegree(t, g(), node1, 0)
 		})
 
 		t.Run("the node has an out-degree of 0", func(t *testing.T) {
-			testDegree(t, graphOutDegreeName, g().OutDegree(node1), 0)
+			testOutDegree(t, g(), node1, 0)
 		})
 	})
 }
@@ -287,19 +282,19 @@ func (tt tester) testGraphWithOneEdge() {
 		)
 
 		t.Run("the source node has a degree of 1", func(t *testing.T) {
-			testDegree(t, graphDegreeName, g().Degree(node1), 1)
+			testDegree(t, g(), node1, 1)
 		})
 
 		t.Run("the target node has a degree of 1", func(t *testing.T) {
-			testDegree(t, graphDegreeName, g().Degree(node2), 1)
+			testDegree(t, g(), node2, 1)
 		})
 
 		t.Run("the target node has an in-degree of 1", func(t *testing.T) {
-			testDegree(t, graphInDegreeName, g().InDegree(node2), 1)
+			testInDegree(t, g(), node2, 1)
 		})
 
 		t.Run("the source node has an out-degree of 1", func(t *testing.T) {
-			testDegree(t, graphOutDegreeName, g().OutDegree(node1), 1)
+			testOutDegree(t, g(), node1, 1)
 		})
 
 		t.Run(
@@ -373,7 +368,7 @@ func (tt tester) testGraphWithTwoEdgesWithSameSourceNode() {
 			}
 
 			t.Run("has a common node with a degree of 2", func(t *testing.T) {
-				testDegree(t, graphDegreeName, g().Degree(node1), 2)
+				testDegree(t, g(), node1, 2)
 			})
 
 			t.Run("has a common node with two successors", func(t *testing.T) {
@@ -418,8 +413,8 @@ func (tt tester) testGraphWithTwoEdgesWithSameSourceNode() {
 				)
 			})
 
-			t.Run("has a common with an out degree of 2", func(t *testing.T) {
-				testDegree(t, graphOutDegreeName, g().OutDegree(node1), 2)
+			t.Run("has a common with an out-degree of 2", func(t *testing.T) {
+				testOutDegree(t, g(), node1, 2)
 			})
 
 			// TODO: Add more tests, starting again from graph_test.go, "when
@@ -476,9 +471,11 @@ func (tt tester) testEdges(
 	g graph.Graph[int],
 	expectedEdges ...graph.EndpointPair[int],
 ) {
+	t.Helper()
+
 	edgeSetTester{
 		t:             t,
-		setName:       graphEdgesName,
+		setName:       "Graph.Edges",
 		edges:         g.Edges(),
 		directionMode: tt.directionMode,
 		expectedEdges: expectedEdges,
@@ -491,9 +488,11 @@ func (tt tester) testIncidentEdges(
 	node int,
 	expectedEdges ...graph.EndpointPair[int],
 ) {
+	t.Helper()
+
 	edgeSetTester{
 		t:             t,
-		setName:       graphIncidentEdgesName,
+		setName:       "Graph.IncidentEdges",
 		edges:         g.IncidentEdges(node),
 		directionMode: tt.directionMode,
 		expectedEdges: expectedEdges,
@@ -502,16 +501,39 @@ func (tt tester) testIncidentEdges(
 
 func testDegree(
 	t *testing.T,
-	degreeName string,
-	actualDegree int,
+	g graph.Graph[int],
+	node int,
 	expectedDegree int,
 ) {
-	if got, want := actualDegree, expectedDegree; got != want {
-		t.Errorf(
-			"%s: got degree of %d, want %d",
-			degreeName,
-			got,
-			want,
-		)
+	t.Helper()
+
+	if got, want := g.Degree(node), expectedDegree; got != want {
+		t.Errorf("Graph.Degree: got %d, want %d", got, want)
+	}
+}
+
+func testInDegree(
+	t *testing.T,
+	g graph.Graph[int],
+	node int,
+	expectedDegree int,
+) {
+	t.Helper()
+
+	if got, want := g.InDegree(node), expectedDegree; got != want {
+		t.Errorf("Graph.InDegree: got %d, want %d", got, want)
+	}
+}
+
+func testOutDegree(
+	t *testing.T,
+	g graph.Graph[int],
+	node int,
+	expectedDegree int,
+) {
+	t.Helper()
+
+	if got, want := g.OutDegree(node), expectedDegree; got != want {
+		t.Errorf("Graph.OutDegree: got %d, want %d", got, want)
 	}
 }
