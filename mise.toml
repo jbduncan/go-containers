@@ -98,10 +98,7 @@ depends = ["go-sanity-check"]
 [tasks.go-sanity-check]
 description = "Run various quick Go-related sanity checks against the project"
 hide = true
-run = [
-  "go mod verify",
-  "go mod download",
-]
+run = ["go mod verify", "go mod download"]
 
 [tasks.golangci-lint]
 description = "Check that no problems are found when running the linters defined in .golangci.yml against the library source code."
@@ -155,10 +152,7 @@ alias = "tr"
 
 [tasks.update-versions]
 description = "Update the versions of all tools and dependencies."
-run = [
-  "mise x -- go get -u -t ./...",
-  "mise up"
-]
+run = ["mise x -- go get -u -t ./...", "mise up"]
 alias = "u"
 
 [tools]
