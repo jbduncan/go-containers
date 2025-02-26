@@ -109,6 +109,7 @@ func (t *edgeSetStringTester) report(tt *testing.T) {
 			msg.WriteString(" or ")
 			msg.WriteString(reverseOf(edge).String())
 		}
+		msg.WriteString("\n")
 	}
 	tt.Fatalf(msg.String(), t.setName, t.edges)
 }

@@ -24,7 +24,7 @@ const (
 	nodeNotInGraph = 1_000
 )
 
-//go:generate stringer -type=Mutability
+//go:generate mise x -- stringer -type=Mutability
 type Mutability int
 
 const (
@@ -32,7 +32,7 @@ const (
 	Immutable
 )
 
-//go:generate stringer -type=DirectionMode
+//go:generate mise x -- stringer -type=DirectionMode
 type DirectionMode int
 
 const (
@@ -40,7 +40,7 @@ const (
 	Undirected
 )
 
-//go:generate stringer -type=SelfLoopsMode
+//go:generate mise x -- stringer -type=SelfLoopsMode
 type SelfLoopsMode int
 
 const (
@@ -379,15 +379,51 @@ func (tt tester) testGraphWithTwoEdgesWithSameSourceNode() {
 			t.Run("has a common node with two successors", func(t *testing.T) {
 				testNodeSet(
 					t,
-					"Graph.Successors",
+					graphSuccessorsName,
 					g().Successors(node1),
 					node2,
 					node3,
 				)
 			})
 
-			// TODO: Adapt from graph_test.go, line 280, test "reports the two
-			//       unique nodes as adjacent to the common one"
+			t.Run(
+				"has a common node with two unique adjacent nodes",
+				func(t *testing.T) {
+					testNodeSet(
+						t,
+						graphAdjacentNodesName,
+						g().AdjacentNodes(node1),
+						node2,
+						node3,
+					)
+				},
+			)
+
+			t.Run("has a common with two edges", func(t *testing.T) {
+				tt.testEdges(
+					t,
+					g(),
+					graph.EndpointPairOf(node1, node2),
+					graph.EndpointPairOf(node1, node3),
+				)
+			})
+
+			t.Run("has a common with two incident edges", func(t *testing.T) {
+				tt.testIncidentEdges(
+					t,
+					g(),
+					node1,
+					graph.EndpointPairOf(node1, node2),
+					graph.EndpointPairOf(node1, node3),
+				)
+			})
+
+			t.Run("has a common with an out degree of 2", func(t *testing.T) {
+				testDegree(t, graphOutDegreeName, g().OutDegree(node1), 2)
+			})
+
+			// TODO: Add more tests, starting again from graph_test.go, "when
+			//       putting two connected edges with the same target node".
 		},
 	)
 }
