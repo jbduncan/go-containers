@@ -22,7 +22,7 @@ func reversesOf(edges []graph.EndpointPair[int]) []graph.EndpointPair[int] {
 
 func splitByComma(s string) []string {
 	if len(s) == 0 {
-		return make([]string, 0)
+		return []string{}
 	}
 	return strings.Split(s, ", ")
 }
