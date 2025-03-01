@@ -149,6 +149,11 @@ func (tt tester) test() {
 	tt.testGraphWithSameEdgePutTwice()
 
 	tt.testGraphWithTwoEdgesWithSameSourceNode()
+
+	tt.testGraphWithTwoEdgesWithSameTargetNode()
+
+	// TODO: Continue from graph_test.go, "when finding the predecessors of an
+	//       absent node"
 }
 
 func (tt tester) testEmptyGraph() {
@@ -416,9 +421,52 @@ func (tt tester) testGraphWithTwoEdgesWithSameSourceNode() {
 			t.Run("has a common with an out-degree of 2", func(t *testing.T) {
 				testOutDegree(t, g(), node1, 2)
 			})
+		},
+	)
+}
 
-			// TODO: Add more tests, starting again from graph_test.go, "when
-			//       putting two connected edges with the same target node".
+func (tt tester) testGraphWithTwoEdgesWithSameTargetNode() {
+	tt.t.Helper()
+
+	tt.t.Run(
+		"graph with two edges with the same target node",
+		func(t *testing.T) {
+			g := func() graph.Graph[int] {
+				g := tt.graphBuilder()
+				g = putEdge(g, node1, node2)
+				g = putEdge(g, node3, node2)
+				return g
+			}
+
+			t.Run(
+				"has a common node with an in-degree of 2",
+				func(t *testing.T) {
+					testInDegree(t, g(), node2, 2)
+				},
+			)
+
+			t.Run(
+				"has a common node with two predecessors",
+				func(t *testing.T) {
+					testNodeSet(
+						t,
+						graphPredecessorsName,
+						g().Predecessors(node2),
+						node1,
+						node3,
+					)
+				},
+			)
+
+			t.Run("has a common with two incident edges", func(t *testing.T) {
+				tt.testIncidentEdges(
+					t,
+					g(),
+					node2,
+					graph.EndpointPairOf(node1, node2),
+					graph.EndpointPairOf(node3, node2),
+				)
+			})
 		},
 	)
 }

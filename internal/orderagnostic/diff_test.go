@@ -60,7 +60,7 @@ func TestDiff(t *testing.T) {
 			if got := orderagnostic.Diff(
 				tt.args.got,
 				tt.args.want,
-			); (len(got) == 0) != tt.wantEmpty {
+			); len(got) == 0 != tt.wantEmpty {
 				diffKind := "empty string diff"
 				if !tt.wantEmpty {
 					diffKind = "non-" + diffKind
