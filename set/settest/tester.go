@@ -96,18 +96,15 @@ func Set(t TestingT, setBuilder func(elems []string) set.Set[string]) {
 type tester struct {
 	t          TestingT
 	setBuilder func(elems []string) set.Set[string]
-	mutable    bool
 }
 
 func newTester(
 	t TestingT,
 	setBuilder func(elems []string) set.Set[string],
 ) *tester {
-	_, mutable := setBuilder(empty()).(set.MutableSet[string])
 	return &tester{
 		t:          t,
 		setBuilder: setBuilder,
-		mutable:    mutable,
 	}
 }
 
