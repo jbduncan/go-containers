@@ -1,8 +1,9 @@
 package orderagnostic_test
 
 import (
-	"github.com/jbduncan/go-containers/internal/orderagnostic"
 	"testing"
+
+	"github.com/jbduncan/go-containers/internal/orderagnostic"
 )
 
 func TestDiff(t *testing.T) {
