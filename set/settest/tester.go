@@ -111,26 +111,10 @@ func newTester(
 	}
 }
 
-func (tt tester) runEmptyIfMutable(
-	name string,
-	f func(t *testing.T, s set.MutableSet[string]),
-) {
-	tt.t.Helper()
-
-	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
-		tt.t.Run(name, func(t *testing.T) {
-			f(t, s)
-		})
-	}
-}
-
 func (tt tester) emptySetHasLengthOfZero() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"empty set: has length of 0",
 		func(t *testing.T) {
-			t.Helper()
 			s := tt.setBuilder(empty())
 
 			if got, want := s.Len(), 0; got != want {
@@ -140,8 +124,6 @@ func (tt tester) emptySetHasLengthOfZero() {
 }
 
 func (tt tester) emptySetContainsNothing() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"empty set: contains nothing",
 		func(t *testing.T) {
@@ -154,8 +136,6 @@ func (tt tester) emptySetContainsNothing() {
 }
 
 func (tt tester) emptySetIterationDoesNothing() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"empty set: iteration does nothing",
 		func(t *testing.T) {
@@ -168,8 +148,6 @@ func (tt tester) emptySetIterationDoesNothing() {
 }
 
 func (tt tester) emptySetHasEmptyStringRepr() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"empty set: has empty string representation",
 		func(t *testing.T) {
@@ -182,24 +160,18 @@ func (tt tester) emptySetHasEmptyStringRepr() {
 }
 
 func (tt tester) emptySetRemoveDoesNothing() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: remove does nothing",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: remove does nothing", func(t *testing.T) {
 			s.Remove(a)
 
 			if got, want := s.Len(), 0; got != want {
 				t.Fatalf("got Set.Len of %v, want %v", got, want)
 			}
 		})
+	}
 }
 
 func (tt tester) oneElementSetHasLengthOfOne() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"one element set: has length of 1",
 		func(t *testing.T) {
@@ -212,24 +184,18 @@ func (tt tester) oneElementSetHasLengthOfOne() {
 }
 
 func (tt tester) emptySetPlusOneHasLengthOfOne() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add: has length of 1",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add: has length of 1", func(t *testing.T) {
 			s.Add(a)
 
 			if got, want := s.Len(), 1; got != want {
 				t.Fatalf("got Set.Len of %v, want %v", got, want)
 			}
 		})
+	}
 }
 
 func (tt tester) oneElementSetContainsPresentElement() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"one element set: contains present element",
 		func(t *testing.T) {
@@ -242,24 +208,18 @@ func (tt tester) oneElementSetContainsPresentElement() {
 }
 
 func (tt tester) emptySetPlusOneContainsPresentElement() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add: contains present element",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add: contains present element", func(t *testing.T) {
 			s.Add(a)
 
 			if !s.Contains(a) {
 				t.Fatalf("got Set.Contains(%q) == false, want true", a)
 			}
 		})
+	}
 }
 
 func (tt tester) oneElementSetDoesNotContainAbsentElement() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"one element set: does not contain absent element",
 		func(t *testing.T) {
@@ -272,24 +232,18 @@ func (tt tester) oneElementSetDoesNotContainAbsentElement() {
 }
 
 func (tt tester) emptySetPlusOneDoesNotContainAbsentElement() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add: does not contain absent element",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add: does not contain absent element", func(t *testing.T) {
 			s.Add(a)
 
 			if s.Contains(b) {
 				t.Fatalf("got Set.Contains(%q) == true, want false", b)
 			}
 		})
+	}
 }
 
 func (tt tester) oneElementSetReturnsElementOnIteration() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"one element set: returns element on iteration",
 		func(t *testing.T) {
@@ -302,24 +256,18 @@ func (tt tester) oneElementSetReturnsElementOnIteration() {
 }
 
 func (tt tester) emptySetPlusOneReturnsElementOnIteration() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add: returns element on iteration",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add: returns element on iteration", func(t *testing.T) {
 			s.Add(a)
 
 			if got, want := slices.Collect(s.All()), oneElement(); !slices.Equal(got, want) {
 				t.Fatalf("got Set.All of %q, want %q", got, want)
 			}
 		})
+	}
 }
 
 func (tt tester) oneElementSetHasOneElementStringRepr() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"one element set: has one-element string representation",
 		func(t *testing.T) {
@@ -332,29 +280,20 @@ func (tt tester) oneElementSetHasOneElementStringRepr() {
 }
 
 func (tt tester) emptySetPlusOneHasOneElementStringRepr() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add: has one-element string representation",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add: has one-element string representation", func(t *testing.T) {
 			s.Add(a)
 
 			if got, want := s.String(), aString(); got != want {
 				t.Fatalf("got Set.String of %q, want %q", got, want)
 			}
 		})
+	}
 }
 
 func (tt tester) emptySetPlusOneMinusOneDoesNotContainAnything() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add: remove: does not contain anything",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add: remove: does not contain anything", func(t *testing.T) {
 			s.Add(a)
 			s.Remove(a)
 
@@ -362,11 +301,10 @@ func (tt tester) emptySetPlusOneMinusOneDoesNotContainAnything() {
 				t.Fatalf("got Set.Contains(%q) == true, want false", a)
 			}
 		})
+	}
 }
 
 func (tt tester) twoElementSetHasLengthOfTwo() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"two element set: has length of 2",
 		func(t *testing.T) {
@@ -379,13 +317,8 @@ func (tt tester) twoElementSetHasLengthOfTwo() {
 }
 
 func (tt tester) emptySetPlusTwoHasLengthOfTwo() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add x2: has length of 2",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add x2: has length of 2", func(t *testing.T) {
 			s.Add(a)
 			s.Add(b)
 
@@ -393,11 +326,10 @@ func (tt tester) emptySetPlusTwoHasLengthOfTwo() {
 				t.Fatalf("got Set.Len of %v, want %v", got, want)
 			}
 		})
+	}
 }
 
 func (tt tester) twoElementSetContainsBothElements() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"two element set: contains both elements",
 		func(t *testing.T) {
@@ -415,13 +347,8 @@ func (tt tester) twoElementSetContainsBothElements() {
 }
 
 func (tt tester) emptySetPlusTwoContainsBothElements() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add x2: contains both elements",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add x2: contains both elements", func(t *testing.T) {
 			s.Add(a)
 			s.Add(b)
 
@@ -434,11 +361,10 @@ func (tt tester) emptySetPlusTwoContainsBothElements() {
 				}
 			}
 		})
+	}
 }
 
 func (tt tester) twoElementSetReturnsBothElementsOnIteration() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"two element set: returns both elements on iteration",
 		func(t *testing.T) {
@@ -452,13 +378,8 @@ func (tt tester) twoElementSetReturnsBothElementsOnIteration() {
 }
 
 func (tt tester) emptySetPlusTwoReturnsBothElementsOnIteration() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add x2: returns both elements on iteration",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add x2: returns both elements on iteration", func(t *testing.T) {
 			s.Add(a)
 			s.Add(b)
 
@@ -467,14 +388,12 @@ func (tt tester) emptySetPlusTwoReturnsBothElementsOnIteration() {
 				t.Errorf("Set.All mismatch (-want +got):\n%s", diff)
 			}
 		})
+	}
 }
 
 func (tt tester) emptySetPlusVarargsReturnsBothElementsOnIteration() {
-	tt.runEmptyIfMutable(
-		"empty set: add varargs: returns all elements on iteration",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add varargs: returns all elements on iteration", func(t *testing.T) {
 			s.Add(a, b)
 
 			got, want := slices.Collect(s.All()), twoElements()
@@ -482,11 +401,10 @@ func (tt tester) emptySetPlusVarargsReturnsBothElementsOnIteration() {
 				t.Errorf("Set.All mismatch (-want +got):\n%s", diff)
 			}
 		})
+	}
 }
 
 func (tt tester) twoElementSetHasTwoElementStringRepr() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"two element set: has two-element string representation",
 		func(t *testing.T) {
@@ -499,13 +417,8 @@ func (tt tester) twoElementSetHasTwoElementStringRepr() {
 }
 
 func (tt tester) emptySetPlusTwoReturnsTwoElementStringRepr() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add x2: has two-element string representation",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add x2: has two-element string representation", func(t *testing.T) {
 			s.Add(a)
 			s.Add(b)
 
@@ -513,16 +426,12 @@ func (tt tester) emptySetPlusTwoReturnsTwoElementStringRepr() {
 				t.Fatalf("got Set.String of %v, want any of %q", got, wantAny)
 			}
 		})
+	}
 }
 
 func (tt tester) emptySetPlusTwoMinusOneHasLengthOfOne() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add x2: remove x1: has length of 1",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add x2: remove x1: has length of 1", func(t *testing.T) {
 			s.Add(a)
 			s.Add(b)
 			s.Remove(a)
@@ -531,16 +440,12 @@ func (tt tester) emptySetPlusTwoMinusOneHasLengthOfOne() {
 				t.Fatalf("got Set.Len of %v, want %v", got, want)
 			}
 		})
+	}
 }
 
 func (tt tester) emptySetPlusTwoMinusVarargsHasLengthOfZero() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add x2: remove varargs: has length of 0",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add x2: remove varargs: has length of 0", func(t *testing.T) {
 			s.Add(a)
 			s.Add(b)
 			s.Remove(a, b)
@@ -549,16 +454,12 @@ func (tt tester) emptySetPlusTwoMinusVarargsHasLengthOfZero() {
 				t.Fatalf("got Set.Len of %v, want %v", got, want)
 			}
 		})
+	}
 }
 
 func (tt tester) emptySetPlusThreeContainsAllThreeElements() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add x3: contains all three elements",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add x3: contains all three elements", func(t *testing.T) {
 			s.Add(a)
 			s.Add(b)
 			s.Add(c)
@@ -572,11 +473,10 @@ func (tt tester) emptySetPlusThreeContainsAllThreeElements() {
 				}
 			}
 		})
+	}
 }
 
 func (tt tester) threeElementSetContainsAllThreeElements() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"three element set: contains all three elements",
 		func(t *testing.T) {
@@ -592,13 +492,8 @@ func (tt tester) threeElementSetContainsAllThreeElements() {
 }
 
 func (tt tester) emptySetPlusThreeHasThreeElementStringRepr() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add x3: has three-element string representation",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add x3: has three-element string representation", func(t *testing.T) {
 			s.Add(a)
 			s.Add(b)
 			s.Add(c)
@@ -611,11 +506,10 @@ func (tt tester) emptySetPlusThreeHasThreeElementStringRepr() {
 				)
 			}
 		})
+	}
 }
 
 func (tt tester) threeElementSetHasThreeElementStringRepr() {
-	tt.t.Helper()
-
 	tt.t.Run("three element set: has three-element string representation",
 		func(t *testing.T) {
 			s := tt.setBuilder(threeElements())
@@ -627,8 +521,6 @@ func (tt tester) threeElementSetHasThreeElementStringRepr() {
 }
 
 func (tt tester) setInitializedFromTwoOfSameElementHasLengthOfOne() {
-	tt.t.Helper()
-
 	tt.t.Run("set initialized from two of same element: has length of 1",
 		func(t *testing.T) {
 			s := tt.setBuilder(twoSameElements())
@@ -640,13 +532,8 @@ func (tt tester) setInitializedFromTwoOfSameElementHasLengthOfOne() {
 }
 
 func (tt tester) emptySetPlusSameElementTwiceHasLengthOfOne() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add same element x2: has length of 1",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add same element x2: has length of 1", func(t *testing.T) {
 			s.Add(a)
 			s.Add(a)
 
@@ -654,11 +541,10 @@ func (tt tester) emptySetPlusSameElementTwiceHasLengthOfOne() {
 				t.Fatalf("got Set.Len of %v, want %v", got, want)
 			}
 		})
+	}
 }
 
 func (tt tester) setInitializedFromTwoOfSameElementReturnsOneElementOnIteration() {
-	tt.t.Helper()
-
 	tt.t.Run("set initialized from two of same element: returns one element on iteration",
 		func(t *testing.T) {
 			s := tt.setBuilder(twoSameElements())
@@ -670,13 +556,8 @@ func (tt tester) setInitializedFromTwoOfSameElementReturnsOneElementOnIteration(
 }
 
 func (tt tester) emptySetPlusSameElementTwiceReturnsOneElementOnIteration() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add same element x2: returns one element on iteration",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add same element x2: returns one element on iteration", func(t *testing.T) {
 			s.Add(a)
 			s.Add(a)
 
@@ -684,32 +565,24 @@ func (tt tester) emptySetPlusSameElementTwiceReturnsOneElementOnIteration() {
 				t.Fatalf("got Set.All of %q, want %q", got, want)
 			}
 		})
+	}
 }
 
 func (tt tester) emptySetPlusOneReturnsTrue() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add: returns true",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add: returns true", func(t *testing.T) {
 			got := s.Add(a)
 
 			if !got {
 				t.Fatalf("got Set.Add(%q) == false, want true", a)
 			}
 		})
+	}
 }
 
 func (tt tester) emptySetPlusSameElementTwiceReturnsFalse() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add same element x2: returns true",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add same element x2: returns true", func(t *testing.T) {
 			s.Add(a)
 			got := s.Add(a)
 
@@ -717,16 +590,12 @@ func (tt tester) emptySetPlusSameElementTwiceReturnsFalse() {
 				t.Fatalf("got Set.Add(%q) == true, want false", a)
 			}
 		})
+	}
 }
 
 func (tt tester) emptySetPlusSameElementTwiceThenDifferentOnceReturnsTrue() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add same element x2: add different element: returns true",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add same element x2: add different element: returns true", func(t *testing.T) {
 			s.Add(a)
 			s.Add(a)
 			got := s.Add(b)
@@ -735,16 +604,12 @@ func (tt tester) emptySetPlusSameElementTwiceThenDifferentOnceReturnsTrue() {
 				t.Fatalf("got Set.Add(%q) == false, want true", b)
 			}
 		})
+	}
 }
 
 func (tt tester) emptySetPlusOnePlusVarargsReturnsTrue() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add x1: add varargs: returns true",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add x1: add varargs: returns true", func(t *testing.T) {
 			s.Add(a)
 			got := s.Add(b, a)
 
@@ -752,16 +617,12 @@ func (tt tester) emptySetPlusOnePlusVarargsReturnsTrue() {
 				t.Fatalf("got Set.Add(%q, %q) == false, want true", b, a)
 			}
 		})
+	}
 }
 
 func (tt tester) emptySetMinusOneReturnsFalse() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: remove: returns false",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: remove: returns false", func(t *testing.T) {
 			got := s.Remove(a)
 
 			if got {
@@ -771,16 +632,12 @@ func (tt tester) emptySetMinusOneReturnsFalse() {
 				)
 			}
 		})
+	}
 }
 
 func (tt tester) emptySetPlusOneMinusSameElementReturnsTrue() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add: remove same element: returns true",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add: remove same element: returns true", func(t *testing.T) {
 			s.Add(a)
 			got := s.Remove(a)
 
@@ -788,16 +645,12 @@ func (tt tester) emptySetPlusOneMinusSameElementReturnsTrue() {
 				t.Fatalf("got Set.Remove(%q) == false, want true", a)
 			}
 		})
+	}
 }
 
 func (tt tester) emptySetPlusOneMinusSameElementTwiceReturnsFalse() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add: remove same element x2: returns false",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add: remove same element x2: returns false", func(t *testing.T) {
 			s.Add(a)
 			s.Remove(a)
 			got := s.Remove(a)
@@ -806,16 +659,12 @@ func (tt tester) emptySetPlusOneMinusSameElementTwiceReturnsFalse() {
 				t.Fatalf("got Set.Remove(%q) == true, want false", a)
 			}
 		})
+	}
 }
 
 func (tt tester) emptySetPlusOneMinusVarargsReturnsTrue() {
-	tt.t.Helper()
-
-	tt.runEmptyIfMutable(
-		"empty set: add: remove varargs: returns true",
-		func(t *testing.T, s set.MutableSet[string]) {
-			t.Helper()
-
+	if s, mutable := tt.setBuilder(empty()).(set.MutableSet[string]); mutable {
+		tt.t.Run("empty set: add: remove varargs: returns true", func(t *testing.T) {
 			s.Add(a)
 			got := s.Remove(b, a)
 
@@ -823,6 +672,7 @@ func (tt tester) emptySetPlusOneMinusVarargsReturnsTrue() {
 				t.Fatalf("got Set.Remove(%q) == false, want true", a)
 			}
 		})
+	}
 }
 
 const (
