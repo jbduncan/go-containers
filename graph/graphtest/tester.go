@@ -151,9 +151,6 @@ func (tt tester) test() {
 	tt.testGraphWithTwoEdgesWithSameSourceNode()
 
 	tt.testGraphWithTwoEdgesWithSameTargetNode()
-
-	// TODO: Continue from graph_test.go, "has an unmodifiable adjacent nodes
-	//       set view"
 }
 
 func (tt tester) testEmptyGraph() {
@@ -210,7 +207,7 @@ func (tt tester) testEmptyGraph() {
 
 			if _, mutable := nodes.(set.MutableSet[int]); mutable {
 				t.Fatalf(
-					"%s: got mutable set: %v, want unmodifiable set",
+					"%s: got a set.MutableSet: %v, want just a set.Set",
 					graphNodesName,
 					nodes,
 				)
@@ -220,6 +217,81 @@ func (tt tester) testEmptyGraph() {
 
 			testNodeSet(t, graphNodesName, nodes, node1)
 		})
+
+		t.Run(
+			"has an unmodifiable adjacent nodes set view",
+			func(t *testing.T) {
+				g := tt.graphBuilder()
+				adjacentNodes := g.AdjacentNodes(node1)
+
+				if _, mutable := adjacentNodes.(set.MutableSet[int]); mutable {
+					t.Fatalf(
+						"%s: got a set.MutableSet: %v, want just a set.Set",
+						graphAdjacentNodesName,
+						adjacentNodes,
+					)
+				}
+
+				g = putEdge(g, node1, node2)
+				_ = putEdge(g, node3, node1)
+
+				testNodeSet(t, graphAdjacentNodesName, adjacentNodes, node2, node3)
+			},
+		)
+
+		t.Run("has an unmodifiable predecessors set view", func(t *testing.T) {
+			g := tt.graphBuilder()
+			predecessors := g.Predecessors(node1)
+
+			if _, mutable := predecessors.(set.MutableSet[int]); mutable {
+				t.Fatalf(
+					"%s: got a set.MutableSet: %v, want just a set.Set",
+					graphPredecessorsName,
+					predecessors,
+				)
+			}
+
+			_ = putEdge(g, node2, node1)
+
+			testNodeSet(t, graphPredecessorsName, predecessors, node2)
+		})
+
+		t.Run("has an unmodifiable successors set view", func(t *testing.T) {
+			g := tt.graphBuilder()
+			successors := g.Successors(node1)
+
+			if _, mutable := successors.(set.MutableSet[int]); mutable {
+				t.Fatalf(
+					"%s: got a set.MutableSet: %v, want just a set.Set",
+					graphSuccessorsName,
+					successors,
+				)
+			}
+
+			_ = putEdge(g, node1, node2)
+
+			testNodeSet(t, graphSuccessorsName, successors, node2)
+		})
+
+		t.Run("has an unmodifiable edges set view", func(t *testing.T) {
+			g := tt.graphBuilder()
+			edges := g.Edges()
+
+			if _, mutable := edges.(set.MutableSet[graph.EndpointPair[int]]); mutable {
+				t.Fatalf(
+					"%s: got a set.MutableSet: %v, want just a set.Set",
+					// TODO: refactor: extract into const
+					"Graph.Edges",
+					edges,
+				)
+			}
+
+			_ = putEdge(g, node1, node2)
+
+			tt.testEdges(t, g, graph.EndpointPairOf(node1, node2))
+		})
+
+		// TODO: continue from graph_test.go, "has an unmodifiable set view of incident edges".
 	})
 }
 
