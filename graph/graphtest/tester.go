@@ -224,13 +224,7 @@ func (tt tester) testEmptyGraph() {
 				g := tt.graphBuilder()
 				adjacentNodes := g.AdjacentNodes(node1)
 
-				if _, mutable := adjacentNodes.(set.MutableSet[int]); mutable {
-					t.Fatalf(
-						"%s: got a set.MutableSet: %v, want just a set.Set",
-						graphAdjacentNodesName,
-						adjacentNodes,
-					)
-				}
+				testSetIsMutable(t, adjacentNodes, graphAdjacentNodesName)
 
 				g = putEdge(g, node1, node2)
 				_ = putEdge(g, node3, node1)
@@ -243,13 +237,7 @@ func (tt tester) testEmptyGraph() {
 			g := tt.graphBuilder()
 			predecessors := g.Predecessors(node1)
 
-			if _, mutable := predecessors.(set.MutableSet[int]); mutable {
-				t.Fatalf(
-					"%s: got a set.MutableSet: %v, want just a set.Set",
-					graphPredecessorsName,
-					predecessors,
-				)
-			}
+			testSetIsMutable(t, predecessors, graphPredecessorsName)
 
 			_ = putEdge(g, node2, node1)
 
@@ -260,13 +248,7 @@ func (tt tester) testEmptyGraph() {
 			g := tt.graphBuilder()
 			successors := g.Successors(node1)
 
-			if _, mutable := successors.(set.MutableSet[int]); mutable {
-				t.Fatalf(
-					"%s: got a set.MutableSet: %v, want just a set.Set",
-					graphSuccessorsName,
-					successors,
-				)
-			}
+			testSetIsMutable(t, successors, graphSuccessorsName)
 
 			_ = putEdge(g, node1, node2)
 
@@ -277,14 +259,8 @@ func (tt tester) testEmptyGraph() {
 			g := tt.graphBuilder()
 			edges := g.Edges()
 
-			if _, mutable := edges.(set.MutableSet[graph.EndpointPair[int]]); mutable {
-				t.Fatalf(
-					"%s: got a set.MutableSet: %v, want just a set.Set",
-					// TODO: refactor: extract into const
-					"Graph.Edges",
-					edges,
-				)
-			}
+			// TODO: refactor: extract "Graph.Edges" into const
+			testSetIsMutable(t, edges, "Graph.Edges")
 
 			_ = putEdge(g, node1, node2)
 
@@ -708,5 +684,21 @@ func testOutDegree(
 
 	if got, want := g.OutDegree(node), expectedDegree; got != want {
 		t.Errorf("Graph.OutDegree: got %d, want %d", got, want)
+	}
+}
+
+func testSetIsMutable[T comparable](
+	t *testing.T,
+	s set.Set[T],
+	setName string,
+) {
+	t.Helper()
+
+	if _, mutable := s.(set.MutableSet[T]); mutable {
+		t.Fatalf(
+			"%s: got a set.MutableSet: %v, want just a set.Set",
+			setName,
+			s,
+		)
 	}
 }
