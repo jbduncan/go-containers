@@ -58,6 +58,8 @@ const (
 // the graph.Graph and graph.MutableGraph interfaces are not tested.
 func Graph(
 	t TestingT,
+	// TODO: Rename to `emptyGraph` and add a note to the docs about how this
+	//       function should always return a newly initialized, empty graph.
 	graphBuilder func() graph.Graph[int],
 	mutability Mutability,
 	directionMode DirectionMode,
@@ -229,7 +231,13 @@ func (tt tester) testEmptyGraph() {
 				g = putEdge(g, node1, node2)
 				_ = putEdge(g, node3, node1)
 
-				testNodeSet(t, graphAdjacentNodesName, adjacentNodes, node2, node3)
+				testNodeSet(
+					t,
+					graphAdjacentNodesName,
+					adjacentNodes,
+					node2,
+					node3,
+				)
 			},
 		)
 

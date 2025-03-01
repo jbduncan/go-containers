@@ -48,7 +48,7 @@ func (tt edgeSetTester) test() {
 		tt.directionMode,
 		tt.edges,
 		tt.expectedEdges,
-	).Test()
+	).test()
 }
 
 func (tt edgeSetTester) testEdgeSetAll(
@@ -59,24 +59,22 @@ func (tt edgeSetTester) testEdgeSetAll(
 ) {
 	t.Helper()
 
-	t.Run("Set.All", func(t *testing.T) {
-		got, want := slices.Collect(edges.All()), expectedEdges
-		if tt.directionMode == Directed {
-			if diff := orderagnostic.Diff(got, want); diff != "" {
-				t.Errorf(
-					"%s: Set.All mismatch (-want +got):\n%s",
-					setName,
-					diff,
-				)
-			}
-		} else {
-			if diff := undirectedEndpointPairsDiff(got, want); diff != "" {
-				t.Errorf(
-					"%s: Set.All mismatch (-want +got):\n%s",
-					setName,
-					diff,
-				)
-			}
+	got, want := slices.Collect(edges.All()), expectedEdges
+	if tt.directionMode == Directed {
+		if diff := orderagnostic.Diff(got, want); diff != "" {
+			t.Errorf(
+				"%s: Set.All mismatch (-want +got):\n%s",
+				setName,
+				diff,
+			)
 		}
-	})
+	} else {
+		if diff := undirectedEndpointPairsDiff(got, want); diff != "" {
+			t.Errorf(
+				"%s: Set.All mismatch (-want +got):\n%s",
+				setName,
+				diff,
+			)
+		}
+	}
 }

@@ -35,43 +35,41 @@ func newEdgeSetStringTester(
 	}
 }
 
-func (t *edgeSetStringTester) Test() {
+func (t *edgeSetStringTester) test() {
 	t.tt.Helper()
 
-	t.tt.Run("Set.String", func(ttt *testing.T) {
-		trimmed, prefixFound := strings.CutPrefix(t.edges, "[")
-		if !prefixFound {
-			ttt.Fatalf(
-				`%s: got Set.String of %q, want to have prefix "["`,
-				t.setName,
-				t.edges,
-			)
-		}
-		trimmed, suffixFound := strings.CutSuffix(trimmed, "]")
-		if !suffixFound {
-			ttt.Fatalf(
-				`%s: got Set.String of %q, want to have suffix "]"`,
-				t.setName,
-				t.edges,
-			)
-		}
+	trimmed, prefixFound := strings.CutPrefix(t.edges, "[")
+	if !prefixFound {
+		t.tt.Fatalf(
+			`%s: got Set.String of %q, want to have prefix "["`,
+			t.setName,
+			t.edges,
+		)
+	}
+	trimmed, suffixFound := strings.CutSuffix(trimmed, "]")
+	if !suffixFound {
+		t.tt.Fatalf(
+			`%s: got Set.String of %q, want to have suffix "]"`,
+			t.setName,
+			t.edges,
+		)
+	}
 
-		elems := splitByComma(trimmed)
-		want := make([]graph.EndpointPair[int], 0, len(elems))
-		for _, elemStr := range elems {
-			want = append(want, t.toEndpointPair(ttt, elemStr))
-		}
+	elems := splitByComma(trimmed)
+	want := make([]graph.EndpointPair[int], 0, len(elems))
+	for _, elemStr := range elems {
+		want = append(want, t.toEndpointPair(t.tt, elemStr))
+	}
 
-		var diff string
-		if t.directionMode == Directed {
-			diff = orderagnostic.Diff(t.expectedEdges, want)
-		} else {
-			diff = undirectedEndpointPairsDiff(t.expectedEdges, want)
-		}
-		if diff != "" {
-			t.report(ttt)
-		}
-	})
+	var diff string
+	if t.directionMode == Directed {
+		diff = orderagnostic.Diff(t.expectedEdges, want)
+	} else {
+		diff = undirectedEndpointPairsDiff(t.expectedEdges, want)
+	}
+	if diff != "" {
+		t.report(t.tt)
+	}
 }
 
 var endpointPairStringRegex = regexp.MustCompile(`<(\d+) -> (\d)+>`)
