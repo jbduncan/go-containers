@@ -152,8 +152,8 @@ func (tt tester) test() {
 
 	tt.testGraphWithTwoEdgesWithSameTargetNode()
 
-	// TODO: Continue from graph_test.go, "when finding the predecessors of an
-	//       absent node"
+	// TODO: Continue from graph_test.go, "has an unmodifiable adjacent nodes
+	//       set view"
 }
 
 func (tt tester) testEmptyGraph() {
@@ -166,6 +166,59 @@ func (tt tester) testEmptyGraph() {
 
 		t.Run("has no edges", func(t *testing.T) {
 			tt.testEdges(t, tt.graphBuilder())
+		})
+
+		t.Run("has no predecessors for an absent node", func(t *testing.T) {
+			testNodeSet(
+				t,
+				graphPredecessorsName,
+				tt.graphBuilder().Predecessors(nodeNotInGraph),
+			)
+		})
+
+		t.Run("has no successors for an absent node", func(t *testing.T) {
+			testNodeSet(
+				t,
+				graphSuccessorsName,
+				tt.graphBuilder().Successors(nodeNotInGraph),
+			)
+		})
+
+		t.Run("has no adjacent nodes for an absent node", func(t *testing.T) {
+			testNodeSet(
+				t,
+				graphAdjacentNodesName,
+				tt.graphBuilder().AdjacentNodes(nodeNotInGraph),
+			)
+		})
+
+		t.Run("has a degree of 0 for an absent node", func(t *testing.T) {
+			testDegree(t, tt.graphBuilder(), nodeNotInGraph, 0)
+		})
+
+		t.Run("has an in-degree of 0 for an absent node", func(t *testing.T) {
+			testInDegree(t, tt.graphBuilder(), nodeNotInGraph, 0)
+		})
+
+		t.Run("has an out-degree of 0 for an absent node", func(t *testing.T) {
+			testOutDegree(t, tt.graphBuilder(), nodeNotInGraph, 0)
+		})
+
+		t.Run("has an unmodifiable nodes set view", func(t *testing.T) {
+			g := tt.graphBuilder()
+			nodes := g.Nodes()
+
+			if _, mutable := nodes.(set.MutableSet[int]); mutable {
+				t.Fatalf(
+					"%s: got mutable set: %v, want unmodifiable set",
+					graphNodesName,
+					nodes,
+				)
+			}
+
+			_ = addNode(g, node1)
+
+			testNodeSet(t, graphNodesName, nodes, node1)
 		})
 	})
 }
