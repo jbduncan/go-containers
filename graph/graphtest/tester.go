@@ -136,6 +136,7 @@ const (
 	graphPredecessorsName  = "Graph.Predecessors"
 	graphSuccessorsName    = "Graph.Successors"
 	graphEdgesName         = "Graph.Edges"
+	graphIncidentEdgesName = "Graph.IncidentEdges"
 )
 
 func (tt tester) test() {
@@ -275,7 +276,26 @@ func (tt tester) testEmptyGraph() {
 			tt.testEdges(t, g, graph.EndpointPairOf(node1, node2))
 		})
 
-		// TODO: continue from graph_test.go, "has an unmodifiable set view of incident edges".
+		t.Run(
+			"has an unmodifiable incident edges set view",
+			func(t *testing.T) {
+				g := tt.graphBuilder()
+				edges := g.IncidentEdges(node1)
+
+				testSetIsMutable(t, edges, graphIncidentEdgesName)
+
+				_ = putEdge(g, node1, node2)
+
+				tt.testIncidentEdges(
+					t,
+					g,
+					node1,
+					graph.EndpointPairOf(node1, node2),
+				)
+			},
+		)
+
+		// TODO: continue from graph_test.go, line 426, "mutableGraphTests".
 	})
 }
 
@@ -649,7 +669,7 @@ func (tt tester) testIncidentEdges(
 
 	edgeSetTester{
 		t:             t,
-		setName:       "Graph.IncidentEdges",
+		setName:       graphIncidentEdgesName,
 		edges:         g.IncidentEdges(node),
 		directionMode: tt.directionMode,
 		expectedEdges: expectedEdges,
