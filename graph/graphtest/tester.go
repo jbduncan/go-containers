@@ -140,8 +140,6 @@ const (
 )
 
 func (tt tester) test() {
-	tt.t.Helper()
-
 	tt.testEmptyGraph()
 
 	tt.testGraphWithOneNode()
@@ -155,11 +153,11 @@ func (tt tester) test() {
 	tt.testGraphWithTwoEdgesWithSameSourceNode()
 
 	tt.testGraphWithTwoEdgesWithSameTargetNode()
+
+	tt.testEmptyMutableGraph()
 }
 
 func (tt tester) testEmptyGraph() {
-	tt.t.Helper()
-
 	tt.t.Run("empty graph", func(t *testing.T) {
 		t.Run("has no nodes", func(t *testing.T) {
 			testNodeSet(t, graphNodesName, tt.graphBuilder().Nodes())
@@ -294,14 +292,10 @@ func (tt tester) testEmptyGraph() {
 				)
 			},
 		)
-
-		// TODO: continue from graph_test.go, line 426, "mutableGraphTests".
 	})
 }
 
 func (tt tester) testGraphWithOneNode() {
-	tt.t.Helper()
-
 	tt.t.Run("graph with one node", func(t *testing.T) {
 		g := func() graph.Graph[int] {
 			g := tt.graphBuilder()
@@ -344,8 +338,6 @@ func (tt tester) testGraphWithOneNode() {
 }
 
 func (tt tester) testGraphWithTwoNodes() {
-	tt.t.Helper()
-
 	tt.t.Run("graph with two nodes", func(t *testing.T) {
 		t.Run("has both nodes", func(t *testing.T) {
 			g := tt.graphBuilder()
@@ -358,8 +350,6 @@ func (tt tester) testGraphWithTwoNodes() {
 }
 
 func (tt tester) testGraphWithOneEdge() {
-	tt.t.Helper()
-
 	tt.t.Run("graph with one edge", func(t *testing.T) {
 		g := func() graph.Graph[int] {
 			g := tt.graphBuilder()
@@ -476,8 +466,6 @@ func (tt tester) testGraphWithOneEdge() {
 }
 
 func (tt tester) testGraphWithSameEdgePutTwice() {
-	tt.t.Helper()
-
 	tt.t.Run("graph with same edge put twice", func(t *testing.T) {
 		t.Run("has only one edge", func(t *testing.T) {
 			g := tt.graphBuilder()
@@ -489,8 +477,6 @@ func (tt tester) testGraphWithSameEdgePutTwice() {
 }
 
 func (tt tester) testGraphWithTwoEdgesWithSameSourceNode() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"graph with two edges with the same source node",
 		func(t *testing.T) {
@@ -555,8 +541,6 @@ func (tt tester) testGraphWithTwoEdgesWithSameSourceNode() {
 }
 
 func (tt tester) testGraphWithTwoEdgesWithSameTargetNode() {
-	tt.t.Helper()
-
 	tt.t.Run(
 		"graph with two edges with the same target node",
 		func(t *testing.T) {
@@ -598,6 +582,31 @@ func (tt tester) testGraphWithTwoEdgesWithSameTargetNode() {
 			})
 		},
 	)
+}
+
+func (tt tester) testEmptyMutableGraph() {
+	tt.t.Run("empty mutable graph", func(t *testing.T) {
+		emptyMutableGraph := func() graph.MutableGraph[int] {
+			tt.t.Helper()
+
+			g := tt.graphBuilder()
+
+			if mutG, ok := g.(graph.MutableGraph[int]); !ok {
+				tt.t.Fatalf("graph was expected to implement graph.MutableGraph, but it did not")
+				return nil // Make the compiler happy
+			} else {
+				return mutG
+			}
+		}
+
+		t.Run("adding a new node returns true", func(t *testing.T) {
+			if got := emptyMutableGraph().AddNode(node1); !got {
+				t.Fatalf("MutableGraph.AddNode: got false, want true")
+			}
+		})
+	})
+
+	// TODO: continue from graph_test.go, line 492, "mutableGraphTests".
 }
 
 func addNode(g graph.Graph[int], node int) graph.Graph[int] {
