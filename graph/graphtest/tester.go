@@ -48,6 +48,9 @@ const (
 	DisallowsSelfLoops
 )
 
+// TODO: Rename to `emptyGraph` and add a note to the docs about how this
+//       function should always return a newly initialized, empty graph.
+
 // Graph produces a suite of test cases for testing implementations of the
 // graph.Graph and graph.MutableGraph interfaces. Graph instances created for
 // testing are to have int nodes.
@@ -58,8 +61,6 @@ const (
 // the graph.Graph and graph.MutableGraph interfaces are not tested.
 func Graph(
 	t TestingT,
-// TODO: Rename to `emptyGraph` and add a note to the docs about how this
-//       function should always return a newly initialized, empty graph.
 	graphBuilder func() graph.Graph[int],
 	mutability Mutability,
 	directionMode DirectionMode,
@@ -590,13 +591,12 @@ func (tt tester) testEmptyMutableGraph() {
 			tt.t.Helper()
 
 			g := tt.graphBuilder()
-
-			if mutG, ok := g.(graph.MutableGraph[int]); !ok {
-				tt.t.Fatalf("graph was expected to implement graph.MutableGraph, but it did not")
-				return nil // Make the compiler happy
-			} else {
+			if mutG, ok := g.(graph.MutableGraph[int]); ok {
 				return mutG
 			}
+
+			tt.t.Fatalf("graph was expected to implement graph.MutableGraph, but it did not")
+			return nil // Make the compiler happy
 		}
 
 		t.Run("adding a new node returns true", func(t *testing.T) {
