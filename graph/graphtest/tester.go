@@ -161,7 +161,7 @@ func (tt tester) test() {
 func (tt tester) testEmptyGraph() {
 	tt.t.Run("empty graph", func(t *testing.T) {
 		t.Run("has no nodes", func(t *testing.T) {
-			testNodeSet(t, graphNodesName, tt.graphBuilder().Nodes())
+			testNodes(t, tt.graphBuilder())
 		})
 
 		t.Run("has no edges", func(t *testing.T) {
@@ -169,27 +169,15 @@ func (tt tester) testEmptyGraph() {
 		})
 
 		t.Run("has no predecessors for an absent node", func(t *testing.T) {
-			testNodeSet(
-				t,
-				graphPredecessorsName,
-				tt.graphBuilder().Predecessors(nodeNotInGraph),
-			)
+			testPredecessors(t, tt.graphBuilder(), nodeNotInGraph)
 		})
 
 		t.Run("has no successors for an absent node", func(t *testing.T) {
-			testNodeSet(
-				t,
-				graphSuccessorsName,
-				tt.graphBuilder().Successors(nodeNotInGraph),
-			)
+			testSuccessors(t, tt.graphBuilder(), nodeNotInGraph)
 		})
 
 		t.Run("has no adjacent nodes for an absent node", func(t *testing.T) {
-			testNodeSet(
-				t,
-				graphAdjacentNodesName,
-				tt.graphBuilder().AdjacentNodes(nodeNotInGraph),
-			)
+			testAdjacentNodes(t, tt.graphBuilder(), nodeNotInGraph)
 		})
 
 		t.Run("has a degree of 0 for an absent node", func(t *testing.T) {
@@ -305,19 +293,19 @@ func (tt tester) testGraphWithOneNode() {
 		}
 
 		t.Run("has just that node", func(t *testing.T) {
-			testNodeSet(t, graphNodesName, g().Nodes(), node1)
+			testNodes(t, g(), node1)
 		})
 
 		t.Run("the node has no adjacent nodes", func(t *testing.T) {
-			testNodeSet(t, graphAdjacentNodesName, g().AdjacentNodes(node1))
+			testAdjacentNodes(t, g(), node1)
 		})
 
 		t.Run("the node has no predecessors", func(t *testing.T) {
-			testNodeSet(t, graphPredecessorsName, g().Predecessors(node1))
+			testPredecessors(t, g(), node1)
 		})
 
 		t.Run("the node has no successors", func(t *testing.T) {
-			testNodeSet(t, graphSuccessorsName, g().Successors(node1))
+			testSuccessors(t, g(), node1)
 		})
 
 		t.Run("the node has no incident edges", func(t *testing.T) {
@@ -345,7 +333,7 @@ func (tt tester) testGraphWithTwoNodes() {
 			g = addNode(g, node1)
 			g = addNode(g, node2)
 
-			testNodeSet(t, graphNodesName, g.Nodes(), node1, node2)
+			testNodes(t, g, node1, node2)
 		})
 	})
 }
@@ -361,48 +349,28 @@ func (tt tester) testGraphWithOneEdge() {
 		t.Run(
 			"the source node is adjacent to the target node",
 			func(t *testing.T) {
-				testNodeSet(
-					t,
-					graphAdjacentNodesName,
-					g().AdjacentNodes(node1),
-					node2,
-				)
+				testAdjacentNodes(t, g(), node1, node2)
 			},
 		)
 
 		t.Run(
 			"the target node is adjacent to the source node",
 			func(t *testing.T) {
-				testNodeSet(
-					t,
-					graphAdjacentNodesName,
-					g().AdjacentNodes(node2),
-					node1,
-				)
+				testAdjacentNodes(t, g(), node2, node1)
 			},
 		)
 
 		t.Run(
 			"the source node is the predecessor of the target node",
 			func(t *testing.T) {
-				testNodeSet(
-					t,
-					graphPredecessorsName,
-					g().Predecessors(node2),
-					node1,
-				)
+				testPredecessors(t, g(), node2, node1)
 			},
 		)
 
 		t.Run(
 			"the target node is the successor of the source node",
 			func(t *testing.T) {
-				testNodeSet(
-					t,
-					graphSuccessorsName,
-					g().Successors(node1),
-					node2,
-				)
+				testSuccessors(t, g(), node1, node2)
 			},
 		)
 
@@ -493,25 +461,13 @@ func (tt tester) testGraphWithTwoEdgesWithSameSourceNode() {
 			})
 
 			t.Run("has a common node with two successors", func(t *testing.T) {
-				testNodeSet(
-					t,
-					graphSuccessorsName,
-					g().Successors(node1),
-					node2,
-					node3,
-				)
+				testSuccessors(t, g(), node1, node2, node3)
 			})
 
 			t.Run(
 				"has a common node with two unique adjacent nodes",
 				func(t *testing.T) {
-					testNodeSet(
-						t,
-						graphAdjacentNodesName,
-						g().AdjacentNodes(node1),
-						node2,
-						node3,
-					)
+					testAdjacentNodes(t, g(), node1, node2, node3)
 				},
 			)
 
@@ -562,13 +518,7 @@ func (tt tester) testGraphWithTwoEdgesWithSameTargetNode() {
 			t.Run(
 				"has a common node with two predecessors",
 				func(t *testing.T) {
-					testNodeSet(
-						t,
-						graphPredecessorsName,
-						g().Predecessors(node2),
-						node1,
-						node3,
-					)
+					testPredecessors(t, g(), node2, node1, node3)
 				},
 			)
 
@@ -638,24 +588,14 @@ func (tt tester) testEmptyMutableGraph() {
 			t.Run("leaves the other nodes alone", func(t *testing.T) {
 				g, _ := setup()
 
-				testNodeSet(t, graphNodesName, g.Nodes(), node2, node3)
+				testNodes(t, g, node2, node3)
 			})
 
 			t.Run("detaches it from its adjacent nodes", func(t *testing.T) {
 				g, _ := setup()
 
-				testNodeSet(
-					t,
-					graphAdjacentNodesName,
-					g.AdjacentNodes(node2),
-					node3,
-				)
-				testNodeSet(
-					t,
-					graphAdjacentNodesName,
-					g.AdjacentNodes(node3),
-					node2,
-				)
+				testAdjacentNodes(t, g, node2, node3)
+				testAdjacentNodes(t, g, node3, node2)
 			})
 
 			t.Run("removes the connected edges", func(t *testing.T) {
@@ -684,7 +624,7 @@ func (tt tester) testEmptyMutableGraph() {
 			t.Run("leaves all the nodes alone", func(t *testing.T) {
 				g, _ := setup()
 
-				testNodeSet(t, graphNodesName, g.Nodes(), node1)
+				testNodes(t, g, node1)
 			})
 		})
 
@@ -718,7 +658,7 @@ func (tt tester) testEmptyMutableGraph() {
 				t.Run("leaves the other node alone", func(t *testing.T) {
 					g := setup()
 
-					testNodeSet(t, graphNodesName, g.Nodes(), node2)
+					testNodes(t, g, node2)
 				})
 
 				t.Run("removes both edges", func(t *testing.T) {
@@ -754,6 +694,49 @@ func complement(nodes []int) []int {
 	return slices.DeleteFunc(all, func(value int) bool {
 		return slices.Contains(nodes, value)
 	})
+}
+
+func testNodes(
+	t *testing.T,
+	g graph.Graph[int],
+	expectedValues ...int,
+) {
+	t.Helper()
+
+	testNodeSet(t, graphNodesName, g.Nodes(), expectedValues...)
+}
+
+func testAdjacentNodes(
+	t *testing.T,
+	g graph.Graph[int],
+	node int,
+	expectedValues ...int,
+) {
+	t.Helper()
+
+	testNodeSet(t, graphAdjacentNodesName, g.AdjacentNodes(node), expectedValues...)
+}
+
+func testPredecessors(
+	t *testing.T,
+	g graph.Graph[int],
+	node int,
+	expectedValues ...int,
+) {
+	t.Helper()
+
+	testNodeSet(t, graphPredecessorsName, g.Predecessors(node), expectedValues...)
+}
+
+func testSuccessors(
+	t *testing.T,
+	g graph.Graph[int],
+	node int,
+	expectedValues ...int,
+) {
+	t.Helper()
+
+	testNodeSet(t, graphSuccessorsName, g.Successors(node), expectedValues...)
 }
 
 func testNodeSet(
