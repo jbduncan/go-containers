@@ -176,6 +176,8 @@ func (tt tester) test() {
 		tt.testEmptyMutableGraphPuttingExistingEdge()
 
 		tt.testEmptyMutableGraphPuttingTwoAntiParallelEdges()
+
+		// TODO: continue from graph_test.go, line 586, "when removing an existing edge".
 	})
 }
 
