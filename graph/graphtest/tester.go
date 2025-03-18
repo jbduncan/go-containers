@@ -542,31 +542,31 @@ func (tt tester) testGraphWithTwoEdgesWithSameTargetNode() {
 	)
 }
 
+func (tt tester) emptyMutableGraph() graph.MutableGraph[int] {
+	tt.t.Helper()
+
+	g := tt.graphBuilder()
+
+	mutG, ok := g.(graph.MutableGraph[int])
+	if !ok {
+		tt.t.Fatalf(
+			"graph was expected to implement graph.MutableGraph, " +
+				"but it did not")
+		return nil // Make the compiler happy
+	}
+	return mutG
+}
+
 func (tt tester) testEmptyMutableGraph() {
 	tt.t.Run("empty mutable graph", func(t *testing.T) {
-		emptyMutableGraph := func() graph.MutableGraph[int] {
-			tt.t.Helper()
-
-			g := tt.graphBuilder()
-
-			mutG, ok := g.(graph.MutableGraph[int])
-			if !ok {
-				tt.t.Fatalf(
-					"graph was expected to implement graph.MutableGraph, " +
-						"but it did not")
-				return nil // Make the compiler happy
-			}
-			return mutG
-		}
-
 		t.Run("adding a new node returns true", func(t *testing.T) {
-			if got := emptyMutableGraph().AddNode(node1); !got {
+			if got := tt.emptyMutableGraph().AddNode(node1); !got {
 				t.Fatalf("MutableGraph.AddNode: got false, want true")
 			}
 		})
 
 		t.Run("adding an existing node returns false", func(t *testing.T) {
-			g := emptyMutableGraph()
+			g := tt.emptyMutableGraph()
 			g.AddNode(node1)
 
 			if got := g.AddNode(node1); got {
@@ -576,7 +576,7 @@ func (tt tester) testEmptyMutableGraph() {
 
 		t.Run("removing an existing node", func(t *testing.T) {
 			setup := func() (g graph.MutableGraph[int], removed bool) {
-				g = emptyMutableGraph()
+				g = tt.emptyMutableGraph()
 				g.PutEdge(node1, node2)
 				g.PutEdge(node3, node1)
 				g.PutEdge(node2, node3)
@@ -614,7 +614,7 @@ func (tt tester) testEmptyMutableGraph() {
 
 		t.Run("removing an absent node", func(t *testing.T) {
 			setup := func() (g graph.MutableGraph[int], removed bool) {
-				g = emptyMutableGraph()
+				g = tt.emptyMutableGraph()
 				g.AddNode(node1)
 
 				return g, g.RemoveNode(nodeNotInGraph)
@@ -636,13 +636,13 @@ func (tt tester) testEmptyMutableGraph() {
 		})
 
 		t.Run("putting a new edge returns true", func(t *testing.T) {
-			if got := emptyMutableGraph().PutEdge(node1, node2); !got {
+			if got := tt.emptyMutableGraph().PutEdge(node1, node2); !got {
 				t.Fatalf("MutableGraph.PutEdge: got false, want true")
 			}
 		})
 
 		t.Run("putting an existing edge returns false", func(t *testing.T) {
-			g := emptyMutableGraph()
+			g := tt.emptyMutableGraph()
 			g.PutEdge(node1, node2)
 
 			if got := g.PutEdge(node1, node2); got {
@@ -654,7 +654,7 @@ func (tt tester) testEmptyMutableGraph() {
 			"putting two anti-parallel edges and removing one of the nodes",
 			func(t *testing.T) {
 				setup := func() graph.MutableGraph[int] {
-					g := emptyMutableGraph()
+					g := tt.emptyMutableGraph()
 					g.PutEdge(node1, node2)
 					g.PutEdge(node2, node1)
 					g.RemoveNode(node1)
