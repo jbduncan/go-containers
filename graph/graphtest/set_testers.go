@@ -82,19 +82,21 @@ func testSetString[T comparable](
 	str := s.String()
 	trimmed, prefixFound := strings.CutPrefix(str, "[")
 	if !prefixFound {
-		t.Fatalf(
+		t.Errorf(
 			`%s: got Set.String of %q, want to have prefix "["`,
 			setName,
 			str,
 		)
+		return
 	}
 	trimmed, suffixFound := strings.CutSuffix(trimmed, "]")
 	if !suffixFound {
-		t.Fatalf(
+		t.Errorf(
 			`%s: got Set.String of %q, want to have suffix "]"`,
 			setName,
 			str,
 		)
+		return
 	}
 
 	want := make([]string, 0, len(expectedValues))
@@ -104,7 +106,7 @@ func testSetString[T comparable](
 	got := splitByComma(trimmed)
 
 	if diff := orderagnostic.Diff(got, want); diff != "" {
-		t.Fatalf(
+		t.Errorf(
 			"%s: Set.String of %q: elements mismatch: (-want +got):\n%s",
 			setName,
 			str,
