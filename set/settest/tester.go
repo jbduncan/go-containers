@@ -9,6 +9,10 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
+// TODO: Rename to `emptySet`.
+// TODO: When writing the docs, add a note about how this function should
+//       always return a newly initialized, empty set.
+
 func Set(t *testing.T, setBuilder func(elems []string) set.Set[string]) {
 	tt := newTester(t, setBuilder)
 
