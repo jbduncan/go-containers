@@ -661,7 +661,7 @@ func (tt tester) testEmptyMutableGraph() {
 		)
 	})
 
-	// TODO: continue from graph_test.go, line 550, "when putting a new edge".
+	// TODO: continue from graph_test.go, line 586, "when removing an existing edge".
 }
 
 func addNode(g graph.Graph[int], node int) graph.Graph[int] {
