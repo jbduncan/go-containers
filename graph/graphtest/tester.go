@@ -591,12 +591,15 @@ func (tt tester) testEmptyMutableGraph() {
 			tt.t.Helper()
 
 			g := tt.graphBuilder()
-			if mutG, ok := g.(graph.MutableGraph[int]); ok {
-				return mutG
-			}
 
-			tt.t.Fatalf("graph was expected to implement graph.MutableGraph, but it did not")
-			return nil // Make the compiler happy
+			mutG, ok := g.(graph.MutableGraph[int])
+			if !ok {
+				tt.t.Fatalf(
+					"graph was expected to implement graph.MutableGraph, " +
+						"but it did not")
+				return nil // Make the compiler happy
+			}
+			return mutG
 		}
 
 		t.Run("adding a new node returns true", func(t *testing.T) {
@@ -604,9 +607,89 @@ func (tt tester) testEmptyMutableGraph() {
 				t.Fatalf("MutableGraph.AddNode: got false, want true")
 			}
 		})
+
+		t.Run("adding an existing node returns false", func(t *testing.T) {
+			g := emptyMutableGraph()
+			g.AddNode(node1)
+
+			if got := g.AddNode(node1); got {
+				t.Fatalf("MutableGraph.AddNode: got true, want false")
+			}
+		})
+
+		t.Run("removing an existing node", func(t *testing.T) {
+			setup := func() (g graph.MutableGraph[int], removed bool) {
+				g = emptyMutableGraph()
+				g.PutEdge(node1, node2)
+				g.PutEdge(node3, node1)
+				g.PutEdge(node2, node3)
+
+				return g, g.RemoveNode(node1)
+			}
+
+			t.Run("returns true", func(t *testing.T) {
+				_, removed := setup()
+
+				if got := removed; !got {
+					t.Fatalf("MutableGraph.RemoveNode: got false, want true")
+				}
+			})
+
+			t.Run("leaves the other nodes alone", func(t *testing.T) {
+				g, _ := setup()
+
+				testNodeSet(t, graphNodesName, g.Nodes(), node2, node3)
+			})
+
+			t.Run("detaches it from its adjacent nodes", func(t *testing.T) {
+				g, _ := setup()
+
+				testNodeSet(
+					t,
+					graphAdjacentNodesName,
+					g.AdjacentNodes(node2),
+					node3,
+				)
+				testNodeSet(
+					t,
+					graphAdjacentNodesName,
+					g.AdjacentNodes(node3),
+					node2,
+				)
+			})
+
+			t.Run("removes the connected edges", func(t *testing.T) {
+				g, _ := setup()
+
+				tt.testEdges(t, g, graph.EndpointPairOf(node2, node3))
+			})
+		})
+
+		t.Run("removing an absent node", func(t *testing.T) {
+			setup := func() (g graph.MutableGraph[int], removed bool) {
+				g = emptyMutableGraph()
+				g.AddNode(node1)
+
+				return g, g.RemoveNode(nodeNotInGraph)
+			}
+
+			t.Run("returns false", func(t *testing.T) {
+				_, removed := setup()
+
+				if got := removed; got {
+					t.Fatalf("MutableGraph.RemoveNode: got true, want false")
+				}
+			})
+
+			t.Run("leaves all the nodes alone", func(t *testing.T) {
+				g, _ := setup()
+
+				testNodeSet(t, graphNodesName, g.Nodes(), node1)
+			})
+		})
 	})
 
-	// TODO: continue from graph_test.go, line 492, "mutableGraphTests".
+	// TODO: continue from graph_test.go, line 550, "when putting a new edge".
 }
 
 func addNode(g graph.Graph[int], node int) graph.Graph[int] {
