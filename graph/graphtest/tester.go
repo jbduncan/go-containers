@@ -8,15 +8,6 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
-// TestingT is an interface for the parts of *testing.T that graphtest.Graph
-// needs to run. Whenever you see an argument of this type, pass in an instance
-// of *testing.T or your unit testing framework's equivalent.
-type TestingT interface {
-	Helper()
-	Fatalf(format string, args ...any)
-	Run(name string, f func(t *testing.T)) bool
-}
-
 const (
 	node1          = 1
 	node2          = 2
@@ -60,7 +51,7 @@ const (
 // the set of the nodes in the graph. Details of specific implementations of
 // the graph.Graph and graph.MutableGraph interfaces are not tested.
 func Graph(
-	t TestingT,
+	t *testing.T,
 	graphBuilder func() graph.Graph[int],
 	mutability Mutability,
 	directionMode DirectionMode,
@@ -78,7 +69,7 @@ func Graph(
 }
 
 func validate(
-	t TestingT,
+	t *testing.T,
 	mutability Mutability,
 	directionMode DirectionMode,
 	selfLoopsMode SelfLoopsMode,
@@ -108,7 +99,7 @@ func validate(
 }
 
 func newTester(
-	t TestingT,
+	t *testing.T,
 	graphBuilder func() graph.Graph[int],
 	mutability Mutability,
 	directionMode DirectionMode,
@@ -124,7 +115,7 @@ func newTester(
 }
 
 type tester struct {
-	t             TestingT
+	t             *testing.T
 	graphBuilder  func() graph.Graph[int]
 	mutability    Mutability
 	directionMode DirectionMode

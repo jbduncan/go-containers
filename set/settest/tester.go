@@ -9,15 +9,7 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
-// TestingT is an interface for the parts of *testing.T that settest.Set needs
-// to run. Whenever you see an argument of this type, pass in an instance of
-// *testing.T or your unit testing framework's equivalent.
-type TestingT interface {
-	Helper()
-	Run(name string, f func(t *testing.T)) bool
-}
-
-func Set(t TestingT, setBuilder func(elems []string) set.Set[string]) {
+func Set(t *testing.T, setBuilder func(elems []string) set.Set[string]) {
 	tt := newTester(t, setBuilder)
 
 	tt.emptySetHasLengthOfZero()
@@ -94,12 +86,12 @@ func Set(t TestingT, setBuilder func(elems []string) set.Set[string]) {
 }
 
 type tester struct {
-	t          TestingT
+	t          *testing.T
 	setBuilder func(elems []string) set.Set[string]
 }
 
 func newTester(
-	t TestingT,
+	t *testing.T,
 	setBuilder func(elems []string) set.Set[string],
 ) *tester {
 	return &tester{
