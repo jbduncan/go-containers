@@ -233,13 +233,7 @@ func (tt tester) testEmptyGraph() {
 			g := tt.graphBuilder()
 			nodes := g.Nodes()
 
-			if _, mutable := nodes.(set.MutableSet[int]); mutable {
-				t.Fatalf(
-					"%s: got a set.MutableSet: %v, want just a set.Set",
-					graphNodesName,
-					nodes,
-				)
-			}
+			testSetIsMutable(t, nodes, graphNodesName)
 
 			_ = tt.addNode(g, node1)
 
