@@ -162,31 +162,37 @@ func (tt tester) test() {
 
 	tt.testGraphWithTwoEdgesWithSameTargetNode()
 
-	tt.t.Run("mutable graph", func(t *testing.T) {
-		tt.testMutableGraphAddingNewNode(t)
+	if tt.mutability == Mutable {
+		tt.t.Run("mutable graph", func(t *testing.T) {
+			tt.testMutableGraphAddingNewNode(t)
 
-		tt.testMutableGraphAddingExistingNode(t)
+			tt.testMutableGraphAddingExistingNode(t)
 
-		tt.testMutableGraphRemovingExistingNode(t)
+			tt.testMutableGraphRemovingExistingNode(t)
 
-		tt.testMutableGraphRemovingAbsentNode(t)
+			tt.testMutableGraphRemovingAbsentNode(t)
 
-		tt.testMutableGraphPuttingNewEdge(t)
+			tt.testMutableGraphPuttingNewEdge(t)
 
-		tt.testMutableGraphPuttingExistingEdge(t)
+			tt.testMutableGraphPuttingExistingEdge(t)
 
-		tt.testMutableGraphPuttingTwoAntiParallelEdges(t)
+			tt.testMutableGraphPuttingTwoAntiParallelEdges(t)
 
-		tt.testMutableGraphRemovingExistingEdge(t)
+			tt.testMutableGraphRemovingExistingEdge(t)
 
-		tt.testMutableGraphRemovingAbsentEdgeWithExistingSource(t)
+			tt.testMutableGraphRemovingAbsentEdgeWithExistingSource(t)
 
-		tt.testMutableGraphRemovingAbsentEdgeWithExistingTarget(t)
+			tt.testMutableGraphRemovingAbsentEdgeWithExistingTarget(t)
 
-		tt.testMutableGraphRemovingAbsentEdgeWithTwoExistingNodes(t)
+			tt.testMutableGraphRemovingAbsentEdgeWithTwoExistingNodes(t)
+		})
+	}
 
-		// TODO: continue from graph_test.go, line 696, "undirectedGraphTests".
-	})
+	if tt.directionMode == Undirected {
+		tt.testUndirectedGraph()
+	}
+
+	// TODO: continue from graph_test.go, line 743, "directedGraphTests".
 }
 
 func (tt tester) testEmptyGraph() {
@@ -442,14 +448,14 @@ func (tt tester) testGraphWithOneEdge() {
 		)
 
 		t.Run(
-			"sees the first node as being connected to the second",
+			"connects the first node to the second",
 			func(t *testing.T) {
 				testHasEdgeConnecting(t, g(), node1, node2)
 			},
 		)
 
 		t.Run(
-			"sees the first node as being connected to no other node",
+			"connects the first node to no other node",
 			func(t *testing.T) {
 				testHasNoEdgeConnecting(t, g(), node1, nodeNotInGraph)
 				testHasNoEdgeConnecting(t, g(), nodeNotInGraph, node1)
@@ -457,7 +463,7 @@ func (tt tester) testGraphWithOneEdge() {
 		)
 
 		t.Run(
-			"sees the second node as being connected to no other node",
+			"connects the second node to no other node",
 			func(t *testing.T) {
 				testHasNoEdgeConnecting(t, g(), node2, nodeNotInGraph)
 			},
@@ -842,6 +848,65 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithTwoExistingNodes(
 	)
 }
 
+func (tt tester) testUndirectedGraph() {
+	tt.t.Run("undirected graph", func(t *testing.T) {
+		t.Run("is undirected", func(t *testing.T) {
+			g := tt.graphBuilder()
+
+			if got := g.IsDirected(); got {
+				t.Fatalf("Graph.IsDirected: got true, want false")
+			}
+		})
+
+		g := func() graph.Graph[int] {
+			g := tt.graphBuilder()
+			g = tt.putEdge(g, node1, node2)
+			return g
+		}
+
+		t.Run("putting an edge", func(t *testing.T) {
+			t.Run(
+				"makes the first node the predecessor of the second",
+				func(t *testing.T) {
+					testPredecessors(t, g(), node1, node2)
+				},
+			)
+
+			t.Run(
+				"makes the first node a predecessor of the second",
+				func(t *testing.T) {
+					testPredecessors(t, g(), node1, node2)
+				},
+			)
+
+			t.Run(
+				"makes the second node a successor of the first",
+				func(t *testing.T) {
+					testSuccessors(t, g(), node2, node1)
+				},
+			)
+
+			t.Run(
+				"makes the first node have an in-degree of 1",
+				func(t *testing.T) {
+					testInDegree(t, g(), node1, 1)
+				},
+			)
+
+			t.Run(
+				"makes the second node have an out-degree of 1",
+				func(t *testing.T) {
+					testOutDegree(t, g(), node2, 1)
+				},
+			)
+
+			t.Run("connects the second node to the first", func(t *testing.T) {
+				testHasEdgeConnecting(t, g(), node2, node1)
+			})
+		})
+	})
+}
+
 func complement(nodes []int) []int {
 	all := []int{node1, node2, node3, nodeNotInGraph}
 	return slices.DeleteFunc(all, func(value int) bool {
@@ -991,6 +1056,36 @@ func testOutDegree(
 
 	if got, want := g.OutDegree(node), expectedDegree; got != want {
 		t.Errorf("Graph.OutDegree: got %d, want %d", got, want)
+	}
+}
+
+func testHasEdgeConnecting(
+	t *testing.T,
+	g graph.Graph[int],
+	source, target int,
+) {
+	if got := g.HasEdgeConnecting(source, target); !got {
+		t.Errorf("Graph.HasEdgeConnecting: got false, want true")
+	}
+	if got := g.HasEdgeConnectingEndpoints(
+		graph.EndpointPairOf(source, target),
+	); !got {
+		t.Errorf("Graph.HasEdgeConnectingEndpoints: got false, want true")
+	}
+}
+
+func testHasNoEdgeConnecting(
+	t *testing.T,
+	g graph.Graph[int],
+	source, target int,
+) {
+	if got := g.HasEdgeConnecting(source, target); got {
+		t.Errorf("Graph.HasEdgeConnecting: got true, want false")
+	}
+	if got := g.HasEdgeConnectingEndpoints(
+		graph.EndpointPairOf(source, target),
+	); got {
+		t.Errorf("Graph.HasEdgeConnectingEndpoints: got true, want false")
 	}
 }
 
