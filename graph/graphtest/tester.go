@@ -179,7 +179,13 @@ func (tt tester) test() {
 
 		tt.testMutableGraphRemovingExistingEdge(t)
 
-		// TODO: continue from graph_test.go, line 616, "when removing an absent edge with an existing source".
+		tt.testMutableGraphRemovingAbsentEdgeWithExistingSource(t)
+
+		tt.testMutableGraphRemovingAbsentEdgeWithExistingTarget(t)
+
+		tt.testMutableGraphRemovingAbsentEdgeWithTwoExistingNodes(t)
+
+		// TODO: continue from graph_test.go, line 696, "undirectedGraphTests".
 	})
 }
 
@@ -743,6 +749,99 @@ func (tt tester) testMutableGraphRemovingExistingEdge(t *testing.T) {
 	)
 }
 
+func (tt tester) testMutableGraphRemovingAbsentEdgeWithExistingSource(
+	t *testing.T,
+) {
+	t.Run(
+		"removing an absent edge with an existing source",
+		func(t *testing.T) {
+			setup := func() (g graph.MutableGraph[int], removed bool) {
+				g = tt.emptyMutableGraph()
+				g.PutEdge(node1, node2)
+				removed = g.RemoveEdge(node1, nodeNotInGraph)
+				return
+			}
+
+			t.Run("returns false", func(t *testing.T) {
+				_, removed := setup()
+
+				if got := removed; got {
+					t.Fatalf("MutableGraph.RemoveEdge: got true, want false")
+				}
+			})
+
+			t.Run("leaves the existing nodes alone", func(t *testing.T) {
+				g, _ := setup()
+
+				testSuccessors(t, g, node1, node2)
+				testPredecessors(t, g, node2, node1)
+			})
+		},
+	)
+}
+
+func (tt tester) testMutableGraphRemovingAbsentEdgeWithExistingTarget(
+	t *testing.T,
+) {
+	t.Run(
+		"removing an absent edge with an existing target",
+		func(t *testing.T) {
+			setup := func() (g graph.MutableGraph[int], removed bool) {
+				g = tt.emptyMutableGraph()
+				g.PutEdge(node1, node2)
+				removed = g.RemoveEdge(nodeNotInGraph, node2)
+				return
+			}
+
+			t.Run("returns false", func(t *testing.T) {
+				_, removed := setup()
+
+				if got := removed; got {
+					t.Fatalf("MutableGraph.RemoveEdge: got true, want false")
+				}
+			})
+
+			t.Run("leaves the existing nodes alone", func(t *testing.T) {
+				g, _ := setup()
+
+				testSuccessors(t, g, node1, node2)
+				testPredecessors(t, g, node2, node1)
+			})
+		},
+	)
+}
+
+func (tt tester) testMutableGraphRemovingAbsentEdgeWithTwoExistingNodes(
+	t *testing.T,
+) {
+	t.Run(
+		"removing an absent edge with two existing nodes",
+		func(t *testing.T) {
+			setup := func() (g graph.MutableGraph[int], removed bool) {
+				g = tt.emptyMutableGraph()
+				g.AddNode(node1)
+				g.AddNode(node2)
+				removed = g.RemoveEdge(node1, node2)
+				return
+			}
+
+			t.Run("returns false", func(t *testing.T) {
+				_, removed := setup()
+
+				if got := removed; got {
+					t.Fatalf("MutableGraph.RemoveEdge: got true, want false")
+				}
+			})
+
+			t.Run("leaves the existing nodes alone", func(t *testing.T) {
+				g, _ := setup()
+
+				testNodes(t, g, node1, node2)
+			})
+		},
+	)
+}
+
 func complement(nodes []int) []int {
 	all := []int{node1, node2, node3, nodeNotInGraph}
 	return slices.DeleteFunc(all, func(value int) bool {
@@ -768,7 +867,12 @@ func testAdjacentNodes(
 ) {
 	t.Helper()
 
-	testNodeSet(t, graphAdjacentNodesName, g.AdjacentNodes(node), expectedValues...)
+	testNodeSet(
+		t,
+		graphAdjacentNodesName,
+		g.AdjacentNodes(node),
+		expectedValues...,
+	)
 }
 
 func testPredecessors(
@@ -779,7 +883,12 @@ func testPredecessors(
 ) {
 	t.Helper()
 
-	testNodeSet(t, graphPredecessorsName, g.Predecessors(node), expectedValues...)
+	testNodeSet(
+		t,
+		graphPredecessorsName,
+		g.Predecessors(node),
+		expectedValues...,
+	)
 }
 
 func testSuccessors(
