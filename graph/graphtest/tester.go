@@ -195,8 +195,8 @@ func (tt tester) test() {
 		tt.testUndirectedGraph()
 	}
 
-	// TODO: continue from graph_test.go, line 788, "when
-	//       putting two connected edges that form a line graph".
+	// TODO: continue from graph_test.go, line 799,
+	//       "allowsSelfLoopsGraphTests".
 }
 
 func (tt tester) testEmptyGraph() {
@@ -895,6 +895,18 @@ func (tt tester) testDirectedGraph() {
 				testHasNoEdgeConnecting(t, g(), node2, node1)
 			})
 		})
+
+		t.Run(
+			"putting two connected edges makes the common node have a "+
+				"degree of 2",
+			func(t *testing.T) {
+				g := tt.graphBuilder()
+				g = tt.putEdge(g, node1, node2)
+				g = tt.putEdge(g, node2, node3)
+
+				testDegree(t, g, node2, 2)
+			},
+		)
 	})
 }
 
