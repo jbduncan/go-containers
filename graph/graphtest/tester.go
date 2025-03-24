@@ -188,11 +188,15 @@ func (tt tester) test() {
 		})
 	}
 
-	if tt.directionMode == Undirected {
+	switch tt.directionMode {
+	case Directed:
+		tt.testDirectedGraph()
+	case Undirected:
 		tt.testUndirectedGraph()
 	}
 
-	// TODO: continue from graph_test.go, line 743, "directedGraphTests".
+	// TODO: continue from graph_test.go, line 788, "when
+	//       putting two connected edges that form a line graph".
 }
 
 func (tt tester) testEmptyGraph() {
@@ -842,9 +846,61 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithTwoExistingNodes(
 	)
 }
 
+func (tt tester) testDirectedGraph() {
+	tt.t.Run("directed graph", func(t *testing.T) {
+		t.Run("is directed", func(t *testing.T) {
+			g := tt.graphBuilder()
+
+			if got := g.IsDirected(); !got {
+				t.Fatalf("Graph.IsDirected: got false, want true")
+			}
+		})
+
+		t.Run("putting an edge", func(t *testing.T) {
+			g := func() graph.Graph[int] {
+				g := tt.graphBuilder()
+				g = tt.putEdge(g, node1, node2)
+				return g
+			}
+
+			t.Run(
+				"makes the first node have no predecessors",
+				func(t *testing.T) {
+					testPredecessors(t, g(), node1)
+				},
+			)
+
+			t.Run(
+				"makes the second node have no successors",
+				func(t *testing.T) {
+					testSuccessors(t, g(), node2)
+				},
+			)
+
+			t.Run(
+				"makes the first node have an in-degree of 0",
+				func(t *testing.T) {
+					testInDegree(t, g(), node1, 0)
+				},
+			)
+
+			t.Run(
+				"makes the second node have an out-degree of 0",
+				func(t *testing.T) {
+					testOutDegree(t, g(), node2, 0)
+				},
+			)
+
+			t.Run("does not connect the second node to the first", func(t *testing.T) {
+				testHasNoEdgeConnecting(t, g(), node2, node1)
+			})
+		})
+	})
+}
+
 func (tt tester) testUndirectedGraph() {
 	tt.t.Run("undirected graph", func(t *testing.T) {
-		t.Run("is undirected", func(t *testing.T) {
+		t.Run("is not directed", func(t *testing.T) {
 			g := tt.graphBuilder()
 
 			if got := g.IsDirected(); got {
@@ -852,13 +908,13 @@ func (tt tester) testUndirectedGraph() {
 			}
 		})
 
-		g := func() graph.Graph[int] {
-			g := tt.graphBuilder()
-			g = tt.putEdge(g, node1, node2)
-			return g
-		}
-
 		t.Run("putting an edge", func(t *testing.T) {
+			g := func() graph.Graph[int] {
+				g := tt.graphBuilder()
+				g = tt.putEdge(g, node1, node2)
+				return g
+			}
+
 			t.Run(
 				"makes the first node the predecessor of the second",
 				func(t *testing.T) {
