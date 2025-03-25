@@ -195,8 +195,12 @@ func (tt tester) test() {
 		tt.testUndirectedGraph()
 	}
 
-	// TODO: continue from graph_test.go, line 799,
-	//       "allowsSelfLoopsGraphTests".
+	if tt.selfLoopsMode == AllowsSelfLoops {
+		tt.testSelfLoopingGraph()
+	}
+
+	// TODO: continue from graph_test.go, line 811,
+	//       "when putting one self-loop edge".
 }
 
 func (tt tester) testEmptyGraph() {
@@ -848,7 +852,7 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithTwoExistingNodes(
 
 func (tt tester) testDirectedGraph() {
 	tt.t.Run("directed graph", func(t *testing.T) {
-		t.Run("is directed", func(t *testing.T) {
+		t.Run("says it is directed", func(t *testing.T) {
 			g := tt.graphBuilder()
 
 			if got := g.IsDirected(); !got {
@@ -912,7 +916,7 @@ func (tt tester) testDirectedGraph() {
 
 func (tt tester) testUndirectedGraph() {
 	tt.t.Run("undirected graph", func(t *testing.T) {
-		t.Run("is not directed", func(t *testing.T) {
+		t.Run("says it is not directed", func(t *testing.T) {
 			g := tt.graphBuilder()
 
 			if got := g.IsDirected(); got {
@@ -965,6 +969,18 @@ func (tt tester) testUndirectedGraph() {
 			t.Run("connects the second node to the first", func(t *testing.T) {
 				testHasEdgeConnecting(t, g(), node2, node1)
 			})
+		})
+	})
+}
+
+func (tt tester) testSelfLoopingGraph() {
+	tt.t.Run("graph that allows self loops", func(t *testing.T) {
+		t.Run("says it allows self loops", func(t *testing.T) {
+			g := tt.graphBuilder()
+
+			if got := g.AllowsSelfLoops(); !got {
+				t.Fatalf("Graph.AllowsSelfLoops: got false, want true")
+			}
 		})
 	})
 }
