@@ -195,8 +195,19 @@ func (tt tester) test() {
 		tt.testUndirectedGraph()
 	}
 
-	if tt.selfLoopsMode == AllowsSelfLoops {
+	switch tt.selfLoopsMode {
+	case AllowsSelfLoops:
 		tt.testSelfLoopingGraph()
+	case DisallowsSelfLoops:
+		tt.testSelfLoopDisallowingGraph()
+	}
+
+	if tt.mutability == Mutable && tt.selfLoopsMode == AllowsSelfLoops {
+		tt.testMutableSelfLoopingGraph()
+	}
+
+	if tt.directionMode == Undirected && tt.selfLoopsMode == AllowsSelfLoops {
+		tt.testUndirectedSelfLoopingGraph()
 	}
 
 	// TODO: continue from graph_test.go, line 811,
@@ -974,13 +985,120 @@ func (tt tester) testUndirectedGraph() {
 }
 
 func (tt tester) testSelfLoopingGraph() {
-	tt.t.Run("graph that allows self loops", func(t *testing.T) {
+	tt.t.Run("self-looping graph", func(t *testing.T) {
 		t.Run("says it allows self loops", func(t *testing.T) {
 			g := tt.graphBuilder()
 
 			if got := g.AllowsSelfLoops(); !got {
 				t.Fatalf("Graph.AllowsSelfLoops: got false, want true")
 			}
+		})
+
+		t.Run("putting a self-loop edge", func(t *testing.T) {
+			g := func() graph.Graph[int] {
+				g := tt.graphBuilder()
+				g = tt.putEdge(g, node1, node1)
+				return g
+			}
+
+			t.Run(
+				"makes the shared node its own adjacent node",
+				func(t *testing.T) {
+					testAdjacentNodes(t, g(), node1, node1)
+				},
+			)
+
+			t.Run(
+				"makes the shared node have a degree of 2 because the "+
+					"edge touches the node twice",
+				func(t *testing.T) {
+					testDegree(t, g(), node1, 2)
+				},
+			)
+		})
+	})
+}
+
+func (tt tester) testSelfLoopDisallowingGraph() {
+	tt.t.Run("self-loop-disallowing graph", func(t *testing.T) {
+		t.Run(
+			"says it disallows self-loops",
+			func(t *testing.T) {
+				g := tt.graphBuilder()
+
+				if got := g.AllowsSelfLoops(); got {
+					t.Fatalf("Graph.AllowsSelfLoops: got true, want false")
+				}
+			},
+		)
+	})
+}
+
+func (tt tester) testMutableSelfLoopingGraph() {
+	tt.t.Run("mutable self-looping graph", func(t *testing.T) {
+		t.Run(
+			"removing a self-looping node removes the self-loop edge",
+			func(t *testing.T) {
+				g := tt.emptyMutableGraph()
+				g.PutEdge(node1, node1)
+				g.RemoveNode(node1)
+
+				tt.testEdges(t, g)
+			},
+		)
+	})
+}
+
+func (tt tester) testUndirectedSelfLoopingGraph() {
+	tt.t.Run("undirected self-looping graph", func(t *testing.T) {
+		t.Run("has an empty-graph string representation", func(t *testing.T) {
+			if got, want := tt.graphBuilder().String(),
+				"isDirected: false, allowsSelfLoops: true, nodes: [], edges: []"; got != want {
+				t.Errorf("Graph.String: got %q, want %q", got, want)
+			}
+		})
+
+		t.Run("adding a node", func(t *testing.T) {
+			t.Run(
+				"has a non-empty-graph string representation",
+				func(t *testing.T) {
+					// TODO: extract out a common function for this sort of
+					//       graph initialisation.
+					graphWithOneNode := func() graph.Graph[int] {
+						g := tt.graphBuilder()
+						g = tt.addNode(g, node1)
+						return g
+					}
+					if got, want := graphWithOneNode().String(),
+						"isDirected: false, allowsSelfLoops: true, nodes: [1], edges: []"; got != want {
+						t.Errorf("Graph.String: got %q, want %q", got, want)
+					}
+				},
+			)
+		})
+
+		t.Run("putting an edge", func(t *testing.T) {
+			t.Run(
+				"has a non-empty-graph string representation",
+				func(t *testing.T) {
+					// TODO: extract out a common function for this sort of
+					//       graph initialisation.
+					graphWithOneEdge := func() graph.Graph[int] {
+						g := tt.graphBuilder()
+						g = tt.putEdge(g, node1, node2)
+						return g
+					}
+					if got, wantAny := graphWithOneEdge().String(),
+						[]string{
+							"isDirected: false, allowsSelfLoops: true, nodes: [1, 2], edges: [<1 -> 2>]",
+							"isDirected: false, allowsSelfLoops: true, nodes: [2, 1], edges: [<1 -> 2>]",
+							"isDirected: false, allowsSelfLoops: true, nodes: [1, 2], edges: [<2 -> 1>]",
+							"isDirected: false, allowsSelfLoops: true, nodes: [2, 1], edges: [<2 -> 1>]",
+						}; !slices.Contains(wantAny, got) {
+						t.Errorf("Graph.String: got %q, want any of %q", got, wantAny)
+					}
+				},
+			)
 		})
 	})
 }
