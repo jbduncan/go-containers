@@ -2,6 +2,7 @@ package graphtest
 
 import (
 	"slices"
+	"strconv"
 	"testing"
 
 	"github.com/jbduncan/go-containers/graph"
@@ -163,29 +164,7 @@ func (tt tester) test() {
 	tt.testGraphWithTwoEdgesWithSameTargetNode()
 
 	if tt.mutability == Mutable {
-		tt.t.Run("mutable graph", func(t *testing.T) {
-			tt.testMutableGraphAddingNewNode(t)
-
-			tt.testMutableGraphAddingExistingNode(t)
-
-			tt.testMutableGraphRemovingExistingNode(t)
-
-			tt.testMutableGraphRemovingAbsentNode(t)
-
-			tt.testMutableGraphPuttingNewEdge(t)
-
-			tt.testMutableGraphPuttingExistingEdge(t)
-
-			tt.testMutableGraphPuttingTwoAntiParallelEdges(t)
-
-			tt.testMutableGraphRemovingExistingEdge(t)
-
-			tt.testMutableGraphRemovingAbsentEdgeWithExistingSource(t)
-
-			tt.testMutableGraphRemovingAbsentEdgeWithExistingTarget(t)
-
-			tt.testMutableGraphRemovingAbsentEdgeWithTwoExistingNodes(t)
-		})
+		tt.testMutableGraph()
 	}
 
 	switch tt.directionMode {
@@ -210,8 +189,17 @@ func (tt tester) test() {
 		tt.testUndirectedSelfLoopingGraph()
 	}
 
-	// TODO: continue from graph_test.go, line 811,
-	//       "when putting one self-loop edge".
+	if tt.directionMode == Undirected && tt.selfLoopsMode == DisallowsSelfLoops {
+		tt.testUndirectedSelfLoopDisallowingGraph()
+	}
+
+	if tt.directionMode == Directed && tt.selfLoopsMode == AllowsSelfLoops {
+		tt.testDirectedSelfLoopingGraph()
+	}
+
+	if tt.directionMode == Directed && tt.selfLoopsMode == DisallowsSelfLoops {
+		tt.testDirectedSelfLoopDisallowingGraph()
+	}
 }
 
 func (tt tester) testEmptyGraph() {
@@ -598,6 +586,32 @@ func (tt tester) emptyMutableGraph() graph.MutableGraph[int] {
 		return nil // Make the compiler happy
 	}
 	return mutG
+}
+
+func (tt tester) testMutableGraph() {
+	tt.t.Run("mutable graph", func(t *testing.T) {
+		tt.testMutableGraphAddingNewNode(t)
+
+		tt.testMutableGraphAddingExistingNode(t)
+
+		tt.testMutableGraphRemovingExistingNode(t)
+
+		tt.testMutableGraphRemovingAbsentNode(t)
+
+		tt.testMutableGraphPuttingNewEdge(t)
+
+		tt.testMutableGraphPuttingExistingEdge(t)
+
+		tt.testMutableGraphPuttingTwoAntiParallelEdges(t)
+
+		tt.testMutableGraphRemovingExistingEdge(t)
+
+		tt.testMutableGraphRemovingAbsentEdgeWithExistingSource(t)
+
+		tt.testMutableGraphRemovingAbsentEdgeWithExistingTarget(t)
+
+		tt.testMutableGraphRemovingAbsentEdgeWithTwoExistingNodes(t)
+	})
 }
 
 func (tt tester) testMutableGraphAddingNewNode(t *testing.T) {
@@ -1051,56 +1065,94 @@ func (tt tester) testMutableSelfLoopingGraph() {
 
 func (tt tester) testUndirectedSelfLoopingGraph() {
 	tt.t.Run("undirected self-looping graph", func(t *testing.T) {
-		t.Run("has an empty-graph string representation", func(t *testing.T) {
-			if got, want := tt.graphBuilder().String(),
-				"isDirected: false, allowsSelfLoops: true, nodes: [], edges: []"; got != want {
+		tt.testStringRepresentations(t, false, true)
+	})
+}
+
+func (tt tester) testUndirectedSelfLoopDisallowingGraph() {
+	tt.t.Run("undirected self-loop-disallowing graph", func(t *testing.T) {
+		tt.testStringRepresentations(t, false, false)
+	})
+}
+
+func (tt tester) testDirectedSelfLoopingGraph() {
+	tt.t.Run("directed self-looping graph", func(t *testing.T) {
+		tt.testStringRepresentations(t, true, true)
+	})
+}
+
+func (tt tester) testDirectedSelfLoopDisallowingGraph() {
+	tt.t.Run("directed self-loop-disallowing graph", func(t *testing.T) {
+		tt.testStringRepresentations(t, true, false)
+	})
+}
+
+func (tt tester) testStringRepresentations(
+	t *testing.T,
+	directed bool,
+	allowsSelfLoops bool,
+) {
+	t.Run("has an empty graph string representation", func(t *testing.T) {
+		if got, want := tt.graphBuilder().String(),
+			"isDirected: "+
+				strconv.FormatBool(directed)+
+				", allowsSelfLoops: "+
+				strconv.FormatBool(allowsSelfLoops)+
+				", nodes: [], edges: []"; got != want {
+			t.Errorf("Graph.String: got %q, want %q", got, want)
+		}
+	})
+
+	t.Run(
+		"adding a node makes a non-empty graph string representation",
+		func(t *testing.T) {
+			g := tt.graphBuilder()
+			g = tt.addNode(g, node1)
+
+			if got, want := g.String(),
+				"isDirected: "+
+					strconv.FormatBool(directed)+
+					", allowsSelfLoops: "+
+					strconv.FormatBool(allowsSelfLoops)+
+					", nodes: [1], edges: []"; got != want {
 				t.Errorf("Graph.String: got %q, want %q", got, want)
 			}
-		})
+		},
+	)
 
-		t.Run("adding a node", func(t *testing.T) {
-			t.Run(
-				"has a non-empty-graph string representation",
-				func(t *testing.T) {
-					// TODO: extract out a common function for this sort of
-					//       graph initialisation.
-					graphWithOneNode := func() graph.Graph[int] {
-						g := tt.graphBuilder()
-						g = tt.addNode(g, node1)
-						return g
-					}
-					if got, want := graphWithOneNode().String(),
-						"isDirected: false, allowsSelfLoops: true, nodes: [1], edges: []"; got != want {
-						t.Errorf("Graph.String: got %q, want %q", got, want)
-					}
-				},
-			)
-		})
+	t.Run(
+		"putting an edge makes a non-empty graph string representation",
+		func(t *testing.T) {
+			g := tt.graphBuilder()
+			g = tt.putEdge(g, node1, node2)
 
-		t.Run("putting an edge", func(t *testing.T) {
-			t.Run(
-				"has a non-empty-graph string representation",
-				func(t *testing.T) {
-					// TODO: extract out a common function for this sort of
-					//       graph initialisation.
-					graphWithOneEdge := func() graph.Graph[int] {
-						g := tt.graphBuilder()
-						g = tt.putEdge(g, node1, node2)
-						return g
-					}
-					if got, wantAny := graphWithOneEdge().String(),
-						[]string{
-							"isDirected: false, allowsSelfLoops: true, nodes: [1, 2], edges: [<1 -> 2>]",
-							"isDirected: false, allowsSelfLoops: true, nodes: [2, 1], edges: [<1 -> 2>]",
-							"isDirected: false, allowsSelfLoops: true, nodes: [1, 2], edges: [<2 -> 1>]",
-							"isDirected: false, allowsSelfLoops: true, nodes: [2, 1], edges: [<2 -> 1>]",
-						}; !slices.Contains(wantAny, got) {
-						t.Errorf("Graph.String: got %q, want any of %q", got, wantAny)
-					}
-				},
-			)
-		})
-	})
+			var wantAny []string
+			for _, nodes := range []string{"[1, 2]", "[2, 1]"} {
+				var wantAnyEdges []string
+				if directed {
+					wantAnyEdges = []string{"[<1 -> 2>]"}
+				} else {
+					wantAnyEdges = []string{"[<1 -> 2>]", "[<2 -> 1>]"}
+				}
+				for _, edges := range wantAnyEdges {
+					wantAny = append(
+						wantAny,
+						"isDirected: "+
+							strconv.FormatBool(directed)+
+							", allowsSelfLoops: "+
+							strconv.FormatBool(allowsSelfLoops)+
+							", nodes: "+
+							nodes+
+							", edges: "+
+							edges,
+					)
+				}
+			}
+			if got := g.String(); !slices.Contains(wantAny, got) {
+				t.Errorf("Graph.String: got %q, want any of %q", got, wantAny)
+			}
+		},
+	)
 }
 
 func complement(nodes []int) []int {
