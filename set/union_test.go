@@ -24,28 +24,28 @@ func TestUnion(t *testing.T) {
 
 		return set.Union[string](a, b)
 	})
-}
 
-func TestUnionIsUnmodifiable(t *testing.T) {
-	g := NewWithT(t)
+	t.Run("union is unmodifiable", func(t *testing.T) {
+		g := NewWithT(t)
 
-	union := set.Union[int](set.Of[int](), set.Of[int]())
+		union := set.Union[int](set.Of[int](), set.Of[int]())
 
-	g.Expect(union).To(BeNonMutableSet[int]())
-}
+		g.Expect(union).To(BeNonMutableSet[int]())
+	})
 
-func TestUnionIsView(t *testing.T) {
-	g := NewWithT(t)
-	a := set.Of[int]()
-	b := set.Of[int]()
-	union := set.Union[int](a, b)
+	t.Run("union is view", func(t *testing.T) {
+		g := NewWithT(t)
+		a := set.Of[int]()
+		b := set.Of[int]()
+		union := set.Union[int](a, b)
 
-	a.Add(1)
+		a.Add(1)
 
-	g.Expect(union).To(Contain(1))
-	g.Expect(union).To(HaveLenOf(1))
-	g.Expect(union).To(HaveAllThatConsistsOf[int](1))
-	g.Expect(union).To(HaveStringRepr("[1]"))
+		g.Expect(union).To(Contain(1))
+		g.Expect(union).To(HaveLenOf(1))
+		g.Expect(union).To(HaveAllThatConsistsOf[int](1))
+		g.Expect(union).To(HaveStringRepr("[1]"))
+	})
 }
 
 func FuzzUnion(f *testing.F) {
