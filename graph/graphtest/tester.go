@@ -1087,18 +1087,19 @@ func (tt tester) testDirectedSelfLoopDisallowingGraph() {
 	})
 }
 
+//nolint:revive
 func (tt tester) testStringRepresentations(
 	t *testing.T,
 	directed bool,
 	allowsSelfLoops bool,
 ) {
 	t.Run("has an empty graph string representation", func(t *testing.T) {
-		if got, want := tt.graphBuilder().String(),
-			"isDirected: "+
-				strconv.FormatBool(directed)+
-				", allowsSelfLoops: "+
-				strconv.FormatBool(allowsSelfLoops)+
-				", nodes: [], edges: []"; got != want {
+		want := "isDirected: " +
+			strconv.FormatBool(directed) +
+			", allowsSelfLoops: " +
+			strconv.FormatBool(allowsSelfLoops) +
+			", nodes: [], edges: []"
+		if got := tt.graphBuilder().String(); got != want {
 			t.Errorf("Graph.String: got %q, want %q", got, want)
 		}
 	})
@@ -1109,12 +1110,12 @@ func (tt tester) testStringRepresentations(
 			g := tt.graphBuilder()
 			g = tt.addNode(g, node1)
 
-			if got, want := g.String(),
-				"isDirected: "+
-					strconv.FormatBool(directed)+
-					", allowsSelfLoops: "+
-					strconv.FormatBool(allowsSelfLoops)+
-					", nodes: [1], edges: []"; got != want {
+			want := "isDirected: " +
+				strconv.FormatBool(directed) +
+				", allowsSelfLoops: " +
+				strconv.FormatBool(allowsSelfLoops) +
+				", nodes: [1], edges: []"
+			if got := g.String(); got != want {
 				t.Errorf("Graph.String: got %q, want %q", got, want)
 			}
 		},
