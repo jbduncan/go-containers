@@ -1,7 +1,6 @@
 package set_test
 
 import (
-	"reflect"
 	"testing"
 
 	internalsettest "github.com/jbduncan/go-containers/internal/settest"
@@ -28,9 +27,7 @@ func TestUnion(t *testing.T) {
 	t.Run("union is unmodifiable", func(t *testing.T) {
 		union := set.Union[int](set.Of[int](), set.Of[int]())
 
-		if got := isMutable(union); got {
-			t.Error("set.Union: is mutable: got true, want false")
-		}
+		internalsettest.IsMutable(t, "set.Union", union)
 	})
 
 	t.Run("union is view", func(t *testing.T) {
@@ -40,17 +37,11 @@ func TestUnion(t *testing.T) {
 
 		a.Add(1)
 
-		internalsettest.SetLen(t, "set.Union", union, 1)
-		internalsettest.SetAll(t, "set.Union", union, []int{1})
-		internalsettest.SetContains(t, "set.Union", union, []int{1})
-		internalsettest.SetString(t, "set.Union", union, []int{1})
+		internalsettest.Len(t, "set.Union", union, 1)
+		internalsettest.All(t, "set.Union", union, []int{1})
+		internalsettest.Contains(t, "set.Union", union, []int{1})
+		internalsettest.String(t, "set.Union", union, []int{1})
 	})
-}
-
-var mutableSetType = reflect.TypeOf((*set.MutableSet[int])(nil)).Elem()
-
-func isMutable(s set.Set[int]) bool {
-	return reflect.TypeOf(s).Implements(mutableSetType)
 }
 
 func FuzzUnion(f *testing.F) {
@@ -69,8 +60,8 @@ func FuzzUnion(f *testing.F) {
 				len(a)+len(b),
 			)
 		}
-		internalsettest.SetContains(t, "set.Union", union, a)
-		internalsettest.SetContains(t, "set.Union", union, b)
+		internalsettest.Contains(t, "set.Union", union, a)
+		internalsettest.Contains(t, "set.Union", union, b)
 	})
 }
 

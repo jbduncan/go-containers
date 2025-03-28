@@ -11,7 +11,7 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
-func SetLen[T comparable](
+func Len[T comparable](
 	t *testing.T,
 	setName string,
 	s set.Set[T],
@@ -29,7 +29,7 @@ func SetLen[T comparable](
 	}
 }
 
-func SetAll[T comparable](
+func All[T comparable](
 	t *testing.T,
 	setName string,
 	s set.Set[T],
@@ -43,7 +43,7 @@ func SetAll[T comparable](
 	}
 }
 
-func SetContains[T comparable](
+func Contains[T comparable](
 	t *testing.T,
 	setName string,
 	s set.Set[T],
@@ -62,7 +62,7 @@ func SetContains[T comparable](
 	}
 }
 
-func SetDoesNotContain[T comparable](
+func DoesNotContain[T comparable](
 	t *testing.T,
 	setName string,
 	s set.Set[T],
@@ -81,7 +81,7 @@ func SetDoesNotContain[T comparable](
 	}
 }
 
-func SetString[T comparable](
+func String[T comparable](
 	t *testing.T,
 	setName string,
 	s set.Set[T],
@@ -121,6 +121,18 @@ func SetString[T comparable](
 			setName,
 			str,
 			diff,
+		)
+	}
+}
+
+func IsMutable[T comparable](t *testing.T, setName string, s set.Set[T]) {
+	t.Helper()
+
+	if _, mutable := s.(set.MutableSet[T]); mutable {
+		t.Errorf(
+			"%s: got a set.MutableSet: %v, want just a set.Set",
+			setName,
+			s,
 		)
 	}
 }

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/jbduncan/go-containers/graph"
-	"github.com/jbduncan/go-containers/internal/settest"
+	internalsettest "github.com/jbduncan/go-containers/internal/settest"
 	"github.com/jbduncan/go-containers/set"
 )
 
@@ -241,7 +241,7 @@ func (tt tester) testEmptyGraph() {
 			g := tt.graphBuilder()
 			nodes := g.Nodes()
 
-			testSetIsMutable(t, nodes, graphNodesName)
+			internalsettest.IsMutable(t, graphNodesName, nodes)
 
 			_ = tt.addNode(g, node1)
 
@@ -254,7 +254,7 @@ func (tt tester) testEmptyGraph() {
 				g := tt.graphBuilder()
 				adjacentNodes := g.AdjacentNodes(node1)
 
-				testSetIsMutable(t, adjacentNodes, graphAdjacentNodesName)
+				internalsettest.IsMutable(t, graphAdjacentNodesName, adjacentNodes)
 
 				g = tt.putEdge(g, node1, node2)
 				_ = tt.putEdge(g, node3, node1)
@@ -273,7 +273,7 @@ func (tt tester) testEmptyGraph() {
 			g := tt.graphBuilder()
 			predecessors := g.Predecessors(node1)
 
-			testSetIsMutable(t, predecessors, graphPredecessorsName)
+			internalsettest.IsMutable(t, graphPredecessorsName, predecessors)
 
 			_ = tt.putEdge(g, node2, node1)
 
@@ -284,7 +284,7 @@ func (tt tester) testEmptyGraph() {
 			g := tt.graphBuilder()
 			successors := g.Successors(node1)
 
-			testSetIsMutable(t, successors, graphSuccessorsName)
+			internalsettest.IsMutable(t, graphSuccessorsName, successors)
 
 			_ = tt.putEdge(g, node1, node2)
 
@@ -295,7 +295,7 @@ func (tt tester) testEmptyGraph() {
 			g := tt.graphBuilder()
 			edges := g.Edges()
 
-			testSetIsMutable(t, edges, graphEdgesName)
+			internalsettest.IsMutable(t, graphEdgesName, edges)
 
 			_ = tt.putEdge(g, node1, node2)
 
@@ -308,7 +308,7 @@ func (tt tester) testEmptyGraph() {
 				g := tt.graphBuilder()
 				edges := g.IncidentEdges(node1)
 
-				testSetIsMutable(t, edges, graphIncidentEdgesName)
+				internalsettest.IsMutable(t, graphIncidentEdgesName, edges)
 
 				_ = tt.putEdge(g, node1, node2)
 
@@ -1225,16 +1225,11 @@ func testNodeSet(
 ) {
 	t.Helper()
 
-	settest.SetLen(t, setName, s, len(expectedValues))
-	settest.SetAll(t, setName, s, expectedValues)
-	settest.SetContains(t, setName, s, expectedValues)
-	settest.SetDoesNotContain(
-		t,
-		setName,
-		s,
-		complement(expectedValues),
-	)
-	settest.SetString(t, setName, s, expectedValues)
+	internalsettest.Len(t, setName, s, len(expectedValues))
+	internalsettest.All(t, setName, s, expectedValues)
+	internalsettest.Contains(t, setName, s, expectedValues)
+	internalsettest.DoesNotContain(t, setName, s, complement(expectedValues))
+	internalsettest.String(t, setName, s, expectedValues)
 }
 
 func (tt tester) testEdges(
@@ -1336,21 +1331,5 @@ func testHasNoEdgeConnecting(
 		graph.EndpointPairOf(source, target),
 	); got {
 		t.Errorf("Graph.HasEdgeConnectingEndpoints: got true, want false")
-	}
-}
-
-func testSetIsMutable[T comparable](
-	t *testing.T,
-	s set.Set[T],
-	setName string,
-) {
-	t.Helper()
-
-	if _, mutable := s.(set.MutableSet[T]); mutable {
-		t.Fatalf(
-			"%s: got a set.MutableSet: %v, want just a set.Set",
-			setName,
-			s,
-		)
 	}
 }
