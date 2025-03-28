@@ -37,7 +37,6 @@ func TestSetUnmodifiable(t *testing.T) {
 				"set.Unmodifiable",
 				unmodSet,
 				[]string{"link"},
-				nil,
 			)
 			internalsettest.SetString(
 				t,

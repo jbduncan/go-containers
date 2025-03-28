@@ -1227,11 +1227,11 @@ func testNodeSet(
 
 	settest.SetLen(t, setName, s, len(expectedValues))
 	settest.SetAll(t, setName, s, expectedValues)
-	settest.SetContains(
+	settest.SetContains(t, setName, s, expectedValues)
+	settest.SetDoesNotContain(
 		t,
 		setName,
 		s,
-		expectedValues,
 		complement(expectedValues),
 	)
 	settest.SetString(t, setName, s, expectedValues)

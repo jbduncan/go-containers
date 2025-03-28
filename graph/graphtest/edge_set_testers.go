@@ -42,7 +42,8 @@ func (tt edgeSetTester) test() {
 
 	settest.SetLen(tt.t, tt.setName, tt.edges, len(tt.expectedEdges))
 	tt.testEdgeSetAll(tt.t, tt.setName, tt.edges, tt.expectedEdges)
-	settest.SetContains(tt.t, tt.setName, tt.edges, contains, doesNotContain)
+	settest.SetContains(tt.t, tt.setName, tt.edges, contains)
+	settest.SetDoesNotContain(tt.t, tt.setName, tt.edges, doesNotContain)
 	newEdgeSetStringTester(
 		tt.t,
 		tt.setName,

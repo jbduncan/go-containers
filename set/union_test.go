@@ -42,7 +42,7 @@ func TestUnion(t *testing.T) {
 
 		internalsettest.SetLen(t, "set.Union", union, 1)
 		internalsettest.SetAll(t, "set.Union", union, []int{1})
-		internalsettest.SetContains(t, "set.Union", union, []int{1}, nil)
+		internalsettest.SetContains(t, "set.Union", union, []int{1})
 		internalsettest.SetString(t, "set.Union", union, []int{1})
 	})
 }
@@ -69,8 +69,8 @@ func FuzzUnion(f *testing.F) {
 				len(a)+len(b),
 			)
 		}
-		internalsettest.SetContains(t, "set.Union", union, a, nil)
-		internalsettest.SetContains(t, "set.Union", union, b, nil)
+		internalsettest.SetContains(t, "set.Union", union, a)
+		internalsettest.SetContains(t, "set.Union", union, b)
 	})
 }
 

@@ -48,7 +48,6 @@ func SetContains[T comparable](
 	setName string,
 	s set.Set[T],
 	contains []T,
-	doesNotContain []T,
 ) {
 	t.Helper()
 
@@ -61,6 +60,16 @@ func SetContains[T comparable](
 			)
 		}
 	}
+}
+
+func SetDoesNotContain[T comparable](
+	t *testing.T,
+	setName string,
+	s set.Set[T],
+	doesNotContain []T,
+) {
+	t.Helper()
+
 	for _, value := range doesNotContain {
 		if s.Contains(value) {
 			t.Errorf(
