@@ -1225,16 +1225,16 @@ func testNodeSet(
 ) {
 	t.Helper()
 
-	settest.TestSetLen(t, setName, s, len(expectedValues))
-	settest.TestSetAll(t, setName, s, expectedValues)
-	settest.TestSetContains(
+	settest.SetLen(t, setName, s, len(expectedValues))
+	settest.SetAll(t, setName, s, expectedValues)
+	settest.SetContains(
 		t,
 		setName,
 		s,
 		expectedValues,
 		complement(expectedValues),
 	)
-	settest.TestSetString(t, setName, s, expectedValues)
+	settest.SetString(t, setName, s, expectedValues)
 }
 
 func (tt tester) testEdges(

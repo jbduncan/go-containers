@@ -11,7 +11,7 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
-func TestSetLen[T comparable](
+func SetLen[T comparable](
 	t *testing.T,
 	setName string,
 	s set.Set[T],
@@ -29,7 +29,7 @@ func TestSetLen[T comparable](
 	}
 }
 
-func TestSetAll[T comparable](
+func SetAll[T comparable](
 	t *testing.T,
 	setName string,
 	s set.Set[T],
@@ -43,7 +43,7 @@ func TestSetAll[T comparable](
 	}
 }
 
-func TestSetContains[T comparable](
+func SetContains[T comparable](
 	t *testing.T,
 	setName string,
 	s set.Set[T],
@@ -72,7 +72,7 @@ func TestSetContains[T comparable](
 	}
 }
 
-func TestSetString[T comparable](
+func SetString[T comparable](
 	t *testing.T,
 	setName string,
 	s set.Set[T],

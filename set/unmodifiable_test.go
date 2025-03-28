@@ -25,21 +25,21 @@ func TestSetUnmodifiable(t *testing.T) {
 
 			s.Add("link")
 
-			internalsettest.TestSetLen(t, "set.Unmodifiable", unmodSet, 1)
-			internalsettest.TestSetAll(
+			internalsettest.SetLen(t, "set.Unmodifiable", unmodSet, 1)
+			internalsettest.SetAll(
 				t,
 				"set.Unmodifiable",
 				unmodSet,
 				[]string{"link"},
 			)
-			internalsettest.TestSetContains(
+			internalsettest.SetContains(
 				t,
 				"set.Unmodifiable",
 				unmodSet,
 				[]string{"link"},
 				nil,
 			)
-			internalsettest.TestSetString(
+			internalsettest.SetString(
 				t,
 				"set.Unmodifiable",
 				unmodSet,
@@ -58,7 +58,7 @@ func TestSetUnmodifiable(t *testing.T) {
 			s.Add("link")
 			s.Add("zelda")
 
-			internalsettest.TestSetString(
+			internalsettest.SetString(
 				t,
 				"set.Unmodifiable",
 				unmodSet,
