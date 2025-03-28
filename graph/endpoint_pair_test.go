@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/jbduncan/go-containers/graph"
-	. "github.com/jbduncan/go-containers/internal/matchers"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gcustom"
 	"github.com/onsi/gomega/types"
@@ -51,8 +50,9 @@ func TestEndpointPair(t *testing.T) {
 	t.Run(
 		"EndpointPair.String() returns a string representation",
 		func(t *testing.T) {
-			g := NewWithT(t)
-			g.Expect(endpointPair()).To(HaveStringRepr("<link -> zelda>"))
+			if got, want := endpointPair().String(), "<link -> zelda>"; got != want {
+				t.Errorf("EndpointPair.String: got %s, want %s", got, want)
+			}
 		},
 	)
 }
