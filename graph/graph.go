@@ -61,8 +61,8 @@ func (b Builder[N]) Build() MutableGraph[N] {
 	if b.directed {
 		return &directedGraph[N]{
 			nodes:              set.Of[N](),
-			nodeToPredecessors: make(map[N]set.MutableSet[N]),
-			nodeToSuccessors:   make(map[N]set.MutableSet[N]),
+			nodeToPredecessors: make(map[N]*set.MapSet[N]),
+			nodeToSuccessors:   make(map[N]*set.MapSet[N]),
 			allowsSelfLoops:    b.allowsSelfLoops,
 			numEdges:           0,
 		}
@@ -70,7 +70,7 @@ func (b Builder[N]) Build() MutableGraph[N] {
 
 	return &undirectedGraph[N]{
 		nodes:               set.Of[N](),
-		nodeToAdjacentNodes: make(map[N]set.MutableSet[N]),
+		nodeToAdjacentNodes: make(map[N]*set.MapSet[N]),
 		allowsSelfLoops:     b.allowsSelfLoops,
 		numEdges:            0,
 	}
@@ -84,8 +84,8 @@ var (
 )
 
 type undirectedGraph[N comparable] struct {
-	nodes               set.MutableSet[N]
-	nodeToAdjacentNodes map[N]set.MutableSet[N]
+	nodes               *set.MapSet[N]
+	nodeToAdjacentNodes map[N]*set.MapSet[N]
 	allowsSelfLoops     bool
 	numEdges            int
 }
@@ -209,9 +209,9 @@ func (u *undirectedGraph[N]) RemoveEdge(source, target N) bool {
 }
 
 type directedGraph[N comparable] struct {
-	nodes              set.MutableSet[N]
-	nodeToPredecessors map[N]set.MutableSet[N]
-	nodeToSuccessors   map[N]set.MutableSet[N]
+	nodes              *set.MapSet[N]
+	nodeToPredecessors map[N]*set.MapSet[N]
+	nodeToSuccessors   map[N]*set.MapSet[N]
 	allowsSelfLoops    bool
 	numEdges           int
 }
@@ -369,7 +369,7 @@ func checkSelfLoop[N comparable](g Graph[N], source, target N) {
 	}
 }
 
-func putConnection[N comparable](nodeToNeighbors map[N]set.MutableSet[N], from, to N) bool {
+func putConnection[N comparable](nodeToNeighbors map[N]*set.MapSet[N], from, to N) bool {
 	neighbors, ok := nodeToNeighbors[from]
 	if !ok {
 		neighbors = set.Of[N]()
@@ -378,7 +378,7 @@ func putConnection[N comparable](nodeToNeighbors map[N]set.MutableSet[N], from, 
 	return neighbors.Add(to)
 }
 
-func removeConnection[N comparable](nodeToNeighbors map[N]set.MutableSet[N], from, to N) bool {
+func removeConnection[N comparable](nodeToNeighbors map[N]*set.MapSet[N], from, to N) bool {
 	neighbors, ok := nodeToNeighbors[from]
 	if !ok {
 		return false
