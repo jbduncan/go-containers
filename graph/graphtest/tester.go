@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/jbduncan/go-containers/graph"
+	"github.com/jbduncan/go-containers/internal/settest"
 	"github.com/jbduncan/go-containers/set"
 )
 
@@ -1224,16 +1225,16 @@ func testNodeSet(
 ) {
 	t.Helper()
 
-	testSetLen(t, setName, s, len(expectedValues))
-	testSetAll(t, setName, s, expectedValues)
-	testSetContains(
+	settest.TestSetLen(t, setName, s, len(expectedValues))
+	settest.TestSetAll(t, setName, s, expectedValues)
+	settest.TestSetContains(
 		t,
 		setName,
 		s,
 		expectedValues,
 		complement(expectedValues),
 	)
-	testSetString(t, setName, s, expectedValues)
+	settest.TestSetString(t, setName, s, expectedValues)
 }
 
 func (tt tester) testEdges(

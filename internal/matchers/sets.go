@@ -36,10 +36,6 @@ func HaveLenOf(length int) types.GomegaMatcher {
 		WithTemplateData(length)
 }
 
-func HaveLenOfZero() types.GomegaMatcher {
-	return HaveLenOf(0)
-}
-
 func Contain[T comparable](elem T) types.GomegaMatcher {
 	return gcustom.MakeMatcher(
 		func(s set.Set[T]) (bool, error) {
@@ -47,15 +43,6 @@ func Contain[T comparable](elem T) types.GomegaMatcher {
 		}).
 		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} contain\n{{format .Data 1}}").
 		WithTemplateData(elem)
-}
-
-func HaveAllThatEmitsNothing[T comparable]() types.GomegaMatcher {
-	return gcustom.MakeMatcher(
-		func(s set.Set[T]) (bool, error) {
-			actual := slices.Collect(s.All())
-			return len(actual) == 0, nil
-		}).
-		WithTemplate("Expected All() of\n{{.FormattedActual}}\n{{.To}} emit nothing")
 }
 
 func HaveAllThatConsistsOf[T comparable](first any, rest ...any) types.GomegaMatcher {
@@ -68,23 +55,4 @@ func HaveAllThatConsistsOf[T comparable](first any, rest ...any) types.GomegaMat
 		}).
 		WithTemplate("Expected All() of\n{{.FormattedActual}}\n{{.To}} emit elements consisting of\n{{format .Data 1}}").
 		WithTemplateData(elements)
-}
-
-func HaveAllThatConsistsOfElementsInSlice[T comparable](elements []T) types.GomegaMatcher {
-	return gcustom.MakeMatcher(
-		func(s set.Set[T]) (bool, error) {
-			actual := slices.Collect(s.All())
-			return ConsistOf(elements).Match(actual)
-		}).
-		WithTemplate("Expected All() of\n{{.FormattedActual}}\n{{.To}} emit elements consisting of\n{{format .Data 1}}").
-		WithTemplateData(elements)
-}
-
-func BeNonMutableSet[T comparable]() types.GomegaMatcher {
-	return gcustom.MakeMatcher(
-		func(s set.Set[T]) (bool, error) {
-			_, mutable := s.(set.MutableSet[T])
-			return !mutable, nil
-		}).
-		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} implement set.Set but not set.MutableSet")
 }

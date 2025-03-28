@@ -8,6 +8,7 @@ import (
 
 	"github.com/jbduncan/go-containers/graph"
 	"github.com/jbduncan/go-containers/internal/orderagnostic"
+	"github.com/jbduncan/go-containers/internal/stringsx"
 	"github.com/jbduncan/go-containers/set"
 )
 
@@ -55,7 +56,7 @@ func (t *edgeSetStringTester) test() {
 		)
 	}
 
-	elems := splitByComma(trimmed)
+	elems := stringsx.SplitByComma(trimmed)
 	want := make([]graph.EndpointPair[int], 0, len(elems))
 	for _, elemStr := range elems {
 		want = append(want, t.toEndpointPair(t.tt, elemStr))

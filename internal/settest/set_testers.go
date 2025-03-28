@@ -1,4 +1,4 @@
-package graphtest
+package settest
 
 import (
 	"fmt"
@@ -7,10 +7,11 @@ import (
 	"testing"
 
 	"github.com/jbduncan/go-containers/internal/orderagnostic"
+	"github.com/jbduncan/go-containers/internal/stringsx"
 	"github.com/jbduncan/go-containers/set"
 )
 
-func testSetLen[T comparable](
+func TestSetLen[T comparable](
 	t *testing.T,
 	setName string,
 	s set.Set[T],
@@ -28,7 +29,7 @@ func testSetLen[T comparable](
 	}
 }
 
-func testSetAll[T comparable](
+func TestSetAll[T comparable](
 	t *testing.T,
 	setName string,
 	s set.Set[T],
@@ -42,7 +43,7 @@ func testSetAll[T comparable](
 	}
 }
 
-func testSetContains[T comparable](
+func TestSetContains[T comparable](
 	t *testing.T,
 	setName string,
 	s set.Set[T],
@@ -71,7 +72,7 @@ func testSetContains[T comparable](
 	}
 }
 
-func testSetString[T comparable](
+func TestSetString[T comparable](
 	t *testing.T,
 	setName string,
 	s set.Set[T],
@@ -103,7 +104,7 @@ func testSetString[T comparable](
 	for _, v := range expectedValues {
 		want = append(want, fmt.Sprintf("%v", v))
 	}
-	got := splitByComma(trimmed)
+	got := stringsx.SplitByComma(trimmed)
 
 	if diff := orderagnostic.Diff(got, want); diff != "" {
 		t.Errorf(

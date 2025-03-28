@@ -1,12 +1,12 @@
 package set_test
 
 import (
+	"reflect"
 	"testing"
 
-	. "github.com/jbduncan/go-containers/internal/matchers"
+	internalsettest "github.com/jbduncan/go-containers/internal/settest"
 	"github.com/jbduncan/go-containers/set"
 	"github.com/jbduncan/go-containers/set/settest"
-	. "github.com/onsi/gomega"
 )
 
 func TestUnion(t *testing.T) {
@@ -26,46 +26,51 @@ func TestUnion(t *testing.T) {
 	})
 
 	t.Run("union is unmodifiable", func(t *testing.T) {
-		g := NewWithT(t)
-
 		union := set.Union[int](set.Of[int](), set.Of[int]())
 
-		g.Expect(union).To(BeNonMutableSet[int]())
+		if got := isMutable(union); got {
+			t.Error("set.Union: is mutable: got true, want false")
+		}
 	})
 
 	t.Run("union is view", func(t *testing.T) {
-		g := NewWithT(t)
 		a := set.Of[int]()
 		b := set.Of[int]()
 		union := set.Union[int](a, b)
 
 		a.Add(1)
 
-		g.Expect(union).To(Contain(1))
-		g.Expect(union).To(HaveLenOf(1))
-		g.Expect(union).To(HaveAllThatConsistsOf[int](1))
-		g.Expect(union).To(HaveStringRepr("[1]"))
+		internalsettest.TestSetLen(t, "set.Union", union, 1)
+		internalsettest.TestSetAll(t, "set.Union", union, []int{1})
+		internalsettest.TestSetContains(t, "set.Union", union, []int{1}, nil)
+		internalsettest.TestSetString(t, "set.Union", union, []int{1})
 	})
+}
+
+var mutableSetType = reflect.TypeOf((*set.MutableSet[int])(nil)).Elem()
+
+func isMutable(s set.Set[int]) bool {
+	return reflect.TypeOf(s).Implements(mutableSetType)
 }
 
 func FuzzUnion(f *testing.F) {
 	addUnionFuzzSeedCorpuses(f)
 
 	f.Fuzz(func(t *testing.T, a, b []byte) {
-		g := NewWithT(t)
 		setA := set.Of(a...)
 		setB := set.Of(b...)
 
-		got := set.Union[byte](setA, setB)
+		union := set.Union[byte](setA, setB)
 
-		g.Expect(got.Len()).To(BeNumerically(">=", 0))
-		g.Expect(got.Len()).To(BeNumerically("<=", len(a)+len(b)))
-		for _, elem := range a {
-			g.Expect(got).To(Contain(elem))
+		if got := 0 <= union.Len() && union.Len() <= len(a)+len(b); !got {
+			t.Errorf(
+				"set.Union: got Set.Len of %d, want in range [0-%d]",
+				union.Len(),
+				len(a)+len(b),
+			)
 		}
-		for _, elem := range b {
-			g.Expect(got).To(Contain(elem))
-		}
+		internalsettest.TestSetContains(t, "set.Union", union, a, nil)
+		internalsettest.TestSetContains(t, "set.Union", union, b, nil)
 	})
 }
 
@@ -73,12 +78,16 @@ func FuzzUnionHasCommutativeProperty(f *testing.F) {
 	addUnionFuzzSeedCorpuses(f)
 
 	f.Fuzz(func(t *testing.T, a, b []byte) {
-		g := NewWithT(t)
 		setA := set.Of(a...)
 		setB := set.Of(b...)
 
-		g.Expect(set.Equal(set.Union[byte](setA, setB), set.Union[byte](setB, setA))).
-			To(BeTrue(), "have commutative property")
+		if got := set.Equal(
+			set.Union[byte](setA, setB),
+			set.Union[byte](setB, setA),
+		); !got {
+			t.Error("set.Union: have commutative property: " +
+				"got false, want true")
+		}
 	})
 }
 
@@ -91,7 +100,6 @@ func FuzzUnionHasIdentityProperty(f *testing.F) {
 	f.Add([]byte{1, 2, 3, 4, 5}, false)
 
 	f.Fuzz(func(t *testing.T, bytes []byte, identityFirst bool) {
-		g := NewWithT(t)
 		s := set.Of(bytes...)
 
 		var union set.UnionSet[byte]
@@ -101,8 +109,9 @@ func FuzzUnionHasIdentityProperty(f *testing.F) {
 			union = set.Union[byte](s, set.Of[byte]())
 		}
 
-		g.Expect(set.Equal(union, s)).
-			To(BeTrue(), "have identity property")
+		if got := set.Equal(union, s); !got {
+			t.Error("set.Union: have identity property: got false, want true")
+		}
 	})
 }
 
@@ -112,12 +121,13 @@ func FuzzUnionHasIdempotentProperty(f *testing.F) {
 	f.Add([]byte{1, 2, 3, 4, 5})
 
 	f.Fuzz(func(t *testing.T, bytes []byte) {
-		g := NewWithT(t)
 		s := set.Of(bytes...)
 
 		union := set.Union[byte](s, s)
-		g.Expect(set.Equal(union, s)).
-			To(BeTrue(), "have idempotent property")
+		if got := set.Equal(union, s); !got {
+			t.Error("set.Union: have idempotent property: " +
+				"got false, want true")
+		}
 	})
 }
 

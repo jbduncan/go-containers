@@ -1,8 +1,6 @@
 package graphtest
 
 import (
-	"strings"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/jbduncan/go-containers/graph"
 	"github.com/jbduncan/go-containers/internal/orderagnostic"
@@ -18,13 +16,6 @@ func reversesOf(edges []graph.EndpointPair[int]) []graph.EndpointPair[int] {
 		result = append(result, reverseOf(edge))
 	}
 	return result
-}
-
-func splitByComma(s string) []string {
-	if len(s) == 0 {
-		return []string{}
-	}
-	return strings.Split(s, ", ")
 }
 
 func undirectedEndpointPairsDiff(

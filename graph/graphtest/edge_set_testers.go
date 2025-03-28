@@ -6,6 +6,7 @@ import (
 
 	"github.com/jbduncan/go-containers/graph"
 	"github.com/jbduncan/go-containers/internal/orderagnostic"
+	"github.com/jbduncan/go-containers/internal/settest"
 	"github.com/jbduncan/go-containers/internal/slicesx"
 	"github.com/jbduncan/go-containers/set"
 )
@@ -39,9 +40,9 @@ func (tt edgeSetTester) test() {
 		}
 	}
 
-	testSetLen(tt.t, tt.setName, tt.edges, len(tt.expectedEdges))
+	settest.TestSetLen(tt.t, tt.setName, tt.edges, len(tt.expectedEdges))
 	tt.testEdgeSetAll(tt.t, tt.setName, tt.edges, tt.expectedEdges)
-	testSetContains(tt.t, tt.setName, tt.edges, contains, doesNotContain)
+	settest.TestSetContains(tt.t, tt.setName, tt.edges, contains, doesNotContain)
 	newEdgeSetStringTester(
 		tt.t,
 		tt.setName,
