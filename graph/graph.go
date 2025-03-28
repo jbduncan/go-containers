@@ -99,7 +99,7 @@ func (u *undirectedGraph[N]) AllowsSelfLoops() bool {
 }
 
 func (u *undirectedGraph[N]) Nodes() set.Set[N] {
-	return set.Unmodifiable(u.nodes)
+	return set.Unmodifiable[N](u.nodes)
 }
 
 func (u *undirectedGraph[N]) Edges() set.Set[EndpointPair[N]] {
@@ -217,7 +217,7 @@ type directedGraph[N comparable] struct {
 }
 
 func (d *directedGraph[N]) Nodes() set.Set[N] {
-	return set.Unmodifiable(d.nodes)
+	return set.Unmodifiable[N](d.nodes)
 }
 
 func (d *directedGraph[N]) Edges() set.Set[EndpointPair[N]] {

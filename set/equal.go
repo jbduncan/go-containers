@@ -13,8 +13,8 @@ package set
 //
 // Note: If passing in a MutableSet, Go needs the generic type to be defined explicitly, like:
 //
-//	a := set.NewMutable(1)
-//	b := set.NewMutable(2)
+//	a := set.Of(1)
+//	b := set.Of(2)
 //	result := set.Equal[int](a, b)
 //	                   ^^^^^
 func Equal[T comparable](a, b Set[T]) bool {

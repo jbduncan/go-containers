@@ -1,9 +1,7 @@
 // Package set provides a set data structure, which is a generic, unordered container of elements where no two elements
 // can be equal according to Go's == operator.
 //
-// An immutable set can be created with Of. Likewise, a mutable set can be created with NewMutable.
-//
-// A mutable set can be passed into Unmodifiable, which turns it into a read-only Set view.
+// A mutable set can be created with Of, which can be passed into Unmodifiable to turn it into a read-only Set view.
 //
 // Set has a String method that satisfies fmt.Stringer.
 //

@@ -8,6 +8,12 @@ var _ Set[int] = (*UnmodifiableSet[int])(nil)
 // MutableSet and allows for sets that can be mutated by your own code but not your users' code.
 //
 // If the given set is ever mutated, then the returned set will reflect those mutations.
+//
+// Note: If passing in a MutableSet, Go needs the generic type to be defined explicitly, like:
+//
+//	s := set.Of(1)
+//	s := set.Unmodifiable[int](a)
+//	                     ^^^^^
 func Unmodifiable[T comparable](s Set[T]) UnmodifiableSet[T] {
 	return UnmodifiableSet[T]{
 		s: s,
