@@ -67,7 +67,6 @@ run = [
   "go mod tidy",
   "ast-grep scan --update-all",
   "go run internal/tasks.go eg-fix",
-  "golangci-lint fmt",
   "golangci-lint run --fix",
   "go run internal/tasks.go depaware-fix",
 ]
