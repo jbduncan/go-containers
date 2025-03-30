@@ -7,12 +7,11 @@ cosign-darwin-arm64 = "sha256:edfc761b27ced77f0f9ca288ff4fac7caa898e1e9db38f4dfd
 cosign-linux-amd64 = "sha256:caaad125acef1cb81d58dcdc454a1e429d09a750d1e9e2b3ed1aed8964454708"
 
 [tools.go]
-version = "1.24.0"
+version = "1.24.1"
 backend = "core:go"
 
 [tools.go.checksums]
-"go1.24.0.darwin-arm64.tar.gz" = "sha256:fd9cfb5dd6c75a347cfc641a253f0db1cebaca16b0dd37965351c6184ba595e4"
-"go1.24.0.linux-amd64.tar.gz" = "sha256:dea9ca38a0b852a74e81c26134671af7c0fbe65d81b0dc1c5bfe22cf7d4c8858"
+"go1.24.1.linux-amd64.tar.gz" = "sha256:cb2396bae64183cdccf81a9a6df0aea3bce9511fc21469fb89a0c00470088073"
 
 [tools."go:github.com/tailscale/depaware"]
 version = "b748de0"
@@ -23,15 +22,15 @@ version = "ba14292"
 backend = "go:go.uber.org/nilaway/cmd/nilaway"
 
 [tools."go:golang.org/x/tools/cmd/digraph"]
-version = "0.30.0"
+version = "0.31.0"
 backend = "go:golang.org/x/tools/cmd/digraph"
 
 [tools."go:golang.org/x/tools/cmd/eg"]
-version = "0.30.0"
+version = "0.31.0"
 backend = "go:golang.org/x/tools/cmd/eg"
 
 [tools."go:golang.org/x/tools/cmd/stringer"]
-version = "0.30.0"
+version = "0.31.0"
 backend = "go:golang.org/x/tools/cmd/stringer"
 
 [tools.golangci-lint]
@@ -49,9 +48,8 @@ backend = "ubi:slsa-framework/slsa-verifier"
 slsa-verifier-macos-aarch64 = "sha256:84d9122ce12e0c79080844285fd5c4976407ed3463e434a1b21b0979c46b1e55"
 
 [tools."ubi:ast-grep/ast-grep"]
-version = "0.35.0"
+version = "0.36.2"
 backend = "ubi:ast-grep/ast-grep"
 
 [tools."ubi:ast-grep/ast-grep".checksums]
-ast-grep-linux-x86_64 = "sha256:64a28fe76a664ff38c5717b967cc293f1238c21e488b580ff03ff5d4ba883cd9"
-ast-grep-macos-aarch64 = "sha256:68de6ffb6d8fe66bd0e81c44bfd9f9152ec2cb5231046b54fbb2aac97c93244f"
+ast-grep-linux-x86_64 = "sha256:d6a447219e08a9dee8cb9dc887eba0e88de7e09c844fd9239473744a2b22e2e5"
