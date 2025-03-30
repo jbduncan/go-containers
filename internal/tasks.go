@@ -136,6 +136,7 @@ func doEg() error {
 	for file := range egTemplateFiles {
 		group.Go(func() error {
 			fmt.Printf("Linting with eg template %s concurrently...\n", file)
+			//nolint:gosec // Acceptable because this is a script.
 			c := exec.Command("eg", "-t", file, "./...")
 
 			// On a match, eg prints the whole contents of the matching file

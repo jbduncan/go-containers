@@ -1,9 +1,9 @@
+version: "2"
 run:
   modules-download-mode: readonly
-
 linters:
   # Disable all linters by default and only explicitly enable the ones below.
-  disable-all: true
+  default: none
   enable:
     - bidichk
     - dupl
@@ -13,14 +13,8 @@ linters:
     - errorlint
     - exhaustive
     - exptostd
-    - gci
     - ginkgolinter
-    # gofmt is used just for its rewrite capabilities. gofumpt and gci are used
-    # on top for stricter formatting and import sorting.
-    - gofmt
-    - gofumpt
     - gosec
-    - gosimple
     - govet
     - iface
     - misspell
@@ -30,140 +24,150 @@ linters:
     - recvcheck
     - revive
     - staticcheck
-    - stylecheck
     - testpackage
     - unused
     - usestdlibvars
     - usetesting
-
-linters-settings:
-  exhaustive:
-    check:
-      - switch
-      - map
-  gofmt:
-    simplify: true
-    rewrite-rules:
-      - pattern: 'interface{}'
-        replacement: 'any'
-      - pattern: 'a[0:len(a)]'
-        replacement: 'a[:]'
-      - pattern: 'a[:len(a)]'
-        replacement: 'a[:]'
-      - pattern: 'a[0:]'
-        replacement: 'a[:]'
-      - pattern: 'a[0:b]'
-        replacement: 'a[:b]'
-      - pattern: 'a[b:len(a)]'
-        replacement: 'a[b:]'
-      - pattern: '(a)'
-        replacement: 'a'
-  govet:
-    enable:
-      - appends
-      - asmdecl
-      - assign
-      - atomic
-      - bools
-      - buildtag
-      - cgocall
-      - composites
-      - copylocks
-      - deepequalerrors
-      - defers
-      - directive
-      - errorsas
-      - framepointer
-      - httpresponse
-      - ifaceassert
-      - loopclosure
-      - lostcancel
-      - nilfunc
-      - printf
-      - reflectvaluecompare
-      - shadow
-      - shift
-      - sigchanyzer
-      - slog
-      - sortslice
-      - stdmethods
-      - stdversion
-      - stringintconv
-      - structtag
-      - testinggoroutine
-      - tests
-      - timeformat
-      - unmarshal
-      - unreachable
-      - unsafeptr
-      - unusedresult
-      - unusedwrite
-      - waitgroup
-  revive:
-    enable-all-rules: false
-    rules:
-      - name: atomic
-      - name: blank-imports
-      - name: bool-literal-in-expr
-      - name: call-to-gc
-      - name: comment-spacings
-      - name: confusing-naming
-      - name: confusing-results
-      - name: constant-logical-expr
-      - name: context-as-argument
-      - name: context-keys-type
-      - name: datarace
-      - name: deep-exit
-      - name: defer
-      - name: duplicated-imports
-      - name: early-return
-        arguments:
-          # Do not suggest refactorings that would increase variable scope
-          - preserveScope
-      - name: empty-block
-      - name: error-naming
-      - name: error-return
-      - name: error-strings
-      - name: errorf
-      - name: exported
-      - name: filename-format
-      - name: flag-parameter
-      - name: get-return
-      - name: identical-branches
-      - name: if-return
-      - name: import-alias-naming
-        arguments:
-          # Ensure aliases like "foobar" are allowed and that dot imports are
-          # let through (dot imports are caught by "stylecheck").
-          # However, ensure that aliases with underscores like "foo_bar" are
-          # disallowed.
-          - "^[a-z\\.][a-z0-9]{0,}$"
-      - name: import-shadowing
-      - name: increment-decrement
-      - name: indent-error-flow
-        arguments:
-          # Do not suggest refactorings that would increase variable scope
-          - "preserveScope"
-      - name: modifies-value-receiver
-      - name: package-comments
-      - name: range
-      - name: receiver-naming
-      - name: redefines-builtin-id
-      - name: redundant-import-alias
-      - name: string-of-int
-      - name: struct-tag
-      - name: superfluous-else
-        arguments:
-          # Do not suggest refactorings that would increase variable scope
-          - "preserveScope"
-      - name: time-equal
-      - name: unchecked-type-assertion
-      - name: unconditional-recursion
-      - name: unexported-return
-      - name: unnecessary-stmt
-      - name: unused-parameter
-        arguments:
-          - allowRegex: "^_"
-      - name: useless-break
-      - name: var-declaration
-      - name: var-naming
+  settings:
+    exhaustive:
+      check:
+        - switch
+        - map
+    govet:
+      enable:
+        - appends
+        - asmdecl
+        - assign
+        - atomic
+        - bools
+        - buildtag
+        - cgocall
+        - composites
+        - copylocks
+        - deepequalerrors
+        - defers
+        - directive
+        - errorsas
+        - framepointer
+        - httpresponse
+        - ifaceassert
+        - loopclosure
+        - lostcancel
+        - nilfunc
+        - printf
+        - reflectvaluecompare
+        - shadow
+        - shift
+        - sigchanyzer
+        - slog
+        - sortslice
+        - stdmethods
+        - stdversion
+        - stringintconv
+        - structtag
+        - testinggoroutine
+        - tests
+        - timeformat
+        - unmarshal
+        - unreachable
+        - unsafeptr
+        - unusedresult
+        - unusedwrite
+        - waitgroup
+    revive:
+      enable-all-rules: false
+      rules:
+        - name: atomic
+        - name: blank-imports
+        - name: bool-literal-in-expr
+        - name: call-to-gc
+        - name: comment-spacings
+        - name: confusing-naming
+        - name: confusing-results
+        - name: constant-logical-expr
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: datarace
+        - name: deep-exit
+        - name: defer
+        - name: duplicated-imports
+        - name: early-return
+          arguments:
+            # Do not suggest refactorings that would increase variable scope
+            - preserveScope
+        - name: empty-block
+        - name: error-naming
+        - name: error-return
+        - name: error-strings
+        - name: errorf
+        - name: exported
+        - name: filename-format
+        - name: flag-parameter
+        - name: get-return
+        - name: identical-branches
+        - name: if-return
+        - name: import-alias-naming
+          arguments:
+            # Ensure aliases like "foobar" are allowed and that dot imports are
+            # let through (dot imports are caught by "staticcheck").
+            # However, ensure that aliases with underscores like "foo_bar" are
+            # disallowed.
+            - ^[a-z\.][a-z0-9]{0,}$
+        - name: import-shadowing
+        - name: increment-decrement
+        - name: indent-error-flow
+          arguments:
+            # Do not suggest refactorings that would increase variable scope
+            - preserveScope
+        - name: modifies-value-receiver
+        - name: package-comments
+        - name: range
+        - name: receiver-naming
+        - name: redefines-builtin-id
+        - name: redundant-import-alias
+        - name: string-of-int
+        - name: struct-tag
+        - name: superfluous-else
+          arguments:
+            # Do not suggest refactorings that would increase variable scope
+            - preserveScope
+        - name: time-equal
+        - name: unchecked-type-assertion
+        - name: unconditional-recursion
+        - name: unexported-return
+        - name: unnecessary-stmt
+        - name: unused-parameter
+          arguments:
+            - allowRegex: ^_
+        - name: useless-break
+        - name: var-declaration
+        - name: var-naming
+  exclusions:
+    generated: strict
+    presets:
+      - comments
+formatters:
+  enable:
+    # gofmt is used just for its rewrite capabilities. gofumpt and gci are used
+    # on top for stricter formatting and import sorting.
+    - gci
+    - gofmt
+    - gofumpt
+  settings:
+    gofmt:
+      simplify: true
+      rewrite-rules:
+        - pattern: interface{}
+          replacement: any
+        - pattern: a[0:len(a)]
+          replacement: a[:]
+        - pattern: a[:len(a)]
+          replacement: a[:]
+        - pattern: a[0:]
+          replacement: a[:]
+        - pattern: a[0:b]
+          replacement: a[:b]
+        - pattern: a[b:len(a)]
+          replacement: a[b:]
+        - pattern: (a)
+          replacement: a

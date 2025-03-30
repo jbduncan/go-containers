@@ -67,6 +67,7 @@ run = [
   "go mod tidy",
   "ast-grep scan --update-all",
   "go run internal/tasks.go eg-fix",
+  "golangci-lint fmt",
   "golangci-lint run --fix",
   "go run internal/tasks.go depaware-fix",
 ]
@@ -105,7 +106,7 @@ description = "Check that no problems are found when running the linters defined
 hide = true
 run = "golangci-lint run"
 depends = "build"
-sources = ["go.mod", "go.sum", "**/*.go"]
+sources = ["go.mod", "go.sum", "**/*.go", ".golangci.yml"]
 outputs = { auto = true }
 # If this task and test run at the same time, force it to run last to improve
 # diagnostics in case of test compilation failures.
