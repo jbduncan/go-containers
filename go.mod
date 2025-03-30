@@ -13,7 +13,6 @@ require (
 require (
 	github.com/google/pprof v0.0.0-20250302191652-9094ed2288e7 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
-	github.com/onsi/ginkgo/v2 v2.23.3 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
