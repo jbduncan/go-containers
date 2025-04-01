@@ -41,10 +41,6 @@ const (
 	DisallowsSelfLoops
 )
 
-// TODO: Rename `graphBuilder` to `emptyGraph` and add a note to the docs about
-//       how this function should always return a newly initialized, empty
-//       graph.
-
 // Graph runs a suite of test cases for implementations of the graph.Graph and
 // graph.MutableGraph interfaces. Graph instances created for testing are to
 // have int nodes.
@@ -54,9 +50,13 @@ const (
 // returns the set of the nodes in the graph. Details of specific
 // implementations of the graph.Graph and graph.MutableGraph interfaces are not
 // tested.
+//
+// Parameter `emptyGraph` should always return a newly-initialized empty graph
+// with no nodes and no edges. Otherwise, the behaviour of this function is
+// undefined.
 func Graph(
 	t *testing.T,
-	graphBuilder func() graph.Graph[int],
+	emptyGraph func() graph.Graph[int],
 	addNode func(g graph.Graph[int], node int) graph.Graph[int],
 	putEdge func(g graph.Graph[int], source int, target int) graph.Graph[int],
 	mutability Mutability,
@@ -67,7 +67,7 @@ func Graph(
 
 	newTester(
 		t,
-		graphBuilder,
+		emptyGraph,
 		addNode,
 		putEdge,
 		mutability,
@@ -108,7 +108,7 @@ func validate(
 
 func newTester(
 	t *testing.T,
-	graphBuilder func() graph.Graph[int],
+	emptyGraph func() graph.Graph[int],
 	addNode func(g graph.Graph[int], node int) graph.Graph[int],
 	putEdge func(g graph.Graph[int], source int, target int) graph.Graph[int],
 	mutability Mutability,
@@ -117,7 +117,7 @@ func newTester(
 ) *tester {
 	return &tester{
 		t:             t,
-		graphBuilder:  graphBuilder,
+		emptyGraph:    emptyGraph,
 		addNode:       addNode,
 		putEdge:       putEdge,
 		mutability:    mutability,
@@ -127,10 +127,10 @@ func newTester(
 }
 
 type tester struct {
-	t            *testing.T
-	graphBuilder func() graph.Graph[int]
-	addNode      func(g graph.Graph[int], node int) graph.Graph[int]
-	putEdge      func(
+	t          *testing.T
+	emptyGraph func() graph.Graph[int]
+	addNode    func(g graph.Graph[int], node int) graph.Graph[int]
+	putEdge    func(
 		g graph.Graph[int],
 		source int,
 		target int,
@@ -206,39 +206,39 @@ func (tt tester) test() {
 func (tt tester) testEmptyGraph() {
 	tt.t.Run("empty graph", func(t *testing.T) {
 		t.Run("has no nodes", func(t *testing.T) {
-			testNodes(t, tt.graphBuilder())
+			testNodes(t, tt.emptyGraph())
 		})
 
 		t.Run("has no edges", func(t *testing.T) {
-			tt.testEdges(t, tt.graphBuilder())
+			tt.testEdges(t, tt.emptyGraph())
 		})
 
 		t.Run("has no predecessors for an absent node", func(t *testing.T) {
-			testPredecessors(t, tt.graphBuilder(), nodeNotInGraph)
+			testPredecessors(t, tt.emptyGraph(), nodeNotInGraph)
 		})
 
 		t.Run("has no successors for an absent node", func(t *testing.T) {
-			testSuccessors(t, tt.graphBuilder(), nodeNotInGraph)
+			testSuccessors(t, tt.emptyGraph(), nodeNotInGraph)
 		})
 
 		t.Run("has no adjacent nodes for an absent node", func(t *testing.T) {
-			testAdjacentNodes(t, tt.graphBuilder(), nodeNotInGraph)
+			testAdjacentNodes(t, tt.emptyGraph(), nodeNotInGraph)
 		})
 
 		t.Run("has a degree of 0 for an absent node", func(t *testing.T) {
-			testDegree(t, tt.graphBuilder(), nodeNotInGraph, 0)
+			testDegree(t, tt.emptyGraph(), nodeNotInGraph, 0)
 		})
 
 		t.Run("has an in-degree of 0 for an absent node", func(t *testing.T) {
-			testInDegree(t, tt.graphBuilder(), nodeNotInGraph, 0)
+			testInDegree(t, tt.emptyGraph(), nodeNotInGraph, 0)
 		})
 
 		t.Run("has an out-degree of 0 for an absent node", func(t *testing.T) {
-			testOutDegree(t, tt.graphBuilder(), nodeNotInGraph, 0)
+			testOutDegree(t, tt.emptyGraph(), nodeNotInGraph, 0)
 		})
 
 		t.Run("has an unmodifiable nodes set view", func(t *testing.T) {
-			g := tt.graphBuilder()
+			g := tt.emptyGraph()
 			nodes := g.Nodes()
 
 			internalsettest.IsMutable(t, graphNodesName, nodes)
@@ -251,7 +251,7 @@ func (tt tester) testEmptyGraph() {
 		t.Run(
 			"has an unmodifiable adjacent nodes set view",
 			func(t *testing.T) {
-				g := tt.graphBuilder()
+				g := tt.emptyGraph()
 				adjacentNodes := g.AdjacentNodes(node1)
 
 				internalsettest.IsMutable(t, graphAdjacentNodesName, adjacentNodes)
@@ -270,7 +270,7 @@ func (tt tester) testEmptyGraph() {
 		)
 
 		t.Run("has an unmodifiable predecessors set view", func(t *testing.T) {
-			g := tt.graphBuilder()
+			g := tt.emptyGraph()
 			predecessors := g.Predecessors(node1)
 
 			internalsettest.IsMutable(t, graphPredecessorsName, predecessors)
@@ -281,7 +281,7 @@ func (tt tester) testEmptyGraph() {
 		})
 
 		t.Run("has an unmodifiable successors set view", func(t *testing.T) {
-			g := tt.graphBuilder()
+			g := tt.emptyGraph()
 			successors := g.Successors(node1)
 
 			internalsettest.IsMutable(t, graphSuccessorsName, successors)
@@ -292,7 +292,7 @@ func (tt tester) testEmptyGraph() {
 		})
 
 		t.Run("has an unmodifiable edges set view", func(t *testing.T) {
-			g := tt.graphBuilder()
+			g := tt.emptyGraph()
 			edges := g.Edges()
 
 			internalsettest.IsMutable(t, graphEdgesName, edges)
@@ -305,7 +305,7 @@ func (tt tester) testEmptyGraph() {
 		t.Run(
 			"has an unmodifiable incident edges set view",
 			func(t *testing.T) {
-				g := tt.graphBuilder()
+				g := tt.emptyGraph()
 				edges := g.IncidentEdges(node1)
 
 				internalsettest.IsMutable(t, graphIncidentEdgesName, edges)
@@ -326,7 +326,7 @@ func (tt tester) testEmptyGraph() {
 func (tt tester) testGraphWithOneNode() {
 	tt.t.Run("graph with one node", func(t *testing.T) {
 		g := func() graph.Graph[int] {
-			g := tt.graphBuilder()
+			g := tt.emptyGraph()
 			g = tt.addNode(g, node1)
 			return g
 		}
@@ -368,7 +368,7 @@ func (tt tester) testGraphWithOneNode() {
 func (tt tester) testGraphWithTwoNodes() {
 	tt.t.Run("graph with two nodes", func(t *testing.T) {
 		t.Run("has both nodes", func(t *testing.T) {
-			g := tt.graphBuilder()
+			g := tt.emptyGraph()
 			g = tt.addNode(g, node1)
 			g = tt.addNode(g, node2)
 
@@ -380,7 +380,7 @@ func (tt tester) testGraphWithTwoNodes() {
 func (tt tester) testGraphWithOneEdge() {
 	tt.t.Run("graph with one edge", func(t *testing.T) {
 		g := func() graph.Graph[int] {
-			g := tt.graphBuilder()
+			g := tt.emptyGraph()
 			g = tt.putEdge(g, node1, node2)
 			return g
 		}
@@ -476,7 +476,7 @@ func (tt tester) testGraphWithOneEdge() {
 func (tt tester) testGraphWithSameEdgePutTwice() {
 	tt.t.Run("graph with same edge put twice", func(t *testing.T) {
 		t.Run("has only one edge", func(t *testing.T) {
-			g := tt.graphBuilder()
+			g := tt.emptyGraph()
 			g = tt.putEdge(g, node1, node2)
 
 			tt.testEdges(t, g, graph.EndpointPairOf(node1, node2))
@@ -489,7 +489,7 @@ func (tt tester) testGraphWithTwoEdgesWithSameSourceNode() {
 		"graph with two edges with the same source node",
 		func(t *testing.T) {
 			g := func() graph.Graph[int] {
-				g := tt.graphBuilder()
+				g := tt.emptyGraph()
 				g = tt.putEdge(g, node1, node2)
 				g = tt.putEdge(g, node1, node3)
 				return g
@@ -541,7 +541,7 @@ func (tt tester) testGraphWithTwoEdgesWithSameTargetNode() {
 		"graph with two edges with the same target node",
 		func(t *testing.T) {
 			g := func() graph.Graph[int] {
-				g := tt.graphBuilder()
+				g := tt.emptyGraph()
 				g = tt.putEdge(g, node1, node2)
 				g = tt.putEdge(g, node3, node2)
 				return g
@@ -577,7 +577,7 @@ func (tt tester) testGraphWithTwoEdgesWithSameTargetNode() {
 func (tt tester) emptyMutableGraph() graph.MutableGraph[int] {
 	tt.t.Helper()
 
-	g := tt.graphBuilder()
+	g := tt.emptyGraph()
 
 	mutG, ok := g.(graph.MutableGraph[int])
 	if !ok {
@@ -879,7 +879,7 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithTwoExistingNodes(
 func (tt tester) testDirectedGraph() {
 	tt.t.Run("directed graph", func(t *testing.T) {
 		t.Run("says it is directed", func(t *testing.T) {
-			g := tt.graphBuilder()
+			g := tt.emptyGraph()
 
 			if got := g.IsDirected(); !got {
 				t.Fatalf("Graph.IsDirected: got false, want true")
@@ -888,7 +888,7 @@ func (tt tester) testDirectedGraph() {
 
 		t.Run("putting an edge", func(t *testing.T) {
 			g := func() graph.Graph[int] {
-				g := tt.graphBuilder()
+				g := tt.emptyGraph()
 				g = tt.putEdge(g, node1, node2)
 				return g
 			}
@@ -930,7 +930,7 @@ func (tt tester) testDirectedGraph() {
 			"putting two connected edges makes the common node have a "+
 				"degree of 2",
 			func(t *testing.T) {
-				g := tt.graphBuilder()
+				g := tt.emptyGraph()
 				g = tt.putEdge(g, node1, node2)
 				g = tt.putEdge(g, node2, node3)
 
@@ -943,7 +943,7 @@ func (tt tester) testDirectedGraph() {
 func (tt tester) testUndirectedGraph() {
 	tt.t.Run("undirected graph", func(t *testing.T) {
 		t.Run("says it is not directed", func(t *testing.T) {
-			g := tt.graphBuilder()
+			g := tt.emptyGraph()
 
 			if got := g.IsDirected(); got {
 				t.Fatalf("Graph.IsDirected: got true, want false")
@@ -952,7 +952,7 @@ func (tt tester) testUndirectedGraph() {
 
 		t.Run("putting an edge", func(t *testing.T) {
 			g := func() graph.Graph[int] {
-				g := tt.graphBuilder()
+				g := tt.emptyGraph()
 				g = tt.putEdge(g, node1, node2)
 				return g
 			}
@@ -1002,7 +1002,7 @@ func (tt tester) testUndirectedGraph() {
 func (tt tester) testSelfLoopingGraph() {
 	tt.t.Run("self-looping graph", func(t *testing.T) {
 		t.Run("says it allows self loops", func(t *testing.T) {
-			g := tt.graphBuilder()
+			g := tt.emptyGraph()
 
 			if got := g.AllowsSelfLoops(); !got {
 				t.Fatalf("Graph.AllowsSelfLoops: got false, want true")
@@ -1011,7 +1011,7 @@ func (tt tester) testSelfLoopingGraph() {
 
 		t.Run("putting a self-loop edge", func(t *testing.T) {
 			g := func() graph.Graph[int] {
-				g := tt.graphBuilder()
+				g := tt.emptyGraph()
 				g = tt.putEdge(g, node1, node1)
 				return g
 			}
@@ -1039,7 +1039,7 @@ func (tt tester) testSelfLoopDisallowingGraph() {
 		t.Run(
 			"says it disallows self-loops",
 			func(t *testing.T) {
-				g := tt.graphBuilder()
+				g := tt.emptyGraph()
 
 				if got := g.AllowsSelfLoops(); got {
 					t.Fatalf("Graph.AllowsSelfLoops: got true, want false")
@@ -1100,7 +1100,7 @@ func (tt tester) testStringRepresentations(
 			", allowsSelfLoops: " +
 			strconv.FormatBool(allowsSelfLoops) +
 			", nodes: [], edges: []"
-		if got := tt.graphBuilder().String(); got != want {
+		if got := tt.emptyGraph().String(); got != want {
 			t.Errorf("Graph.String: got %q, want %q", got, want)
 		}
 	})
@@ -1108,7 +1108,7 @@ func (tt tester) testStringRepresentations(
 	t.Run(
 		"adding a node makes a non-empty graph string representation",
 		func(t *testing.T) {
-			g := tt.graphBuilder()
+			g := tt.emptyGraph()
 			g = tt.addNode(g, node1)
 
 			want := "isDirected: " +
@@ -1125,7 +1125,7 @@ func (tt tester) testStringRepresentations(
 	t.Run(
 		"putting an edge makes a non-empty graph string representation",
 		func(t *testing.T) {
-			g := tt.graphBuilder()
+			g := tt.emptyGraph()
 			g = tt.putEdge(g, node1, node2)
 
 			var wantAny []string
