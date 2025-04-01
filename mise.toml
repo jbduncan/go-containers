@@ -8,7 +8,7 @@ experimental = true
 lockfile = true
 
 [tasks.ast-grep]
-description = "Run ast-grep rules against the library source code."
+description = "Run ast-grep rules against the source code."
 hide = true
 run = "ast-grep scan"
 depends = "build"
@@ -27,7 +27,7 @@ outputs = { auto = true }
 wait_for = ["test"]
 
 [tasks.build]
-description = "Build the library source code."
+description = "Compile the source code."
 run = "go build ./..."
 sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
@@ -35,7 +35,7 @@ depends = ["generate"]
 alias = "b"
 
 [tasks.check]
-description = "Run all linters and tests against the library source code."
+description = "Run all linters and tests against the source code."
 depends = ["lint", "test"]
 alias = "c"
 
@@ -51,7 +51,7 @@ sources = ["go.mod", "go.sum", "**/*.go", "**/depaware.txt"]
 outputs = { auto = true }
 
 [tasks.eg]
-description = "Check that the library source code is already refactored according to the eg templates."
+description = "Check that the source code is refactored according to the eg templates."
 hide = true
 run = "go run internal/tasks.go eg"
 depends = ["build"]
@@ -74,7 +74,7 @@ depends = ["build"]
 alias = "f"
 
 [tasks.generate]
-description = "Run go:generate instructions in the library source code."
+description = "Run go:generate instructions in the source code."
 run = "go generate ./..."
 depends = ["go-sanity-check"]
 sources = ["go.mod", "go.sum", "**/*.go"]
@@ -101,7 +101,7 @@ hide = true
 run = ["go mod verify", "go mod download"]
 
 [tasks.golangci-lint]
-description = "Check that no problems are found when running the linters defined in .golangci.yml against the library source code."
+description = "Check that no problems are found when running the linters defined in .golangci.yml against the source code."
 hide = true
 run = "golangci-lint run"
 depends = "build"
@@ -112,7 +112,7 @@ outputs = { auto = true }
 wait_for = ["test"]
 
 [tasks.lint]
-description = "Check the library source code for problems."
+description = "Check the source code for problems."
 hide = true
 depends = [
   "ast-grep",
@@ -125,7 +125,7 @@ depends = [
 ]
 
 [tasks.nilaway]
-description = "Check that no common sources of nil pointer dereferences can occur in the library source code."
+description = "Check that no common sources of nil pointer dereferences can occur in the source code."
 hide = true
 run = "nilaway -include-pkgs github.com/jbduncan/go-containers ./..."
 depends = "build"
@@ -136,7 +136,7 @@ outputs = { auto = true }
 wait_for = ["test"]
 
 [tasks.test]
-description = "Run tests for the library source code."
+description = "Run the tests."
 run = "go test -shuffle=on -race ./..."
 depends = "build"
 sources = ["go.mod", "go.sum", "**/*.go"]
@@ -144,7 +144,7 @@ outputs = { auto = true }
 alias = "t"
 
 [tasks.test-rerun]
-description = "Run tests for the library source code, even if no changes have been made."
+description = "Run the tests, even if no changes have been made."
 run = "go test -shuffle=on -race ./..."
 depends = "build"
 sources = ["go.mod", "go.sum", "**/*.go"]
