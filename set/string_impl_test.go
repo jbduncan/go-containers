@@ -10,6 +10,8 @@ import (
 )
 
 func TestStringImpl(t *testing.T) {
+	t.Parallel()
+
 	type testCase struct {
 		name    string
 		arg     set.Set[string]
@@ -34,6 +36,8 @@ func TestStringImpl(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			if got := set.StringImpl(tt.arg); !slices.Contains(tt.wantAny, got) {
 				t.Errorf("StringImpl() = %v, want any of %v", got, tt.wantAny)
 			}

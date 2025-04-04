@@ -9,6 +9,8 @@ import (
 )
 
 func TestSetUnmodifiable(t *testing.T) {
+	t.Parallel()
+
 	settest.Set(t, func(elements []string) set.Set[string] {
 		s := set.Of[string]()
 		for _, element := range elements {
@@ -20,6 +22,8 @@ func TestSetUnmodifiable(t *testing.T) {
 	t.Run(
 		"empty unmodifiable set: add to underlying set",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := set.Of[string]()
 			unmodSet := set.Unmodifiable[string](s)
 
@@ -51,6 +55,8 @@ func TestSetUnmodifiable(t *testing.T) {
 			"add x2 to underlying set: "+
 			"has two-element string representation",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := set.Of[string]()
 			unmodSet := set.Unmodifiable[string](s)
 

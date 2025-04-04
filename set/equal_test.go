@@ -7,19 +7,27 @@ import (
 )
 
 func TestEqual(t *testing.T) {
+	t.Parallel()
+
 	t.Run("set a: nil; set b: nil; equal", func(t *testing.T) {
+		t.Parallel()
+
 		if got := set.Equal[string](nil, nil); !got {
 			t.Errorf("set.Equal: got false, want true")
 		}
 	})
 
 	t.Run("set a: [link]; set b: nil; not equal", func(t *testing.T) {
+		t.Parallel()
+
 		if got := set.Equal[string](set.Of("link"), nil); got {
 			t.Errorf("set.Equal: got true, want false")
 		}
 	})
 
 	t.Run("set a: [link]; set b: [zelda]; not equal", func(t *testing.T) {
+		t.Parallel()
+
 		if got := set.Equal[string](set.Of("link"), set.Of("zelda")); got {
 			t.Errorf("set.Equal: got true, want false")
 		}
@@ -28,6 +36,8 @@ func TestEqual(t *testing.T) {
 	t.Run(
 		"set a: [link]; set b: [link, zelda]; not equal",
 		func(t *testing.T) {
+			t.Parallel()
+
 			got := set.Equal[string](set.Of("link"), set.Of("link", "zelda"))
 			if got {
 				t.Errorf("set.Equal: got true, want false")

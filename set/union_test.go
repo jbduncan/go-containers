@@ -9,6 +9,8 @@ import (
 )
 
 func TestUnion(t *testing.T) {
+	t.Parallel()
+
 	settest.Set(t, func(elems []string) set.Set[string] {
 		a := set.Of[string]()
 		b := set.Of[string]()
@@ -25,12 +27,16 @@ func TestUnion(t *testing.T) {
 	})
 
 	t.Run("union is unmodifiable", func(t *testing.T) {
+		t.Parallel()
+
 		union := set.Union[int](set.Of[int](), set.Of[int]())
 
 		internalsettest.IsMutable(t, "set.Union", union)
 	})
 
 	t.Run("union is view", func(t *testing.T) {
+		t.Parallel()
+
 		a := set.Of[int]()
 		b := set.Of[int]()
 		union := set.Union[int](a, b)

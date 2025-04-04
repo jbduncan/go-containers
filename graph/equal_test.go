@@ -8,7 +8,10 @@ import (
 )
 
 func TestEqual(t *testing.T) {
+	t.Parallel()
+
 	t.Run("graph a: [link]; graph b: [link]; equal", func(t *testing.T) {
+		t.Parallel()
 		a := undirectedGraphOf("link")
 
 		if got := graph.Equal(a, a); !got {
@@ -17,12 +20,14 @@ func TestEqual(t *testing.T) {
 	})
 
 	t.Run("graph a: nil; graph b: nil; equal", func(t *testing.T) {
+		t.Parallel()
 		if got := graph.Equal[string](nil, nil); !got {
 			t.Errorf("graph.Equal: got false, want true")
 		}
 	})
 
 	t.Run("graph a: [link]; graph b: nil; not equal", func(t *testing.T) {
+		t.Parallel()
 		a := undirectedGraphOf("link")
 		if got := graph.Equal(a, nil); got {
 			t.Errorf("graph.Equal: got true, want false")
@@ -32,6 +37,7 @@ func TestEqual(t *testing.T) {
 	t.Run(
 		"graph a: undirected; graph b: directed; not equal",
 		func(t *testing.T) {
+			t.Parallel()
 			a := undirectedGraphOf("link")
 			b := directedGraphOf("link")
 
@@ -44,6 +50,7 @@ func TestEqual(t *testing.T) {
 	t.Run(
 		"graph a: allows self-loops; graph b: disallows self-loops; not equal",
 		func(t *testing.T) {
+			t.Parallel()
 			a := graph.Undirected[string]().AllowsSelfLoops(true).Build()
 			b := graph.Undirected[string]().Build()
 
@@ -54,6 +61,7 @@ func TestEqual(t *testing.T) {
 	)
 
 	t.Run("graph a: [link]; graph b: [zelda]; not equal", func(t *testing.T) {
+		t.Parallel()
 		a := undirectedGraphOf("link")
 		b := undirectedGraphOf("zelda")
 
@@ -65,6 +73,7 @@ func TestEqual(t *testing.T) {
 	t.Run(
 		"graph a: [<link -> zelda>]; graph b: [link, zelda]; not equal",
 		func(t *testing.T) {
+			t.Parallel()
 			a := undirectedGraphOf(edge("link", "zelda"))
 			b := undirectedGraphOf("link", "zelda")
 

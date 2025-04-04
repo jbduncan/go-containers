@@ -8,6 +8,8 @@ import (
 )
 
 func TestSplitByComma(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		s string
 	}
@@ -40,6 +42,8 @@ func TestSplitByComma(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			if got := stringsx.SplitByComma(tt.args.s); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("SplitByComma(): got %v, want %v", got, tt.want)
 			}

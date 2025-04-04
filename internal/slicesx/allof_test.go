@@ -8,6 +8,8 @@ import (
 )
 
 func TestAllOf(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		first int
 		rest  []int
@@ -44,6 +46,8 @@ func TestAllOf(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			if got := slicesx.AllOf(tt.args.first, tt.args.rest); !slices.Equal(got, tt.want) {
 				t.Errorf("AllOf() = %v, want %v", got, tt.want)
 			}

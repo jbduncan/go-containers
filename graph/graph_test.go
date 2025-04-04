@@ -22,6 +22,8 @@ func putEdgeOnMutableGraph(
 }
 
 func TestUndirectedGraph(t *testing.T) {
+	t.Parallel()
+
 	graphtest.Graph(
 		t,
 		func() graph.Graph[int] {
@@ -36,6 +38,8 @@ func TestUndirectedGraph(t *testing.T) {
 }
 
 func TestUndirectedAllowsSelfLoopsGraph(t *testing.T) {
+	t.Parallel()
+
 	graphtest.Graph(
 		t,
 		func() graph.Graph[int] {
@@ -50,6 +54,8 @@ func TestUndirectedAllowsSelfLoopsGraph(t *testing.T) {
 }
 
 func TestDirectedGraph(t *testing.T) {
+	t.Parallel()
+
 	graphtest.Graph(
 		t,
 		func() graph.Graph[int] {
@@ -64,6 +70,8 @@ func TestDirectedGraph(t *testing.T) {
 }
 
 func TestDirectedAllowsSelfLoopsGraph(t *testing.T) {
+	t.Parallel()
+
 	graphtest.Graph(
 		t,
 		func() graph.Graph[int] {

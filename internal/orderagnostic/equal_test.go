@@ -7,6 +7,8 @@ import (
 )
 
 func TestSlicesEqual(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		a []int
 		b []int
@@ -57,6 +59,8 @@ func TestSlicesEqual(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			if got := orderagnostic.SlicesEqual(
 				tt.args.a,
 				tt.args.b,
