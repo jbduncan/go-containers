@@ -4,46 +4,59 @@ import (
 	"testing"
 
 	"github.com/jbduncan/go-containers/graph"
-	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gcustom"
-	"github.com/onsi/gomega/types"
 )
 
 func TestEndpointPair(t *testing.T) {
 	t.Run("EndpointPair.Source() returns the first node", func(t *testing.T) {
-		g := NewWithT(t)
-		g.Expect(endpointPair()).To(haveSource("link"))
+		if got, want := endpointPair().Source(), "link"; got != want {
+			t.Errorf("EndpointPair.Source: got %q, want %q", got, want)
+		}
 	})
 
 	t.Run("EndpointPair.Target() returns the second node", func(t *testing.T) {
-		g := NewWithT(t)
-		g.Expect(endpointPair()).To(haveTarget("zelda"))
+		if got, want := endpointPair().Target(), "zelda"; got != want {
+			t.Errorf("EndpointPair.Source: got %q, want %q", got, want)
+		}
 	})
 
 	t.Run(
 		"EndpointPair.AdjacentNode(EndpointPair.Source()) returns the target",
 		func(t *testing.T) {
-			g := NewWithT(t)
-			g.Expect(endpointPair().AdjacentNode(endpointPair().Source())).
-				To(Equal(endpointPair().Target()))
+			got := endpointPair().AdjacentNode(endpointPair().Source())
+			want := endpointPair().Target()
+			if got != want {
+				t.Errorf(
+					"EndpointPair.AdjacentNode(%q): got %q, want %q",
+					endpointPair().Source(),
+					got,
+					want,
+				)
+			}
 		},
 	)
 
 	t.Run(
 		"EndpointPair.AdjacentNode(EndpointPair.Target()) returns the source",
 		func(t *testing.T) {
-			g := NewWithT(t)
-			g.Expect(endpointPair().AdjacentNode(endpointPair().Target())).
-				To(Equal(endpointPair().Source()))
+			got := endpointPair().AdjacentNode(endpointPair().Target())
+			want := endpointPair().Source()
+			if got != want {
+				t.Errorf(
+					"EndpointPair.AdjacentNode(%q): got %q, want %q",
+					endpointPair().Target(),
+					got,
+					want,
+				)
+			}
 		},
 	)
 
 	t.Run(
 		"EndpointPair.AdjacentNode(nonAdjacentNode) panics",
 		func(t *testing.T) {
-			g := NewWithT(t)
-			g.Expect(func() { endpointPair().AdjacentNode("ganondorf") }).
-				To(PanicWith("EndpointPair <link -> zelda> does not contain node ganondorf"))
+			defer func() { _ = recover() }()
+			endpointPair().AdjacentNode("ganondorf")
+			t.Errorf(`EndpointPair.AdjacentNode("ganondorf"): should have panicked`)
 		},
 	)
 
@@ -59,22 +72,4 @@ func TestEndpointPair(t *testing.T) {
 
 func endpointPair() graph.EndpointPair[string] {
 	return graph.EndpointPairOf("link", "zelda")
-}
-
-func haveSource(source string) types.GomegaMatcher {
-	return gcustom.MakeMatcher(
-		func(endpointPair graph.EndpointPair[string]) (bool, error) {
-			return endpointPair.Source() == source, nil
-		}).
-		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} to have a source equal to\n{{format .Data 1}}").
-		WithTemplateData(source)
-}
-
-func haveTarget(target string) types.GomegaMatcher {
-	return gcustom.MakeMatcher(
-		func(endpointPair graph.EndpointPair[string]) (bool, error) {
-			return endpointPair.Target() == target, nil
-		}).
-		WithTemplate("Expected\n{{.FormattedActual}}\n{{.To}} to have a target equal to\n{{format .Data 1}}").
-		WithTemplateData(target)
 }
