@@ -9,6 +9,8 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
+// TODO: change from Set[string] to Set[int] for consistency with graph.
+
 func Set(t *testing.T, sliceToSet func(elems []string) set.Set[string]) {
 	tt := newTester(t, sliceToSet)
 
@@ -106,9 +108,7 @@ func (tt tester) emptySetHasLengthOfZero() {
 		func(t *testing.T) {
 			s := tt.sliceToSet(empty())
 
-			if got, want := s.Len(), 0; got != want {
-				t.Fatalf("got Set.Len of %d, want %d", got, want)
-			}
+			testLen(t, s, 0)
 		})
 }
 
@@ -118,9 +118,7 @@ func (tt tester) emptySetContainsNothing() {
 		func(t *testing.T) {
 			s := tt.sliceToSet(empty())
 
-			if s.Contains(a) {
-				t.Fatalf("got Set.Contains(%q) == true, want false", a)
-			}
+			testDoesNotContain(t, s, a)
 		})
 }
 
@@ -130,9 +128,7 @@ func (tt tester) emptySetIterationDoesNothing() {
 		func(t *testing.T) {
 			s := tt.sliceToSet(empty())
 
-			if got, want := slices.Collect(s.All()), empty(); !slices.Equal(got, want) {
-				t.Fatalf("got Set.All of %q, want empty", got)
-			}
+			testAll(t, s, empty())
 		})
 }
 
@@ -142,9 +138,7 @@ func (tt tester) emptySetHasEmptyStringRepr() {
 		func(t *testing.T) {
 			s := tt.sliceToSet(empty())
 
-			if got, want := s.String(), "[]"; got != want {
-				t.Fatalf("got Set.String of %q, want %q", got, want)
-			}
+			testString(t, s, "[]")
 		})
 }
 
@@ -157,9 +151,7 @@ func (tt tester) emptySetRemoveDoesNothing() {
 	tt.t.Run("empty set: remove does nothing", func(t *testing.T) {
 		s.Remove(a)
 
-		if got, want := s.Len(), 0; got != want {
-			t.Fatalf("got Set.Len of %v, want %v", got, want)
-		}
+		testLen(t, s, 0)
 	})
 }
 
@@ -169,9 +161,7 @@ func (tt tester) oneElementSetHasLengthOfOne() {
 		func(t *testing.T) {
 			s := tt.sliceToSet(oneElement())
 
-			if got, want := s.Len(), 1; got != want {
-				t.Fatalf("got Set.Len of %v, want %v", got, want)
-			}
+			testLen(t, s, 1)
 		})
 }
 
@@ -184,9 +174,7 @@ func (tt tester) emptySetPlusOneHasLengthOfOne() {
 	tt.t.Run("empty set: add: has length of 1", func(t *testing.T) {
 		s.Add(a)
 
-		if got, want := s.Len(), 1; got != want {
-			t.Fatalf("got Set.Len of %v, want %v", got, want)
-		}
+		testLen(t, s, 1)
 	})
 }
 
@@ -196,9 +184,7 @@ func (tt tester) oneElementSetContainsPresentElement() {
 		func(t *testing.T) {
 			s := tt.sliceToSet(oneElement())
 
-			if !s.Contains(a) {
-				t.Fatalf("got Set.Contains(%q) == false, want true", a)
-			}
+			testContains(t, s, a)
 		})
 }
 
@@ -211,9 +197,7 @@ func (tt tester) emptySetPlusOneContainsPresentElement() {
 	tt.t.Run("empty set: add: contains present element", func(t *testing.T) {
 		s.Add(a)
 
-		if !s.Contains(a) {
-			t.Fatalf("got Set.Contains(%q) == false, want true", a)
-		}
+		testContains(t, s, a)
 	})
 }
 
@@ -223,9 +207,7 @@ func (tt tester) oneElementSetDoesNotContainAbsentElement() {
 		func(t *testing.T) {
 			s := tt.sliceToSet(oneElement())
 
-			if s.Contains(b) {
-				t.Fatalf("got Set.Contains(%q) == true, want false", b)
-			}
+			testDoesNotContain(t, s, b)
 		})
 }
 
@@ -240,9 +222,7 @@ func (tt tester) emptySetPlusOneDoesNotContainAbsentElement() {
 		func(t *testing.T) {
 			s.Add(a)
 
-			if s.Contains(b) {
-				t.Fatalf("got Set.Contains(%q) == true, want false", b)
-			}
+			testDoesNotContain(t, s, b)
 		},
 	)
 }
@@ -253,9 +233,7 @@ func (tt tester) oneElementSetReturnsElementOnIteration() {
 		func(t *testing.T) {
 			s := tt.sliceToSet(oneElement())
 
-			if got, want := slices.Collect(s.All()), oneElement(); !slices.Equal(got, want) {
-				t.Fatalf("got Set.All of %q, want %q", got, want)
-			}
+			testAll(t, s, oneElement())
 		})
 }
 
@@ -270,9 +248,7 @@ func (tt tester) emptySetPlusOneReturnsElementOnIteration() {
 		func(t *testing.T) {
 			s.Add(a)
 
-			if got, want := slices.Collect(s.All()), oneElement(); !slices.Equal(got, want) {
-				t.Fatalf("got Set.All of %q, want %q", got, want)
-			}
+			testAll(t, s, oneElement())
 		},
 	)
 }
@@ -283,9 +259,7 @@ func (tt tester) oneElementSetHasOneElementStringRepr() {
 		func(t *testing.T) {
 			s := tt.sliceToSet(oneElement())
 
-			if got, want := s.String(), aString(); got != want {
-				t.Fatalf("got Set.String of %q, want %q", got, want)
-			}
+			testString(t, s, aString())
 		})
 }
 
@@ -300,9 +274,7 @@ func (tt tester) emptySetPlusOneHasOneElementStringRepr() {
 		func(t *testing.T) {
 			s.Add(a)
 
-			if got, want := s.String(), aString(); got != want {
-				t.Fatalf("got Set.String of %q, want %q", got, want)
-			}
+			testString(t, s, aString())
 		},
 	)
 }
@@ -319,9 +291,7 @@ func (tt tester) emptySetPlusOneMinusOneDoesNotContainAnything() {
 			s.Add(a)
 			s.Remove(a)
 
-			if s.Contains(a) {
-				t.Fatalf("got Set.Contains(%q) == true, want false", a)
-			}
+			testDoesNotContain(t, s, a)
 		},
 	)
 }
@@ -332,9 +302,7 @@ func (tt tester) twoElementSetHasLengthOfTwo() {
 		func(t *testing.T) {
 			s := tt.sliceToSet(twoElements())
 
-			if got, want := s.Len(), 2; got != want {
-				t.Fatalf("got Set.Len of %v, want %v", got, want)
-			}
+			testLen(t, s, 2)
 		})
 }
 
@@ -348,9 +316,7 @@ func (tt tester) emptySetPlusTwoHasLengthOfTwo() {
 		s.Add(a)
 		s.Add(b)
 
-		if got, want := s.Len(), 2; got != want {
-			t.Fatalf("got Set.Len of %v, want %v", got, want)
-		}
+		testLen(t, s, 2)
 	})
 }
 
@@ -361,12 +327,7 @@ func (tt tester) twoElementSetContainsBothElements() {
 			s := tt.sliceToSet(twoElements())
 
 			for _, element := range twoElements() {
-				if !s.Contains(element) {
-					t.Fatalf(
-						"got Set.Contains(%q) == false, want true",
-						element,
-					)
-				}
+				testContains(t, s, element)
 			}
 		})
 }
@@ -382,12 +343,7 @@ func (tt tester) emptySetPlusTwoContainsBothElements() {
 		s.Add(b)
 
 		for _, element := range twoElements() {
-			if !s.Contains(element) {
-				t.Fatalf(
-					"got Set.Contains(%q) == false, want true",
-					element,
-				)
-			}
+			testContains(t, s, element)
 		}
 	})
 }
@@ -398,10 +354,7 @@ func (tt tester) twoElementSetReturnsBothElementsOnIteration() {
 		func(t *testing.T) {
 			s := tt.sliceToSet(twoElements())
 
-			got, want := slices.Collect(s.All()), twoElements()
-			if diff := orderagnostic.Diff(got, want); diff != "" {
-				t.Errorf("Set.All mismatch (-want +got):\n%s", diff)
-			}
+			testAll(t, s, twoElements())
 		})
 }
 
@@ -417,10 +370,7 @@ func (tt tester) emptySetPlusTwoReturnsBothElementsOnIteration() {
 			s.Add(a)
 			s.Add(b)
 
-			got, want := slices.Collect(s.All()), twoElements()
-			if diff := orderagnostic.Diff(got, want); diff != "" {
-				t.Errorf("Set.All mismatch (-want +got):\n%s", diff)
-			}
+			testAll(t, s, twoElements())
 		},
 	)
 }
@@ -436,10 +386,7 @@ func (tt tester) emptySetPlusVarargsReturnsBothElementsOnIteration() {
 		func(t *testing.T) {
 			s.Add(a, b)
 
-			got, want := slices.Collect(s.All()), twoElements()
-			if diff := orderagnostic.Diff(got, want); diff != "" {
-				t.Errorf("Set.All mismatch (-want +got):\n%s", diff)
-			}
+			testAll(t, s, twoElements())
 		},
 	)
 }
@@ -450,9 +397,7 @@ func (tt tester) twoElementSetHasTwoElementStringRepr() {
 		func(t *testing.T) {
 			s := tt.sliceToSet(twoElements())
 
-			if got, wantAny := s.String(), abStringCombinations(); !slices.Contains(wantAny, s.String()) {
-				t.Fatalf("got Set.String of %v, want any of %q", got, wantAny)
-			}
+			testStringAnyOf(t, s, abStringCombinations())
 		})
 }
 
@@ -468,9 +413,7 @@ func (tt tester) emptySetPlusTwoReturnsTwoElementStringRepr() {
 			s.Add(a)
 			s.Add(b)
 
-			if got, wantAny := s.String(), abStringCombinations(); !slices.Contains(wantAny, s.String()) {
-				t.Fatalf("got Set.String of %v, want any of %q", got, wantAny)
-			}
+			testStringAnyOf(t, s, abStringCombinations())
 		},
 	)
 }
@@ -488,9 +431,7 @@ func (tt tester) emptySetPlusTwoMinusOneHasLengthOfOne() {
 			s.Add(b)
 			s.Remove(a)
 
-			if got, want := s.Len(), 1; got != want {
-				t.Fatalf("got Set.Len of %v, want %v", got, want)
-			}
+			testLen(t, s, 1)
 		},
 	)
 }
@@ -508,9 +449,7 @@ func (tt tester) emptySetPlusTwoMinusVarargsHasLengthOfZero() {
 			s.Add(b)
 			s.Remove(a, b)
 
-			if got, want := s.Len(), 0; got != want {
-				t.Fatalf("got Set.Len of %v, want %v", got, want)
-			}
+			testLen(t, s, 0)
 		},
 	)
 }
@@ -529,12 +468,7 @@ func (tt tester) emptySetPlusThreeContainsAllThreeElements() {
 			s.Add(c)
 
 			for _, element := range threeElements() {
-				if !s.Contains(element) {
-					t.Fatalf(
-						"got Set.Contains(%q) == false, want true",
-						element,
-					)
-				}
+				testContains(t, s, element)
 			}
 		},
 	)
@@ -547,9 +481,7 @@ func (tt tester) threeElementSetContainsAllThreeElements() {
 			s := tt.sliceToSet(threeElements())
 
 			for _, element := range threeElements() {
-				if !s.Contains(element) {
-					t.Fatalf("got Set.Contains(%q) == false, want true", element)
-				}
+				testContains(t, s, element)
 			}
 		},
 	)
@@ -568,13 +500,7 @@ func (tt tester) emptySetPlusThreeHasThreeElementStringRepr() {
 			s.Add(b)
 			s.Add(c)
 
-			if got, wantAny := s.String(), abcStringCombinations(); !slices.Contains(wantAny, s.String()) {
-				t.Fatalf(
-					"got Set.String of %v, want any of %q",
-					got,
-					wantAny,
-				)
-			}
+			testStringAnyOf(t, s, abcStringCombinations())
 		},
 	)
 }
@@ -584,9 +510,7 @@ func (tt tester) threeElementSetHasThreeElementStringRepr() {
 		func(t *testing.T) {
 			s := tt.sliceToSet(threeElements())
 
-			if got, wantAny := s.String(), abcStringCombinations(); !slices.Contains(wantAny, s.String()) {
-				t.Fatalf("got Set.String of %v, want any of %q", got, wantAny)
-			}
+			testStringAnyOf(t, s, abcStringCombinations())
 		})
 }
 
@@ -595,9 +519,7 @@ func (tt tester) setInitializedFromTwoOfSameElementHasLengthOfOne() {
 		func(t *testing.T) {
 			s := tt.sliceToSet(twoSameElements())
 
-			if got, want := s.Len(), 1; got != want {
-				t.Fatalf("got Set.Len of %v, want %v", got, want)
-			}
+			testLen(t, s, 1)
 		})
 }
 
@@ -613,9 +535,7 @@ func (tt tester) emptySetPlusSameElementTwiceHasLengthOfOne() {
 			s.Add(a)
 			s.Add(a)
 
-			if got, want := s.Len(), 1; got != want {
-				t.Fatalf("got Set.Len of %v, want %v", got, want)
-			}
+			testLen(t, s, 1)
 		},
 	)
 }
@@ -626,9 +546,7 @@ func (tt tester) setInitializedFromTwoOfSameElementReturnsOneElementOnIteration(
 		func(t *testing.T) {
 			s := tt.sliceToSet(twoSameElements())
 
-			if got, want := slices.Collect(s.All()), oneElement(); !slices.Equal(got, want) {
-				t.Fatalf("got Set.All of %q, want %q", got, want)
-			}
+			testAll(t, s, oneElement())
 		},
 	)
 }
@@ -645,12 +563,12 @@ func (tt tester) emptySetPlusSameElementTwiceReturnsOneElementOnIteration() {
 			s.Add(a)
 			s.Add(a)
 
-			if got, want := slices.Collect(s.All()), oneElement(); !slices.Equal(got, want) {
-				t.Fatalf("got Set.All of %q, want %q", got, want)
-			}
+			testAll(t, s, oneElement())
 		},
 	)
 }
+
+// TODO: extract testX functions for Set.Add/Remove
 
 func (tt tester) emptySetPlusOneReturnsTrue() {
 	s, mutable := tt.sliceToSet(empty()).(set.MutableSet[string])
@@ -796,6 +714,55 @@ func (tt tester) emptySetPlusOneMinusVarargsReturnsTrue() {
 			}
 		},
 	)
+}
+
+func testLen(t *testing.T, s set.Set[string], want int) {
+	t.Helper()
+
+	if got := s.Len(); got != want {
+		t.Errorf("got Set.Len of %d, want %d", got, want)
+	}
+}
+
+func testContains(t *testing.T, s set.Set[string], want string) {
+	t.Helper()
+
+	if !s.Contains(want) {
+		t.Errorf("got Set.Contains(%q) == false, want true", want)
+	}
+}
+
+func testDoesNotContain(t *testing.T, s set.Set[string], want string) {
+	t.Helper()
+
+	if s.Contains(want) {
+		t.Errorf("got Set.Contains(%q) == true, want false", want)
+	}
+}
+
+func testAll(t *testing.T, s set.Set[string], want []string) {
+	t.Helper()
+
+	got := slices.Collect(s.All())
+	if diff := orderagnostic.Diff(got, want); diff != "" {
+		t.Errorf("Set.All mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func testString(t *testing.T, s set.Set[string], want string) {
+	t.Helper()
+
+	if got := s.String(); got != want {
+		t.Errorf("got Set.String of %q, want %q", got, want)
+	}
+}
+
+func testStringAnyOf(t *testing.T, s set.Set[string], wantAny []string) {
+	t.Helper()
+
+	if got := s.String(); !slices.Contains(wantAny, s.String()) {
+		t.Errorf("got Set.String of %q, want any of %q", got, wantAny)
+	}
 }
 
 const (

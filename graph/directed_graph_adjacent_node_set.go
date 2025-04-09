@@ -8,7 +8,7 @@ import (
 
 type directedGraphAdjacentNodeSet[N comparable] struct {
 	node     N
-	delegate *directedGraph[N]
+	delegate *graph[N]
 }
 
 func (p directedGraphAdjacentNodeSet[N]) Contains(elem N) bool {
