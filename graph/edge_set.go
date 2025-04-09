@@ -9,7 +9,7 @@ import (
 var _ set.Set[EndpointPair[int]] = (*edgeSet[int])(nil)
 
 type edgeSet[N comparable] struct {
-	delegate Graph[N]
+	delegate *Mutable[N]
 	len      func() int
 }
 
@@ -44,7 +44,7 @@ func (e edgeSet[N]) All() iter.Seq[EndpointPair[N]] {
 
 func (e edgeSet[N]) edgeSeen(
 	edge EndpointPair[N],
-	seen set.Set[EndpointPair[N]],
+	seen set.MapSet[EndpointPair[N]],
 ) bool {
 	if seen.Contains(edge) {
 		return true

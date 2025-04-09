@@ -10,7 +10,7 @@ var _ set.Set[EndpointPair[int]] = (*incidentEdgeSet[int])(nil)
 
 type incidentEdgeSet[N comparable] struct {
 	node     N
-	delegate Graph[N]
+	delegate *Mutable[N]
 }
 
 func (i incidentEdgeSet[N]) Contains(elem EndpointPair[N]) bool {

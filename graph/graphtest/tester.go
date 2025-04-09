@@ -10,6 +10,32 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
+type Graph[N comparable] interface {
+	IsDirected() bool
+	AllowsSelfLoops() bool
+	Nodes() set.Set[N]
+	Edges() set.Set[graph.EndpointPair[N]]
+	AdjacentNodes(node N) set.Set[N]
+	Predecessors(node N) set.Set[N]
+	Successors(node N) set.Set[N]
+	IncidentEdges(node N) set.Set[graph.EndpointPair[N]]
+	Degree(node N) int
+	InDegree(node N) int
+	OutDegree(node N) int
+	HasEdgeConnecting(source N, target N) bool
+	HasEdgeConnectingEndpoints(endpointPair graph.EndpointPair[N]) bool
+	String() string
+}
+
+type MutableGraph[N comparable] interface {
+	Graph[N]
+
+	AddNode(node N) bool
+	PutEdge(source N, target N) bool
+	RemoveNode(node N) bool
+	RemoveEdge(source N, target N) bool
+}
+
 const (
 	node1          = 1
 	node2          = 2
@@ -17,12 +43,12 @@ const (
 	nodeNotInGraph = 1_000
 )
 
-//go:generate mise x -- stringer -type=Mutability
-type Mutability int
+//go:generate mise x -- stringer -type=mutability
+type mutability int
 
 const (
-	Mutable Mutability = iota
-	Immutable
+	mutable mutability = iota
+	readOnly
 )
 
 //go:generate mise x -- stringer -type=DirectionMode
@@ -41,36 +67,71 @@ const (
 	DisallowsSelfLoops
 )
 
-// Graph runs a suite of test cases for implementations of the graph.Graph and
-// graph.MutableGraph interfaces. Graph instances created for testing are to
-// have int nodes.
+// TestReadOnly runs a suite of test cases for read-only Graph implementations.
+// Graph instances created for testing are to have int nodes.
 //
 // Test cases that should be handled similarly in any graph implementation are
 // included in this function; for example, testing that the Nodes method
 // returns the set of the nodes in the graph. Details of specific
-// implementations of the graph.Graph and graph.MutableGraph interfaces are not
-// tested.
+// implementations of the Graph interface are not tested.
 //
 // Parameter `emptyGraph` should always return a newly-initialized empty graph
 // with no nodes and no edges. Otherwise, the behaviour of this function is
 // undefined.
-func Graph(
+func TestReadOnly(
 	t *testing.T,
-	emptyGraph func() graph.Graph[int],
-	addNode func(g graph.Graph[int], node int) graph.Graph[int],
-	putEdge func(g graph.Graph[int], source int, target int) graph.Graph[int],
-	mutability Mutability,
+	emptyGraph func() Graph[int],
+	addNode func(g Graph[int], node int) Graph[int],
+	putEdge func(g Graph[int], source int, target int) Graph[int],
 	directionMode DirectionMode,
 	selfLoopsMode SelfLoopsMode,
 ) {
-	validate(t, mutability, directionMode, selfLoopsMode)
+	validate(t, directionMode, selfLoopsMode)
 
 	newTester(
 		t,
 		emptyGraph,
 		addNode,
 		putEdge,
-		mutability,
+		readOnly,
+		directionMode,
+		selfLoopsMode,
+	).test()
+}
+
+// TestMutable runs a suite of test cases for MutableGraph implementations.
+// MutableGraph instances created for testing are to have int nodes.
+//
+// Test cases that should be handled similarly in any graph implementation are
+// included in this function; for example, testing that the Nodes method
+// returns the set of the nodes in the graph. Details of specific
+// implementations of the MutableGraph interface are not tested.
+//
+// Parameter `emptyGraph` should always return a newly-initialized empty graph
+// with no nodes and no edges. Otherwise, the behaviour of this function is
+// undefined.
+func TestMutable(
+	t *testing.T,
+	emptyGraph func() MutableGraph[int],
+	directionMode DirectionMode,
+	selfLoopsMode SelfLoopsMode,
+) {
+	validate(t, directionMode, selfLoopsMode)
+
+	newTester(
+		t,
+		func() Graph[int] {
+			return emptyGraph()
+		},
+		func(g Graph[int], node int) Graph[int] {
+			g.(MutableGraph[int]).AddNode(node)
+			return g
+		},
+		func(g Graph[int], source int, target int) Graph[int] {
+			g.(MutableGraph[int]).PutEdge(source, target)
+			return g
+		},
+		mutable,
 		directionMode,
 		selfLoopsMode,
 	).test()
@@ -78,17 +139,9 @@ func Graph(
 
 func validate(
 	t *testing.T,
-	mutability Mutability,
 	directionMode DirectionMode,
 	selfLoopsMode SelfLoopsMode,
 ) {
-	if mutability != Mutable && mutability != Immutable {
-		t.Fatalf(
-			"mutability expected to be Mutable or Immutable "+
-				"but was %v",
-			mutability,
-		)
-	}
 	if directionMode != Directed && directionMode != Undirected {
 		t.Fatalf(
 			"directionMode expected to be Directed or Undirected "+
@@ -108,10 +161,10 @@ func validate(
 
 func newTester(
 	t *testing.T,
-	emptyGraph func() graph.Graph[int],
-	addNode func(g graph.Graph[int], node int) graph.Graph[int],
-	putEdge func(g graph.Graph[int], source int, target int) graph.Graph[int],
-	mutability Mutability,
+	emptyGraph func() Graph[int],
+	addNode func(g Graph[int], node int) Graph[int],
+	putEdge func(g Graph[int], source int, target int) Graph[int],
+	mutability mutability,
 	directionMode DirectionMode,
 	selfLoopsMode SelfLoopsMode,
 ) *tester {
@@ -127,15 +180,11 @@ func newTester(
 }
 
 type tester struct {
-	t          *testing.T
-	emptyGraph func() graph.Graph[int]
-	addNode    func(g graph.Graph[int], node int) graph.Graph[int]
-	putEdge    func(
-		g graph.Graph[int],
-		source int,
-		target int,
-	) graph.Graph[int]
-	mutability    Mutability
+	t             *testing.T
+	emptyGraph    func() Graph[int]
+	addNode       func(g Graph[int], node int) Graph[int]
+	putEdge       func(g Graph[int], source int, target int) Graph[int]
+	mutability    mutability
 	directionMode DirectionMode
 	selfLoopsMode SelfLoopsMode
 }
@@ -164,7 +213,7 @@ func (tt tester) test() {
 
 	tt.testGraphWithTwoEdgesWithSameTargetNode()
 
-	if tt.mutability == Mutable {
+	if tt.mutability == mutable {
 		tt.testMutableGraph()
 	}
 
@@ -182,7 +231,7 @@ func (tt tester) test() {
 		tt.testSelfLoopDisallowingGraph()
 	}
 
-	if tt.mutability == Mutable && tt.selfLoopsMode == AllowsSelfLoops {
+	if tt.mutability == mutable && tt.selfLoopsMode == AllowsSelfLoops {
 		tt.testMutableSelfLoopingGraph()
 	}
 
@@ -325,7 +374,7 @@ func (tt tester) testEmptyGraph() {
 
 func (tt tester) testGraphWithOneNode() {
 	tt.t.Run("graph with one node", func(t *testing.T) {
-		g := func() graph.Graph[int] {
+		g := func() Graph[int] {
 			g := tt.emptyGraph()
 			g = tt.addNode(g, node1)
 			return g
@@ -379,7 +428,7 @@ func (tt tester) testGraphWithTwoNodes() {
 
 func (tt tester) testGraphWithOneEdge() {
 	tt.t.Run("graph with one edge", func(t *testing.T) {
-		g := func() graph.Graph[int] {
+		g := func() Graph[int] {
 			g := tt.emptyGraph()
 			g = tt.putEdge(g, node1, node2)
 			return g
@@ -488,7 +537,7 @@ func (tt tester) testGraphWithTwoEdgesWithSameSourceNode() {
 	tt.t.Run(
 		"graph with two edges with the same source node",
 		func(t *testing.T) {
-			g := func() graph.Graph[int] {
+			g := func() Graph[int] {
 				g := tt.emptyGraph()
 				g = tt.putEdge(g, node1, node2)
 				g = tt.putEdge(g, node1, node3)
@@ -540,7 +589,7 @@ func (tt tester) testGraphWithTwoEdgesWithSameTargetNode() {
 	tt.t.Run(
 		"graph with two edges with the same target node",
 		func(t *testing.T) {
-			g := func() graph.Graph[int] {
+			g := func() Graph[int] {
 				g := tt.emptyGraph()
 				g = tt.putEdge(g, node1, node2)
 				g = tt.putEdge(g, node3, node2)
@@ -574,15 +623,15 @@ func (tt tester) testGraphWithTwoEdgesWithSameTargetNode() {
 	)
 }
 
-func (tt tester) emptyMutableGraph() graph.MutableGraph[int] {
+func (tt tester) emptyMutableGraph() MutableGraph[int] {
 	tt.t.Helper()
 
 	g := tt.emptyGraph()
 
-	mutG, ok := g.(graph.MutableGraph[int])
+	mutG, ok := g.(MutableGraph[int])
 	if !ok {
 		tt.t.Fatalf(
-			"graph was expected to implement graph.MutableGraph, " +
+			"graph was expected to implement graphtest.MutableGraph, " +
 				"but it did not")
 		return nil // Make the compiler happy
 	}
@@ -636,7 +685,7 @@ func (tt tester) testMutableGraphAddingExistingNode(t *testing.T) {
 
 func (tt tester) testMutableGraphRemovingExistingNode(t *testing.T) {
 	t.Run("removing an existing node", func(t *testing.T) {
-		setup := func() (g graph.MutableGraph[int], removed bool) {
+		setup := func() (g MutableGraph[int], removed bool) {
 			g = tt.emptyMutableGraph()
 			g.PutEdge(node1, node2)
 			g.PutEdge(node3, node1)
@@ -676,7 +725,7 @@ func (tt tester) testMutableGraphRemovingExistingNode(t *testing.T) {
 
 func (tt tester) testMutableGraphRemovingAbsentNode(t *testing.T) {
 	t.Run("removing an absent node", func(t *testing.T) {
-		setup := func() (g graph.MutableGraph[int], removed bool) {
+		setup := func() (g MutableGraph[int], removed bool) {
 			g = tt.emptyMutableGraph()
 			g.AddNode(node1)
 			removed = g.RemoveNode(nodeNotInGraph)
@@ -722,7 +771,7 @@ func (tt tester) testMutableGraphPuttingTwoAntiParallelEdges(t *testing.T) {
 	t.Run(
 		"putting two anti-parallel edges and removing one of the nodes",
 		func(t *testing.T) {
-			setup := func() graph.MutableGraph[int] {
+			setup := func() MutableGraph[int] {
 				g := tt.emptyMutableGraph()
 				g.PutEdge(node1, node2)
 				g.PutEdge(node2, node1)
@@ -750,7 +799,7 @@ func (tt tester) testMutableGraphRemovingExistingEdge(t *testing.T) {
 	t.Run(
 		"removing an existing edge",
 		func(t *testing.T) {
-			setup := func() (g graph.MutableGraph[int], removed bool) {
+			setup := func() (g MutableGraph[int], removed bool) {
 				g = tt.emptyMutableGraph()
 				g.PutEdge(node1, node2)
 				g.PutEdge(node1, node3)
@@ -789,7 +838,7 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithExistingSource(
 	t.Run(
 		"removing an absent edge with an existing source",
 		func(t *testing.T) {
-			setup := func() (g graph.MutableGraph[int], removed bool) {
+			setup := func() (g MutableGraph[int], removed bool) {
 				g = tt.emptyMutableGraph()
 				g.PutEdge(node1, node2)
 				removed = g.RemoveEdge(node1, nodeNotInGraph)
@@ -820,7 +869,7 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithExistingTarget(
 	t.Run(
 		"removing an absent edge with an existing target",
 		func(t *testing.T) {
-			setup := func() (g graph.MutableGraph[int], removed bool) {
+			setup := func() (g MutableGraph[int], removed bool) {
 				g = tt.emptyMutableGraph()
 				g.PutEdge(node1, node2)
 				removed = g.RemoveEdge(nodeNotInGraph, node2)
@@ -851,7 +900,7 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithTwoExistingNodes(
 	t.Run(
 		"removing an absent edge with two existing nodes",
 		func(t *testing.T) {
-			setup := func() (g graph.MutableGraph[int], removed bool) {
+			setup := func() (g MutableGraph[int], removed bool) {
 				g = tt.emptyMutableGraph()
 				g.AddNode(node1)
 				g.AddNode(node2)
@@ -887,7 +936,7 @@ func (tt tester) testDirectedGraph() {
 		})
 
 		t.Run("putting an edge", func(t *testing.T) {
-			g := func() graph.Graph[int] {
+			g := func() Graph[int] {
 				g := tt.emptyGraph()
 				g = tt.putEdge(g, node1, node2)
 				return g
@@ -951,7 +1000,7 @@ func (tt tester) testUndirectedGraph() {
 		})
 
 		t.Run("putting an edge", func(t *testing.T) {
-			g := func() graph.Graph[int] {
+			g := func() Graph[int] {
 				g := tt.emptyGraph()
 				g = tt.putEdge(g, node1, node2)
 				return g
@@ -1010,7 +1059,7 @@ func (tt tester) testSelfLoopingGraph() {
 		})
 
 		t.Run("putting a self-loop edge", func(t *testing.T) {
-			g := func() graph.Graph[int] {
+			g := func() Graph[int] {
 				g := tt.emptyGraph()
 				g = tt.putEdge(g, node1, node1)
 				return g
@@ -1166,7 +1215,7 @@ func complement(nodes []int) []int {
 
 func testNodes(
 	t *testing.T,
-	g graph.Graph[int],
+	g Graph[int],
 	expectedValues ...int,
 ) {
 	t.Helper()
@@ -1176,7 +1225,7 @@ func testNodes(
 
 func testAdjacentNodes(
 	t *testing.T,
-	g graph.Graph[int],
+	g Graph[int],
 	node int,
 	expectedValues ...int,
 ) {
@@ -1192,7 +1241,7 @@ func testAdjacentNodes(
 
 func testPredecessors(
 	t *testing.T,
-	g graph.Graph[int],
+	g Graph[int],
 	node int,
 	expectedValues ...int,
 ) {
@@ -1208,7 +1257,7 @@ func testPredecessors(
 
 func testSuccessors(
 	t *testing.T,
-	g graph.Graph[int],
+	g Graph[int],
 	node int,
 	expectedValues ...int,
 ) {
@@ -1234,7 +1283,7 @@ func testNodeSet(
 
 func (tt tester) testEdges(
 	t *testing.T,
-	g graph.Graph[int],
+	g Graph[int],
 	expectedEdges ...graph.EndpointPair[int],
 ) {
 	t.Helper()
@@ -1250,7 +1299,7 @@ func (tt tester) testEdges(
 
 func (tt tester) testIncidentEdges(
 	t *testing.T,
-	g graph.Graph[int],
+	g Graph[int],
 	node int,
 	expectedEdges ...graph.EndpointPair[int],
 ) {
@@ -1267,7 +1316,7 @@ func (tt tester) testIncidentEdges(
 
 func testDegree(
 	t *testing.T,
-	g graph.Graph[int],
+	g Graph[int],
 	node int,
 	expectedDegree int,
 ) {
@@ -1280,7 +1329,7 @@ func testDegree(
 
 func testInDegree(
 	t *testing.T,
-	g graph.Graph[int],
+	g Graph[int],
 	node int,
 	expectedDegree int,
 ) {
@@ -1293,7 +1342,7 @@ func testInDegree(
 
 func testOutDegree(
 	t *testing.T,
-	g graph.Graph[int],
+	g Graph[int],
 	node int,
 	expectedDegree int,
 ) {
@@ -1306,7 +1355,7 @@ func testOutDegree(
 
 func testHasEdgeConnecting(
 	t *testing.T,
-	g graph.Graph[int],
+	g Graph[int],
 	source, target int,
 ) {
 	if got := g.HasEdgeConnecting(source, target); !got {
@@ -1321,7 +1370,7 @@ func testHasEdgeConnecting(
 
 func testHasNoEdgeConnecting(
 	t *testing.T,
-	g graph.Graph[int],
+	g Graph[int],
 	source, target int,
 ) {
 	if got := g.HasEdgeConnecting(source, target); got {

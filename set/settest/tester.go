@@ -10,6 +10,7 @@ import (
 )
 
 // TODO: change from Set[string] to Set[int] for consistency with graph.
+// TODO: split into Set and MutableSet
 
 func Set(t *testing.T, sliceToSet func(elems []string) set.Set[string]) {
 	tt := newTester(t, sliceToSet)

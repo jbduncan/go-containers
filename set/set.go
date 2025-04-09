@@ -52,12 +52,12 @@ var (
 
 // Of returns a new non-nil, empty MapSet, which implements Set and MutableSet. Its implementation is based on a Go map,
 // with similar performance characteristics.
-func Of[T comparable](elems ...T) *MapSet[T] {
+func Of[T comparable](elems ...T) MapSet[T] {
 	delegate := make(map[T]struct{}, len(elems))
 	for _, elem := range elems {
 		delegate[elem] = struct{}{}
 	}
-	return &MapSet[T]{
+	return MapSet[T]{
 		delegate: delegate,
 	}
 }
@@ -66,7 +66,7 @@ type MapSet[T comparable] struct {
 	delegate map[T]struct{}
 }
 
-func (m *MapSet[T]) Add(elem T, others ...T) bool {
+func (m MapSet[T]) Add(elem T, others ...T) bool {
 	result := m.addInternal(elem)
 	for _, other := range others {
 		added := m.addInternal(other)
@@ -75,13 +75,13 @@ func (m *MapSet[T]) Add(elem T, others ...T) bool {
 	return result
 }
 
-func (m *MapSet[T]) addInternal(elem T) bool {
+func (m MapSet[T]) addInternal(elem T) bool {
 	_, ok := m.delegate[elem]
 	m.delegate[elem] = struct{}{}
 	return !ok
 }
 
-func (m *MapSet[T]) Remove(elem T, others ...T) bool {
+func (m MapSet[T]) Remove(elem T, others ...T) bool {
 	result := m.removeInternal(elem)
 	for _, other := range others {
 		removed := m.removeInternal(other)
@@ -90,25 +90,25 @@ func (m *MapSet[T]) Remove(elem T, others ...T) bool {
 	return result
 }
 
-func (m *MapSet[T]) removeInternal(elem T) bool {
+func (m MapSet[T]) removeInternal(elem T) bool {
 	_, ok := m.delegate[elem]
 	delete(m.delegate, elem)
 	return ok
 }
 
-func (m *MapSet[T]) Contains(elem T) bool {
+func (m MapSet[T]) Contains(elem T) bool {
 	_, ok := m.delegate[elem]
 	return ok
 }
 
-func (m *MapSet[T]) Len() int {
+func (m MapSet[T]) Len() int {
 	return len(m.delegate)
 }
 
-func (m *MapSet[T]) All() iter.Seq[T] {
+func (m MapSet[T]) All() iter.Seq[T] {
 	return maps.Keys(m.delegate)
 }
 
-func (m *MapSet[T]) String() string {
+func (m MapSet[T]) String() string {
 	return StringImpl[T](m)
 }

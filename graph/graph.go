@@ -7,32 +7,6 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
-type Graph[N comparable] interface {
-	IsDirected() bool
-	AllowsSelfLoops() bool
-	Nodes() set.Set[N]
-	Edges() set.Set[EndpointPair[N]]
-	AdjacentNodes(node N) set.Set[N]
-	Predecessors(node N) set.Set[N]
-	Successors(node N) set.Set[N]
-	IncidentEdges(node N) set.Set[EndpointPair[N]]
-	Degree(node N) int
-	InDegree(node N) int
-	OutDegree(node N) int
-	HasEdgeConnecting(source N, target N) bool
-	HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool
-	String() string
-}
-
-type MutableGraph[N comparable] interface {
-	Graph[N]
-
-	AddNode(node N) bool
-	PutEdge(source N, target N) bool
-	RemoveNode(node N) bool
-	RemoveEdge(source N, target N) bool
-}
-
 func Undirected[N comparable]() Builder[N] {
 	return Builder[N]{
 		directed:        false,
@@ -57,173 +31,168 @@ func (b Builder[N]) AllowsSelfLoops(allowsSelfLoops bool) Builder[N] {
 	return b
 }
 
-func (b Builder[N]) Build() MutableGraph[N] {
+func (b Builder[N]) Build() *Mutable[N] {
 	if b.directed {
-		return &graph[N]{
+		return &Mutable[N]{
 			directed:        true,
 			allowsSelfLoops: b.allowsSelfLoops,
 			nodes:           set.Of[N](),
 			connections: directedConnections[N]{
-				nodeToPredecessors: make(map[N]*set.MapSet[N]),
-				nodeToSuccessors:   make(map[N]*set.MapSet[N]),
+				nodeToPredecessors: make(map[N]set.MapSet[N]),
+				nodeToSuccessors:   make(map[N]set.MapSet[N]),
 			},
 			numEdges: 0,
 		}
 	}
 
-	return &graph[N]{
+	return &Mutable[N]{
 		directed:        false,
 		allowsSelfLoops: b.allowsSelfLoops,
 		nodes:           set.Of[N](),
 		connections: undirectedConnections[N]{
-			nodeToAdjacentNodes: make(map[N]*set.MapSet[N]),
+			nodeToAdjacentNodes: make(map[N]set.MapSet[N]),
 		},
 		numEdges: 0,
 	}
 }
 
-var (
-	_ Graph[int]        = (*graph[int])(nil)
-	_ MutableGraph[int] = (*graph[int])(nil)
-)
-
-type graph[N comparable] struct {
+type Mutable[N comparable] struct {
 	directed        bool
 	allowsSelfLoops bool
-	nodes           *set.MapSet[N]
+	nodes           set.MapSet[N]
 	connections     connections[N]
 	numEdges        int
 }
 
-func (g *graph[N]) IsDirected() bool {
-	return g.directed
+func (m *Mutable[N]) IsDirected() bool {
+	return m.directed
 }
 
-func (g *graph[N]) AllowsSelfLoops() bool {
-	return g.allowsSelfLoops
+func (m *Mutable[N]) AllowsSelfLoops() bool {
+	return m.allowsSelfLoops
 }
 
-func (g *graph[N]) Nodes() set.Set[N] {
-	return set.Unmodifiable[N](g.nodes)
+func (m *Mutable[N]) Nodes() set.Set[N] {
+	return set.Unmodifiable[N](m.nodes)
 }
 
-func (g *graph[N]) Edges() set.Set[EndpointPair[N]] {
+func (m *Mutable[N]) Edges() set.Set[EndpointPair[N]] {
 	return edgeSet[N]{
-		delegate: g,
-		len:      func() int { return g.numEdges },
+		delegate: m,
+		len:      func() int { return m.numEdges },
 	}
 }
 
-func (g *graph[N]) AdjacentNodes(node N) set.Set[N] {
-	if g.directed {
+func (m *Mutable[N]) AdjacentNodes(node N) set.Set[N] {
+	if m.directed {
 		return directedGraphAdjacentNodeSet[N]{
 			node:     node,
-			delegate: g,
+			delegate: m,
 		}
 	}
 
-	return g.Predecessors(node)
+	return m.Predecessors(node)
 }
 
-func (g *graph[N]) Predecessors(node N) set.Set[N] {
-	return g.connections.Predecessors(node)
+func (m *Mutable[N]) Predecessors(node N) set.Set[N] {
+	return m.connections.Predecessors(node)
 }
 
-func (g *graph[N]) Successors(node N) set.Set[N] {
-	return g.connections.Successors(node)
+func (m *Mutable[N]) Successors(node N) set.Set[N] {
+	return m.connections.Successors(node)
 }
 
-func (g *graph[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
+func (m *Mutable[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
 	return incidentEdgeSet[N]{
 		node:     node,
-		delegate: g,
+		delegate: m,
 	}
 }
 
-func (g *graph[N]) Degree(node N) int {
-	if g.directed {
-		return g.InDegree(node) + g.OutDegree(node)
+func (m *Mutable[N]) Degree(node N) int {
+	if m.directed {
+		return m.InDegree(node) + m.OutDegree(node)
 	}
 
-	selfLoop := g.AdjacentNodes(node).Contains(node)
+	selfLoop := m.AdjacentNodes(node).Contains(node)
 	selfLoopCorrection := 0
 	if selfLoop {
 		selfLoopCorrection = 1
 	}
-	return g.AdjacentNodes(node).Len() + selfLoopCorrection
+	return m.AdjacentNodes(node).Len() + selfLoopCorrection
 }
 
-func (g *graph[N]) InDegree(node N) int {
-	if g.directed {
-		return g.Predecessors(node).Len()
+func (m *Mutable[N]) InDegree(node N) int {
+	if m.directed {
+		return m.Predecessors(node).Len()
 	}
 
-	return g.Degree(node)
+	return m.Degree(node)
 }
 
-func (g *graph[N]) OutDegree(node N) int {
-	if g.directed {
-		return g.Successors(node).Len()
+func (m *Mutable[N]) OutDegree(node N) int {
+	if m.directed {
+		return m.Successors(node).Len()
 	}
 
-	return g.Degree(node)
+	return m.Degree(node)
 }
 
-func (g *graph[N]) HasEdgeConnecting(source N, target N) bool {
-	return g.Successors(source).Contains(target)
+func (m *Mutable[N]) HasEdgeConnecting(source N, target N) bool {
+	return m.Successors(source).Contains(target)
 }
 
-func (g *graph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
-	return g.HasEdgeConnecting(endpointPair.Source(), endpointPair.Target())
+func (m *Mutable[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
+	return m.HasEdgeConnecting(endpointPair.Source(), endpointPair.Target())
 }
 
-func (g *graph[N]) String() string {
+func (m *Mutable[N]) String() string {
 	return "isDirected: " +
-		strconv.FormatBool(g.IsDirected()) +
+		strconv.FormatBool(m.IsDirected()) +
 		", allowsSelfLoops: " +
-		strconv.FormatBool(g.AllowsSelfLoops()) +
+		strconv.FormatBool(m.AllowsSelfLoops()) +
 		", nodes: " +
-		g.Nodes().String() +
+		m.Nodes().String() +
 		", edges: " +
-		g.Edges().String()
+		m.Edges().String()
 }
 
-func (g *graph[N]) AddNode(node N) bool {
-	return g.nodes.Add(node)
+func (m *Mutable[N]) AddNode(node N) bool {
+	return m.nodes.Add(node)
 }
 
-func (g *graph[N]) PutEdge(source N, target N) bool {
-	if !g.AllowsSelfLoops() && source == target {
+func (m *Mutable[N]) PutEdge(source N, target N) bool {
+	if !m.AllowsSelfLoops() && source == target {
 		panic("self-loops are disallowed")
 	}
 
-	g.AddNode(source)
-	g.AddNode(target)
+	m.AddNode(source)
+	m.AddNode(target)
 
-	put := g.connections.PutEdge(source, target)
+	put := m.connections.PutEdge(source, target)
 	if put {
-		g.numEdges++
+		m.numEdges++
 		return true
 	}
 
 	return false
 }
 
-func (g *graph[N]) RemoveNode(node N) bool {
-	if !g.Nodes().Contains(node) {
+func (m *Mutable[N]) RemoveNode(node N) bool {
+	if !m.Nodes().Contains(node) {
 		return false
 	}
 
-	g.nodes.Remove(node)
-	g.numEdges -= g.AdjacentNodes(node).Len()
+	m.nodes.Remove(node)
+	m.numEdges -= m.AdjacentNodes(node).Len()
 
-	g.connections.RemoveNode(node)
+	m.connections.RemoveNode(node)
 	return true
 }
 
-func (g *graph[N]) RemoveEdge(source N, target N) bool {
-	g.numEdges--
-	return g.connections.RemoveEdge(source, target)
+func (m *Mutable[N]) RemoveEdge(source N, target N) bool {
+	m.numEdges--
+	return m.connections.RemoveEdge(source, target)
 }
 
 type connections[N comparable] interface {
@@ -235,7 +204,7 @@ type connections[N comparable] interface {
 }
 
 type undirectedConnections[N comparable] struct {
-	nodeToAdjacentNodes map[N]*set.MapSet[N]
+	nodeToAdjacentNodes map[N]set.MapSet[N]
 }
 
 func (u undirectedConnections[N]) adjacentNodes(node N) set.Set[N] {
@@ -274,8 +243,8 @@ func (u undirectedConnections[N]) RemoveEdge(source N, target N) bool {
 }
 
 type directedConnections[N comparable] struct {
-	nodeToPredecessors map[N]*set.MapSet[N]
-	nodeToSuccessors   map[N]*set.MapSet[N]
+	nodeToPredecessors map[N]set.MapSet[N]
+	nodeToSuccessors   map[N]set.MapSet[N]
 }
 
 func (d directedConnections[N]) Predecessors(node N) set.Set[N] {
@@ -323,7 +292,7 @@ func copyOf[T comparable](s set.Set[T]) []T {
 	return slices.Collect(s.All())
 }
 
-func putConnection[N comparable](nodeToNeighbors map[N]*set.MapSet[N], from, to N) bool {
+func putConnection[N comparable](nodeToNeighbors map[N]set.MapSet[N], from, to N) bool {
 	neighbors, ok := nodeToNeighbors[from]
 	if !ok {
 		neighbors = set.Of[N]()
@@ -332,7 +301,7 @@ func putConnection[N comparable](nodeToNeighbors map[N]*set.MapSet[N], from, to 
 	return neighbors.Add(to)
 }
 
-func removeConnection[N comparable](nodeToNeighbors map[N]*set.MapSet[N], from, to N) bool {
+func removeConnection[N comparable](nodeToNeighbors map[N]set.MapSet[N], from, to N) bool {
 	neighbors, ok := nodeToNeighbors[from]
 	if !ok {
 		return false

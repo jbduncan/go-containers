@@ -14,7 +14,7 @@ func TestEqual(t *testing.T) {
 		t.Parallel()
 		a := undirectedGraphOf("link")
 
-		if got := graph.Equal(a, a); !got {
+		if got := graph.Equal[string](a, a); !got {
 			t.Errorf("graph.Equal: got false, want true")
 		}
 	})
@@ -29,7 +29,7 @@ func TestEqual(t *testing.T) {
 	t.Run("graph a: [link]; graph b: nil; not equal", func(t *testing.T) {
 		t.Parallel()
 		a := undirectedGraphOf("link")
-		if got := graph.Equal(a, nil); got {
+		if got := graph.Equal[string](a, nil); got {
 			t.Errorf("graph.Equal: got true, want false")
 		}
 	})
@@ -41,7 +41,7 @@ func TestEqual(t *testing.T) {
 			a := undirectedGraphOf("link")
 			b := directedGraphOf("link")
 
-			if got := graph.Equal(a, b); got {
+			if got := graph.Equal[string](a, b); got {
 				t.Errorf("graph.Equal: got true, want false")
 			}
 		},
@@ -54,7 +54,7 @@ func TestEqual(t *testing.T) {
 			a := graph.Undirected[string]().AllowsSelfLoops(true).Build()
 			b := graph.Undirected[string]().Build()
 
-			if got := graph.Equal(a, b); got {
+			if got := graph.Equal[string](a, b); got {
 				t.Errorf("graph.Equal: got true, want false")
 			}
 		},
@@ -65,7 +65,7 @@ func TestEqual(t *testing.T) {
 		a := undirectedGraphOf("link")
 		b := undirectedGraphOf("zelda")
 
-		if got := graph.Equal(a, b); got {
+		if got := graph.Equal[string](a, b); got {
 			t.Errorf("graph.Equal: got true, want false")
 		}
 	})
@@ -77,14 +77,14 @@ func TestEqual(t *testing.T) {
 			a := undirectedGraphOf(edge("link", "zelda"))
 			b := undirectedGraphOf("link", "zelda")
 
-			if got := graph.Equal(a, b); got {
+			if got := graph.Equal[string](a, b); got {
 				t.Errorf("graph.Equal: got true, want false")
 			}
 		},
 	)
 }
 
-func undirectedGraphOf(nodesAndEndpointPairs ...any) graph.Graph[string] {
+func undirectedGraphOf(nodesAndEndpointPairs ...any) *graph.Mutable[string] {
 	result := graph.Undirected[string]().Build()
 	for _, elem := range nodesAndEndpointPairs {
 		switch el := elem.(type) {
@@ -99,7 +99,7 @@ func undirectedGraphOf(nodesAndEndpointPairs ...any) graph.Graph[string] {
 	return result
 }
 
-func directedGraphOf(nodes ...string) graph.Graph[string] {
+func directedGraphOf(nodes ...string) *graph.Mutable[string] {
 	result := graph.Directed[string]().Build()
 	for _, elem := range nodes {
 		result.AddNode(elem)

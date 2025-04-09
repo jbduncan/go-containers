@@ -16,7 +16,18 @@ import "github.com/jbduncan/go-containers/set"
 //   - Transitive: for any potentially-nil graphs a, b and c, if Equal(a, b) and Equal(b, c), then Equal(a, c) is true.
 //   - Consistent: for any potentially-nil graphs a and b, multiple calls to Equal(a, b) consistently returns true or
 //     consistently returns false, as long as the graphs do not change.
-func Equal[T comparable](a, b Graph[T]) bool {
+//
+// Note: Go needs the generic type to be defined explicitly, like:
+//
+//	result := graph.Equal[int](a, b)
+//	                     ^^^^^
+func Equal[N comparable](a, b interface {
+	IsDirected() bool
+	AllowsSelfLoops() bool
+	Nodes() set.Set[N]
+	Edges() set.Set[EndpointPair[N]]
+},
+) bool {
 	if a == nil || b == nil {
 		return a == b
 	}
