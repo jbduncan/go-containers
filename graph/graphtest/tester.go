@@ -43,6 +43,8 @@ const (
 	nodeNotInGraph = 1_000
 )
 
+// TODO: Remove this enum
+
 //go:generate mise x -- stringer -type=mutability
 type mutability int
 
