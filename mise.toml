@@ -98,6 +98,8 @@ description = "Check that 'go fix ./...' has been run"
 hide = true
 run = "go run internal/tasks.go go-fix-diff"
 depends = ["go-sanity-check"]
+sources = ["go.mod", "go.sum", "**/*.go"]
+outputs = { auto = true }
 
 [tasks.go-mod-tidy-diff]
 description = "Check that 'go mod tidy' has been run"
