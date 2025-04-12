@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"slices"
 	"strings"
 
 	"golang.org/x/sync/errgroup"
@@ -42,29 +41,32 @@ func doDepaware() error {
 	group, ctx := newErrorGroup()
 	group.Go(func() error {
 		defer close(depawareFileDirs)
-		return filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-			if !d.Type().IsRegular() {
-				return nil
-			}
-			if filepath.Base(path) != "depaware.txt" {
-				return nil
-			}
+		return filepath.WalkDir(
+			".",
+			func(path string, d os.DirEntry, err error) error {
+				if err != nil {
+					return err
+				}
+				if !d.Type().IsRegular() {
+					return nil
+				}
+				if filepath.Base(path) != "depaware.txt" {
+					return nil
+				}
 
-			select {
-			case depawareFileDirs <- "./" + filepath.Dir(path):
-			case <-ctx.Done():
-				return ctx.Err()
-			}
-			return nil
-		})
+				select {
+				case depawareFileDirs <- "./" + filepath.Dir(path):
+				case <-ctx.Done():
+					return ctx.Err()
+				}
+				return nil
+			},
+		)
 	})
 
 	for dir := range depawareFileDirs {
 		group.Go(func() error {
-			fmt.Printf("Linting with depaware concurrently on directory %s...\n", dir)
+			fmt.Printf("Linting with depaware on directory %s...\n", dir)
 			return cmd("depaware", "--check", dir).Run()
 		})
 	}
@@ -77,30 +79,36 @@ func doDepawareFix() error {
 	group, ctx := newErrorGroup()
 	group.Go(func() error {
 		defer close(depawareFiles)
-		return filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-			if !d.Type().IsRegular() {
-				return nil
-			}
-			if filepath.Base(path) != "depaware.txt" {
-				return nil
-			}
+		return filepath.WalkDir(
+			".",
+			func(path string, d os.DirEntry, err error) error {
+				if err != nil {
+					return err
+				}
+				if !d.Type().IsRegular() {
+					return nil
+				}
+				if filepath.Base(path) != "depaware.txt" {
+					return nil
+				}
 
-			select {
-			case depawareFiles <- "./" + path:
-			case <-ctx.Done():
-				return ctx.Err()
-			}
-			return nil
-		})
+				select {
+				case depawareFiles <- "./" + path:
+				case <-ctx.Done():
+					return ctx.Err()
+				}
+				return nil
+			},
+		)
 	})
 
 	for file := range depawareFiles {
 		group.Go(func() error {
 			dir := "./" + filepath.Dir(file)
-			fmt.Printf("Fixing with depaware concurrently on directory %s...\n", dir)
+			fmt.Printf(
+				"Fixing with depaware on directory %s...\n",
+				dir,
+			)
 			c := cmd("depaware", dir)
 			var b bytes.Buffer
 			c.Stdout = &b
@@ -138,7 +146,7 @@ func doEg() error {
 
 	for file := range egTemplateFiles {
 		group.Go(func() error {
-			fmt.Printf("Linting with eg template %s concurrently...\n", file)
+			fmt.Printf("Linting with eg template %s...\n", file)
 			//nolint:gosec // Acceptable because this is a script.
 			c := exec.Command("eg", "-t", file, "./...")
 
@@ -149,11 +157,20 @@ func doEg() error {
 			buf := new(strings.Builder)
 			c.Stderr = buf
 			if err := c.Run(); err != nil {
-				fmt.Printf("%s: %s: %v\n", file, strings.TrimRight(buf.String(), "\n"), err)
+				fmt.Printf(
+					"%s: %s: %v\n",
+					file,
+					strings.TrimRight(buf.String(), "\n"),
+					err,
+				)
 				return err
 			}
 			if buf.Len() > 0 {
-				fmt.Printf("%s: %s\n", file, strings.TrimRight(buf.String(), "\n"))
+				fmt.Printf(
+					"%s: %s\n",
+					file,
+					strings.TrimRight(buf.String(), "\n"),
+				)
 				return fmt.Errorf("eg found a problem (see above)")
 			}
 			return nil
@@ -178,49 +195,59 @@ func doEgFix() error {
 }
 
 func goFixDiff() error {
-	var goFileDirs []string
-	err := filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if !d.Type().IsRegular() {
-			return nil
-		}
+	goFileDirs := make(map[string]struct{})
+	if err := filepath.WalkDir(
+		".",
+		func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if !d.Type().IsRegular() {
+				return nil
+			}
 
-		if filepath.Ext(d.Name()) != ".go" {
-			return nil
-		}
+			if filepath.Ext(d.Name()) != ".go" {
+				return nil
+			}
 
-		goFileDirs = append(goFileDirs, "./"+filepath.Dir(path))
-		return nil
-	})
-	if err != nil {
+			goFileDirs["./"+filepath.Dir(path)] = struct{}{}
+			return nil
+		},
+	); err != nil {
 		return err
 	}
-	slices.Sort(goFileDirs)
-	goFileDirs = slices.Compact(goFileDirs)
 
 	goVersion := os.Getenv("GO_VERSION") // Set by mise.toml
-	for _, dir := range goFileDirs {
-		fmt.Printf("Linting with 'go tool fix -diff' on directory %s...\n", dir)
-		c := cmd(
-			"go",
-			"tool",
-			"fix",
-			"-diff",
-			fmt.Sprintf("-go=go%s", goVersion),
-			dir,
-		)
-		buf := new(strings.Builder)
-		c.Stderr = buf
-		if err := c.Run(); err != nil {
-			return err
-		}
-		if buf.Len() > 0 {
-			return fmt.Errorf("'go tool fix -diff' found a problem (see above)")
-		}
+	group, _ := newErrorGroup()
+	for dir := range goFileDirs {
+		group.Go(func() error {
+			fmt.Printf(
+				"Linting with 'go tool fix -diff' on directory %s...\n",
+				dir,
+			)
+			c := cmd(
+				"go",
+				"tool",
+				"fix",
+				"-diff",
+				fmt.Sprintf("-go=go%s", goVersion),
+				dir,
+			)
+			buf := new(strings.Builder)
+			c.Stderr = buf
+			if err := c.Run(); err != nil {
+				return err
+			}
+			if buf.Len() > 0 {
+				return fmt.Errorf(
+					"'go tool fix -diff' found a problem (see above)",
+				)
+			}
+			return nil
+		})
 	}
-	return nil
+
+	return group.Wait()
 }
 
 func newErrorGroup() (*errgroup.Group, context.Context) {
