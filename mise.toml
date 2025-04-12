@@ -1,5 +1,8 @@
 min_version = "2025.2.5"
 
+[env]
+GO_VERSION = "{{ exec(command='go list -f {{.GoVersion}} -m') }}"
+
 [hooks]
 enter = "mise i -q"
 
@@ -67,6 +70,7 @@ run = [
   "go mod tidy",
   "ast-grep scan --update-all",
   "go run internal/tasks.go eg-fix",
+  "go fix ./...",
   "golangci-lint run --fix",
   "go run internal/tasks.go depaware-fix",
 ]
@@ -89,6 +93,12 @@ go mod graph | digraph to dot > module-graph.dot
 printf "Install Graphviz https://graphviz.org/, run 'dot -Tsvg -o module-graph.svg module-graph.dot' and open module-graph.svg in your web browser.\n"
 """
 
+[tasks.go-fix-diff]
+description = "Check that 'go fix ./...' has been run"
+hide = true
+run = "go run internal/tasks.go go-fix-diff"
+depends = ["go-sanity-check"]
+
 [tasks.go-mod-tidy-diff]
 description = "Check that 'go mod tidy' has been run"
 hide = true
@@ -98,7 +108,7 @@ depends = ["go-sanity-check"]
 [tasks.go-sanity-check]
 description = "Run various quick Go-related sanity checks against the project"
 hide = true
-run = ["go mod verify", "go mod download"]
+run = ["go mod download", "go mod verify"]
 
 [tasks.golangci-lint]
 description = "Check that no problems are found when running the linters defined in .golangci.yml against the source code."
@@ -119,6 +129,7 @@ depends = [
   "ast-grep-test",
   "depaware",
   "eg",
+  "go-fix-diff",
   "go-sanity-check",
   "go-mod-tidy-diff",
   "golangci-lint",

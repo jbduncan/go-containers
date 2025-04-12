@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 
 	"golang.org/x/sync/errgroup"
@@ -26,6 +27,8 @@ func main() {
 			return doEg()
 		case "eg-fix":
 			return doEgFix()
+		case "go-fix-diff":
+			return goFixDiff()
 		default:
 			return fmt.Errorf("invalid command: %s", os.Args[1])
 		}
@@ -169,6 +172,52 @@ func doEgFix() error {
 		fmt.Printf("Fixing with eg template %s...\n", file)
 		if err := cmd("eg", "-t", file, "-w", "./...").Run(); err != nil {
 			return err
+		}
+	}
+	return nil
+}
+
+func goFixDiff() error {
+	var goFileDirs []string
+	err := filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.Type().IsRegular() {
+			return nil
+		}
+
+		if filepath.Ext(d.Name()) != ".go" {
+			return nil
+		}
+
+		goFileDirs = append(goFileDirs, "./"+filepath.Dir(path))
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	slices.Sort(goFileDirs)
+	goFileDirs = slices.Compact(goFileDirs)
+
+	goVersion := os.Getenv("GO_VERSION") // Set by mise.toml
+	for _, dir := range goFileDirs {
+		fmt.Printf("Linting with 'go tool fix -diff' on directory %s...\n", dir)
+		c := cmd(
+			"go",
+			"tool",
+			"fix",
+			"-diff",
+			fmt.Sprintf("-go=go%s", goVersion),
+			dir,
+		)
+		buf := new(strings.Builder)
+		c.Stderr = buf
+		if err := c.Run(); err != nil {
+			return err
+		}
+		if buf.Len() > 0 {
+			return fmt.Errorf("'go tool fix -diff' found a problem (see above)")
 		}
 	}
 	return nil
