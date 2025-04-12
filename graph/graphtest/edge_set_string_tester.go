@@ -15,7 +15,7 @@ import (
 type edgeSetStringTester struct {
 	tt            *testing.T
 	setName       string
-	directionMode DirectionMode
+	directed      bool
 	edges         string
 	expectedEdges []graph.EndpointPair[int]
 }
@@ -23,14 +23,14 @@ type edgeSetStringTester struct {
 func newEdgeSetStringTester(
 	tt *testing.T,
 	setName string,
-	directionMode DirectionMode,
+	directed bool,
 	edges set.Set[graph.EndpointPair[int]],
 	expectedEdges []graph.EndpointPair[int],
 ) *edgeSetStringTester {
 	return &edgeSetStringTester{
 		tt:            tt,
 		setName:       setName,
-		directionMode: directionMode,
+		directed:      directed,
 		edges:         edges.String(),
 		expectedEdges: expectedEdges,
 	}
@@ -63,7 +63,7 @@ func (t *edgeSetStringTester) test() {
 	}
 
 	var diff string
-	if t.directionMode == Directed {
+	if t.directed {
 		diff = orderagnostic.Diff(t.expectedEdges, want)
 	} else {
 		diff = undirectedEndpointPairsDiff(t.expectedEdges, want)
@@ -104,7 +104,7 @@ func (t *edgeSetStringTester) report(tt *testing.T) {
 	for _, edge := range t.expectedEdges {
 		msg.WriteString("    ")
 		msg.WriteString(edge.String())
-		if t.directionMode == Undirected {
+		if !t.directed {
 			msg.WriteString(" or ")
 			msg.WriteString(reverseOf(edge).String())
 		}

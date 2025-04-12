@@ -43,16 +43,6 @@ const (
 	nodeNotInGraph = 1_000
 )
 
-// TODO: Remove this enum
-
-//go:generate mise x -- stringer -type=mutability
-type mutability int
-
-const (
-	mutable mutability = iota
-	readOnly
-)
-
 //go:generate mise x -- stringer -type=DirectionMode
 type DirectionMode int
 
@@ -95,9 +85,9 @@ func TestReadOnly(
 		emptyGraph,
 		addNode,
 		putEdge,
-		readOnly,
-		directionMode,
-		selfLoopsMode,
+		false,
+		directionMode == Directed,
+		selfLoopsMode == AllowsSelfLoops,
 	).test()
 }
 
@@ -133,9 +123,9 @@ func TestMutable(
 			g.(MutableGraph[int]).PutEdge(source, target)
 			return g
 		},
-		mutable,
-		directionMode,
-		selfLoopsMode,
+		true,
+		directionMode == Directed,
+		selfLoopsMode == AllowsSelfLoops,
 	).test()
 }
 
@@ -166,29 +156,29 @@ func newTester(
 	emptyGraph func() Graph[int],
 	addNode func(g Graph[int], node int) Graph[int],
 	putEdge func(g Graph[int], source int, target int) Graph[int],
-	mutability mutability,
-	directionMode DirectionMode,
-	selfLoopsMode SelfLoopsMode,
+	mutable bool,
+	directed bool,
+	allowsSelfLoops bool,
 ) *tester {
 	return &tester{
-		t:             t,
-		emptyGraph:    emptyGraph,
-		addNode:       addNode,
-		putEdge:       putEdge,
-		mutability:    mutability,
-		directionMode: directionMode,
-		selfLoopsMode: selfLoopsMode,
+		t:               t,
+		emptyGraph:      emptyGraph,
+		addNode:         addNode,
+		putEdge:         putEdge,
+		mutable:         mutable,
+		directed:        directed,
+		allowsSelfLoops: allowsSelfLoops,
 	}
 }
 
 type tester struct {
-	t             *testing.T
-	emptyGraph    func() Graph[int]
-	addNode       func(g Graph[int], node int) Graph[int]
-	putEdge       func(g Graph[int], source int, target int) Graph[int]
-	mutability    mutability
-	directionMode DirectionMode
-	selfLoopsMode SelfLoopsMode
+	t               *testing.T
+	emptyGraph      func() Graph[int]
+	addNode         func(g Graph[int], node int) Graph[int]
+	putEdge         func(g Graph[int], source int, target int) Graph[int]
+	mutable         bool
+	directed        bool
+	allowsSelfLoops bool
 }
 
 const (
@@ -215,41 +205,39 @@ func (tt tester) test() {
 
 	tt.testGraphWithTwoEdgesWithSameTargetNode()
 
-	if tt.mutability == mutable {
+	if tt.mutable {
 		tt.testMutableGraph()
 	}
 
-	switch tt.directionMode {
-	case Directed:
+	if tt.directed {
 		tt.testDirectedGraph()
-	case Undirected:
+	} else {
 		tt.testUndirectedGraph()
 	}
 
-	switch tt.selfLoopsMode {
-	case AllowsSelfLoops:
+	if tt.allowsSelfLoops {
 		tt.testSelfLoopingGraph()
-	case DisallowsSelfLoops:
+	} else {
 		tt.testSelfLoopDisallowingGraph()
 	}
 
-	if tt.mutability == mutable && tt.selfLoopsMode == AllowsSelfLoops {
+	if tt.mutable && tt.allowsSelfLoops {
 		tt.testMutableSelfLoopingGraph()
 	}
 
-	if tt.directionMode == Undirected && tt.selfLoopsMode == AllowsSelfLoops {
+	if !tt.directed && tt.allowsSelfLoops {
 		tt.testUndirectedSelfLoopingGraph()
 	}
 
-	if tt.directionMode == Undirected && tt.selfLoopsMode == DisallowsSelfLoops {
+	if !tt.directed && !tt.allowsSelfLoops {
 		tt.testUndirectedSelfLoopDisallowingGraph()
 	}
 
-	if tt.directionMode == Directed && tt.selfLoopsMode == AllowsSelfLoops {
+	if tt.directed && tt.allowsSelfLoops {
 		tt.testDirectedSelfLoopingGraph()
 	}
 
-	if tt.directionMode == Directed && tt.selfLoopsMode == DisallowsSelfLoops {
+	if tt.directed && !tt.allowsSelfLoops {
 		tt.testDirectedSelfLoopDisallowingGraph()
 	}
 }
@@ -1294,7 +1282,7 @@ func (tt tester) testEdges(
 		t:             t,
 		setName:       graphEdgesName,
 		edges:         g.Edges(),
-		directionMode: tt.directionMode,
+		directed:      tt.directed,
 		expectedEdges: expectedEdges,
 	}.test()
 }
@@ -1311,7 +1299,7 @@ func (tt tester) testIncidentEdges(
 		t:             t,
 		setName:       graphIncidentEdgesName,
 		edges:         g.IncidentEdges(node),
-		directionMode: tt.directionMode,
+		directed:      tt.directed,
 		expectedEdges: expectedEdges,
 	}.test()
 }

@@ -15,7 +15,7 @@ type edgeSetTester struct {
 	t             *testing.T
 	setName       string
 	edges         set.Set[graph.EndpointPair[int]]
-	directionMode DirectionMode
+	directed      bool
 	expectedEdges []graph.EndpointPair[int]
 }
 
@@ -24,7 +24,7 @@ func (tt edgeSetTester) test() {
 
 	var contains []graph.EndpointPair[int]
 	var doesNotContain []graph.EndpointPair[int]
-	if tt.directionMode == Directed {
+	if tt.directed {
 		contains = tt.expectedEdges
 		doesNotContain = slicesx.AllOf(
 			graph.EndpointPairOf(nodeNotInGraph, nodeNotInGraph),
@@ -47,7 +47,7 @@ func (tt edgeSetTester) test() {
 	newEdgeSetStringTester(
 		tt.t,
 		tt.setName,
-		tt.directionMode,
+		tt.directed,
 		tt.edges,
 		tt.expectedEdges,
 	).test()
@@ -62,7 +62,7 @@ func (tt edgeSetTester) testEdgeSetAll(
 	t.Helper()
 
 	got, want := slices.Collect(edges.All()), expectedEdges
-	if tt.directionMode == Directed {
+	if tt.directed {
 		if diff := orderagnostic.Diff(got, want); diff != "" {
 			t.Errorf(
 				"%s: Set.All mismatch (-want +got):\n%s",
