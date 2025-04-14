@@ -6,8 +6,6 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
-var _ set.Set[EndpointPair[int]] = (*edgeSet[int])(nil)
-
 type edgeSet[N comparable] struct {
 	delegate *Mutable[N]
 	len      func() int
@@ -44,7 +42,7 @@ func (e edgeSet[N]) All() iter.Seq[EndpointPair[N]] {
 
 func (e edgeSet[N]) edgeSeen(
 	edge EndpointPair[N],
-	seen set.MapSet[EndpointPair[N]],
+	seen set.Set[EndpointPair[N]],
 ) bool {
 	if seen.Contains(edge) {
 		return true

@@ -11,7 +11,7 @@ import (
 func TestUnion(t *testing.T) {
 	t.Parallel()
 
-	settest.Set(t, func(elems []string) set.Set[string] {
+	settest.TestSet(t, func(elems []string) settest.Set[string] {
 		a := set.Of[string]()
 		b := set.Of[string]()
 
@@ -78,7 +78,7 @@ func FuzzUnionHasCommutativeProperty(f *testing.F) {
 		setA := set.Of(a...)
 		setB := set.Of(b...)
 
-		if got := set.Equal(
+		if got := set.Equal[byte](
 			set.Union[byte](setA, setB),
 			set.Union[byte](setB, setA),
 		); !got {
@@ -106,7 +106,7 @@ func FuzzUnionHasIdentityProperty(f *testing.F) {
 			union = set.Union[byte](s, set.Of[byte]())
 		}
 
-		if got := set.Equal(union, s); !got {
+		if got := set.Equal[byte](union, s); !got {
 			t.Error("set.Union: have identity property: got false, want true")
 		}
 	})
@@ -121,7 +121,7 @@ func FuzzUnionHasIdempotentProperty(f *testing.F) {
 		s := set.Of(bytes...)
 
 		union := set.Union[byte](s, s)
-		if got := set.Equal(union, s); !got {
+		if got := set.Equal[byte](union, s); !got {
 			t.Error("set.Union: have idempotent property: " +
 				"got false, want true")
 		}

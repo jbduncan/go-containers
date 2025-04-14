@@ -2,6 +2,7 @@ package set
 
 import (
 	"fmt"
+	"iter"
 	"strings"
 )
 
@@ -11,13 +12,16 @@ import (
 // elements in the returned string is undefined; it may even change from one
 // call of StringImpl to the next.
 //
-// Note: If passing in a MutableSet, Go needs the generic type to be defined explicitly, like:
+// Note: Go needs the generic type to be defined explicitly, like:
 //
 //	a := set.Of(1)
 //	b := set.Of(2)
 //	s := set.StringImpl[int](a, b)
 //	                   ^^^^^
-func StringImpl[T comparable](s Set[T]) string {
+func StringImpl[T comparable](s interface {
+	All() iter.Seq[T]
+},
+) string {
 	var builder strings.Builder
 
 	builder.WriteRune('[')

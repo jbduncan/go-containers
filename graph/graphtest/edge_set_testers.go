@@ -8,13 +8,12 @@ import (
 	"github.com/jbduncan/go-containers/internal/orderagnostic"
 	"github.com/jbduncan/go-containers/internal/settest"
 	"github.com/jbduncan/go-containers/internal/slicesx"
-	"github.com/jbduncan/go-containers/set"
 )
 
 type edgeSetTester struct {
 	t             *testing.T
 	setName       string
-	edges         set.Set[graph.EndpointPair[int]]
+	edges         graph.SetView[graph.EndpointPair[int]]
 	directed      bool
 	expectedEdges []graph.EndpointPair[int]
 }
@@ -56,7 +55,7 @@ func (tt edgeSetTester) test() {
 func (tt edgeSetTester) testEdgeSetAll(
 	t *testing.T,
 	setName string,
-	edges set.Set[graph.EndpointPair[int]],
+	edges graph.SetView[graph.EndpointPair[int]],
 	expectedEdges []graph.EndpointPair[int],
 ) {
 	t.Helper()

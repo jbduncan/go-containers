@@ -5,68 +5,61 @@ import (
 	"maps"
 )
 
-// Set is a generic, unordered collection of unique elements.
-//
-// An instance of Set can be made with set.Of.
-type Set[T comparable] interface {
-	// Contains returns true if this set contains the given element, otherwise it returns false.
-	Contains(elem T) bool
-
-	// Len returns the number of elements in this set.
-	Len() int
-
-	// All returns an iter.Seq that returns each and every element in this set.
-	//
-	// The iteration order is undefined; it may even change from one call to the next.
-	All() iter.Seq[T]
-
-	// String returns a string representation of all the elements in this set.
-	//
-	// The format of this string is a single "[" followed by a comma-separated list (", ") of this set's elements in
-	// the same order as All (which is undefined and may change from one call to the next), followed by a single
-	// "]".
-	//
-	// This method satisfies fmt.Stringer.
-	String() string
-}
-
-// MutableSet is a Set with additional methods for adding and removing elements.
-//
-// An instance of MutableSet can be made with set.Of.
-type MutableSet[T comparable] interface {
-	Set[T]
-
-	// Add adds the given element(s) to this set. If any of the elements are already present, the set will not add
-	// those elements again. Returns true if this set changed as a result of this call, otherwise false.
-	Add(elem T, others ...T) bool
-
-	// Remove removes the given element(s) from this set. If any of the elements are already absent, the set will not
-	// attempt to remove those elements. Returns true if this set changed as a result of this call, otherwise false.
-	Remove(elem T, others ...T) bool
-}
-
-var (
-	_ Set[int]        = (*MapSet[int])(nil)
-	_ MutableSet[int] = (*MapSet[int])(nil)
-)
-
-// Of returns a new non-nil, empty MapSet, which implements Set and MutableSet. Its implementation is based on a Go map,
-// with similar performance characteristics.
-func Of[T comparable](elems ...T) MapSet[T] {
+// Of returns a new non-nil, empty Set, which is a generic, unordered
+// collection of unique elements. Its implementation is based on a Go map, with
+// similar performance characteristics.
+func Of[T comparable](elems ...T) Set[T] {
 	delegate := make(map[T]struct{}, len(elems))
 	for _, elem := range elems {
 		delegate[elem] = struct{}{}
 	}
-	return MapSet[T]{
+	return Set[T]{
 		delegate: delegate,
 	}
 }
 
-type MapSet[T comparable] struct {
+// Set is a generic, unordered collection of unique elements. Its
+// implementation is based on a Go map, with similar performance
+// characteristics.
+type Set[T comparable] struct {
 	delegate map[T]struct{}
 }
 
-func (m MapSet[T]) Add(elem T, others ...T) bool {
+// Contains returns true if this set contains the given element, otherwise it
+// returns false.
+func (m Set[T]) Contains(elem T) bool {
+	_, ok := m.delegate[elem]
+	return ok
+}
+
+// Len returns the number of elements in this set.
+func (m Set[T]) Len() int {
+	return len(m.delegate)
+}
+
+// All returns an iter.Seq that returns each and every element in this set.
+//
+// The iteration order is undefined; it may even change from one call to the
+// next.
+func (m Set[T]) All() iter.Seq[T] {
+	return maps.Keys(m.delegate)
+}
+
+// String returns a string representation of all the elements in this set.
+//
+// The format of this string is a single "[" followed by a comma-separated list
+// (", ") of this set's elements in the same order as All (which is undefined
+// and may change from one call to the next), followed by a single "]".
+//
+// This method satisfies fmt.Stringer.
+func (m Set[T]) String() string {
+	return StringImpl[T](m)
+}
+
+// Add adds the given element(s) to this set. If any of the elements are
+// already present, the set will not add those elements again. Returns true if
+// this set changed as a result of this call, otherwise false.
+func (m Set[T]) Add(elem T, others ...T) bool {
 	result := m.addInternal(elem)
 	for _, other := range others {
 		added := m.addInternal(other)
@@ -75,13 +68,16 @@ func (m MapSet[T]) Add(elem T, others ...T) bool {
 	return result
 }
 
-func (m MapSet[T]) addInternal(elem T) bool {
+func (m Set[T]) addInternal(elem T) bool {
 	_, ok := m.delegate[elem]
 	m.delegate[elem] = struct{}{}
 	return !ok
 }
 
-func (m MapSet[T]) Remove(elem T, others ...T) bool {
+// Remove removes the given element(s) from this set. If any of the elements
+// are already absent, the set will not attempt to remove those elements.
+// Returns true if this set changed as a result of this call, otherwise false.
+func (m Set[T]) Remove(elem T, others ...T) bool {
 	result := m.removeInternal(elem)
 	for _, other := range others {
 		removed := m.removeInternal(other)
@@ -90,25 +86,8 @@ func (m MapSet[T]) Remove(elem T, others ...T) bool {
 	return result
 }
 
-func (m MapSet[T]) removeInternal(elem T) bool {
+func (m Set[T]) removeInternal(elem T) bool {
 	_, ok := m.delegate[elem]
 	delete(m.delegate, elem)
 	return ok
-}
-
-func (m MapSet[T]) Contains(elem T) bool {
-	_, ok := m.delegate[elem]
-	return ok
-}
-
-func (m MapSet[T]) Len() int {
-	return len(m.delegate)
-}
-
-func (m MapSet[T]) All() iter.Seq[T] {
-	return maps.Keys(m.delegate)
-}
-
-func (m MapSet[T]) String() string {
-	return StringImpl[T](m)
 }

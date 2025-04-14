@@ -2,26 +2,38 @@ package set
 
 import "iter"
 
-var _ Set[int] = (*UnmodifiableSet[int])(nil)
-
-// Unmodifiable wraps a given set as a read-only Set view. This prevents users from casting the given set into a
-// MutableSet and allows for sets that can be mutated by your own code but not your users' code.
+// Unmodifiable wraps a given set as a read-only set view. This prevents users
+// from casting the given set into a Set or another mutable set
+// implementation. Also, it allows libraries to mutate the original set without
+// the library's users mutating it, too.
 //
-// If the given set is ever mutated, then the returned set will reflect those mutations.
+// If the given set is ever mutated, then the returned set will reflect those
+// mutations.
 //
-// Note: If passing in a MutableSet, Go needs the generic type to be defined explicitly, like:
+// Note: Go needs the generic type to be defined explicitly, like:
 //
 //	s := set.Of(1)
 //	s := set.Unmodifiable[int](a)
 //	                     ^^^^^
-func Unmodifiable[T comparable](s Set[T]) UnmodifiableSet[T] {
+func Unmodifiable[T comparable](s interface {
+	Contains(elem T) bool
+	Len() int
+	All() iter.Seq[T]
+	String() string
+},
+) UnmodifiableSet[T] {
 	return UnmodifiableSet[T]{
 		s: s,
 	}
 }
 
 type UnmodifiableSet[T comparable] struct {
-	s Set[T]
+	s interface {
+		Contains(elem T) bool
+		Len() int
+		All() iter.Seq[T]
+		String() string
+	}
 }
 
 func (u UnmodifiableSet[T]) Contains(elem T) bool {

@@ -8,13 +8,13 @@ import (
 
 	"github.com/jbduncan/go-containers/internal/orderagnostic"
 	"github.com/jbduncan/go-containers/internal/stringsx"
-	"github.com/jbduncan/go-containers/set"
+	"github.com/jbduncan/go-containers/set/settest"
 )
 
 func Len[T comparable](
 	t *testing.T,
 	setName string,
-	s set.Set[T],
+	s settest.Set[T],
 	expectedLen int,
 ) {
 	t.Helper()
@@ -32,7 +32,7 @@ func Len[T comparable](
 func All[T comparable](
 	t *testing.T,
 	setName string,
-	s set.Set[T],
+	s settest.Set[T],
 	expectedValues []T,
 ) {
 	t.Helper()
@@ -46,7 +46,7 @@ func All[T comparable](
 func Contains[T comparable](
 	t *testing.T,
 	setName string,
-	s set.Set[T],
+	s settest.Set[T],
 	contains []T,
 ) {
 	t.Helper()
@@ -65,7 +65,7 @@ func Contains[T comparable](
 func DoesNotContain[T comparable](
 	t *testing.T,
 	setName string,
-	s set.Set[T],
+	s settest.Set[T],
 	doesNotContain []T,
 ) {
 	t.Helper()
@@ -84,7 +84,7 @@ func DoesNotContain[T comparable](
 func String[T comparable](
 	t *testing.T,
 	setName string,
-	s set.Set[T],
+	s settest.Set[T],
 	expectedValues []T,
 ) {
 	t.Helper()
@@ -125,12 +125,12 @@ func String[T comparable](
 	}
 }
 
-func IsMutable[T comparable](t *testing.T, setName string, s set.Set[T]) {
+func IsMutable[T comparable](t *testing.T, setName string, s settest.Set[T]) {
 	t.Helper()
 
-	if _, mutable := s.(set.MutableSet[T]); mutable {
+	if _, mutable := s.(settest.MutableSet[T]); mutable {
 		t.Errorf(
-			"%s: got a set.MutableSet: %v, want just a set.Set",
+			"%s: got a settest.MutableSet: %v, want just a settest.Set",
 			setName,
 			s,
 		)

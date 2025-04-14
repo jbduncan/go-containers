@@ -6,8 +6,6 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
-var _ set.Set[EndpointPair[int]] = (*incidentEdgeSet[int])(nil)
-
 type incidentEdgeSet[N comparable] struct {
 	node     N
 	delegate *Mutable[N]

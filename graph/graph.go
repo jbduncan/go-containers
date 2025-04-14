@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"iter"
 	"slices"
 	"strconv"
 
@@ -38,8 +39,8 @@ func (b Builder[N]) Build() *Mutable[N] {
 			allowsSelfLoops: b.allowsSelfLoops,
 			nodes:           set.Of[N](),
 			connections: directedConnections[N]{
-				nodeToPredecessors: make(map[N]set.MapSet[N]),
-				nodeToSuccessors:   make(map[N]set.MapSet[N]),
+				nodeToPredecessors: make(map[N]set.Set[N]),
+				nodeToSuccessors:   make(map[N]set.Set[N]),
 			},
 			numEdges: 0,
 		}
@@ -50,16 +51,44 @@ func (b Builder[N]) Build() *Mutable[N] {
 		allowsSelfLoops: b.allowsSelfLoops,
 		nodes:           set.Of[N](),
 		connections: undirectedConnections[N]{
-			nodeToAdjacentNodes: make(map[N]set.MapSet[N]),
+			nodeToAdjacentNodes: make(map[N]set.Set[N]),
 		},
 		numEdges: 0,
 	}
 }
 
+// SetView is a read-only set view; a generic, unordered collection of unique
+// elements that only allows read operations. It is returned by a few of the
+// methods on graph.Mutable.
+type SetView[T comparable] interface {
+	// Contains returns true if this set contains the given element, otherwise
+	// it returns false.
+	Contains(elem T) bool
+
+	// Len returns the number of elements in this set.
+	Len() int
+
+	// All returns an iter.Seq that returns each and every element in this set.
+	//
+	// The iteration order is undefined; it may even change from one call to
+	// the next.
+	All() iter.Seq[T]
+
+	// String returns a string representation of all the elements in this set.
+	//
+	// The format of this string is a single "[" followed by a comma-separated
+	// list (", ") of this set's elements in the same order as All (which is
+	// undefined and may change from one call to the next), followed by a
+	// single "]".
+	//
+	// This method satisfies fmt.Stringer.
+	String() string
+}
+
 type Mutable[N comparable] struct {
 	directed        bool
 	allowsSelfLoops bool
-	nodes           set.MapSet[N]
+	nodes           set.Set[N]
 	connections     connections[N]
 	numEdges        int
 }
@@ -72,18 +101,18 @@ func (m *Mutable[N]) AllowsSelfLoops() bool {
 	return m.allowsSelfLoops
 }
 
-func (m *Mutable[N]) Nodes() set.Set[N] {
+func (m *Mutable[N]) Nodes() SetView[N] {
 	return set.Unmodifiable[N](m.nodes)
 }
 
-func (m *Mutable[N]) Edges() set.Set[EndpointPair[N]] {
+func (m *Mutable[N]) Edges() SetView[EndpointPair[N]] {
 	return edgeSet[N]{
 		delegate: m,
 		len:      func() int { return m.numEdges },
 	}
 }
 
-func (m *Mutable[N]) AdjacentNodes(node N) set.Set[N] {
+func (m *Mutable[N]) AdjacentNodes(node N) SetView[N] {
 	if m.directed {
 		return directedGraphAdjacentNodeSet[N]{
 			node:     node,
@@ -94,15 +123,15 @@ func (m *Mutable[N]) AdjacentNodes(node N) set.Set[N] {
 	return m.Predecessors(node)
 }
 
-func (m *Mutable[N]) Predecessors(node N) set.Set[N] {
+func (m *Mutable[N]) Predecessors(node N) SetView[N] {
 	return m.connections.Predecessors(node)
 }
 
-func (m *Mutable[N]) Successors(node N) set.Set[N] {
+func (m *Mutable[N]) Successors(node N) SetView[N] {
 	return m.connections.Successors(node)
 }
 
-func (m *Mutable[N]) IncidentEdges(node N) set.Set[EndpointPair[N]] {
+func (m *Mutable[N]) IncidentEdges(node N) SetView[EndpointPair[N]] {
 	return incidentEdgeSet[N]{
 		node:     node,
 		delegate: m,
@@ -200,29 +229,29 @@ func (m *Mutable[N]) RemoveEdge(source N, target N) bool {
 }
 
 type connections[N comparable] interface {
-	Predecessors(node N) set.Set[N]
-	Successors(node N) set.Set[N]
+	Predecessors(node N) SetView[N]
+	Successors(node N) SetView[N]
 	PutEdge(source N, target N) bool
 	RemoveNode(node N)
 	RemoveEdge(source N, target N) bool
 }
 
 type undirectedConnections[N comparable] struct {
-	nodeToAdjacentNodes map[N]set.MapSet[N]
+	nodeToAdjacentNodes map[N]set.Set[N]
 }
 
-func (u undirectedConnections[N]) adjacentNodes(node N) set.Set[N] {
+func (u undirectedConnections[N]) adjacentNodes(node N) SetView[N] {
 	return neighborSet[N]{
 		node:            node,
 		nodeToNeighbors: u.nodeToAdjacentNodes,
 	}
 }
 
-func (u undirectedConnections[N]) Predecessors(node N) set.Set[N] {
+func (u undirectedConnections[N]) Predecessors(node N) SetView[N] {
 	return u.adjacentNodes(node)
 }
 
-func (u undirectedConnections[N]) Successors(node N) set.Set[N] {
+func (u undirectedConnections[N]) Successors(node N) SetView[N] {
 	return u.adjacentNodes(node)
 }
 
@@ -247,18 +276,18 @@ func (u undirectedConnections[N]) RemoveEdge(source N, target N) bool {
 }
 
 type directedConnections[N comparable] struct {
-	nodeToPredecessors map[N]set.MapSet[N]
-	nodeToSuccessors   map[N]set.MapSet[N]
+	nodeToPredecessors map[N]set.Set[N]
+	nodeToSuccessors   map[N]set.Set[N]
 }
 
-func (d directedConnections[N]) Predecessors(node N) set.Set[N] {
+func (d directedConnections[N]) Predecessors(node N) SetView[N] {
 	return neighborSet[N]{
 		node:            node,
 		nodeToNeighbors: d.nodeToPredecessors,
 	}
 }
 
-func (d directedConnections[N]) Successors(node N) set.Set[N] {
+func (d directedConnections[N]) Successors(node N) SetView[N] {
 	return neighborSet[N]{
 		node:            node,
 		nodeToNeighbors: d.nodeToSuccessors,
@@ -292,11 +321,11 @@ func (d directedConnections[N]) RemoveEdge(source N, target N) bool {
 	return removed
 }
 
-func copyOf[T comparable](s set.Set[T]) []T {
+func copyOf[T comparable](s SetView[T]) []T {
 	return slices.Collect(s.All())
 }
 
-func putConnection[N comparable](nodeToNeighbors map[N]set.MapSet[N], from, to N) bool {
+func putConnection[N comparable](nodeToNeighbors map[N]set.Set[N], from, to N) bool {
 	neighbors, ok := nodeToNeighbors[from]
 	if !ok {
 		neighbors = set.Of[N]()
@@ -305,7 +334,7 @@ func putConnection[N comparable](nodeToNeighbors map[N]set.MapSet[N], from, to N
 	return neighbors.Add(to)
 }
 
-func removeConnection[N comparable](nodeToNeighbors map[N]set.MapSet[N], from, to N) bool {
+func removeConnection[N comparable](nodeToNeighbors map[N]set.Set[N], from, to N) bool {
 	neighbors, ok := nodeToNeighbors[from]
 	if !ok {
 		return false

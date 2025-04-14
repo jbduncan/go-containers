@@ -4,18 +4,23 @@ import "iter"
 
 // Union returns the set union of sets a and b.
 //
-// The returned set is an unmodifiable view that implements Set, so changes to a and b will be reflected in the returned
-// set.
+// The returned set is a read-only view that implements Set, so changes to a
+// and b will be reflected in the returned set.
 //
 // Set.Len runs in O(b) time for the returned set.
 //
-// Note: If passing in a MutableSet, Go needs the generic type to be defined explicitly, like:
+// Note: Go needs the generic type to be defined explicitly, like:
 //
 //	a := set.Of(1)
 //	b := set.Of(2)
 //	u := set.Union[int](a, b)
 //	              ^^^^^
-func Union[T comparable](a, b Set[T]) UnionSet[T] {
+func Union[T comparable](a, b interface {
+	Contains(elem T) bool
+	All() iter.Seq[T]
+	Len() int
+},
+) UnionSet[T] {
 	return UnionSet[T]{
 		a: a,
 		b: b,
@@ -23,8 +28,11 @@ func Union[T comparable](a, b Set[T]) UnionSet[T] {
 }
 
 type UnionSet[T comparable] struct {
-	a Set[T]
-	b Set[T]
+	a, b interface {
+		Contains(elem T) bool
+		All() iter.Seq[T]
+		Len() int
+	}
 }
 
 func (u UnionSet[T]) Contains(elem T) bool {

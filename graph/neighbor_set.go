@@ -6,11 +6,9 @@ import (
 	"github.com/jbduncan/go-containers/set"
 )
 
-var _ set.Set[int] = (*neighborSet[int])(nil)
-
 type neighborSet[N comparable] struct {
 	node            N
-	nodeToNeighbors map[N]set.MapSet[N]
+	nodeToNeighbors map[N]set.Set[N]
 }
 
 func (a neighborSet[N]) Contains(elem N) bool {

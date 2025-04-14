@@ -2,6 +2,7 @@ package set_test
 
 import (
 	"fmt"
+	"iter"
 	"slices"
 	"strings"
 	"testing"
@@ -13,8 +14,10 @@ func TestStringImpl(t *testing.T) {
 	t.Parallel()
 
 	type testCase struct {
-		name    string
-		arg     set.Set[string]
+		name string
+		arg  interface {
+			All() iter.Seq[string]
+		}
 		wantAny []string
 	}
 	tests := []testCase{

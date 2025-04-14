@@ -24,8 +24,8 @@ import "github.com/jbduncan/go-containers/set"
 func Equal[N comparable](a, b interface {
 	IsDirected() bool
 	AllowsSelfLoops() bool
-	Nodes() set.Set[N]
-	Edges() set.Set[EndpointPair[N]]
+	Nodes() SetView[N]
+	Edges() SetView[EndpointPair[N]]
 },
 ) bool {
 	if a == nil || b == nil {

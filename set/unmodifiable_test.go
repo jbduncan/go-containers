@@ -11,7 +11,7 @@ import (
 func TestSetUnmodifiable(t *testing.T) {
 	t.Parallel()
 
-	settest.Set(t, func(elements []string) set.Set[string] {
+	settest.TestSet(t, func(elements []string) settest.Set[string] {
 		s := set.Of[string]()
 		for _, element := range elements {
 			s.Add(element)

@@ -9,7 +9,6 @@ import (
 	"github.com/jbduncan/go-containers/graph"
 	"github.com/jbduncan/go-containers/internal/orderagnostic"
 	"github.com/jbduncan/go-containers/internal/stringsx"
-	"github.com/jbduncan/go-containers/set"
 )
 
 type edgeSetStringTester struct {
@@ -24,7 +23,7 @@ func newEdgeSetStringTester(
 	tt *testing.T,
 	setName string,
 	directed bool,
-	edges set.Set[graph.EndpointPair[int]],
+	edges graph.SetView[graph.EndpointPair[int]],
 	expectedEdges []graph.EndpointPair[int],
 ) *edgeSetStringTester {
 	return &edgeSetStringTester{

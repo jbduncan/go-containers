@@ -1,5 +1,7 @@
 package set
 
+import "iter"
+
 // Equal returns true if set a has the same elements as set b in any order. Otherwise, it returns false.
 //
 // This method should be used over ==, the behaviour of which is undefined.
@@ -11,13 +13,18 @@ package set
 //   - Consistent: for any potentially-nil sets a and b, multiple calls to Equal(a, b) consistently returns true or
 //     consistently returns false, as long as the sets do not change.
 //
-// Note: If passing in a MutableSet, Go needs the generic type to be defined explicitly, like:
+// Note: Go needs the generic type to be defined explicitly, like:
 //
 //	a := set.Of(1)
 //	b := set.Of(2)
 //	result := set.Equal[int](a, b)
 //	                   ^^^^^
-func Equal[T comparable](a, b Set[T]) bool {
+func Equal[T comparable](a, b interface {
+	Contains(elem T) bool
+	Len() int
+	All() iter.Seq[T]
+},
+) bool {
 	if a == nil || b == nil {
 		return a == b
 	}

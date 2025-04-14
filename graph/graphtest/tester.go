@@ -7,18 +7,17 @@ import (
 
 	"github.com/jbduncan/go-containers/graph"
 	internalsettest "github.com/jbduncan/go-containers/internal/settest"
-	"github.com/jbduncan/go-containers/set"
 )
 
 type Graph[N comparable] interface {
 	IsDirected() bool
 	AllowsSelfLoops() bool
-	Nodes() set.Set[N]
-	Edges() set.Set[graph.EndpointPair[N]]
-	AdjacentNodes(node N) set.Set[N]
-	Predecessors(node N) set.Set[N]
-	Successors(node N) set.Set[N]
-	IncidentEdges(node N) set.Set[graph.EndpointPair[N]]
+	Nodes() graph.SetView[N]
+	Edges() graph.SetView[graph.EndpointPair[N]]
+	AdjacentNodes(node N) graph.SetView[N]
+	Predecessors(node N) graph.SetView[N]
+	Successors(node N) graph.SetView[N]
+	IncidentEdges(node N) graph.SetView[graph.EndpointPair[N]]
 	Degree(node N) int
 	InDegree(node N) int
 	OutDegree(node N) int
@@ -1259,7 +1258,7 @@ func testSuccessors(
 func testNodeSet(
 	t *testing.T,
 	setName string,
-	s set.Set[int],
+	s graph.SetView[int],
 	expectedValues ...int,
 ) {
 	t.Helper()

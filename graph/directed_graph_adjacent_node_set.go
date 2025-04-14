@@ -35,7 +35,7 @@ func (p directedGraphAdjacentNodeSet[N]) String() string {
 	return p.union().String()
 }
 
-func (p directedGraphAdjacentNodeSet[N]) union() set.Set[N] {
+func (p directedGraphAdjacentNodeSet[N]) union() SetView[N] {
 	return set.Union[N](
 		p.delegate.Predecessors(p.node),
 		p.delegate.Successors(p.node),
