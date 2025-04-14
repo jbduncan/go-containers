@@ -114,12 +114,7 @@ func (m *Mutable[N]) Degree(node N) int {
 		return m.InDegree(node) + m.OutDegree(node)
 	}
 
-	selfLoop := m.AdjacentNodes(node).Contains(node)
-	selfLoopCorrection := 0
-	if selfLoop {
-		selfLoopCorrection = 1
-	}
-	return m.AdjacentNodes(node).Len() + selfLoopCorrection
+	return m.undirectedGraphDegree(node)
 }
 
 func (m *Mutable[N]) InDegree(node N) int {
@@ -127,7 +122,7 @@ func (m *Mutable[N]) InDegree(node N) int {
 		return m.Predecessors(node).Len()
 	}
 
-	return m.Degree(node)
+	return m.undirectedGraphDegree(node)
 }
 
 func (m *Mutable[N]) OutDegree(node N) int {
@@ -135,7 +130,16 @@ func (m *Mutable[N]) OutDegree(node N) int {
 		return m.Successors(node).Len()
 	}
 
-	return m.Degree(node)
+	return m.undirectedGraphDegree(node)
+}
+
+func (m *Mutable[N]) undirectedGraphDegree(node N) int {
+	selfLoop := m.AdjacentNodes(node).Contains(node)
+	selfLoopCorrection := 0
+	if selfLoop {
+		selfLoopCorrection = 1
+	}
+	return m.AdjacentNodes(node).Len() + selfLoopCorrection
 }
 
 func (m *Mutable[N]) HasEdgeConnecting(source N, target N) bool {
