@@ -11,18 +11,18 @@ type incidentEdgeSet[N comparable] struct {
 	delegate *Mutable[N]
 }
 
-func (i incidentEdgeSet[N]) Contains(elem EndpointPair[N]) bool {
-	return i.containsForwards(elem) || i.containsBackwards(elem)
+func (i incidentEdgeSet[N]) Contains(element EndpointPair[N]) bool {
+	return i.containsForwards(element) || i.containsBackwards(element)
 }
 
-func (i incidentEdgeSet[N]) containsForwards(elem EndpointPair[N]) bool {
-	return i.node == elem.Source() &&
-		i.delegate.Successors(i.node).Contains(elem.Target())
+func (i incidentEdgeSet[N]) containsForwards(element EndpointPair[N]) bool {
+	return i.node == element.Source() &&
+		i.delegate.Successors(i.node).Contains(element.Target())
 }
 
-func (i incidentEdgeSet[N]) containsBackwards(elem EndpointPair[N]) bool {
-	return i.node == elem.Target() &&
-		i.delegate.Predecessors(i.node).Contains(elem.Source())
+func (i incidentEdgeSet[N]) containsBackwards(element EndpointPair[N]) bool {
+	return i.node == element.Target() &&
+		i.delegate.Predecessors(i.node).Contains(element.Source())
 }
 
 func (i incidentEdgeSet[N]) Len() int {

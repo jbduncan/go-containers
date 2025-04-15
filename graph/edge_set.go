@@ -11,9 +11,9 @@ type edgeSet[N comparable] struct {
 	len      func() int
 }
 
-func (e edgeSet[N]) Contains(elem EndpointPair[N]) bool {
-	return e.delegate.Nodes().Contains(elem.Source()) &&
-		e.delegate.Successors(elem.Source()).Contains(elem.Target())
+func (e edgeSet[N]) Contains(element EndpointPair[N]) bool {
+	return e.delegate.Nodes().Contains(element.Source()) &&
+		e.delegate.Successors(element.Source()).Contains(element.Target())
 }
 
 func (e edgeSet[N]) Len() int {

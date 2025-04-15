@@ -11,8 +11,8 @@ type directedGraphAdjacentNodeSet[N comparable] struct {
 	delegate *Mutable[N]
 }
 
-func (p directedGraphAdjacentNodeSet[N]) Contains(elem N) bool {
-	return p.union().Contains(elem)
+func (p directedGraphAdjacentNodeSet[N]) Contains(element N) bool {
+	return p.union().Contains(element)
 }
 
 func (p directedGraphAdjacentNodeSet[N]) Len() int {

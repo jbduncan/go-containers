@@ -33,11 +33,11 @@ func All[T comparable](
 	t *testing.T,
 	setName string,
 	s settest.Set[T],
-	expectedValues []T,
+	expectedElements []T,
 ) {
 	t.Helper()
 
-	got, want := slices.Collect(s.All()), expectedValues
+	got, want := slices.Collect(s.All()), expectedElements
 	if diff := orderagnostic.Diff(got, want); diff != "" {
 		t.Errorf("%s: Set.All mismatch (-want +got):\n%s", setName, diff)
 	}
@@ -51,12 +51,12 @@ func Contains[T comparable](
 ) {
 	t.Helper()
 
-	for _, value := range contains {
-		if !s.Contains(value) {
+	for _, element := range contains {
+		if !s.Contains(element) {
 			t.Errorf(
 				"%s: got Set.Contains(%v) == false, want true",
 				setName,
-				value,
+				element,
 			)
 		}
 	}
@@ -70,12 +70,12 @@ func DoesNotContain[T comparable](
 ) {
 	t.Helper()
 
-	for _, value := range doesNotContain {
-		if s.Contains(value) {
+	for _, element := range doesNotContain {
+		if s.Contains(element) {
 			t.Errorf(
 				"%s: got Set.Contains(%v) == true, want false",
 				setName,
-				value,
+				element,
 			)
 		}
 	}
@@ -85,7 +85,7 @@ func String[T comparable](
 	t *testing.T,
 	setName string,
 	s settest.Set[T],
-	expectedValues []T,
+	expectedElements []T,
 ) {
 	t.Helper()
 
@@ -109,8 +109,8 @@ func String[T comparable](
 		return
 	}
 
-	want := make([]string, 0, len(expectedValues))
-	for _, v := range expectedValues {
+	want := make([]string, 0, len(expectedElements))
+	for _, v := range expectedElements {
 		want = append(want, fmt.Sprintf("%v", v))
 	}
 	got := stringsx.SplitByComma(trimmed)

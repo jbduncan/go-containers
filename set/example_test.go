@@ -30,8 +30,8 @@ func ExampleOf() {
 	fmt.Println(exampleSet.String())              // [link]
 
 	// Loop over all elements in the set.
-	for elem := range exampleSet.All() {
-		fmt.Println(elem) // link
+	for element := range exampleSet.All() {
+		fmt.Println(element) // link
 	}
 
 	// Output:

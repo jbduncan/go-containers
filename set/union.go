@@ -16,7 +16,7 @@ import "iter"
 //	u := set.Union[int](a, b)
 //	              ^^^^^
 func Union[T comparable](a, b interface {
-	Contains(elem T) bool
+	Contains(element T) bool
 	All() iter.Seq[T]
 	Len() int
 },
@@ -29,20 +29,20 @@ func Union[T comparable](a, b interface {
 
 type UnionSet[T comparable] struct {
 	a, b interface {
-		Contains(elem T) bool
+		Contains(element T) bool
 		All() iter.Seq[T]
 		Len() int
 	}
 }
 
-func (u UnionSet[T]) Contains(elem T) bool {
-	return u.a.Contains(elem) || u.b.Contains(elem)
+func (u UnionSet[T]) Contains(element T) bool {
+	return u.a.Contains(element) || u.b.Contains(element)
 }
 
 func (u UnionSet[T]) Len() int {
 	bLen := 0
-	for elem := range u.b.All() {
-		if !u.a.Contains(elem) {
+	for element := range u.b.All() {
+		if !u.a.Contains(element) {
 			bLen++
 		}
 	}
@@ -51,17 +51,17 @@ func (u UnionSet[T]) Len() int {
 
 func (u UnionSet[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
-		for elem := range u.a.All() {
-			if !yield(elem) {
+		for element := range u.a.All() {
+			if !yield(element) {
 				return
 			}
 		}
 
-		for elem := range u.b.All() {
-			if u.a.Contains(elem) {
+		for element := range u.b.All() {
+			if u.a.Contains(element) {
 				continue
 			}
-			if !yield(elem) {
+			if !yield(element) {
 				return
 			}
 		}

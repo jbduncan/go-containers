@@ -26,12 +26,12 @@ func StringImpl[T comparable](s interface {
 
 	builder.WriteRune('[')
 	index := 0
-	for elem := range s.All() {
+	for element := range s.All() {
 		if index > 0 {
 			builder.WriteString(", ")
 		}
 
-		builder.WriteString(fmt.Sprintf("%v", elem))
+		builder.WriteString(fmt.Sprintf("%v", element))
 		index++
 	}
 

@@ -11,12 +11,12 @@ import (
 func TestSetUnmodifiable(t *testing.T) {
 	t.Parallel()
 
-	settest.TestSet(t, func(elements []string) settest.Set[string] {
-		s := set.Of[string]()
+	settest.TestSet(t, func(elements []int) settest.Set[int] {
+		s := set.Of[int]()
 		for _, element := range elements {
 			s.Add(element)
 		}
-		return set.Unmodifiable[string](s)
+		return set.Unmodifiable[int](s)
 	})
 
 	t.Run(
@@ -24,29 +24,29 @@ func TestSetUnmodifiable(t *testing.T) {
 		func(t *testing.T) {
 			t.Parallel()
 
-			s := set.Of[string]()
-			unmodSet := set.Unmodifiable[string](s)
+			s := set.Of[int]()
+			unmodSet := set.Unmodifiable[int](s)
 
-			s.Add("link")
+			s.Add(1)
 
 			internalsettest.Len(t, "set.Unmodifiable", unmodSet, 1)
 			internalsettest.All(
 				t,
 				"set.Unmodifiable",
 				unmodSet,
-				[]string{"link"},
+				[]int{1},
 			)
 			internalsettest.Contains(
 				t,
 				"set.Unmodifiable",
 				unmodSet,
-				[]string{"link"},
+				[]int{1},
 			)
 			internalsettest.String(
 				t,
 				"set.Unmodifiable",
 				unmodSet,
-				[]string{"link"},
+				[]int{1},
 			)
 		})
 

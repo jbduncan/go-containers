@@ -11,19 +11,19 @@ import (
 func TestUnion(t *testing.T) {
 	t.Parallel()
 
-	settest.TestSet(t, func(elems []string) settest.Set[string] {
-		a := set.Of[string]()
-		b := set.Of[string]()
+	settest.TestSet(t, func(elements []int) settest.Set[int] {
+		a := set.Of[int]()
+		b := set.Of[int]()
 
-		for i, elem := range elems {
+		for i, element := range elements {
 			if i%2 == 0 {
-				a.Add(elem)
+				a.Add(element)
 			} else {
-				b.Add(elem)
+				b.Add(element)
 			}
 		}
 
-		return set.Union[string](a, b)
+		return set.Union[int](a, b)
 	})
 
 	t.Run("union is unmodifiable", func(t *testing.T) {

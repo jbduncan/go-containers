@@ -86,14 +86,14 @@ func TestEqual(t *testing.T) {
 
 func undirectedGraphOf(nodesAndEndpointPairs ...any) *graph.Mutable[string] {
 	result := graph.Undirected[string]().Build()
-	for _, elem := range nodesAndEndpointPairs {
-		switch el := elem.(type) {
+	for _, element := range nodesAndEndpointPairs {
+		switch el := element.(type) {
 		case string:
 			result.AddNode(el)
 		case graph.EndpointPair[string]:
 			result.PutEdge(el.Source(), el.Target())
 		default:
-			panic(fmt.Sprintf("Unexpected elem: %v", elem))
+			panic(fmt.Sprintf("Unexpected element: %v", element))
 		}
 	}
 	return result
@@ -101,8 +101,8 @@ func undirectedGraphOf(nodesAndEndpointPairs ...any) *graph.Mutable[string] {
 
 func directedGraphOf(nodes ...string) *graph.Mutable[string] {
 	result := graph.Directed[string]().Build()
-	for _, elem := range nodes {
-		result.AddNode(elem)
+	for _, element := range nodes {
+		result.AddNode(element)
 	}
 	return result
 }

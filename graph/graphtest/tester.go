@@ -1205,18 +1205,18 @@ func complement(nodes []int) []int {
 func testNodes(
 	t *testing.T,
 	g Graph[int],
-	expectedValues ...int,
+	expectedElements ...int,
 ) {
 	t.Helper()
 
-	testNodeSet(t, graphNodesName, g.Nodes(), expectedValues...)
+	testNodeSet(t, graphNodesName, g.Nodes(), expectedElements...)
 }
 
 func testAdjacentNodes(
 	t *testing.T,
 	g Graph[int],
 	node int,
-	expectedValues ...int,
+	expectedElements ...int,
 ) {
 	t.Helper()
 
@@ -1224,7 +1224,7 @@ func testAdjacentNodes(
 		t,
 		graphAdjacentNodesName,
 		g.AdjacentNodes(node),
-		expectedValues...,
+		expectedElements...,
 	)
 }
 
@@ -1232,7 +1232,7 @@ func testPredecessors(
 	t *testing.T,
 	g Graph[int],
 	node int,
-	expectedValues ...int,
+	expectedElements ...int,
 ) {
 	t.Helper()
 
@@ -1240,7 +1240,7 @@ func testPredecessors(
 		t,
 		graphPredecessorsName,
 		g.Predecessors(node),
-		expectedValues...,
+		expectedElements...,
 	)
 }
 
@@ -1248,26 +1248,26 @@ func testSuccessors(
 	t *testing.T,
 	g Graph[int],
 	node int,
-	expectedValues ...int,
+	expectedElements ...int,
 ) {
 	t.Helper()
 
-	testNodeSet(t, graphSuccessorsName, g.Successors(node), expectedValues...)
+	testNodeSet(t, graphSuccessorsName, g.Successors(node), expectedElements...)
 }
 
 func testNodeSet(
 	t *testing.T,
 	setName string,
 	s graph.SetView[int],
-	expectedValues ...int,
+	expectedElements ...int,
 ) {
 	t.Helper()
 
-	internalsettest.Len(t, setName, s, len(expectedValues))
-	internalsettest.All(t, setName, s, expectedValues)
-	internalsettest.Contains(t, setName, s, expectedValues)
-	internalsettest.DoesNotContain(t, setName, s, complement(expectedValues))
-	internalsettest.String(t, setName, s, expectedValues)
+	internalsettest.Len(t, setName, s, len(expectedElements))
+	internalsettest.All(t, setName, s, expectedElements)
+	internalsettest.Contains(t, setName, s, expectedElements)
+	internalsettest.DoesNotContain(t, setName, s, complement(expectedElements))
+	internalsettest.String(t, setName, s, expectedElements)
 }
 
 func (tt tester) testEdges(

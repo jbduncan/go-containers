@@ -10,18 +10,18 @@ import (
 func TestSetOf(t *testing.T) {
 	t.Parallel()
 
-	settest.TestSet(t, func(elems []string) settest.Set[string] {
-		return set.Of(elems...)
+	settest.TestSet(t, func(elements []int) settest.Set[int] {
+		return set.Of(elements...)
 	})
 }
 
 func TestSetInitializedWithAdd(t *testing.T) {
 	t.Parallel()
 
-	settest.TestSet(t, func(elems []string) settest.Set[string] {
-		s := set.Of[string]()
-		for _, elem := range elems {
-			s.Add(elem)
+	settest.TestSet(t, func(elements []int) settest.Set[int] {
+		s := set.Of[int]()
+		for _, element := range elements {
+			s.Add(element)
 		}
 		return s
 	})

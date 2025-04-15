@@ -63,7 +63,7 @@ func (b Builder[N]) Build() *Mutable[N] {
 type SetView[T comparable] interface {
 	// Contains returns true if this set contains the given element, otherwise
 	// it returns false.
-	Contains(elem T) bool
+	Contains(element T) bool
 
 	// Len returns the number of elements in this set.
 	Len() int

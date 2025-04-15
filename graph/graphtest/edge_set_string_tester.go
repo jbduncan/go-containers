@@ -55,10 +55,10 @@ func (t *edgeSetStringTester) test() {
 		)
 	}
 
-	elems := stringsx.SplitByComma(trimmed)
-	want := make([]graph.EndpointPair[int], 0, len(elems))
-	for _, elemStr := range elems {
-		want = append(want, t.toEndpointPair(t.tt, elemStr))
+	elements := stringsx.SplitByComma(trimmed)
+	want := make([]graph.EndpointPair[int], 0, len(elements))
+	for _, elementStr := range elements {
+		want = append(want, t.toEndpointPair(t.tt, elementStr))
 	}
 
 	var diff string

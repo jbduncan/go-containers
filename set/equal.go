@@ -20,7 +20,7 @@ import "iter"
 //	result := set.Equal[int](a, b)
 //	                   ^^^^^
 func Equal[T comparable](a, b interface {
-	Contains(elem T) bool
+	Contains(element T) bool
 	Len() int
 	All() iter.Seq[T]
 },
@@ -33,8 +33,8 @@ func Equal[T comparable](a, b interface {
 		return false
 	}
 
-	for elem := range b.All() {
-		if !a.Contains(elem) {
+	for element := range b.All() {
+		if !a.Contains(element) {
 			return false
 		}
 	}

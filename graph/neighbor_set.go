@@ -11,9 +11,9 @@ type neighborSet[N comparable] struct {
 	nodeToNeighbors map[N]set.Set[N]
 }
 
-func (a neighborSet[N]) Contains(elem N) bool {
+func (a neighborSet[N]) Contains(element N) bool {
 	if neighbors, ok := a.nodeToNeighbors[a.node]; ok {
-		return neighbors.Contains(elem)
+		return neighbors.Contains(element)
 	}
 
 	return false

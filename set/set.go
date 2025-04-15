@@ -8,9 +8,9 @@ import (
 // Of returns a new non-nil, empty Set, which is a generic, unordered
 // collection of unique elements. Its implementation is based on a Go map, with
 // similar performance characteristics.
-func Of[T comparable](elems ...T) Set[T] {
-	delegate := make(map[T]struct{}, len(elems))
-	for _, elem := range elems {
+func Of[T comparable](elements ...T) Set[T] {
+	delegate := make(map[T]struct{}, len(elements))
+	for _, elem := range elements {
 		delegate[elem] = struct{}{}
 	}
 	return Set[T]{
