@@ -7,7 +7,7 @@ import (
 )
 
 type edgeSet[N comparable] struct {
-	delegate *Mutable[N]
+	delegate *Graph[N]
 	len      func() int
 }
 

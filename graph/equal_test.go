@@ -84,7 +84,7 @@ func TestEqual(t *testing.T) {
 	)
 }
 
-func undirectedGraphOf(nodesAndEndpointPairs ...any) *graph.Mutable[string] {
+func undirectedGraphOf(nodesAndEndpointPairs ...any) *graph.Graph[string] {
 	result := graph.Undirected[string]().Build()
 	for _, element := range nodesAndEndpointPairs {
 		switch el := element.(type) {
@@ -99,7 +99,7 @@ func undirectedGraphOf(nodesAndEndpointPairs ...any) *graph.Mutable[string] {
 	return result
 }
 
-func directedGraphOf(nodes ...string) *graph.Mutable[string] {
+func directedGraphOf(nodes ...string) *graph.Graph[string] {
 	result := graph.Directed[string]().Build()
 	for _, element := range nodes {
 		result.AddNode(element)

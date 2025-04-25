@@ -32,9 +32,9 @@ func (b Builder[N]) AllowsSelfLoops(allowsSelfLoops bool) Builder[N] {
 	return b
 }
 
-func (b Builder[N]) Build() *Mutable[N] {
+func (b Builder[N]) Build() *Graph[N] {
 	if b.directed {
-		return &Mutable[N]{
+		return &Graph[N]{
 			directed:        true,
 			allowsSelfLoops: b.allowsSelfLoops,
 			nodes:           set.Of[N](),
@@ -46,7 +46,7 @@ func (b Builder[N]) Build() *Mutable[N] {
 		}
 	}
 
-	return &Mutable[N]{
+	return &Graph[N]{
 		directed:        false,
 		allowsSelfLoops: b.allowsSelfLoops,
 		nodes:           set.Of[N](),
@@ -59,7 +59,7 @@ func (b Builder[N]) Build() *Mutable[N] {
 
 // SetView is a read-only set view; a generic, unordered collection of unique
 // elements that only allows read operations. It is returned by a few of the
-// methods on graph.Mutable.
+// methods on graph.Graph.
 type SetView[T comparable] interface {
 	// Contains returns true if this set contains the given element, otherwise
 	// it returns false.
@@ -85,7 +85,7 @@ type SetView[T comparable] interface {
 	String() string
 }
 
-type Mutable[N comparable] struct {
+type Graph[N comparable] struct {
 	directed        bool
 	allowsSelfLoops bool
 	nodes           set.Set[N]
@@ -93,26 +93,26 @@ type Mutable[N comparable] struct {
 	numEdges        int
 }
 
-func (m *Mutable[N]) IsDirected() bool {
+func (m *Graph[N]) IsDirected() bool {
 	return m.directed
 }
 
-func (m *Mutable[N]) AllowsSelfLoops() bool {
+func (m *Graph[N]) AllowsSelfLoops() bool {
 	return m.allowsSelfLoops
 }
 
-func (m *Mutable[N]) Nodes() SetView[N] {
+func (m *Graph[N]) Nodes() SetView[N] {
 	return set.Unmodifiable[N](m.nodes)
 }
 
-func (m *Mutable[N]) Edges() SetView[EndpointPair[N]] {
+func (m *Graph[N]) Edges() SetView[EndpointPair[N]] {
 	return edgeSet[N]{
 		delegate: m,
 		len:      func() int { return m.numEdges },
 	}
 }
 
-func (m *Mutable[N]) AdjacentNodes(node N) SetView[N] {
+func (m *Graph[N]) AdjacentNodes(node N) SetView[N] {
 	if m.directed {
 		return directedGraphAdjacentNodeSet[N]{
 			node:     node,
@@ -123,22 +123,22 @@ func (m *Mutable[N]) AdjacentNodes(node N) SetView[N] {
 	return m.Predecessors(node)
 }
 
-func (m *Mutable[N]) Predecessors(node N) SetView[N] {
+func (m *Graph[N]) Predecessors(node N) SetView[N] {
 	return m.connections.Predecessors(node)
 }
 
-func (m *Mutable[N]) Successors(node N) SetView[N] {
+func (m *Graph[N]) Successors(node N) SetView[N] {
 	return m.connections.Successors(node)
 }
 
-func (m *Mutable[N]) IncidentEdges(node N) SetView[EndpointPair[N]] {
+func (m *Graph[N]) IncidentEdges(node N) SetView[EndpointPair[N]] {
 	return incidentEdgeSet[N]{
 		node:     node,
 		delegate: m,
 	}
 }
 
-func (m *Mutable[N]) Degree(node N) int {
+func (m *Graph[N]) Degree(node N) int {
 	if m.directed {
 		return m.InDegree(node) + m.OutDegree(node)
 	}
@@ -146,7 +146,7 @@ func (m *Mutable[N]) Degree(node N) int {
 	return m.undirectedGraphDegree(node)
 }
 
-func (m *Mutable[N]) InDegree(node N) int {
+func (m *Graph[N]) InDegree(node N) int {
 	if m.directed {
 		return m.Predecessors(node).Len()
 	}
@@ -154,7 +154,7 @@ func (m *Mutable[N]) InDegree(node N) int {
 	return m.undirectedGraphDegree(node)
 }
 
-func (m *Mutable[N]) OutDegree(node N) int {
+func (m *Graph[N]) OutDegree(node N) int {
 	if m.directed {
 		return m.Successors(node).Len()
 	}
@@ -162,7 +162,7 @@ func (m *Mutable[N]) OutDegree(node N) int {
 	return m.undirectedGraphDegree(node)
 }
 
-func (m *Mutable[N]) undirectedGraphDegree(node N) int {
+func (m *Graph[N]) undirectedGraphDegree(node N) int {
 	selfLoop := m.AdjacentNodes(node).Contains(node)
 	selfLoopCorrection := 0
 	if selfLoop {
@@ -171,15 +171,15 @@ func (m *Mutable[N]) undirectedGraphDegree(node N) int {
 	return m.AdjacentNodes(node).Len() + selfLoopCorrection
 }
 
-func (m *Mutable[N]) HasEdgeConnecting(source N, target N) bool {
+func (m *Graph[N]) HasEdgeConnecting(source N, target N) bool {
 	return m.Successors(source).Contains(target)
 }
 
-func (m *Mutable[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
+func (m *Graph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
 	return m.HasEdgeConnecting(endpointPair.Source(), endpointPair.Target())
 }
 
-func (m *Mutable[N]) String() string {
+func (m *Graph[N]) String() string {
 	return "isDirected: " +
 		strconv.FormatBool(m.IsDirected()) +
 		", allowsSelfLoops: " +
@@ -190,11 +190,11 @@ func (m *Mutable[N]) String() string {
 		m.Edges().String()
 }
 
-func (m *Mutable[N]) AddNode(node N) bool {
+func (m *Graph[N]) AddNode(node N) bool {
 	return m.nodes.Add(node)
 }
 
-func (m *Mutable[N]) PutEdge(source N, target N) bool {
+func (m *Graph[N]) PutEdge(source N, target N) bool {
 	if !m.AllowsSelfLoops() && source == target {
 		panic("self-loops are disallowed")
 	}
@@ -211,7 +211,7 @@ func (m *Mutable[N]) PutEdge(source N, target N) bool {
 	return false
 }
 
-func (m *Mutable[N]) RemoveNode(node N) bool {
+func (m *Graph[N]) RemoveNode(node N) bool {
 	if !m.Nodes().Contains(node) {
 		return false
 	}
@@ -223,7 +223,7 @@ func (m *Mutable[N]) RemoveNode(node N) bool {
 	return true
 }
 
-func (m *Mutable[N]) RemoveEdge(source N, target N) bool {
+func (m *Graph[N]) RemoveEdge(source N, target N) bool {
 	m.numEdges--
 	return m.connections.RemoveEdge(source, target)
 }

@@ -8,7 +8,7 @@ import (
 
 type incidentEdgeSet[N comparable] struct {
 	node     N
-	delegate *Mutable[N]
+	delegate *Graph[N]
 }
 
 func (i incidentEdgeSet[N]) Contains(element EndpointPair[N]) bool {
