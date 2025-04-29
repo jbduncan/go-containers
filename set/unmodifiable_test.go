@@ -11,7 +11,7 @@ import (
 func TestSetUnmodifiable(t *testing.T) {
 	t.Parallel()
 
-	settest.TestSet(t, func(elements []int) settest.Set[int] {
+	settest.TestReadOnly(t, func(elements []int) settest.Set[int] {
 		s := set.Of[int]()
 		for _, element := range elements {
 			s.Add(element)

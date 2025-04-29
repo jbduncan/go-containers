@@ -2,27 +2,45 @@ package settest
 
 import (
 	"fmt"
+	"iter"
 	"slices"
 	"strings"
 	"testing"
 
 	"github.com/jbduncan/go-containers/internal/orderagnostic"
 	"github.com/jbduncan/go-containers/internal/stringsx"
-	"github.com/jbduncan/go-containers/set/settest"
 )
+
+type set[T comparable] interface {
+	Contains(element T) bool
+	Len() int
+	All() iter.Seq[T]
+	String() string
+}
+
+type mutableSet[T comparable] interface {
+	set[T]
+	Add(element T, others ...T) bool
+	Remove(element T, others ...T) bool
+}
 
 func Len[T comparable](
 	t *testing.T,
 	setName string,
-	s settest.Set[T],
+	s set[T],
 	expectedLen int,
 ) {
 	t.Helper()
 
+	var prefix string
+	if len(setName) > 0 {
+		prefix = setName + ": "
+	}
+
 	if got, want := s.Len(), expectedLen; got != want {
 		t.Errorf(
-			"%s: got Set.Len of %d, want %d",
-			setName,
+			"%sgot Set.Len of %d, want %d",
+			prefix,
 			got,
 			want,
 		)
@@ -32,30 +50,40 @@ func Len[T comparable](
 func All[T comparable](
 	t *testing.T,
 	setName string,
-	s settest.Set[T],
+	s set[T],
 	expectedElements []T,
 ) {
 	t.Helper()
 
+	var prefix string
+	if len(setName) > 0 {
+		prefix = setName + ": "
+	}
+
 	got, want := slices.Collect(s.All()), expectedElements
 	if diff := orderagnostic.Diff(got, want); diff != "" {
-		t.Errorf("%s: Set.All mismatch (-want +got):\n%s", setName, diff)
+		t.Errorf("%sSet.All mismatch (-want +got):\n%s", prefix, diff)
 	}
 }
 
 func Contains[T comparable](
 	t *testing.T,
 	setName string,
-	s settest.Set[T],
+	s set[T],
 	contains []T,
 ) {
 	t.Helper()
 
+	var prefix string
+	if len(setName) > 0 {
+		prefix = setName + ": "
+	}
+
 	for _, element := range contains {
 		if !s.Contains(element) {
 			t.Errorf(
-				"%s: got Set.Contains(%v) == false, want true",
-				setName,
+				"%sgot Set.Contains(%v) == false, want true",
+				prefix,
 				element,
 			)
 		}
@@ -65,16 +93,21 @@ func Contains[T comparable](
 func DoesNotContain[T comparable](
 	t *testing.T,
 	setName string,
-	s settest.Set[T],
+	s set[T],
 	doesNotContain []T,
 ) {
 	t.Helper()
 
+	var prefix string
+	if len(setName) > 0 {
+		prefix = setName + ": "
+	}
+
 	for _, element := range doesNotContain {
 		if s.Contains(element) {
 			t.Errorf(
-				"%s: got Set.Contains(%v) == true, want false",
-				setName,
+				"%sgot Set.Contains(%v) == true, want false",
+				prefix,
 				element,
 			)
 		}
@@ -84,17 +117,22 @@ func DoesNotContain[T comparable](
 func String[T comparable](
 	t *testing.T,
 	setName string,
-	s settest.Set[T],
+	s set[T],
 	expectedElements []T,
 ) {
 	t.Helper()
+
+	var prefix string
+	if len(setName) > 0 {
+		prefix = setName + ": "
+	}
 
 	str := s.String()
 	trimmed, prefixFound := strings.CutPrefix(str, "[")
 	if !prefixFound {
 		t.Errorf(
-			`%s: got Set.String of %q, want to have prefix "["`,
-			setName,
+			`%sgot Set.String of %q, want to have prefix "["`,
+			prefix,
 			str,
 		)
 		return
@@ -102,8 +140,8 @@ func String[T comparable](
 	trimmed, suffixFound := strings.CutSuffix(trimmed, "]")
 	if !suffixFound {
 		t.Errorf(
-			`%s: got Set.String of %q, want to have suffix "]"`,
-			setName,
+			`%sgot Set.String of %q, want to have suffix "]"`,
+			prefix,
 			str,
 		)
 		return
@@ -117,21 +155,26 @@ func String[T comparable](
 
 	if diff := orderagnostic.Diff(got, want); diff != "" {
 		t.Errorf(
-			"%s: Set.String of %q: elements mismatch: (-want +got):\n%s",
-			setName,
+			"%sSet.String of %q: elements mismatch: (-want +got):\n%s",
+			prefix,
 			str,
 			diff,
 		)
 	}
 }
 
-func IsMutable[T comparable](t *testing.T, setName string, s settest.Set[T]) {
+func IsMutable[T comparable](t *testing.T, setName string, s set[T]) {
 	t.Helper()
 
-	if _, mutable := s.(settest.MutableSet[T]); mutable {
+	var prefix string
+	if len(setName) > 0 {
+		prefix = setName + ": "
+	}
+
+	if _, mutable := s.(mutableSet[T]); mutable {
 		t.Errorf(
-			"%s: got a settest.MutableSet: %v, want just a settest.Set",
-			setName,
+			"%sgot a mutable set: %v, want just a set",
+			prefix,
 			s,
 		)
 	}

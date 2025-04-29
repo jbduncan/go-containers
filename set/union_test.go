@@ -11,7 +11,7 @@ import (
 func TestUnion(t *testing.T) {
 	t.Parallel()
 
-	settest.TestSet(t, func(elements []int) settest.Set[int] {
+	settest.TestReadOnly(t, func(elements []int) settest.Set[int] {
 		a := set.Of[int]()
 		b := set.Of[int]()
 
