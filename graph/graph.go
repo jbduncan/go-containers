@@ -93,139 +93,139 @@ type Graph[N comparable] struct {
 	numEdges        int
 }
 
-func (m *Graph[N]) IsDirected() bool {
-	return m.directed
+func (g *Graph[N]) IsDirected() bool {
+	return g.directed
 }
 
-func (m *Graph[N]) AllowsSelfLoops() bool {
-	return m.allowsSelfLoops
+func (g *Graph[N]) AllowsSelfLoops() bool {
+	return g.allowsSelfLoops
 }
 
-func (m *Graph[N]) Nodes() SetView[N] {
-	return set.Unmodifiable[N](m.nodes)
+func (g *Graph[N]) Nodes() SetView[N] {
+	return set.Unmodifiable[N](g.nodes)
 }
 
-func (m *Graph[N]) Edges() SetView[EndpointPair[N]] {
+func (g *Graph[N]) Edges() SetView[EndpointPair[N]] {
 	return edgeSet[N]{
-		delegate: m,
-		len:      func() int { return m.numEdges },
+		delegate: g,
+		len:      func() int { return g.numEdges },
 	}
 }
 
-func (m *Graph[N]) AdjacentNodes(node N) SetView[N] {
-	if m.directed {
+func (g *Graph[N]) AdjacentNodes(node N) SetView[N] {
+	if g.directed {
 		return directedGraphAdjacentNodeSet[N]{
 			node:     node,
-			delegate: m,
+			delegate: g,
 		}
 	}
 
-	return m.Predecessors(node)
+	return g.Predecessors(node)
 }
 
-func (m *Graph[N]) Predecessors(node N) SetView[N] {
-	return m.connections.Predecessors(node)
+func (g *Graph[N]) Predecessors(node N) SetView[N] {
+	return g.connections.Predecessors(node)
 }
 
-func (m *Graph[N]) Successors(node N) SetView[N] {
-	return m.connections.Successors(node)
+func (g *Graph[N]) Successors(node N) SetView[N] {
+	return g.connections.Successors(node)
 }
 
-func (m *Graph[N]) IncidentEdges(node N) SetView[EndpointPair[N]] {
+func (g *Graph[N]) IncidentEdges(node N) SetView[EndpointPair[N]] {
 	return incidentEdgeSet[N]{
 		node:     node,
-		delegate: m,
+		delegate: g,
 	}
 }
 
-func (m *Graph[N]) Degree(node N) int {
-	if m.directed {
-		return m.InDegree(node) + m.OutDegree(node)
+func (g *Graph[N]) Degree(node N) int {
+	if g.directed {
+		return g.InDegree(node) + g.OutDegree(node)
 	}
 
-	return m.undirectedGraphDegree(node)
+	return g.undirectedGraphDegree(node)
 }
 
-func (m *Graph[N]) InDegree(node N) int {
-	if m.directed {
-		return m.Predecessors(node).Len()
+func (g *Graph[N]) InDegree(node N) int {
+	if g.directed {
+		return g.Predecessors(node).Len()
 	}
 
-	return m.undirectedGraphDegree(node)
+	return g.undirectedGraphDegree(node)
 }
 
-func (m *Graph[N]) OutDegree(node N) int {
-	if m.directed {
-		return m.Successors(node).Len()
+func (g *Graph[N]) OutDegree(node N) int {
+	if g.directed {
+		return g.Successors(node).Len()
 	}
 
-	return m.undirectedGraphDegree(node)
+	return g.undirectedGraphDegree(node)
 }
 
-func (m *Graph[N]) undirectedGraphDegree(node N) int {
-	selfLoop := m.AdjacentNodes(node).Contains(node)
+func (g *Graph[N]) undirectedGraphDegree(node N) int {
+	selfLoop := g.AdjacentNodes(node).Contains(node)
 	selfLoopCorrection := 0
 	if selfLoop {
 		selfLoopCorrection = 1
 	}
-	return m.AdjacentNodes(node).Len() + selfLoopCorrection
+	return g.AdjacentNodes(node).Len() + selfLoopCorrection
 }
 
-func (m *Graph[N]) HasEdgeConnecting(source N, target N) bool {
-	return m.Successors(source).Contains(target)
+func (g *Graph[N]) HasEdgeConnecting(source N, target N) bool {
+	return g.Successors(source).Contains(target)
 }
 
-func (m *Graph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
-	return m.HasEdgeConnecting(endpointPair.Source(), endpointPair.Target())
+func (g *Graph[N]) HasEdgeConnectingEndpoints(endpointPair EndpointPair[N]) bool {
+	return g.HasEdgeConnecting(endpointPair.Source(), endpointPair.Target())
 }
 
-func (m *Graph[N]) String() string {
+func (g *Graph[N]) String() string {
 	return "isDirected: " +
-		strconv.FormatBool(m.IsDirected()) +
+		strconv.FormatBool(g.IsDirected()) +
 		", allowsSelfLoops: " +
-		strconv.FormatBool(m.AllowsSelfLoops()) +
+		strconv.FormatBool(g.AllowsSelfLoops()) +
 		", nodes: " +
-		m.Nodes().String() +
+		g.Nodes().String() +
 		", edges: " +
-		m.Edges().String()
+		g.Edges().String()
 }
 
-func (m *Graph[N]) AddNode(node N) bool {
-	return m.nodes.Add(node)
+func (g *Graph[N]) AddNode(node N) bool {
+	return g.nodes.Add(node)
 }
 
-func (m *Graph[N]) PutEdge(source N, target N) bool {
-	if !m.AllowsSelfLoops() && source == target {
+func (g *Graph[N]) PutEdge(source N, target N) bool {
+	if !g.AllowsSelfLoops() && source == target {
 		panic("self-loops are disallowed")
 	}
 
-	m.AddNode(source)
-	m.AddNode(target)
+	g.AddNode(source)
+	g.AddNode(target)
 
-	put := m.connections.PutEdge(source, target)
+	put := g.connections.PutEdge(source, target)
 	if put {
-		m.numEdges++
+		g.numEdges++
 		return true
 	}
 
 	return false
 }
 
-func (m *Graph[N]) RemoveNode(node N) bool {
-	if !m.Nodes().Contains(node) {
+func (g *Graph[N]) RemoveNode(node N) bool {
+	if !g.Nodes().Contains(node) {
 		return false
 	}
 
-	m.nodes.Remove(node)
-	m.numEdges -= m.AdjacentNodes(node).Len()
+	g.nodes.Remove(node)
+	g.numEdges -= g.AdjacentNodes(node).Len()
 
-	m.connections.RemoveNode(node)
+	g.connections.RemoveNode(node)
 	return true
 }
 
-func (m *Graph[N]) RemoveEdge(source N, target N) bool {
-	m.numEdges--
-	return m.connections.RemoveEdge(source, target)
+func (g *Graph[N]) RemoveEdge(source N, target N) bool {
+	g.numEdges--
+	return g.connections.RemoveEdge(source, target)
 }
 
 type connections[N comparable] interface {
