@@ -6,13 +6,13 @@ import (
 	"github.com/jbduncan/go-containers/internal/orderagnostic"
 )
 
-func reverseOf(endpointPair graph.EndpointPair[int]) graph.EndpointPair[int] {
-	return graph.EndpointPairOf(endpointPair.Target(), endpointPair.Source())
+func reverseOf(e graph.EndpointPair[int]) graph.EndpointPair[int] {
+	return graph.EndpointPairOf(e.Target(), e.Source())
 }
 
-func reversesOf(edges []graph.EndpointPair[int]) []graph.EndpointPair[int] {
-	result := make([]graph.EndpointPair[int], 0, len(edges))
-	for _, edge := range edges {
+func reversesOf(s []graph.EndpointPair[int]) []graph.EndpointPair[int] {
+	result := make([]graph.EndpointPair[int], 0, len(s))
+	for _, edge := range s {
 		result = append(result, reverseOf(edge))
 	}
 	return result
