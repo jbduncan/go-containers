@@ -236,7 +236,12 @@ func goFixDiff() error {
 		return err
 	}
 
-	goVersion := os.Getenv("GO_VERSION") // Set by mise.toml
+	goVersion, err := minGoVersionForProject()
+	if err != nil {
+		return fmt.Errorf("min project Go version not found: %w", err)
+	}
+	fmt.Printf("Min project Go version of %q found\n", goVersion)
+
 	group, ctx := newErrorGroup()
 	for dir := range goFileDirs {
 		group.Go(func() error {
@@ -250,6 +255,17 @@ func goFixDiff() error {
 	}
 
 	return group.Wait()
+}
+
+func minGoVersionForProject() (string, error) {
+	s := new(strings.Builder)
+	c := cmd("go", "list", "-f", "{{.GoVersion}}", "-m")
+	c.Stdout = s
+	if err := c.Run(); err != nil {
+		return "", err
+	}
+	goVersion := strings.TrimRight(s.String(), "\n")
+	return goVersion, nil
 }
 
 func doGoFixFor(dir string, goVersion string) error {

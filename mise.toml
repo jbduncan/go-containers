@@ -1,8 +1,5 @@
 min_version = "2025.2.5"
 
-[env]
-GO_VERSION = "{{ exec(command='go list -f {{.GoVersion}} -m') }}"
-
 [hooks]
 enter = "mise i -q"
 

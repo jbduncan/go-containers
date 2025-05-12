@@ -1,18 +1,16 @@
 [tools.cosign]
-version = "2.4.3"
+version = "2.5.0"
 backend = "aqua:sigstore/cosign"
 
 [tools.cosign.checksums]
-cosign-darwin-arm64 = "sha256:edfc761b27ced77f0f9ca288ff4fac7caa898e1e9db38f4dfdf72160cdf8e638"
-cosign-linux-amd64 = "sha256:caaad125acef1cb81d58dcdc454a1e429d09a750d1e9e2b3ed1aed8964454708"
+cosign-darwin-arm64 = "sha256:780da3654d9601367b0d54686ac65cb9716578610cabe292d725c7008de4db85"
 
 [tools.go]
-version = "1.24.1"
+version = "1.24.3"
 backend = "core:go"
 
 [tools.go.checksums]
-"go1.24.1.darwin-arm64.tar.gz" = "sha256:295581b5619acc92f5106e5bcb05c51869337eb19742fdfa6c8346c18e78ff88"
-"go1.24.1.linux-amd64.tar.gz" = "sha256:cb2396bae64183cdccf81a9a6df0aea3bce9511fc21469fb89a0c00470088073"
+"go1.24.3.darwin-arm64.tar.gz" = "sha256:64a3fa22142f627e78fac3018ce3d4aeace68b743eff0afda8aae0411df5e4fb"
 
 [tools."go:github.com/tailscale/depaware"]
 version = "b748de0"
@@ -23,24 +21,23 @@ version = "ba14292"
 backend = "go:go.uber.org/nilaway/cmd/nilaway"
 
 [tools."go:golang.org/x/tools/cmd/digraph"]
-version = "0.31.0"
+version = "0.33.0"
 backend = "go:golang.org/x/tools/cmd/digraph"
 
 [tools."go:golang.org/x/tools/cmd/eg"]
-version = "0.31.0"
+version = "0.33.0"
 backend = "go:golang.org/x/tools/cmd/eg"
 
 [tools."go:golang.org/x/tools/cmd/stringer"]
-version = "0.31.0"
+version = "0.33.0"
 backend = "go:golang.org/x/tools/cmd/stringer"
 
 [tools.golangci-lint]
-version = "2.0.2"
+version = "2.1.6"
 backend = "aqua:golangci/golangci-lint"
 
 [tools.golangci-lint.checksums]
-"golangci-lint-2.0.2-darwin-arm64.tar.gz" = "sha256:664550e7954f5f4451aae99b4f7382c1a47039c66f39ca605f5d9af1a0d32b49"
-"golangci-lint-2.0.2-linux-amd64.tar.gz" = "sha256:89cc8a7810dc63b9a37900da03e37c3601caf46d42265d774e0f1a5d883d53e2"
+"golangci-lint-2.1.6-darwin-arm64.tar.gz" = "sha256:90783fa092a0f64a4f7b7d419f3da1f53207e300261773babe962957240e9ea6"
 
 [tools.slsa-verifier]
 version = "2.7.0"
@@ -50,9 +47,8 @@ backend = "ubi:slsa-framework/slsa-verifier"
 slsa-verifier-macos-aarch64 = "sha256:84d9122ce12e0c79080844285fd5c4976407ed3463e434a1b21b0979c46b1e55"
 
 [tools."ubi:ast-grep/ast-grep"]
-version = "0.36.2"
+version = "0.38.1"
 backend = "ubi:ast-grep/ast-grep"
 
 [tools."ubi:ast-grep/ast-grep".checksums]
-ast-grep-linux-x86_64 = "sha256:d6a447219e08a9dee8cb9dc887eba0e88de7e09c844fd9239473744a2b22e2e5"
-ast-grep-macos-aarch64 = "sha256:979045e65546c4d86e1967c808f73437899498a0a5f78d8e6cea59931ca83eca"
+ast-grep-macos-aarch64 = "sha256:ccece9bdcf972dd22dbbfd056c7c6dc7f01506c82336a701ea5e4b1643b2eb34"
