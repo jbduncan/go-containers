@@ -150,7 +150,7 @@ wait_for = ["test"]
 
 [tasks.test]
 description = "Run the tests."
-run = "go test -shuffle=on -race ./..."
+run = "go test -shuffle=on -race -cover ./..."
 depends = "build"
 sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
@@ -158,7 +158,7 @@ alias = "t"
 
 [tasks.test-rerun]
 description = "Run the tests, even if no changes have been made."
-run = "go test -shuffle=on -race ./..."
+run = "go test -shuffle=on -race -cover ./..."
 depends = "build"
 sources = ["go.mod", "go.sum", "**/*.go"]
 alias = "tr"

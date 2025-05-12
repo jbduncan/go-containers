@@ -16,5 +16,4 @@ func (b Builder[N]) Build() *WeightedGraph[N] {
 	return &WeightedGraph[N]{}
 }
 
-type WeightedGraph[N comparable] struct {
-}
+type WeightedGraph[N comparable] struct{}
