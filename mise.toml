@@ -6,6 +6,9 @@ enter = "mise i -q"
 [settings]
 experimental = true
 lockfile = true
+status.missing_tools = "always"
+status.show_env = true
+status.show_tools = true
 
 [tasks.ast-grep]
 description = "Run ast-grep rules against the source code."
@@ -170,7 +173,7 @@ alias = "u"
 cosign = "latest"
 go = "latest"
 "go:github.com/tailscale/depaware" = "b748de0"
-"go:go.uber.org/nilaway/cmd/nilaway" = "ba14292"
+"go:go.uber.org/nilaway/cmd/nilaway" = "aa1ea38"
 "go:golang.org/x/tools/cmd/digraph" = "latest"
 "go:golang.org/x/tools/cmd/eg" = "latest"
 "go:golang.org/x/tools/cmd/stringer" = "latest"
