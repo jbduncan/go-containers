@@ -2,9 +2,19 @@
 version = "2.5.3"
 backend = "aqua:sigstore/cosign"
 
+[tools.cosign.platforms.macos-arm64]
+checksum = "sha256:86e0cad94d0da4c0dab5e26672ede71447a08a0f0d8495b9381c117df27d7d09"
+size = 152385074
+url = "https://github.com/sigstore/cosign/releases/download/v2.5.3/cosign-darwin-arm64"
+
 [tools.go]
 version = "1.25.0"
 backend = "core:go"
+
+[tools.go.platforms.macos-arm64]
+checksum = "sha256:544932844156d8172f7a28f77f2ac9c15a23046698b6243f633b0a0b00c0749c"
+size = 57906112
+url = "https://dl.google.com/go/go1.25.0.darwin-arm64.tar.gz"
 
 [tools."go:github.com/tailscale/depaware"]
 version = "b748de0"
@@ -30,10 +40,21 @@ backend = "go:golang.org/x/tools/cmd/stringer"
 version = "2.4.0"
 backend = "aqua:golangci/golangci-lint"
 
+[tools.golangci-lint.platforms.macos-arm64]
+checksum = "sha256:cd4dd53fa09b6646baff5fd22b8c64d91db02c21c7496df27992d75d34feec59"
+size = 13542526
+url = "https://github.com/golangci/golangci-lint/releases/download/v2.4.0/golangci-lint-2.4.0-darwin-arm64.tar.gz"
+
 [tools.slsa-verifier]
 version = "2.7.1"
 backend = "ubi:slsa-framework/slsa-verifier"
 
+[tools.slsa-verifier.platforms.macos-arm64-slsa-verifier]
+checksum = "blake3:af93f77462964b7eeb93b9f45ccedeefc641305f6618d9ffc2480d89b0cceed6"
+
 [tools."ubi:ast-grep/ast-grep"]
 version = "0.39.4"
 backend = "ubi:ast-grep/ast-grep"
+
+[tools."ubi:ast-grep/ast-grep".platforms.macos-arm64-ast-grep]
+checksum = "blake3:bde1c2d9bba5daf971a34ab6b24b1fb424d0b80370362d3e7e239e47bf799903"
