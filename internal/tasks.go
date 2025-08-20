@@ -8,26 +8,31 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"golang.org/x/sync/errgroup"
 )
 
 func main() {
 	doMain := func() error {
+		ctx, stop := signal.NotifyContext(context.Background(), interruptSignal())
+		defer stop()
+
 		switch os.Args[1] {
 		case "depaware":
-			return doDepaware()
+			return doDepaware(ctx)
 		case "depaware-fix":
-			return doDepawareFix()
+			return doDepawareFix(ctx)
 		case "eg":
-			return doEg()
+			return doEg(ctx)
 		case "eg-fix":
-			return doEgFix()
+			return doEgFix(ctx)
 		case "go-fix-diff":
-			return goFixDiff()
+			return doGoFixDiff(ctx)
 		default:
 			return fmt.Errorf("invalid command: %s", os.Args[1])
 		}
@@ -36,9 +41,16 @@ func main() {
 	os.Exit(toExitCode(doMain()))
 }
 
-func doDepaware() error {
+func interruptSignal() os.Signal {
+	if runtime.GOOS == "windows" {
+		return os.Kill // os.Interrupt is not implemented on Windows
+	}
+	return os.Interrupt
+}
+
+func doDepaware(baseCtx context.Context) error {
 	depawareFileDirs := make(chan string)
-	group, ctx := newErrorGroup()
+	group, ctx := newErrorGroup(baseCtx)
 	group.Go(func() error {
 		defer close(depawareFileDirs)
 		return filepath.WalkDir(
@@ -71,7 +83,7 @@ func doDepaware() error {
 				return ctx.Err()
 			default:
 				fmt.Printf("Linting with depaware on directory %s...\n", dir)
-				return cmd("depaware", "--check", dir).Run()
+				return cmd(ctx, "depaware", "--check", dir).Run()
 			}
 		})
 	}
@@ -79,9 +91,9 @@ func doDepaware() error {
 	return group.Wait()
 }
 
-func doDepawareFix() error {
+func doDepawareFix(baseCtx context.Context) error {
 	depawareFiles := make(chan string)
-	group, ctx := newErrorGroup()
+	group, ctx := newErrorGroup(baseCtx)
 	group.Go(func() error {
 		defer close(depawareFiles)
 		return filepath.WalkDir(
@@ -113,7 +125,7 @@ func doDepawareFix() error {
 			case <-ctx.Done():
 				return ctx.Err()
 			default:
-				return doDepawareFixFor(file)
+				return doDepawareFixFor(ctx, file)
 			}
 		})
 	}
@@ -121,10 +133,10 @@ func doDepawareFix() error {
 	return group.Wait()
 }
 
-func doDepawareFixFor(depawareFile string) error {
+func doDepawareFixFor(ctx context.Context, depawareFile string) error {
 	dir := "./" + filepath.Dir(depawareFile)
 	fmt.Printf("Fixing with depaware on directory %s...\n", dir)
-	c := cmd("depaware", dir)
+	c := cmd(ctx, "depaware", dir)
 	var b bytes.Buffer
 	c.Stdout = &b
 	if err := c.Run(); err != nil {
@@ -133,9 +145,9 @@ func doDepawareFixFor(depawareFile string) error {
 	return os.WriteFile(depawareFile, b.Bytes(), 0o600)
 }
 
-func doEg() error {
+func doEg(baseCtx context.Context) error {
 	egTemplateFiles := make(chan string)
-	group, ctx := newErrorGroup()
+	group, ctx := newErrorGroup(baseCtx)
 	group.Go(func() error {
 		defer close(egTemplateFiles)
 		matches, err := filepath.Glob("eg/*.template")
@@ -161,7 +173,7 @@ func doEg() error {
 			case <-ctx.Done():
 				return ctx.Err()
 			default:
-				return doEgFor(file)
+				return doEgFor(ctx, file)
 			}
 		})
 	}
@@ -169,9 +181,9 @@ func doEg() error {
 	return group.Wait()
 }
 
-func doEgFor(egTemplateFile string) error {
+func doEgFor(ctx context.Context, egTemplateFile string) error {
 	fmt.Printf("Linting with eg template %s...\n", egTemplateFile)
-	c := exec.Command("eg", "-t", egTemplateFile, "./...")
+	c := cmd(ctx, "eg", "-t", egTemplateFile, "./...")
 
 	// On a match, eg prints the whole contents of the matching file
 	// which is too noisy, so stop it from being printed.
@@ -199,21 +211,21 @@ func doEgFor(egTemplateFile string) error {
 	return nil
 }
 
-func doEgFix() error {
+func doEgFix(ctx context.Context) error {
 	egTemplateFiles, err := filepath.Glob("eg/*.template")
 	if err != nil {
 		return err
 	}
 	for _, file := range egTemplateFiles {
 		fmt.Printf("Fixing with eg template %s...\n", file)
-		if err := cmd("eg", "-t", file, "-w", "./...").Run(); err != nil {
+		if err := cmd(ctx, "eg", "-t", file, "-w", "./...").Run(); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func goFixDiff() error {
+func doGoFixDiff(baseCtx context.Context) error {
 	goFileDirs := make(map[string]struct{})
 	if err := filepath.WalkDir(
 		".",
@@ -236,20 +248,20 @@ func goFixDiff() error {
 		return err
 	}
 
-	goVersion, err := minGoVersionForProject()
+	goVersion, err := minGoVersionForProject(baseCtx)
 	if err != nil {
 		return fmt.Errorf("min project Go version not found: %w", err)
 	}
 	fmt.Printf("Min project Go version of %q found\n", goVersion)
 
-	group, ctx := newErrorGroup()
+	group, ctx := newErrorGroup(baseCtx)
 	for dir := range goFileDirs {
 		group.Go(func() error {
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
 			default:
-				return doGoFixFor(dir, goVersion)
+				return doGoFixDiffFor(ctx, dir, goVersion)
 			}
 		})
 	}
@@ -257,9 +269,9 @@ func goFixDiff() error {
 	return group.Wait()
 }
 
-func minGoVersionForProject() (string, error) {
+func minGoVersionForProject(ctx context.Context) (string, error) {
 	s := new(strings.Builder)
-	c := cmd("go", "list", "-f", "{{.GoVersion}}", "-m")
+	c := cmd(ctx, "go", "list", "-f", "{{.GoVersion}}", "-m")
 	c.Stdout = s
 	if err := c.Run(); err != nil {
 		return "", err
@@ -268,12 +280,13 @@ func minGoVersionForProject() (string, error) {
 	return goVersion, nil
 }
 
-func doGoFixFor(dir string, goVersion string) error {
+func doGoFixDiffFor(ctx context.Context, dir string, goVersion string) error {
 	fmt.Printf(
 		"Linting with 'go tool fix -diff' on directory %s...\n",
 		dir,
 	)
 	c := cmd(
+		ctx,
 		"go",
 		"tool",
 		"fix",
@@ -294,17 +307,23 @@ func doGoFixFor(dir string, goVersion string) error {
 	return nil
 }
 
-func newErrorGroup() (*errgroup.Group, context.Context) {
-	group, ctx := errgroup.WithContext(context.Background())
+func newErrorGroup(ctx context.Context) (*errgroup.Group, context.Context) {
+	group, ctx := errgroup.WithContext(ctx)
 	group.SetLimit(max(1, runtime.NumCPU()-1))
 	return group, ctx
 }
 
-func cmd(name string, args ...string) *exec.Cmd {
-	result := exec.Command(name, args...)
-	result.Stdout = os.Stdout
-	result.Stderr = os.Stderr
-	return result
+func cmd(ctx context.Context, name string, args ...string) *exec.Cmd {
+	subprocess := exec.CommandContext(ctx, name, args...)
+	subprocess.Stdout = os.Stdout
+	subprocess.Stderr = os.Stderr
+	subprocess.Cancel = func() error {
+		return subprocess.Process.Signal(os.Interrupt)
+	}
+	// If Cancel above fails to shut down the subprocess within the wait delay
+	// specified below, the subprocess will be killed automatically.
+	subprocess.WaitDelay = 2 * time.Second
+	return subprocess
 }
 
 func toExitCode(err error) int {

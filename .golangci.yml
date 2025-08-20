@@ -19,6 +19,7 @@ linters:
     - iface
     - misspell
     - nilnesserr
+    - noctx
     - nolintlint
     - paralleltest
     - predeclared

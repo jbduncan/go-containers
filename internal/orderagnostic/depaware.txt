@@ -25,6 +25,7 @@ github.com/jbduncan/go-containers/internal/orderagnostic dependencies: (generate
         sort                                                         from github.com/google/go-cmp/cmp/internal/value+
         strconv                                                      from fmt+
         strings                                                      from github.com/google/go-cmp/cmp+
+   W    structs                                                      from internal/syscall/windows
         sync                                                         from fmt+
         sync/atomic                                                  from internal/bisect+
         syscall                                                      from internal/filepathlite+

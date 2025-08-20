@@ -1,57 +1,39 @@
 [tools.cosign]
-version = "2.5.2"
+version = "2.5.3"
 backend = "aqua:sigstore/cosign"
 
-[tools.cosign.checksums]
-cosign-darwin-arm64 = "sha256:51fdc6d8da8310d72df10065a52247b6bebfe990d4c946dd9f71e17588256011"
-
 [tools.go]
-version = "1.24.5"
+version = "1.25.0"
 backend = "core:go"
-
-[tools.go.checksums]
-"go1.24.5.darwin-arm64.tar.gz" = "sha256:92d30a678f306c327c544758f2d2fa5515aa60abe9dba4ca35fbf9b8bfc53212"
-"go1.24.5.linux-amd64.tar.gz" = "sha256:10ad9e86233e74c0f6590fe5426895de6bf388964210eac34a6d83f38918ecdc"
 
 [tools."go:github.com/tailscale/depaware"]
 version = "b748de0"
 backend = "go:github.com/tailscale/depaware"
 
 [tools."go:go.uber.org/nilaway/cmd/nilaway"]
-version = "aa1ea38"
+version = "8ad05f0"
 backend = "go:go.uber.org/nilaway/cmd/nilaway"
 
 [tools."go:golang.org/x/tools/cmd/digraph"]
-version = "0.35.0"
+version = "0.36.0"
 backend = "go:golang.org/x/tools/cmd/digraph"
 
 [tools."go:golang.org/x/tools/cmd/eg"]
-version = "0.35.0"
+version = "0.36.0"
 backend = "go:golang.org/x/tools/cmd/eg"
 
 [tools."go:golang.org/x/tools/cmd/stringer"]
-version = "0.35.0"
+version = "0.36.0"
 backend = "go:golang.org/x/tools/cmd/stringer"
 
 [tools.golangci-lint]
-version = "2.2.2"
+version = "2.4.0"
 backend = "aqua:golangci/golangci-lint"
-
-[tools.golangci-lint.checksums]
-"golangci-lint-2.2.2-darwin-arm64.tar.gz" = "sha256:d84d94d042c0d495fd1746f3d18948a75de163b17a14e8de3ef840928dd2df74"
-"golangci-lint-2.2.2-linux-amd64.tar.gz" = "sha256:c27fbde948a87d326feacd21df2f61a9c54dbd2e3bfa185c0a1cd6917a6f964f"
 
 [tools.slsa-verifier]
 version = "2.7.1"
 backend = "ubi:slsa-framework/slsa-verifier"
 
-[tools.slsa-verifier.checksums]
-slsa-verifier-macos-aarch64 = "blake3:af93f77462964b7eeb93b9f45ccedeefc641305f6618d9ffc2480d89b0cceed6"
-
 [tools."ubi:ast-grep/ast-grep"]
-version = "0.38.7"
+version = "0.39.4"
 backend = "ubi:ast-grep/ast-grep"
-
-[tools."ubi:ast-grep/ast-grep".checksums]
-ast-grep-linux-x86_64 = "sha256:c8b72307e9943710ab9531759d1d258750b4189ba74da8d6931a6db4e279e833"
-ast-grep-macos-aarch64 = "blake3:6cfa3c3fbb70837ebbaa10ad5cae5de68650ec997d74155870708231251fe1bc"
