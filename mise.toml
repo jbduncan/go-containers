@@ -10,25 +10,6 @@ status.missing_tools = "always"
 status.show_env = true
 status.show_tools = true
 
-[tasks.ast-grep]
-description = "Run ast-grep rules against the source code."
-hide = true
-run = "ast-grep scan"
-depends = "build"
-# If this task and test run at the same time, force eg to run last to improve
-# diagnostics in case of test compilation failures.
-wait_for = ["test"]
-
-[tasks.ast-grep-test]
-description = "Run the tests for the ast-grep rules."
-hide = true
-run = "ast-grep test"
-sources = ["sgconfig.yml", "sg/**"]
-outputs = { auto = true }
-# If this task and test run at the same time, force it to run last to improve
-# diagnostics in case of test compilation failures.
-wait_for = ["test"]
-
 [tasks.build]
 description = "Compile the source code."
 run = "go build ./..."
@@ -38,22 +19,80 @@ depends = ["generate"]
 alias = "b"
 
 [tasks.check]
-description = "Run all linters and tests against the source code."
+description = "Check the source code for problems and run the tests. Shorthand for running 'mise lint; mise test'."
 depends = ["lint", "test"]
 alias = "c"
 
 [tasks.default]
+description = "Run the 'check' task."
 depends = ["check"]
 
-[tasks.depaware]
-description = "Check that no Go package dependencies changed unexpectedly."
+[tasks.generate]
+description = "Run go:generate instructions in the source code."
+run = "go generate ./..."
+depends = ["sanity-check"]
+sources = ["go.mod", "go.sum", "**/*.go"]
+outputs = { auto = true }
+alias = "g"
+
+[tasks."graph:go:modules"]
+description = "Generate a graph of this project's module dependencies. It will be written to file 'module-graph.dot' in the Graphviz DOT format. Install https://graphviz.org/ to turn it into a pretty picture."
+run = """
+#!/usr/bin/env bash
+go mod graph | digraph to dot > module-graph.dot
+printf "Install Graphviz https://graphviz.org/, run 'dot -Tsvg -o module-graph.svg module-graph.dot' and open module-graph.svg in your web browser.\n"
+"""
+
+[tasks."graph:go:packages"]
+description = "Tell the user how to view the project's package dependencies."
+run = """
+#!/usr/bin/env bash
+printf "Check the 'depaware.txt' file of any package in this project to see its package dependencies.\n"
+"""
+
+[tasks.lint]
+description = "Check the source code for problems."
+depends = [
+  "build",
+  "lint:ast-grep",
+  "lint:ast-grep:test",
+  "lint:depaware",
+  "lint:eg",
+  "lint:go-fix-diff",
+  "lint:go-mod-tidy-diff",
+  "lint:golangci-lint",
+  "lint:nilaway",
+  "sanity-check",
+]
+
+[tasks."lint:ast-grep"]
+description = "Run ast-grep rules against the source code."
+hide = true
+run = "ast-grep scan"
+depends = "build"
+# If this task and 'test' run at the same time, force ast-grep to run last to
+# improve diagnostics in case of test compilation failures.
+wait_for = ["test"]
+
+[tasks."lint:ast-grep:test"]
+description = "Run the tests for the ast-grep rules."
+hide = true
+run = "ast-grep test"
+sources = ["sgconfig.yml", "sg/**"]
+outputs = { auto = true }
+# If this task and test run at the same time, force it to run last to improve
+# diagnostics in case of test compilation failures.
+wait_for = ["test"]
+
+[tasks."lint:depaware"]
+description = "Check that no package dependencies changed unexpectedly."
 hide = true
 run = "go run internal/tasks.go depaware"
 depends = ["build"]
 sources = ["go.mod", "go.sum", "**/*.go", "**/depaware.txt"]
 outputs = { auto = true }
 
-[tasks.eg]
+[tasks."lint:eg"]
 description = "Check that the source code is refactored according to the eg templates."
 hide = true
 run = "go run internal/tasks.go eg"
@@ -64,8 +103,10 @@ outputs = { auto = true }
 # diagnostics in case of test compilation failures.
 wait_for = ["test"]
 
-[tasks.fix]
+[tasks."lint:fix"]
 description = "Automatically fix as many lint errors as possible."
+# Run the fixers inline rather than in separate tasks to ensure they run
+# sequentially and reproducibly.
 run = [
   "go mod tidy",
   "ast-grep scan --update-all",
@@ -75,44 +116,23 @@ run = [
   "go run internal/tasks.go depaware-fix",
 ]
 depends = ["build"]
-alias = "f"
+alias = ["fix", "f"]
 
-[tasks.generate]
-description = "Run go:generate instructions in the source code."
-run = "go generate ./..."
-depends = ["go-sanity-check"]
-sources = ["go.mod", "go.sum", "**/*.go"]
-outputs = { auto = true }
-alias = "g"
-
-[tasks.go-mod-graph]
-description = "Generate a graph of this project's module dependencies. It will be written to file 'module-graph.dot' in the Graphviz DOT format. Install https://graphviz.org/ to turn it into a pretty picture."
-run = """
-#!/usr/bin/env bash
-go mod graph | digraph to dot > module-graph.dot
-printf "Install Graphviz https://graphviz.org/, run 'dot -Tsvg -o module-graph.svg module-graph.dot' and open module-graph.svg in your web browser.\n"
-"""
-
-[tasks.go-fix-diff]
+[tasks."lint:go-fix-diff"]
 description = "Check that 'go fix ./...' has been run"
 hide = true
 run = "go run internal/tasks.go go-fix-diff"
-depends = ["go-sanity-check"]
+depends = ["sanity-check"]
 sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
 
-[tasks.go-mod-tidy-diff]
+[tasks."lint:go-mod-tidy-diff"]
 description = "Check that 'go mod tidy' has been run"
 hide = true
 run = "go mod tidy -diff"
-depends = ["go-sanity-check"]
+depends = ["sanity-check"]
 
-[tasks.go-sanity-check]
-description = "Run various quick Go-related sanity checks against the project"
-hide = true
-run = ["go mod download", "go mod verify"]
-
-[tasks.golangci-lint]
+[tasks."lint:golangci-lint"]
 description = "Check that no problems are found when running the linters defined in .golangci.yml against the source code."
 hide = true
 run = "golangci-lint run"
@@ -123,21 +143,7 @@ outputs = { auto = true }
 # diagnostics in case of test compilation failures.
 wait_for = ["test"]
 
-[tasks.lint]
-description = "Check the source code for problems."
-hide = true
-depends = [
-  "ast-grep",
-  "ast-grep-test",
-  "depaware",
-  "eg",
-  "go-fix-diff",
-  "go-sanity-check",
-  "go-mod-tidy-diff",
-  "golangci-lint",
-]
-
-[tasks.nilaway]
+[tasks."lint:nilaway"]
 description = "Check that no common sources of nil pointer dereferences can occur in the source code."
 hide = true
 run = "nilaway -include-pkgs github.com/jbduncan/go-containers ./..."
@@ -148,6 +154,11 @@ outputs = { auto = true }
 # diagnostics in case of test compilation failures.
 wait_for = ["test"]
 
+[tasks.sanity-check]
+description = "Run various quick sanity checks against the project."
+hide = true
+run = ["go mod download", "go mod verify"]
+
 [tasks.test]
 description = "Run the tests."
 run = "go test -shuffle=on -race -cover ./..."
@@ -156,7 +167,7 @@ sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
 alias = "t"
 
-[tasks.test-rerun]
+[tasks."test:rerun"]
 description = "Run the tests, even if no changes have been made."
 run = "go test -shuffle=on -race -cover ./..."
 depends = "build"
