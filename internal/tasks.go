@@ -38,7 +38,16 @@ func main() {
 		}
 	}
 
-	os.Exit(toExitCode(doMain()))
+	if err := doMain(); err != nil {
+		exitCode := 1
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
+			exitCode = exitErr.ExitCode()
+		}
+
+		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(exitCode)
+	}
 }
 
 func interruptSignal() os.Signal {
@@ -192,21 +201,19 @@ func doEgFor(ctx context.Context, egTemplateFile string) error {
 	buf := new(strings.Builder)
 	c.Stderr = buf
 	if err := c.Run(); err != nil {
-		fmt.Printf(
-			"%s: %s: %v\n",
+		return fmt.Errorf(
+			"%s: %s: %w",
 			egTemplateFile,
 			strings.TrimRight(buf.String(), "\n"),
 			err,
 		)
-		return err
 	}
 	if buf.Len() > 0 {
-		fmt.Printf(
-			"%s: %s\n",
+		return fmt.Errorf(
+			"eg found a problem: %s: %s",
 			egTemplateFile,
 			strings.TrimRight(buf.String(), "\n"),
 		)
-		return fmt.Errorf("eg found a problem (see above)")
 	}
 	return nil
 }
@@ -324,19 +331,4 @@ func cmd(ctx context.Context, name string, args ...string) *exec.Cmd {
 	// specified below, the subprocess will be killed automatically.
 	subprocess.WaitDelay = 2 * time.Second
 	return subprocess
-}
-
-func toExitCode(err error) int {
-	if err == nil {
-		return 0
-	}
-
-	var exitErr *exec.ExitError
-	if errors.As(err, &exitErr) {
-		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
-		return exitErr.ExitCode()
-	}
-
-	fmt.Printf("%v\n", err)
-	return 1
 }
