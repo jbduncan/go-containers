@@ -224,21 +224,7 @@ func (tt tester) test() {
 		tt.testMutableSelfLoopingGraph()
 	}
 
-	if !tt.directed && tt.allowsSelfLoops {
-		tt.testUndirectedSelfLoopingGraph()
-	}
-
-	if !tt.directed && !tt.allowsSelfLoops {
-		tt.testUndirectedSelfLoopDisallowingGraph()
-	}
-
-	if tt.directed && tt.allowsSelfLoops {
-		tt.testDirectedSelfLoopingGraph()
-	}
-
-	if tt.directed && !tt.allowsSelfLoops {
-		tt.testDirectedSelfLoopDisallowingGraph()
-	}
+	tt.testStringRepresentations(tt.t)
 }
 
 func (tt tester) testEmptyGraph() {
@@ -1102,41 +1088,12 @@ func (tt tester) testMutableSelfLoopingGraph() {
 	})
 }
 
-func (tt tester) testUndirectedSelfLoopingGraph() {
-	tt.t.Run("undirected self-looping graph", func(t *testing.T) {
-		tt.testStringRepresentations(t, false, true)
-	})
-}
-
-func (tt tester) testUndirectedSelfLoopDisallowingGraph() {
-	tt.t.Run("undirected self-loop-disallowing graph", func(t *testing.T) {
-		tt.testStringRepresentations(t, false, false)
-	})
-}
-
-func (tt tester) testDirectedSelfLoopingGraph() {
-	tt.t.Run("directed self-looping graph", func(t *testing.T) {
-		tt.testStringRepresentations(t, true, true)
-	})
-}
-
-func (tt tester) testDirectedSelfLoopDisallowingGraph() {
-	tt.t.Run("directed self-loop-disallowing graph", func(t *testing.T) {
-		tt.testStringRepresentations(t, true, false)
-	})
-}
-
-//nolint:revive
-func (tt tester) testStringRepresentations(
-	t *testing.T,
-	directed bool,
-	allowsSelfLoops bool,
-) {
+func (tt tester) testStringRepresentations(t *testing.T) {
 	t.Run("has an empty graph string representation", func(t *testing.T) {
 		want := "isDirected: " +
-			strconv.FormatBool(directed) +
+			strconv.FormatBool(tt.directed) +
 			", allowsSelfLoops: " +
-			strconv.FormatBool(allowsSelfLoops) +
+			strconv.FormatBool(tt.allowsSelfLoops) +
 			", nodes: [], edges: []"
 		if got := tt.emptyGraph().String(); got != want {
 			t.Errorf("Graph.String: got %q, want %q", got, want)
@@ -1150,9 +1107,9 @@ func (tt tester) testStringRepresentations(
 			g = tt.addNode(g, node1)
 
 			want := "isDirected: " +
-				strconv.FormatBool(directed) +
+				strconv.FormatBool(tt.directed) +
 				", allowsSelfLoops: " +
-				strconv.FormatBool(allowsSelfLoops) +
+				strconv.FormatBool(tt.allowsSelfLoops) +
 				", nodes: [1], edges: []"
 			if got := g.String(); got != want {
 				t.Errorf("Graph.String: got %q, want %q", got, want)
@@ -1169,7 +1126,7 @@ func (tt tester) testStringRepresentations(
 			var wantAny []string
 			for _, nodes := range []string{"[1, 2]", "[2, 1]"} {
 				var wantAnyEdges []string
-				if directed {
+				if tt.directed {
 					wantAnyEdges = []string{"[<1 -> 2>]"}
 				} else {
 					wantAnyEdges = []string{"[<1 -> 2>]", "[<2 -> 1>]"}
@@ -1178,9 +1135,9 @@ func (tt tester) testStringRepresentations(
 					wantAny = append(
 						wantAny,
 						"isDirected: "+
-							strconv.FormatBool(directed)+
+							strconv.FormatBool(tt.directed)+
 							", allowsSelfLoops: "+
-							strconv.FormatBool(allowsSelfLoops)+
+							strconv.FormatBool(tt.allowsSelfLoops)+
 							", nodes: "+
 							nodes+
 							", edges: "+
