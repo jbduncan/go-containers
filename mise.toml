@@ -1,7 +1,7 @@
 min_version = "2025.2.5"
 
 [hooks]
-enter = "mise i -q"
+enter = "mise i"
 
 [settings]
 experimental = true

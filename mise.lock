@@ -1,4 +1,4 @@
-[tools.cosign]
+[[tools.cosign]]
 version = "2.5.3"
 backend = "aqua:sigstore/cosign"
 
@@ -7,36 +7,36 @@ checksum = "sha256:86e0cad94d0da4c0dab5e26672ede71447a08a0f0d8495b9381c117df27d7
 size = 152385074
 url = "https://github.com/sigstore/cosign/releases/download/v2.5.3/cosign-darwin-arm64"
 
-[tools.go]
-version = "1.25.0"
+[[tools.go]]
+version = "1.25.1"
 backend = "core:go"
 
 [tools.go.platforms.macos-arm64]
-checksum = "sha256:544932844156d8172f7a28f77f2ac9c15a23046698b6243f633b0a0b00c0749c"
-size = 57906112
-url = "https://dl.google.com/go/go1.25.0.darwin-arm64.tar.gz"
+checksum = "sha256:68deebb214f39d542e518ebb0598a406ab1b5a22bba8ec9ade9f55fb4dd94a6c"
+size = 57906702
+url = "https://dl.google.com/go/go1.25.1.darwin-arm64.tar.gz"
 
-[tools."go:github.com/tailscale/depaware"]
+[[tools."go:github.com/tailscale/depaware"]]
 version = "b748de0"
 backend = "go:github.com/tailscale/depaware"
 
-[tools."go:go.uber.org/nilaway/cmd/nilaway"]
+[[tools."go:go.uber.org/nilaway/cmd/nilaway"]]
 version = "8ad05f0"
 backend = "go:go.uber.org/nilaway/cmd/nilaway"
 
-[tools."go:golang.org/x/tools/cmd/digraph"]
+[[tools."go:golang.org/x/tools/cmd/digraph"]]
 version = "0.36.0"
 backend = "go:golang.org/x/tools/cmd/digraph"
 
-[tools."go:golang.org/x/tools/cmd/eg"]
+[[tools."go:golang.org/x/tools/cmd/eg"]]
 version = "0.36.0"
 backend = "go:golang.org/x/tools/cmd/eg"
 
-[tools."go:golang.org/x/tools/cmd/stringer"]
+[[tools."go:golang.org/x/tools/cmd/stringer"]]
 version = "0.36.0"
 backend = "go:golang.org/x/tools/cmd/stringer"
 
-[tools.golangci-lint]
+[[tools.golangci-lint]]
 version = "2.4.0"
 backend = "aqua:golangci/golangci-lint"
 
@@ -45,16 +45,16 @@ checksum = "sha256:cd4dd53fa09b6646baff5fd22b8c64d91db02c21c7496df27992d75d34fee
 size = 13542526
 url = "https://github.com/golangci/golangci-lint/releases/download/v2.4.0/golangci-lint-2.4.0-darwin-arm64.tar.gz"
 
-[tools.slsa-verifier]
+[[tools.slsa-verifier]]
 version = "2.7.1"
 backend = "ubi:slsa-framework/slsa-verifier"
 
 [tools.slsa-verifier.platforms.macos-arm64-slsa-verifier]
 checksum = "blake3:af93f77462964b7eeb93b9f45ccedeefc641305f6618d9ffc2480d89b0cceed6"
 
-[tools."ubi:ast-grep/ast-grep"]
-version = "0.39.4"
+[[tools."ubi:ast-grep/ast-grep"]]
+version = "0.39.5"
 backend = "ubi:ast-grep/ast-grep"
 
 [tools."ubi:ast-grep/ast-grep".platforms.macos-arm64-ast-grep]
-checksum = "blake3:bde1c2d9bba5daf971a34ab6b24b1fb424d0b80370362d3e7e239e47bf799903"
+checksum = "blake3:b7ec3046f7a16af6989a8e70bdc173a2fabe242450795dad5f44e66fd62987ab"
