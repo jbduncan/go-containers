@@ -1,6 +1,7 @@
 package graph_test
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/jbduncan/go-containers/graph"
@@ -19,7 +20,7 @@ func TestEndpointPair(t *testing.T) {
 	t.Run("EndpointPair.Target() returns the second node", func(t *testing.T) {
 		t.Parallel()
 		if got, want := endpointPair().Target(), "zelda"; got != want {
-			t.Errorf("EndpointPair.Source: got %q, want %q", got, want)
+			t.Errorf("EndpointPair.Target: got %q, want %q", got, want)
 		}
 	})
 
@@ -64,6 +65,28 @@ func TestEndpointPair(t *testing.T) {
 			defer func() { _ = recover() }()
 			endpointPair().AdjacentNode("ganondorf")
 			t.Errorf(`EndpointPair.AdjacentNode("ganondorf"): should have panicked`)
+		},
+	)
+
+	t.Run(
+		"EndpointPair.All() returns the source and target",
+		func(t *testing.T) {
+			t.Parallel()
+
+			nodes := slices.Collect(endpointPair().All())
+			if !slices.Equal(nodes, []string{"link", "zelda"}) &&
+				!slices.Equal(nodes, []string{"zelda", "link"}) {
+				t.Errorf(
+					`EndpointPair.All: got %v, want a slice with "link" and "zelda" in any order`,
+					nodes,
+				)
+			}
+
+			// Ensure the iterator stops early if `break` is used. If it
+			// doesn't, the iterator will panic, failing the test.
+			for range endpointPair().All() {
+				break
+			}
 		},
 	)
 

@@ -1,6 +1,9 @@
 package graph
 
-import "fmt"
+import (
+	"fmt"
+	"iter"
+)
 
 func EndpointPairOf[N comparable](source N, target N) EndpointPair[N] {
 	return EndpointPair[N]{
@@ -30,6 +33,17 @@ func (e EndpointPair[N]) AdjacentNode(node N) N {
 		return e.Source()
 	default:
 		panic(fmt.Sprintf("EndpointPair %s does not contain node %v", e.String(), node))
+	}
+}
+
+func (e EndpointPair[N]) All() iter.Seq[N] {
+	return func(yield func(N) bool) {
+		// Yield the source and target in reverse order to try to stop users
+		// from relying on the order (see Hyrum's Law).
+		if !yield(e.target) {
+			return
+		}
+		yield(e.source)
 	}
 }
 
