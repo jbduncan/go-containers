@@ -25,15 +25,15 @@ version = "8ad05f0"
 backend = "go:go.uber.org/nilaway/cmd/nilaway"
 
 [[tools."go:golang.org/x/tools/cmd/digraph"]]
-version = "0.36.0"
+version = "0.37.0"
 backend = "go:golang.org/x/tools/cmd/digraph"
 
 [[tools."go:golang.org/x/tools/cmd/eg"]]
-version = "0.36.0"
+version = "0.37.0"
 backend = "go:golang.org/x/tools/cmd/eg"
 
 [[tools."go:golang.org/x/tools/cmd/stringer"]]
-version = "0.36.0"
+version = "0.37.0"
 backend = "go:golang.org/x/tools/cmd/stringer"
 
 [[tools.golangci-lint]]

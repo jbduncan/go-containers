@@ -86,11 +86,11 @@ type SetView[T comparable] interface {
 }
 
 type Graph[N comparable] struct {
+	connections     connections[N]
+	nodes           set.Set[N]
+	numEdges        int
 	directed        bool
 	allowsSelfLoops bool
-	nodes           set.Set[N]
-	connections     connections[N]
-	numEdges        int
 }
 
 func (g *Graph[N]) IsDirected() bool {

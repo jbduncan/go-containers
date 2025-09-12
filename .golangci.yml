@@ -51,11 +51,14 @@ linters:
         - directive
         - errorsas
         - framepointer
+        - hostport
+        - httpmux
         - httpresponse
         - ifaceassert
         - loopclosure
         - lostcancel
         - nilfunc
+        - nilness
         - printf
         - reflectvaluecompare
         - shadow
