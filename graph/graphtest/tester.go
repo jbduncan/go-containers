@@ -666,7 +666,7 @@ func (tt tester) testMutableGraphRemovingExistingNode(t *testing.T) {
 			g.PutEdge(node3, node1)
 			g.PutEdge(node2, node3)
 			removed = g.RemoveNode(node1)
-			return
+			return g, removed
 		}
 
 		t.Run("returns true", func(t *testing.T) {
@@ -704,7 +704,7 @@ func (tt tester) testMutableGraphRemovingAbsentNode(t *testing.T) {
 			g = tt.emptyMutableGraph()
 			g.AddNode(node1)
 			removed = g.RemoveNode(nodeNotInGraph)
-			return
+			return g, removed
 		}
 
 		t.Run("returns false", func(t *testing.T) {
@@ -779,7 +779,7 @@ func (tt tester) testMutableGraphRemovingExistingEdge(t *testing.T) {
 				g.PutEdge(node1, node2)
 				g.PutEdge(node1, node3)
 				removed = g.RemoveEdge(node1, node2)
-				return
+				return g, removed
 			}
 
 			t.Run("returns true", func(t *testing.T) {
@@ -817,7 +817,7 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithExistingSource(
 				g = tt.emptyMutableGraph()
 				g.PutEdge(node1, node2)
 				removed = g.RemoveEdge(node1, nodeNotInGraph)
-				return
+				return g, removed
 			}
 
 			t.Run("returns false", func(t *testing.T) {
@@ -848,7 +848,7 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithExistingTarget(
 				g = tt.emptyMutableGraph()
 				g.PutEdge(node1, node2)
 				removed = g.RemoveEdge(nodeNotInGraph, node2)
-				return
+				return g, removed
 			}
 
 			t.Run("returns false", func(t *testing.T) {
@@ -880,7 +880,7 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithTwoExistingNodes(
 				g.AddNode(node1)
 				g.AddNode(node2)
 				removed = g.RemoveEdge(node1, node2)
-				return
+				return g, removed
 			}
 
 			t.Run("returns false", func(t *testing.T) {

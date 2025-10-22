@@ -17,8 +17,9 @@ const _SelfLoopsMode_name = "AllowsSelfLoopsDisallowsSelfLoops"
 var _SelfLoopsMode_index = [...]uint8{0, 15, 33}
 
 func (i SelfLoopsMode) String() string {
-	if i < 0 || i >= SelfLoopsMode(len(_SelfLoopsMode_index)-1) {
+	idx := int(i) - 0
+	if i < 0 || idx >= len(_SelfLoopsMode_index)-1 {
 		return "SelfLoopsMode(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
-	return _SelfLoopsMode_name[_SelfLoopsMode_index[i]:_SelfLoopsMode_index[i+1]]
+	return _SelfLoopsMode_name[_SelfLoopsMode_index[idx]:_SelfLoopsMode_index[idx+1]]
 }

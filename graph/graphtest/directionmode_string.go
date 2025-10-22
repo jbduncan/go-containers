@@ -17,8 +17,9 @@ const _DirectionMode_name = "DirectedUndirected"
 var _DirectionMode_index = [...]uint8{0, 8, 18}
 
 func (i DirectionMode) String() string {
-	if i < 0 || i >= DirectionMode(len(_DirectionMode_index)-1) {
+	idx := int(i) - 0
+	if i < 0 || idx >= len(_DirectionMode_index)-1 {
 		return "DirectionMode(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
-	return _DirectionMode_name[_DirectionMode_index[i]:_DirectionMode_index[i+1]]
+	return _DirectionMode_name[_DirectionMode_index[idx]:_DirectionMode_index[idx+1]]
 }

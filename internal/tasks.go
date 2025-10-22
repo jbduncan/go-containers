@@ -244,7 +244,7 @@ func doGoFixDiff(baseCtx context.Context) error {
 				return nil
 			}
 
-			if filepath.Ext(d.Name()) != ".go" {
+			if !isGoFile(d.Name()) {
 				return nil
 			}
 
@@ -312,6 +312,10 @@ func doGoFixDiffFor(ctx context.Context, dir string, goVersion string) error {
 		)
 	}
 	return nil
+}
+
+func isGoFile(path string) bool {
+	return filepath.Ext(path) == ".go"
 }
 
 func newErrorGroup(ctx context.Context) (*errgroup.Group, context.Context) {
