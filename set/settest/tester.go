@@ -187,6 +187,8 @@ func (tt tester) emptySetHasLengthOfZero() {
 	tt.t.Run(
 		"empty set: has length of 0",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			testLen(t, s, 0)
@@ -197,6 +199,8 @@ func (tt tester) emptySetContainsNothing() {
 	tt.t.Run(
 		"empty set: contains nothing",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			testDoesNotContain(t, s, a)
@@ -207,6 +211,8 @@ func (tt tester) emptySetIterationDoesNothing() {
 	tt.t.Run(
 		"empty set: iteration does nothing",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			testAll(t, s, empty())
@@ -217,6 +223,8 @@ func (tt tester) emptySetHasEmptyStringRepr() {
 	tt.t.Run(
 		"empty set: has empty string representation",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			testString(t, s, empty())
@@ -227,6 +235,8 @@ func (tt tester) oneElementSetHasLengthOfOne() {
 	tt.t.Run(
 		"one element set: has length of 1",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(oneElement())
 
 			testLen(t, s, 1)
@@ -237,6 +247,8 @@ func (tt tester) oneElementSetContainsPresentElement() {
 	tt.t.Run(
 		"one element set: contains present element",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(oneElement())
 
 			testContains(t, s, a)
@@ -247,6 +259,8 @@ func (tt tester) oneElementSetDoesNotContainAbsentElement() {
 	tt.t.Run(
 		"one element set: does not contain absent element",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(oneElement())
 
 			testDoesNotContain(t, s, b)
@@ -257,6 +271,8 @@ func (tt tester) oneElementSetReturnsElementOnIteration() {
 	tt.t.Run(
 		"one element set: returns element on iteration",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(oneElement())
 
 			testAll(t, s, oneElement())
@@ -267,6 +283,8 @@ func (tt tester) oneElementSetHasOneElementStringRepr() {
 	tt.t.Run(
 		"one element set: has one-element string representation",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(oneElement())
 
 			testString(t, s, oneElement())
@@ -277,6 +295,8 @@ func (tt tester) twoElementSetHasLengthOfTwo() {
 	tt.t.Run(
 		"two element set: has length of 2",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(twoElements())
 
 			testLen(t, s, 2)
@@ -287,6 +307,8 @@ func (tt tester) twoElementSetContainsBothElements() {
 	tt.t.Run(
 		"two element set: contains both elements",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(twoElements())
 
 			for _, element := range twoElements() {
@@ -299,6 +321,8 @@ func (tt tester) twoElementSetReturnsBothElementsOnIteration() {
 	tt.t.Run(
 		"two element set: returns both elements on iteration",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(twoElements())
 
 			testAll(t, s, twoElements())
@@ -309,6 +333,8 @@ func (tt tester) twoElementSetHasTwoElementStringRepr() {
 	tt.t.Run(
 		"two element set: has two-element string representation",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(twoElements())
 
 			testString(t, s, twoElements())
@@ -319,6 +345,8 @@ func (tt tester) threeElementSetContainsAllThreeElements() {
 	tt.t.Run(
 		"three element set: contains all three elements",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(threeElements())
 
 			for _, element := range threeElements() {
@@ -331,6 +359,8 @@ func (tt tester) threeElementSetContainsAllThreeElements() {
 func (tt tester) threeElementSetHasThreeElementStringRepr() {
 	tt.t.Run("three element set: has three-element string representation",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(threeElements())
 
 			testString(t, s, threeElements())
@@ -340,6 +370,8 @@ func (tt tester) threeElementSetHasThreeElementStringRepr() {
 func (tt tester) setInitializedFromTwoOfSameElementHasLengthOfOne() {
 	tt.t.Run("set initialized from two of same element: has length of 1",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(twoSameElements())
 
 			testLen(t, s, 1)
@@ -350,6 +382,8 @@ func (tt tester) setInitializedFromTwoOfSameElementReturnsOneElementOnIteration(
 	tt.t.Run(
 		"set initialized from two of same element: returns one element on iteration",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(twoSameElements())
 
 			testAll(t, s, oneElement())
@@ -374,6 +408,8 @@ func newMutableTester(
 
 func (tt mutableTester) emptySetRemoveDoesNothing() {
 	tt.t.Run("empty set: remove does nothing", func(t *testing.T) {
+		t.Parallel()
+
 		s := tt.sliceToSet(empty())
 
 		s.Remove(a)
@@ -384,6 +420,8 @@ func (tt mutableTester) emptySetRemoveDoesNothing() {
 
 func (tt mutableTester) emptySetPlusOneHasLengthOfOne() {
 	tt.t.Run("empty set: add: has length of 1", func(t *testing.T) {
+		t.Parallel()
+
 		s := tt.sliceToSet(empty())
 
 		s.Add(a)
@@ -394,6 +432,8 @@ func (tt mutableTester) emptySetPlusOneHasLengthOfOne() {
 
 func (tt mutableTester) emptySetPlusOneContainsPresentElement() {
 	tt.t.Run("empty set: add: contains present element", func(t *testing.T) {
+		t.Parallel()
+
 		s := tt.sliceToSet(empty())
 
 		s.Add(a)
@@ -406,6 +446,8 @@ func (tt mutableTester) emptySetPlusOneDoesNotContainAbsentElement() {
 	tt.t.Run(
 		"empty set: add: does not contain absent element",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -419,6 +461,8 @@ func (tt mutableTester) emptySetPlusOneReturnsElementOnIteration() {
 	tt.t.Run(
 		"empty set: add: returns element on iteration",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -432,6 +476,8 @@ func (tt mutableTester) emptySetPlusOneHasOneElementStringRepr() {
 	tt.t.Run(
 		"empty set: add: has one-element string representation",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -445,6 +491,8 @@ func (tt mutableTester) emptySetPlusOneMinusOneDoesNotContainAnything() {
 	tt.t.Run(
 		"empty set: add: remove: does not contain anything",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -457,6 +505,8 @@ func (tt mutableTester) emptySetPlusOneMinusOneDoesNotContainAnything() {
 
 func (tt mutableTester) emptySetPlusTwoHasLengthOfTwo() {
 	tt.t.Run("empty set: add x2: has length of 2", func(t *testing.T) {
+		t.Parallel()
+
 		s := tt.sliceToSet(empty())
 
 		s.Add(a)
@@ -468,6 +518,8 @@ func (tt mutableTester) emptySetPlusTwoHasLengthOfTwo() {
 
 func (tt mutableTester) emptySetPlusTwoContainsBothElements() {
 	tt.t.Run("empty set: add x2: contains both elements", func(t *testing.T) {
+		t.Parallel()
+
 		s := tt.sliceToSet(empty())
 
 		s.Add(a)
@@ -483,6 +535,8 @@ func (tt mutableTester) emptySetPlusTwoReturnsBothElementsOnIteration() {
 	tt.t.Run(
 		"empty set: add x2: returns both elements on iteration",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -497,6 +551,8 @@ func (tt mutableTester) emptySetPlusVarargsReturnsBothElementsOnIteration() {
 	tt.t.Run(
 		"empty set: add varargs: returns all elements on iteration",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a, b)
@@ -510,6 +566,8 @@ func (tt mutableTester) emptySetPlusTwoReturnsTwoElementStringRepr() {
 	tt.t.Run(
 		"empty set: add x2: has two-element string representation",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -524,6 +582,8 @@ func (tt mutableTester) emptySetPlusTwoMinusOneHasLengthOfOne() {
 	tt.t.Run(
 		"empty set: add x2: remove x1: has length of 1",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -539,6 +599,8 @@ func (tt mutableTester) emptySetPlusTwoMinusVarargsHasLengthOfZero() {
 	tt.t.Run(
 		"empty set: add x2: remove varargs: has length of 0",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -554,6 +616,8 @@ func (tt mutableTester) emptySetPlusThreeContainsAllThreeElements() {
 	tt.t.Run(
 		"empty set: add x3: contains all three elements",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -571,6 +635,8 @@ func (tt mutableTester) emptySetPlusThreeHasThreeElementStringRepr() {
 	tt.t.Run(
 		"empty set: add x3: has three-element string representation",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -586,6 +652,8 @@ func (tt mutableTester) emptySetPlusSameElementTwiceHasLengthOfOne() {
 	tt.t.Run(
 		"empty set: add same element x2: has length of 1",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -600,6 +668,8 @@ func (tt mutableTester) emptySetPlusSameElementTwiceReturnsOneElementOnIteration
 	tt.t.Run(
 		"empty set: add same element x2: returns one element on iteration",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -612,6 +682,8 @@ func (tt mutableTester) emptySetPlusSameElementTwiceReturnsOneElementOnIteration
 
 func (tt mutableTester) emptySetPlusOneReturnsTrue() {
 	tt.t.Run("empty set: add: returns true", func(t *testing.T) {
+		t.Parallel()
+
 		s := tt.sliceToSet(empty())
 
 		got := s.Add(a)
@@ -624,6 +696,8 @@ func (tt mutableTester) emptySetPlusOneReturnsTrue() {
 
 func (tt mutableTester) emptySetPlusSameElementTwiceReturnsFalse() {
 	tt.t.Run("empty set: add same element x2: returns true", func(t *testing.T) {
+		t.Parallel()
+
 		s := tt.sliceToSet(empty())
 
 		s.Add(a)
@@ -639,6 +713,8 @@ func (tt mutableTester) emptySetPlusSameElementTwiceThenDifferentOnceReturnsTrue
 	tt.t.Run(
 		"empty set: add same element x2: add different element: returns true",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -656,6 +732,8 @@ func (tt mutableTester) emptySetPlusOnePlusVarargsReturnsTrue() {
 	tt.t.Run(
 		"empty set: add x1: add varargs: returns true",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -670,6 +748,8 @@ func (tt mutableTester) emptySetPlusOnePlusVarargsReturnsTrue() {
 
 func (tt mutableTester) emptySetMinusOneReturnsFalse() {
 	tt.t.Run("empty set: remove: returns false", func(t *testing.T) {
+		t.Parallel()
+
 		s := tt.sliceToSet(empty())
 
 		got := s.Remove(a)
@@ -687,6 +767,8 @@ func (tt mutableTester) emptySetPlusOneMinusSameElementReturnsTrue() {
 	tt.t.Run(
 		"empty set: add: remove same element: returns true",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -703,6 +785,8 @@ func (tt mutableTester) emptySetPlusOneMinusSameElementTwiceReturnsFalse() {
 	tt.t.Run(
 		"empty set: add: remove same element x2: returns false",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
@@ -720,6 +804,8 @@ func (tt mutableTester) emptySetPlusOneMinusVarargsReturnsTrue() {
 	tt.t.Run(
 		"empty set: add: remove varargs: returns true",
 		func(t *testing.T) {
+			t.Parallel()
+
 			s := tt.sliceToSet(empty())
 
 			s.Add(a)
