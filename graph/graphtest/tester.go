@@ -231,46 +231,55 @@ func (tt tester) testEmptyGraph() {
 	tt.t.Run("empty graph", func(t *testing.T) {
 		t.Run("has no nodes", func(t *testing.T) {
 			t.Parallel()
+
 			testNodes(t, tt.emptyGraph())
 		})
 
 		t.Run("has no edges", func(t *testing.T) {
 			t.Parallel()
+
 			tt.testEdges(t, tt.emptyGraph())
 		})
 
 		t.Run("has no predecessors for an absent node", func(t *testing.T) {
 			t.Parallel()
+
 			testPredecessors(t, tt.emptyGraph(), nodeNotInGraph)
 		})
 
 		t.Run("has no successors for an absent node", func(t *testing.T) {
 			t.Parallel()
+
 			testSuccessors(t, tt.emptyGraph(), nodeNotInGraph)
 		})
 
 		t.Run("has no adjacent nodes for an absent node", func(t *testing.T) {
 			t.Parallel()
+
 			testAdjacentNodes(t, tt.emptyGraph(), nodeNotInGraph)
 		})
 
 		t.Run("has a degree of 0 for an absent node", func(t *testing.T) {
 			t.Parallel()
+
 			testDegree(t, tt.emptyGraph(), nodeNotInGraph, 0)
 		})
 
 		t.Run("has an in-degree of 0 for an absent node", func(t *testing.T) {
 			t.Parallel()
+
 			testInDegree(t, tt.emptyGraph(), nodeNotInGraph, 0)
 		})
 
 		t.Run("has an out-degree of 0 for an absent node", func(t *testing.T) {
 			t.Parallel()
+
 			testOutDegree(t, tt.emptyGraph(), nodeNotInGraph, 0)
 		})
 
 		t.Run("has an unmodifiable nodes set view", func(t *testing.T) {
 			t.Parallel()
+
 			g := tt.emptyGraph()
 			nodes := g.Nodes()
 
@@ -285,6 +294,7 @@ func (tt tester) testEmptyGraph() {
 			"has an unmodifiable adjacent nodes set view",
 			func(t *testing.T) {
 				t.Parallel()
+
 				g := tt.emptyGraph()
 				adjacentNodes := g.AdjacentNodes(node1)
 
@@ -305,6 +315,7 @@ func (tt tester) testEmptyGraph() {
 
 		t.Run("has an unmodifiable predecessors set view", func(t *testing.T) {
 			t.Parallel()
+
 			g := tt.emptyGraph()
 			predecessors := g.Predecessors(node1)
 
@@ -317,6 +328,7 @@ func (tt tester) testEmptyGraph() {
 
 		t.Run("has an unmodifiable successors set view", func(t *testing.T) {
 			t.Parallel()
+
 			g := tt.emptyGraph()
 			successors := g.Successors(node1)
 
@@ -329,6 +341,7 @@ func (tt tester) testEmptyGraph() {
 
 		t.Run("has an unmodifiable edges set view", func(t *testing.T) {
 			t.Parallel()
+
 			g := tt.emptyGraph()
 			edges := g.Edges()
 
@@ -343,6 +356,7 @@ func (tt tester) testEmptyGraph() {
 			"has an unmodifiable incident edges set view",
 			func(t *testing.T) {
 				t.Parallel()
+
 				g := tt.emptyGraph()
 				edges := g.IncidentEdges(node1)
 
@@ -371,41 +385,49 @@ func (tt tester) testGraphWithOneNode() {
 
 		t.Run("has just that node", func(t *testing.T) {
 			t.Parallel()
+
 			testNodes(t, g(), node1)
 		})
 
 		t.Run("the node has no adjacent nodes", func(t *testing.T) {
 			t.Parallel()
+
 			testAdjacentNodes(t, g(), node1)
 		})
 
 		t.Run("the node has no predecessors", func(t *testing.T) {
 			t.Parallel()
+
 			testPredecessors(t, g(), node1)
 		})
 
 		t.Run("the node has no successors", func(t *testing.T) {
 			t.Parallel()
+
 			testSuccessors(t, g(), node1)
 		})
 
 		t.Run("the node has no incident edges", func(t *testing.T) {
 			t.Parallel()
+
 			tt.testIncidentEdges(t, g(), node1)
 		})
 
 		t.Run("the node has a degree of 0", func(t *testing.T) {
 			t.Parallel()
+
 			testDegree(t, g(), node1, 0)
 		})
 
 		t.Run("the node has an in-degree of 0", func(t *testing.T) {
 			t.Parallel()
+
 			testInDegree(t, g(), node1, 0)
 		})
 
 		t.Run("the node has an out-degree of 0", func(t *testing.T) {
 			t.Parallel()
+
 			testOutDegree(t, g(), node1, 0)
 		})
 	})
@@ -415,6 +437,7 @@ func (tt tester) testGraphWithTwoNodes() {
 	tt.t.Run("graph with two nodes", func(t *testing.T) {
 		t.Run("has both nodes", func(t *testing.T) {
 			t.Parallel()
+
 			g := tt.emptyGraph()
 			g = tt.addNode(g, node1)
 			g = tt.addNode(g, node2)
@@ -436,6 +459,7 @@ func (tt tester) testGraphWithOneEdge() {
 			"the source node is adjacent to the target node",
 			func(t *testing.T) {
 				t.Parallel()
+
 				testAdjacentNodes(t, g(), node1, node2)
 			},
 		)
@@ -444,6 +468,7 @@ func (tt tester) testGraphWithOneEdge() {
 			"the target node is adjacent to the source node",
 			func(t *testing.T) {
 				t.Parallel()
+
 				testAdjacentNodes(t, g(), node2, node1)
 			},
 		)
@@ -452,6 +477,7 @@ func (tt tester) testGraphWithOneEdge() {
 			"the source node is the predecessor of the target node",
 			func(t *testing.T) {
 				t.Parallel()
+
 				testPredecessors(t, g(), node2, node1)
 			},
 		)
@@ -460,27 +486,32 @@ func (tt tester) testGraphWithOneEdge() {
 			"the target node is the successor of the source node",
 			func(t *testing.T) {
 				t.Parallel()
+
 				testSuccessors(t, g(), node1, node2)
 			},
 		)
 
 		t.Run("the source node has a degree of 1", func(t *testing.T) {
 			t.Parallel()
+
 			testDegree(t, g(), node1, 1)
 		})
 
 		t.Run("the target node has a degree of 1", func(t *testing.T) {
 			t.Parallel()
+
 			testDegree(t, g(), node2, 1)
 		})
 
 		t.Run("the target node has an in-degree of 1", func(t *testing.T) {
 			t.Parallel()
+
 			testInDegree(t, g(), node2, 1)
 		})
 
 		t.Run("the source node has an out-degree of 1", func(t *testing.T) {
 			t.Parallel()
+
 			testOutDegree(t, g(), node1, 1)
 		})
 
@@ -489,6 +520,7 @@ func (tt tester) testGraphWithOneEdge() {
 				"second node",
 			func(t *testing.T) {
 				t.Parallel()
+
 				tt.testIncidentEdges(
 					t,
 					g(),
@@ -502,6 +534,7 @@ func (tt tester) testGraphWithOneEdge() {
 			"has just one edge",
 			func(t *testing.T) {
 				t.Parallel()
+
 				tt.testEdges(t, g(), graph.EndpointPairOf(node1, node2))
 			},
 		)
@@ -510,6 +543,7 @@ func (tt tester) testGraphWithOneEdge() {
 			"connects the first node to the second",
 			func(t *testing.T) {
 				t.Parallel()
+
 				testHasEdgeConnecting(t, g(), node1, node2)
 			},
 		)
@@ -518,6 +552,7 @@ func (tt tester) testGraphWithOneEdge() {
 			"connects the first node to no other node",
 			func(t *testing.T) {
 				t.Parallel()
+
 				testHasNoEdgeConnecting(t, g(), node1, nodeNotInGraph)
 				testHasNoEdgeConnecting(t, g(), nodeNotInGraph, node1)
 			},
@@ -527,6 +562,7 @@ func (tt tester) testGraphWithOneEdge() {
 			"connects the second node to no other node",
 			func(t *testing.T) {
 				t.Parallel()
+
 				testHasNoEdgeConnecting(t, g(), node2, nodeNotInGraph)
 			},
 		)
@@ -537,6 +573,7 @@ func (tt tester) testGraphWithSameEdgePutTwice() {
 	tt.t.Run("graph with same edge put twice", func(t *testing.T) {
 		t.Run("has only one edge", func(t *testing.T) {
 			t.Parallel()
+
 			g := tt.emptyGraph()
 			g = tt.putEdge(g, node1, node2)
 
@@ -558,11 +595,13 @@ func (tt tester) testGraphWithTwoEdgesWithSameSourceNode() {
 
 			t.Run("has a common node with a degree of 2", func(t *testing.T) {
 				t.Parallel()
+
 				testDegree(t, g(), node1, 2)
 			})
 
 			t.Run("has a common node with two successors", func(t *testing.T) {
 				t.Parallel()
+
 				testSuccessors(t, g(), node1, node2, node3)
 			})
 
@@ -570,12 +609,14 @@ func (tt tester) testGraphWithTwoEdgesWithSameSourceNode() {
 				"has a common node with two unique adjacent nodes",
 				func(t *testing.T) {
 					t.Parallel()
+
 					testAdjacentNodes(t, g(), node1, node2, node3)
 				},
 			)
 
 			t.Run("has a common with two edges", func(t *testing.T) {
 				t.Parallel()
+
 				tt.testEdges(
 					t,
 					g(),
@@ -586,6 +627,7 @@ func (tt tester) testGraphWithTwoEdgesWithSameSourceNode() {
 
 			t.Run("has a common with two incident edges", func(t *testing.T) {
 				t.Parallel()
+
 				tt.testIncidentEdges(
 					t,
 					g(),
@@ -597,6 +639,7 @@ func (tt tester) testGraphWithTwoEdgesWithSameSourceNode() {
 
 			t.Run("has a common with an out-degree of 2", func(t *testing.T) {
 				t.Parallel()
+
 				testOutDegree(t, g(), node1, 2)
 			})
 		},
@@ -618,6 +661,7 @@ func (tt tester) testGraphWithTwoEdgesWithSameTargetNode() {
 				"has a common node with an in-degree of 2",
 				func(t *testing.T) {
 					t.Parallel()
+
 					testInDegree(t, g(), node2, 2)
 				},
 			)
@@ -626,12 +670,14 @@ func (tt tester) testGraphWithTwoEdgesWithSameTargetNode() {
 				"has a common node with two predecessors",
 				func(t *testing.T) {
 					t.Parallel()
+
 					testPredecessors(t, g(), node2, node1, node3)
 				},
 			)
 
 			t.Run("has a common with two incident edges", func(t *testing.T) {
 				t.Parallel()
+
 				tt.testIncidentEdges(
 					t,
 					g(),
@@ -662,6 +708,7 @@ func (tt tester) emptyMutableGraph() MutableGraph[int] {
 func (tt tester) testMutableGraph() {
 	tt.t.Run("mutable graph", func(t *testing.T) {
 		t.Parallel()
+
 		tt.testMutableGraphAddingNewNode(t)
 
 		tt.testMutableGraphAddingExistingNode(t)
@@ -689,6 +736,7 @@ func (tt tester) testMutableGraph() {
 func (tt tester) testMutableGraphAddingNewNode(t *testing.T) {
 	t.Run("adding a new node returns true", func(t *testing.T) {
 		t.Parallel()
+
 		if got := tt.emptyMutableGraph().AddNode(node1); !got {
 			t.Fatalf("MutableGraph.AddNode: got false, want true")
 		}
@@ -698,6 +746,7 @@ func (tt tester) testMutableGraphAddingNewNode(t *testing.T) {
 func (tt tester) testMutableGraphAddingExistingNode(t *testing.T) {
 	t.Run("adding an existing node returns false", func(t *testing.T) {
 		t.Parallel()
+
 		g := tt.emptyMutableGraph()
 		g.AddNode(node1)
 
@@ -720,6 +769,7 @@ func (tt tester) testMutableGraphRemovingExistingNode(t *testing.T) {
 
 		t.Run("returns true", func(t *testing.T) {
 			t.Parallel()
+
 			_, removed := setup()
 
 			if got := removed; !got {
@@ -729,6 +779,7 @@ func (tt tester) testMutableGraphRemovingExistingNode(t *testing.T) {
 
 		t.Run("leaves the other nodes alone", func(t *testing.T) {
 			t.Parallel()
+
 			g, _ := setup()
 
 			testNodes(t, g, node2, node3)
@@ -736,6 +787,7 @@ func (tt tester) testMutableGraphRemovingExistingNode(t *testing.T) {
 
 		t.Run("detaches it from its adjacent nodes", func(t *testing.T) {
 			t.Parallel()
+
 			g, _ := setup()
 
 			testAdjacentNodes(t, g, node2, node3)
@@ -744,6 +796,7 @@ func (tt tester) testMutableGraphRemovingExistingNode(t *testing.T) {
 
 		t.Run("removes the connected edges", func(t *testing.T) {
 			t.Parallel()
+
 			g, _ := setup()
 
 			tt.testEdges(t, g, graph.EndpointPairOf(node2, node3))
@@ -762,6 +815,7 @@ func (tt tester) testMutableGraphRemovingAbsentNode(t *testing.T) {
 
 		t.Run("returns false", func(t *testing.T) {
 			t.Parallel()
+
 			_, removed := setup()
 
 			if got := removed; got {
@@ -771,6 +825,7 @@ func (tt tester) testMutableGraphRemovingAbsentNode(t *testing.T) {
 
 		t.Run("leaves all the nodes alone", func(t *testing.T) {
 			t.Parallel()
+
 			g, _ := setup()
 
 			testNodes(t, g, node1)
@@ -781,6 +836,7 @@ func (tt tester) testMutableGraphRemovingAbsentNode(t *testing.T) {
 func (tt tester) testMutableGraphPuttingNewEdge(t *testing.T) {
 	t.Run("putting a new edge returns true", func(t *testing.T) {
 		t.Parallel()
+
 		if got := tt.emptyMutableGraph().PutEdge(node1, node2); !got {
 			t.Fatalf("MutableGraph.PutEdge: got false, want true")
 		}
@@ -790,6 +846,7 @@ func (tt tester) testMutableGraphPuttingNewEdge(t *testing.T) {
 func (tt tester) testMutableGraphPuttingExistingEdge(t *testing.T) {
 	t.Run("putting an existing edge returns false", func(t *testing.T) {
 		t.Parallel()
+
 		g := tt.emptyMutableGraph()
 		g.PutEdge(node1, node2)
 
@@ -814,6 +871,7 @@ func (tt tester) testMutableGraphPuttingTwoAntiParallelEdges(t *testing.T) {
 
 			t.Run("leaves the other node alone", func(t *testing.T) {
 				t.Parallel()
+
 				g := setup()
 
 				testNodes(t, g, node2)
@@ -821,6 +879,7 @@ func (tt tester) testMutableGraphPuttingTwoAntiParallelEdges(t *testing.T) {
 
 			t.Run("removes both edges", func(t *testing.T) {
 				t.Parallel()
+
 				g := setup()
 
 				tt.testEdges(t, g)
@@ -843,6 +902,7 @@ func (tt tester) testMutableGraphRemovingExistingEdge(t *testing.T) {
 
 			t.Run("returns true", func(t *testing.T) {
 				t.Parallel()
+
 				_, removed := setup()
 
 				if got := removed; !got {
@@ -852,6 +912,7 @@ func (tt tester) testMutableGraphRemovingExistingEdge(t *testing.T) {
 
 			t.Run("detaches the two nodes", func(t *testing.T) {
 				t.Parallel()
+
 				g, _ := setup()
 
 				testSuccessors(t, g, node1, node3)
@@ -861,6 +922,7 @@ func (tt tester) testMutableGraphRemovingExistingEdge(t *testing.T) {
 
 			t.Run("leaves the other edges alone", func(t *testing.T) {
 				t.Parallel()
+
 				g, _ := setup()
 
 				tt.testEdges(t, g, graph.EndpointPairOf(node1, node3))
@@ -884,6 +946,7 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithExistingSource(
 
 			t.Run("returns false", func(t *testing.T) {
 				t.Parallel()
+
 				_, removed := setup()
 
 				if got := removed; got {
@@ -893,6 +956,7 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithExistingSource(
 
 			t.Run("leaves the existing nodes alone", func(t *testing.T) {
 				t.Parallel()
+
 				g, _ := setup()
 
 				testSuccessors(t, g, node1, node2)
@@ -917,6 +981,7 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithExistingTarget(
 
 			t.Run("returns false", func(t *testing.T) {
 				t.Parallel()
+
 				_, removed := setup()
 
 				if got := removed; got {
@@ -926,6 +991,7 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithExistingTarget(
 
 			t.Run("leaves the existing nodes alone", func(t *testing.T) {
 				t.Parallel()
+
 				g, _ := setup()
 
 				testSuccessors(t, g, node1, node2)
@@ -951,6 +1017,7 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithTwoExistingNodes(
 
 			t.Run("returns false", func(t *testing.T) {
 				t.Parallel()
+
 				_, removed := setup()
 
 				if got := removed; got {
@@ -960,6 +1027,7 @@ func (tt tester) testMutableGraphRemovingAbsentEdgeWithTwoExistingNodes(
 
 			t.Run("leaves the existing nodes alone", func(t *testing.T) {
 				t.Parallel()
+
 				g, _ := setup()
 
 				testNodes(t, g, node1, node2)
@@ -972,6 +1040,7 @@ func (tt tester) testDirectedGraph() {
 	tt.t.Run("directed graph", func(t *testing.T) {
 		t.Run("says it is directed", func(t *testing.T) {
 			t.Parallel()
+
 			g := tt.emptyGraph()
 
 			if got := g.IsDirected(); !got {
@@ -990,6 +1059,7 @@ func (tt tester) testDirectedGraph() {
 				"makes the first node have no predecessors",
 				func(t *testing.T) {
 					t.Parallel()
+
 					testPredecessors(t, g(), node1)
 				},
 			)
@@ -998,6 +1068,7 @@ func (tt tester) testDirectedGraph() {
 				"makes the second node have no successors",
 				func(t *testing.T) {
 					t.Parallel()
+
 					testSuccessors(t, g(), node2)
 				},
 			)
@@ -1006,6 +1077,7 @@ func (tt tester) testDirectedGraph() {
 				"makes the first node have an in-degree of 0",
 				func(t *testing.T) {
 					t.Parallel()
+
 					testInDegree(t, g(), node1, 0)
 				},
 			)
@@ -1014,12 +1086,14 @@ func (tt tester) testDirectedGraph() {
 				"makes the second node have an out-degree of 0",
 				func(t *testing.T) {
 					t.Parallel()
+
 					testOutDegree(t, g(), node2, 0)
 				},
 			)
 
 			t.Run("does not connect the second node to the first", func(t *testing.T) {
 				t.Parallel()
+
 				testHasNoEdgeConnecting(t, g(), node2, node1)
 			})
 		})
@@ -1029,6 +1103,7 @@ func (tt tester) testDirectedGraph() {
 				"degree of 2",
 			func(t *testing.T) {
 				t.Parallel()
+
 				g := tt.emptyGraph()
 				g = tt.putEdge(g, node1, node2)
 				g = tt.putEdge(g, node2, node3)
@@ -1043,6 +1118,7 @@ func (tt tester) testUndirectedGraph() {
 	tt.t.Run("undirected graph", func(t *testing.T) {
 		t.Run("says it is not directed", func(t *testing.T) {
 			t.Parallel()
+
 			g := tt.emptyGraph()
 
 			if got := g.IsDirected(); got {
@@ -1061,6 +1137,7 @@ func (tt tester) testUndirectedGraph() {
 				"makes the first node the predecessor of the second",
 				func(t *testing.T) {
 					t.Parallel()
+
 					testPredecessors(t, g(), node1, node2)
 				},
 			)
@@ -1069,6 +1146,7 @@ func (tt tester) testUndirectedGraph() {
 				"makes the first node a predecessor of the second",
 				func(t *testing.T) {
 					t.Parallel()
+
 					testPredecessors(t, g(), node1, node2)
 				},
 			)
@@ -1077,6 +1155,7 @@ func (tt tester) testUndirectedGraph() {
 				"makes the second node a successor of the first",
 				func(t *testing.T) {
 					t.Parallel()
+
 					testSuccessors(t, g(), node2, node1)
 				},
 			)
@@ -1085,6 +1164,7 @@ func (tt tester) testUndirectedGraph() {
 				"makes the first node have an in-degree of 1",
 				func(t *testing.T) {
 					t.Parallel()
+
 					testInDegree(t, g(), node1, 1)
 				},
 			)
@@ -1093,12 +1173,14 @@ func (tt tester) testUndirectedGraph() {
 				"makes the second node have an out-degree of 1",
 				func(t *testing.T) {
 					t.Parallel()
+
 					testOutDegree(t, g(), node2, 1)
 				},
 			)
 
 			t.Run("connects the second node to the first", func(t *testing.T) {
 				t.Parallel()
+
 				testHasEdgeConnecting(t, g(), node2, node1)
 			})
 		})
@@ -1109,6 +1191,7 @@ func (tt tester) testSelfLoopingGraph() {
 	tt.t.Run("self-looping graph", func(t *testing.T) {
 		t.Run("says it allows self loops", func(t *testing.T) {
 			t.Parallel()
+
 			g := tt.emptyGraph()
 
 			if got := g.AllowsSelfLoops(); !got {
@@ -1127,6 +1210,7 @@ func (tt tester) testSelfLoopingGraph() {
 				"makes the shared node its own adjacent node",
 				func(t *testing.T) {
 					t.Parallel()
+
 					testAdjacentNodes(t, g(), node1, node1)
 				},
 			)
@@ -1136,6 +1220,7 @@ func (tt tester) testSelfLoopingGraph() {
 					"edge touches the node twice",
 				func(t *testing.T) {
 					t.Parallel()
+
 					testDegree(t, g(), node1, 2)
 				},
 			)
@@ -1149,6 +1234,7 @@ func (tt tester) testSelfLoopDisallowingGraph() {
 			"says it disallows self-loops",
 			func(t *testing.T) {
 				t.Parallel()
+
 				g := tt.emptyGraph()
 
 				if got := g.AllowsSelfLoops(); got {
@@ -1165,6 +1251,7 @@ func (tt tester) testMutableSelfLoopingGraph() {
 			"removing a self-looping node removes the self-loop edge",
 			func(t *testing.T) {
 				t.Parallel()
+
 				g := tt.emptyMutableGraph()
 				g.PutEdge(node1, node1)
 				g.RemoveNode(node1)
@@ -1178,6 +1265,7 @@ func (tt tester) testMutableSelfLoopingGraph() {
 func (tt tester) testStringRepresentations(t *testing.T) {
 	t.Run("has an empty graph string representation", func(t *testing.T) {
 		t.Parallel()
+
 		want := "isDirected: " +
 			strconv.FormatBool(tt.directed) +
 			", allowsSelfLoops: " +
@@ -1192,6 +1280,7 @@ func (tt tester) testStringRepresentations(t *testing.T) {
 		"adding a node makes a non-empty graph string representation",
 		func(t *testing.T) {
 			t.Parallel()
+
 			g := tt.emptyGraph()
 			g = tt.addNode(g, node1)
 
@@ -1210,6 +1299,7 @@ func (tt tester) testStringRepresentations(t *testing.T) {
 		"putting an edge makes a non-empty graph string representation",
 		func(t *testing.T) {
 			t.Parallel()
+
 			g := tt.emptyGraph()
 			g = tt.putEdge(g, node1, node2)
 
