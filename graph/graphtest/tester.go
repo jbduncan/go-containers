@@ -69,6 +69,11 @@ const (
 // Parameter `emptyGraph` should always return a newly-initialized empty graph
 // with no nodes and no edges. Otherwise, the behaviour of this function is
 // undefined.
+//
+// This function runs tests in parallel. As a result, the emptyGraph, addNode,
+// and putEdge functions must be pure functions (i.e., they must not have side
+// effects and must return the same result for the same input every time they
+// are called).
 func TestReadOnly(
 	t *testing.T,
 	emptyGraph func() Graph[int],
@@ -101,6 +106,10 @@ func TestReadOnly(
 // Parameter `emptyGraph` should always return a newly-initialized empty graph
 // with no nodes and no edges. Otherwise, the behaviour of this function is
 // undefined.
+//
+// This function runs tests in parallel. As a result, the emptyGraph function
+// must be a pure function (i.e., it must not have side effects and must return
+// the same result for the same input every time it is called).
 func TestMutable(
 	t *testing.T,
 	emptyGraph func() MutableGraph[int],

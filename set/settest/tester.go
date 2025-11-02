@@ -45,6 +45,16 @@ type MutableSet[T comparable] interface {
 	Remove(element T, others ...T) bool
 }
 
+// TestReadOnly runs a suite of test cases for read-only Set implementations.
+//
+// Test cases that should be handled similarly in any set implementation are
+// included in this function; for example, testing that the Len method returns
+// the number of elements in the set. Details of specific implementations of
+// the Set interface are not tested.
+//
+// This function runs tests in parallel. As a result, the sliceToSet function
+// must be a pure function (i.e., it must not have side effects and must return
+// the same result for the same input every time it is called).
 func TestReadOnly(
 	t *testing.T,
 	sliceToSet func(elements []int) Set[int],
@@ -86,6 +96,16 @@ func TestReadOnly(
 	tt.setInitializedFromTwoOfSameElementReturnsOneElementOnIteration()
 }
 
+// TestMutable runs a suite of test cases for MutableSet implementations.
+//
+// Test cases that should be handled similarly in any set implementation are
+// included in this function; for example, testing that the Add method adds
+// elements to the set. Details of specific implementations of the MutableSet
+// interface are not tested.
+//
+// This function runs tests in parallel. As a result, the sliceToSet function
+// must be a pure function (i.e., it must not have side effects and must return
+// the same result for the same input every time it is called).
 func TestMutable(
 	t *testing.T,
 	sliceToSet func(elements []int) MutableSet[int],
