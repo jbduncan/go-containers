@@ -57,7 +57,7 @@ type MutableSet[T comparable] interface {
 // containing the given elements. Otherwise, the behaviour of this function is
 // undefined.
 //
-// This function runs tests in parallel. As a result, the sliceToSet function
+// This function runs tests in parallel. As a result, the `sliceToSet` function
 // must be a pure function (i.e., it must not have side effects and must return
 // the same result for the same input every time it is called).
 func TestReadOnly(
@@ -113,7 +113,7 @@ func TestReadOnly(
 // containing the given elements. Otherwise, the behaviour of this function is
 // undefined.
 //
-// This function runs tests in parallel. As a result, the sliceToSet function
+// This function runs tests in parallel. As a result, the `sliceToSet` function
 // must be a pure function (i.e., it must not have side effects and must return
 // the same result for the same input every time it is called).
 func TestMutable(
