@@ -2,6 +2,11 @@
 version = "1.25.3"
 backend = "core:go"
 
+[tools.go.platforms.linux-x64]
+checksum = "sha256:0335f314b6e7bfe08c3d0cfaa7c19db961b7b99fb20be62b0a826c992ad14e0f"
+size = 59767979
+url = "https://dl.google.com/go/go1.25.3.linux-amd64.tar.gz"
+
 [tools.go.platforms.macos-arm64]
 checksum = "sha256:7c083e3d2c00debfeb2f77d9a4c00a1aac97113b89b9ccc42a90487af3437382"
 size = 58028114
@@ -31,6 +36,11 @@ backend = "go:golang.org/x/tools/cmd/stringer"
 version = "2.5.0"
 backend = "aqua:golangci/golangci-lint"
 
+[tools.golangci-lint.platforms.linux-x64]
+checksum = "sha256:c77313a77e19b06123962c411d9943cc0d092bbec76b956104d18964e274902e"
+size = 14221503
+url = "https://github.com/golangci/golangci-lint/releases/download/v2.5.0/golangci-lint-2.5.0-linux-amd64.tar.gz"
+
 [tools.golangci-lint.platforms.macos-arm64]
 checksum = "sha256:0b3cbdc2a2472f60b538ebccb1b2e1ae5d938a051c010591aa68c6efd3706672"
 size = 13629335
@@ -39,6 +49,9 @@ url = "https://github.com/golangci/golangci-lint/releases/download/v2.5.0/golang
 [[tools."ubi:ast-grep/ast-grep"]]
 version = "0.39.6"
 backend = "ubi:ast-grep/ast-grep"
+
+[tools."ubi:ast-grep/ast-grep".platforms.linux-x64-ast-grep]
+checksum = "blake3:b65800af332c8a48748389a73c010e281c0695ead6c0da964a08e98f844a877a"
 
 [tools."ubi:ast-grep/ast-grep".platforms.macos-arm64-ast-grep]
 checksum = "blake3:8c2f8e7d7c7c631760eb5f6a906b628d382afde0148abacbfcba2ab4d99c1860"
