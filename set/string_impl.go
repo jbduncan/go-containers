@@ -31,7 +31,7 @@ func StringImpl[T comparable](s interface {
 			builder.WriteString(", ")
 		}
 
-		builder.WriteString(fmt.Sprintf("%v", element))
+		_, _ = fmt.Fprintf(&builder, "%v", element)
 		index++
 	}
 

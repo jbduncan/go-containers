@@ -62,7 +62,6 @@ depends = [
   "lint:ast-grep:test",
   "lint:depaware",
   "lint:eg",
-  "lint:go-fix-diff",
   "lint:go-mod-tidy-diff",
   "lint:golangci-lint",
   "lint:nilaway",
@@ -115,20 +114,11 @@ run = [
   "go mod tidy",
   "ast-grep scan --update-all",
   "go run internal/tasks.go eg-fix",
-  "go fix ./...",
   "golangci-lint run --fix",
   "go run internal/tasks.go depaware-fix",
 ]
 depends = ["build"]
 alias = ["fix", "f"]
-
-[tasks."lint:go-fix-diff"]
-description = "Check that 'go fix ./...' has been run"
-hide = true
-run = "go run internal/tasks.go go-fix-diff"
-depends = ["sanity-check"]
-sources = ["go.mod", "go.sum", "**/*.go"]
-outputs = { auto = true }
 
 [tasks."lint:go-mod-tidy-diff"]
 description = "Check that 'go mod tidy' has been run"
@@ -180,15 +170,15 @@ alias = "tr"
 
 [tasks.update-versions]
 description = "Update the versions of all tools and dependencies."
-run = ["mise x -- go get -u -t ./...", "mise up"]
+run = ["mise x -- go get -u -t ./...", "mise up", "go get toolchain@latest"]
 alias = "u"
 
 [tools]
 go = "latest"
-"go:github.com/tailscale/depaware" = "b748de0"
-"go:go.uber.org/nilaway/cmd/nilaway" = "8ad05f0"
+"go:github.com/tailscale/depaware" = "latest"
+"go:go.uber.org/nilaway/cmd/nilaway" = "latest"
 "go:golang.org/x/tools/cmd/digraph" = "latest"
 "go:golang.org/x/tools/cmd/eg" = "latest"
 "go:golang.org/x/tools/cmd/stringer" = "latest"
 golangci-lint = "latest"
-"ubi:ast-grep/ast-grep" = "latest"
+"github:ast-grep/ast-grep" = "latest"

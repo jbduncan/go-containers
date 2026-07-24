@@ -18,6 +18,7 @@ linters:
     - govet
     - iface
     - misspell
+    - modernize
     - nilnesserr
     - noctx
     - nolintlint
@@ -41,6 +42,7 @@ linters:
         - asmdecl
         - assign
         - atomic
+        - atomicalign
         - bools
         - buildtag
         - cgocall
@@ -50,11 +52,13 @@ linters:
         - defers
         - directive
         - errorsas
+        - findcall
         - framepointer
         - hostport
         - httpmux
         - httpresponse
         - ifaceassert
+        - inline
         - loopclosure
         - lostcancel
         - nilfunc
@@ -151,28 +155,9 @@ linters:
     generated: strict
     presets:
       - comments
+      - common-false-positives
 formatters:
   enable:
-    # gofmt is used just for its rewrite capabilities. gofumpt and gci are used
-    # on top for stricter formatting and import sorting.
+    # gofumpt and gci are used for stricter formatting than gofmt and import sorting.
     - gci
-    - gofmt
     - gofumpt
-  settings:
-    gofmt:
-      simplify: true
-      rewrite-rules:
-        - pattern: interface{}
-          replacement: any
-        - pattern: a[0:len(a)]
-          replacement: a[:]
-        - pattern: a[:len(a)]
-          replacement: a[:]
-        - pattern: a[0:]
-          replacement: a[:]
-        - pattern: a[0:b]
-          replacement: a[:b]
-        - pattern: a[b:len(a)]
-          replacement: a[b:]
-        - pattern: (a)
-          replacement: a

@@ -31,8 +31,6 @@ func main() {
 			return doEg(ctx)
 		case "eg-fix":
 			return doEgFix(ctx)
-		case "go-fix-diff":
-			return doGoFixDiff(ctx)
 		default:
 			return fmt.Errorf("invalid command: %s", os.Args[1])
 		}
@@ -230,92 +228,6 @@ func doEgFix(ctx context.Context) error {
 		}
 	}
 	return nil
-}
-
-func doGoFixDiff(baseCtx context.Context) error {
-	goFileDirs := make(map[string]struct{})
-	if err := filepath.WalkDir(
-		".",
-		func(path string, d os.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-			if !d.Type().IsRegular() {
-				return nil
-			}
-
-			if !isGoFile(d.Name()) {
-				return nil
-			}
-
-			goFileDirs["./"+filepath.Dir(path)] = struct{}{}
-			return nil
-		},
-	); err != nil {
-		return err
-	}
-
-	goVersion, err := minGoVersionForProject(baseCtx)
-	if err != nil {
-		return fmt.Errorf("min project Go version not found: %w", err)
-	}
-	fmt.Printf("Min project Go version of %q found\n", goVersion)
-
-	group, ctx := newErrorGroup(baseCtx)
-	for dir := range goFileDirs {
-		group.Go(func() error {
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			default:
-				return doGoFixDiffFor(ctx, dir, goVersion)
-			}
-		})
-	}
-
-	return group.Wait()
-}
-
-func minGoVersionForProject(ctx context.Context) (string, error) {
-	s := new(strings.Builder)
-	c := cmd(ctx, "go", "list", "-f", "{{.GoVersion}}", "-m")
-	c.Stdout = s
-	if err := c.Run(); err != nil {
-		return "", err
-	}
-	goVersion := strings.TrimRight(s.String(), "\n")
-	return goVersion, nil
-}
-
-func doGoFixDiffFor(ctx context.Context, dir string, goVersion string) error {
-	fmt.Printf(
-		"Linting with 'go tool fix -diff' on directory %s...\n",
-		dir,
-	)
-	c := cmd(
-		ctx,
-		"go",
-		"tool",
-		"fix",
-		"-diff",
-		fmt.Sprintf("-go=go%s", goVersion),
-		dir,
-	)
-	buf := new(strings.Builder)
-	c.Stderr = buf
-	if err := c.Run(); err != nil {
-		return err
-	}
-	if buf.Len() > 0 {
-		return fmt.Errorf(
-			"'go tool fix -diff' found a problem (see above)",
-		)
-	}
-	return nil
-}
-
-func isGoFile(path string) bool {
-	return filepath.Ext(path) == ".go"
 }
 
 func newErrorGroup(ctx context.Context) (*errgroup.Group, context.Context) {
