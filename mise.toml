@@ -133,8 +133,8 @@ run = "golangci-lint run"
 depends = "build"
 sources = ["go.mod", "go.sum", "**/*.go", ".golangci.yml"]
 outputs = { auto = true }
-# If this task and test run at the same time, force it to run last to improve
-# diagnostics in case of test compilation failures.
+# If this task and the tests run at the same time, force it to run last to
+# improve diagnostics in case of test compilation failures.
 wait_for = ["test"]
 
 [tasks."lint:nilaway"]
@@ -144,8 +144,8 @@ run = "nilaway -include-pkgs github.com/jbduncan/go-containers ./..."
 depends = "build"
 sources = ["go.mod", "go.sum", "**/*.go"]
 outputs = { auto = true }
-# If this task and test run at the same time, force it to run last to improve
-# diagnostics in case of test compilation failures.
+# If this task and the tests run at the same time, force it to run last to
+# improve diagnostics in case of test compilation failures.
 wait_for = ["test"]
 
 [tasks.sanity-check]
